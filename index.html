@@ -16,7 +16,8 @@ canvas#cv{position:absolute;inset:0;width:100%;height:100%}
 .sw button{font:inherit;font-size:14px;padding:8px 16px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
 .sw button[aria-pressed=true]{background:var(--on);color:#fff;border-color:var(--on)}
 .hint{font-size:13px;color:var(--muted)}
-</style></head><body>
+body.loading{background:#07101b}body.loading .wrap{visibility:hidden}body.loading::before{content:"加载中…";position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#9fb0c8;font-size:18px;letter-spacing:.2em}
+</style></head><body class="loading">
 <div class="wrap">
 <div class="stage" id="st"><canvas id="cv" width="960" height="600" aria-label="写实俯瞰风野外地图，小兵挥刀斩敌"></canvas><div id="kc">斩敌 0</div><canvas id="mm" width="84" height="84"></canvas></div>
 <div class="sw" role="group" aria-label="角色" id="cs"><button data-c="m" aria-pressed="true">男主</button><button data-c="f0" aria-pressed="false">女主·长直发</button><button data-c="f1" aria-pressed="false">女主·短发</button><button data-c="f2" aria-pressed="false">女主·卷发</button><button data-c="f3" aria-pressed="false">女主·红发带</button><button data-c="f4" aria-pressed="false">女主·丸子头</button></div>
