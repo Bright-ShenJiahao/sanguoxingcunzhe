@@ -17,20 +17,39 @@ canvas#cv{position:absolute;inset:0;width:100%;height:100%}
 .sw button[aria-pressed=true]{background:var(--on);color:#fff;border-color:var(--on)}
 .hint{font-size:13px;color:var(--muted)}
 body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
-#boot{position:fixed;inset:0;z-index:60;overflow:hidden;background:#07101b url(assets/map/boot.jpg) center/cover;transition:opacity .5s}
-#boot::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,#07101bcc,#050c16aa)}
-#boot .sd{position:absolute;image-rendering:pixelated;will-change:transform}
-#boot .tx{position:absolute;left:0;right:0;bottom:16vh;text-align:center;color:#c9d8e8;font-size:16px;letter-spacing:.35em}
-#boot .bar{position:absolute;left:50%;bottom:11vh;width:min(320px,60vw);height:4px;margin-left:calc(min(320px,60vw)/-2);background:#ffffff22;border-radius:2px;overflow:hidden}
+#boot{position:fixed;inset:0;z-index:60;overflow:hidden;background:#07101b;transition:opacity .5s}
+#boot .bg{position:absolute;inset:0;background:url(assets/map/boot.jpg) repeat-x 0 0/auto 100%}
+#boot::before{content:"";position:absolute;inset:0;z-index:2000;pointer-events:none;background:linear-gradient(180deg,#07101b99,#07101b44 45%,#07101bbb)}
+#boot .sd{position:absolute;left:0;image-rendering:pixelated;transform-origin:50% 100%;will-change:transform}
+#boot .tx{position:absolute;left:0;right:0;bottom:9vh;z-index:2100;text-align:center;color:#c9d8e8;font-size:15px;letter-spacing:.35em}
+#boot .bar{position:absolute;left:50%;bottom:5vh;z-index:2100;width:min(320px,60vw);height:4px;margin-left:calc(min(320px,60vw)/-2);background:#ffffff22;border-radius:2px;overflow:hidden}
 #boot .bar i{display:block;height:100%;width:4%;background:#f0d58a;transition:width .25s}
+#bx{position:absolute;z-index:2200;display:flex;gap:14px;align-items:center;box-sizing:border-box;width:min(440px,90vw);padding:14px 18px 14px 14px;background:#101a3a;border:4px solid #f4f4f4;box-shadow:0 0 0 4px #101a3a,0 0 0 7px #8aa6e0,0 8px 24px #000a;color:#fff;font:700 17px/1.65 "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;letter-spacing:.08em;opacity:0;transition:opacity .2s}
+#bx.on{opacity:1}
+#bx canvas{flex:none;width:84px;height:75px;image-rendering:pixelated;border:3px solid #f4f4f4;background:linear-gradient(#3b5ba8,#22306a)}
+#bx p{margin:0;color:#fff;font-size:inherit;min-height:3.3em}
+#bx i{position:absolute;right:12px;bottom:6px;font-style:normal;font-size:12px;animation:bk .7s steps(2) infinite}
+#bx::after{content:"";position:absolute;left:var(--tail,50%);bottom:-17px;margin-left:-9px;border:9px solid transparent;border-top:9px solid #f4f4f4;border-bottom:0}
+@keyframes bk{50%{opacity:0}}
 </style></head><body class="loading">
-<div id="boot"><div class="tx">加载中…</div><div class="bar"><i id="bootbar"></i></div></div>
+<div id="boot"><div class="bg" id="bbg"></div><div id="bx"><canvas id="bxa" width="28" height="25"></canvas><p id="bxt"></p><i>▼</i></div><div class="tx">加载中…</div><div class="bar"><i id="bootbar"></i></div></div>
 <script>
-(function(){var b=document.getElementById('boot');if(!b)return;var K=['grunt_club','blade','spear','shield','archer'],L=[];
-for(var i=0;i<5;i++){var k=K[i],f=[];for(var j=0;j<6;j++){var im=new Image();im.src='assets/characters/enemies/'+k+'/walk'+j+'.png';f.push(im.src)}
-var el=document.createElement('img');el.className='sd';el.style.bottom=(24+i*5)+'vh';el.style.height='84px';b.appendChild(el);L.push({el:el,f:f,x:-i*220,v:70+i*14})}
-var last=performance.now();function tick(n){if(!document.getElementById('boot'))return;var dt=Math.min(.05,(n-last)/1000);last=n;var w=innerWidth;
-for(var i=0;i<L.length;i++){var o=L[i];o.x+=o.v*dt;if(o.x>w+120)o.x=-160;o.el.src=o.f[Math.floor(n/110+i)%6];o.el.style.transform='translateX('+Math.round(o.x)+'px)'}
+(function(){var b=document.getElementById('boot');if(!b)return;
+var P='assets/characters/',K=innerHeight>=900?3:2,W=innerWidth,H=innerHeight,hb=Math.round(H*.27),hx=Math.round(W*(W<700?.7:.62));
+var kinds=['grunt_club','blade','spear','shield','archer'],L=[],lane=[-26,18,-8,30,0,-30,14,24,-14,4];
+function fr(dir,pre,from,to){var a=[];for(var j=from;j<=to;j++){var im=new Image();im.src=P+dir+'/'+pre+j+'.png';a.push(im.src)}return a}
+function mk(f,bot,z,x,v,ph,fps){var el=document.createElement('img');el.className='sd';el.style.bottom=bot+'px';el.style.zIndex=z;b.appendChild(el);return {el:el,f:f,x:x,v:v,ph:ph,fps:fps,bot:bot}}
+var hero=mk(fr('hero_b','w',2,7),hb,1000-hb,hx,0,0,85);
+for(var i=0;i<10;i++){var bt=hb+lane[i]*K/2;L.push(mk(fr('enemies/'+kinds[i>>1],'walk',0,5),bt,1000-bt,hx-(110+(i>>1)*70+(i&1)*38)*K/2,0,i,95))}
+var tp=document.getElementById('bx'),tt=document.getElementById('bxt'),T='我刚才不是在家里打游戏吗！？',t0=performance.now();
+var av=new Image();av.onload=function(){var c=document.getElementById('bxa').getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(av,6,0,28,25,0,0,28,25)};av.src=P+'hero_b/w0.png';
+var bw=Math.min(440,W*.9),bl=Math.max(12,Math.min(hx-bw/2,W-bw-12));tp.style.left=bl+'px';tp.style.bottom=(hb+50*K+26)+'px';tp.style.setProperty('--tail',(hx-bl)+'px');
+var bgw=H*3.2,last=t0;
+function tick(n){if(!document.getElementById('boot'))return;var t=(n-t0)/1000,dt=Math.min(.05,(n-last)/1000);last=n;
+document.getElementById('bbg').style.backgroundPositionX=-Math.round((t*180*K/2)%bgw)+'px';
+hero.el.src=hero.f[Math.floor(n/hero.fps)%6];hero.el.style.transform='translateX('+(hero.x-18*K)+'px) scale('+K+')';
+for(var i=0;i<L.length;i++){var o=L[i],sx=o.x+Math.sin(t*2.1+i*1.7)*16*K/2;o.el.src=o.f[Math.floor(n/o.fps+i)%6];o.el.style.transform='translateX('+Math.round(sx-17*K)+'px) scale('+K+')'}
+if(t>.35){tp.className='on';var k=Math.min(T.length,Math.floor((t-.35)/.075));tt.textContent=T.slice(0,k)}
 requestAnimationFrame(tick)}requestAnimationFrame(tick)})();
 </script>
 <div class="wrap">

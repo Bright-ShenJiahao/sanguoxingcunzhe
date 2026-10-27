@@ -47,7 +47,7 @@ export function createMenu(game){
   <h2 class="menu-section">角色</h2><div class="menu-characters"></div>
   <div class="menu-note">WASD / 方向键移动 · 靠近敌人自动攻击<br>移动端在地图上拖动即可行走</div>
  </nav>`;
- document.body.append(root);document.body.classList.remove('loading');{const bt=document.getElementById('boot');if(bt){bt.style.opacity='0';setTimeout(()=>bt.remove(),500)}}document.body.classList.add('menu-open');document.title='三国幸存者 · 无名之辈外传';
+ document.body.append(root);document.body.classList.remove('loading');{const bt=document.getElementById('boot');if(bt)setTimeout(()=>{bt.style.opacity='0';setTimeout(()=>bt.remove(),500)},Math.max(0,2300-performance.now()))}document.body.classList.add('menu-open');document.title='三国幸存者 · 无名之辈外传';
  const cs=document.getElementById('cs');root.querySelector('.menu-characters').append(cs);
  const input=root.querySelector('input'),caption=root.querySelector('.menu-character');
  try{input.value=localStorage.getItem('sanguo.playerName')||''}catch{/* 隐私模式仍可游玩。 */}
