@@ -25,3 +25,11 @@
 
 ## 重新生成地图
 `tools/build_world.sh`（读 art_src/map，写 assets/map 与 data/world.json）。
+
+## 协作规则（第一次接手先读这里）
+1. 运行：`python3 -m http.server 8000`，打开 http://localhost:8000 ，能看到地图、人物、可操作即正常。
+2. 只改你被分配的任务涉及的文件；不要重新生成或改动 `assets/map/`、`data/world.json`（地图已定稿）。
+3. 游戏逻辑都在 `src/main.js`；人物/武器素材清单在 `data/characters.json`，骑马数据在 `data/ride.json`。
+4. 接入新美术：把 PNG 放进 `assets/characters/...`，在 `data/*.json` 登记路径和尺寸，再在 `src/main.js` 里引用；保持 脚底锚点、画布大小 与旧图一致。
+5. 改完只做基本检查：页面能打开、控制台无报错、能走动。不需要写大量测试。
+6. 一次提交只做一件事，提交信息用中文，直接推到 `main`（Netlify 会自动部署）。
