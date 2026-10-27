@@ -20,7 +20,7 @@ for(const k in D.spr)ld('s_'+k,D.spr[k]);
 for(const cl of ['base','one'])D.hf[cl].forEach((u,i)=>ld('hf_'+cl+'_'+i,u));for(const k in D.en2)ld('e_'+k,D.en2[k]);ld('wpn',D.wpn2);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');for(let i=0;i<8;i++)ld('rh_'+i,'assets/characters/ride/horse_'+i+'.png');for(let i=0;i<3;i++){ld('rr_'+i,'assets/characters/ride/rider_'+i+'.png');ld('rg_'+i,'assets/characters/ride/rider_g_'+i+'.png')}
 for(let i=0;i<6;i++)ld('hbg_'+i,'assets/characters/hero_b/g_f'+i+'.png');
-let hairG=false,ride=null,pj=[],CM,GK='ground',mmc={},IM2={},heroM='A',wpm='none';const R=D.coll_r;
+let hairG=false,ride=null,pj=[],CM,GK='ground',mmc={},IM2={},heroM='B',wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
 const hero={x:WW/2,y:WW/2,face:1};const CO=objs.filter(o=>o.r);
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WW)return 1;return CM[(y*WW+x)*4]}
@@ -52,7 +52,7 @@ const RIDE_K=.68; // 骑马整体缩放：让骑手头身大小≈步行时的�
 function drawRide(px,py,moving,now){
  const hm=D.ride.horse,rm=D.ride.rider,seq=[2,3,4,5,6,7],hi=moving?seq[Math.floor(now/110)%6]:Math.floor(now/700)%2,hd=hm[hi],him=IM['rh_'+hi];
  const bk=hd.buckle,sx=bk[0]-1,sy=bk[1]-13,bob=moving?Math.sin(now/110*Math.PI/1)*.0:0;
- let ri=0;if(ride&&wpm=='none')ri=2;const rim=IM[(hairG?'rg_':'rr_')+ri],rsz=rm[ri];
+ let ri=0;const rim=IM[(hairG?'rg_':'rr_')+ri],rsz=rm[ri];
  c.save();c.translate(px,py);c.scale(hero.face*RIDE_K,RIDE_K);c.imageSmoothingEnabled=false;
  c.fillStyle='rgba(18,40,20,.22)';c.beginPath();c.ellipse(0,-1,hd.size[0]*.36,2.6,0,0,6.3);c.fill();
  const ox=-bk[0],oy=-hd.size[1]; // 马：镫扣 x 对齐，底边落地
@@ -61,8 +61,6 @@ function drawRide(px,py,moving,now){
  const hip=[5,17],hand=[11.5,15.5];
  const T=ride?Math.min(1,(now-ride.t0)/ride.dur):0,LN={short:2.2,long:3.2,bow:-.8,xbow:-.4,none:2.2}[wpm]||0,lunge=ride?LN*Math.sin(T*Math.PI):0;
  c.drawImage(rim,seatX+(ride?lunge:0)-hip[0],seatY-hip[1],rsz.size[0],rsz.size[1]);
- if(wpm!='none'&&wpm!='magic'){const sh=[seatX+lunge-hip[0]+8.8,seatY-hip[1]+13.2],gx=seatX+lunge-hip[0]+hand[0]+(wpm=='short'&&ride?2.5*Math.min(1,T*1.25):0),gy=seatY-hip[1]+hand[1]+(wpm=='short'&&ride?-5*Math.sin(Math.min(1,T*1.25)*Math.PI):0);
-  for(const [col,wd] of [['#4a2c1c',3.4],['#f0b878',2.2]]){c.strokeStyle=col;c.lineWidth=wd;c.lineCap='round';c.beginPath();c.moveTo(sh[0],sh[1]);c.lineTo(gx,gy);c.stroke()}}
  if(wpm!='none'){const wi=IM['wp_'+wpm],hx=seatX+lunge-hip[0]+hand[0]+(wpm=='short'&&ride?2.5*Math.min(1,T*1.25):0),hy=seatY-hip[1]+hand[1]+(wpm=='short'&&ride?-5*Math.sin(Math.min(1,T*1.25)*Math.PI):0);c.save();c.translate(hx,hy);
   if(wpm=='short'){const a=ride?(-1.1+2.5*Math.min(1,T*1.25)):.55;c.rotate(a);c.scale(.5,.5);c.drawImage(wi,-3.04,-28*.85);}
   else if(wpm=='long'){const th=ride?-.1:-.55,pt=ride?Math.sin(T*Math.PI)*13:0;c.rotate(th+1.57);c.translate(0,-pt);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height*.55)}
@@ -132,7 +130,7 @@ function loop(now){
   const s2=e.sp*(water(e.x,e.y)===2?.6:1)*dt*60;if(d>13){const mx=ax/d*s2,my=ay/d*s2;
    if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}else{const sx=-my*1.6,sy=mx*1.6;if(ok(e.x+sx,e.y+sy)){e.x+=sx;e.y+=sy}}}}
  for(let i=0;i<en.length;i++)for(let j=i+1;j<en.length;j++){const a=en[i],b=en[j],ddx=b.x-a.x,ddy=b.y-a.y,d=Math.hypot(ddx,ddy);if(d>0&&d<10){const f=(10-d)/24;if(ok(a.x-ddx/d*f,a.y-ddy/d*f)){a.x-=ddx/d*f;a.y-=ddy/d*f}if(ok(b.x+ddx/d*f,b.y+ddy/d*f)){b.x+=ddx/d*f;b.y+=ddy/d*f}}}
- if(heroM=='R'||(heroM=='B'&&wpm!='none')){const RNG=(wpm=='bow'||wpm=='xbow'),DUR={short:380,none:380,long:430,bow:560,xbow:380,magic:380}[wpm]||380;
+ if(wpm!='none'&&wpm!='magic'){const RNG=(wpm=='bow'||wpm=='xbow'),DUR={short:380,none:380,long:430,bow:560,xbow:380,magic:380}[wpm]||380;
   if(!ride&&now>nextAtk){let best=null,bd=RNG?150:52;for(const e of en){const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d<bd){bd=d;best=e}}if(best){hero.face=best.x>=hero.x?1:-1;ride={t0:now,dur:DUR,hit:false,tx:best.x,ty:best.y}}}
   if(ride){const el=now-ride.t0;
    if(RNG){const rel=wpm=='bow'?.62:.5;if(!ride.hit&&el>DUR*rel){ride.hit=true;const ax=ride.tx-hero.x,ay=ride.ty-(hero.y-10),L2=Math.hypot(ax,ay)||1;pj.push({x:hero.x+hero.face*8,y:hero.y,dx:ax/L2,dy:(ride.ty-hero.y)/L2,v:wpm=='bow'?190:260,life:.7})}}
@@ -140,7 +138,6 @@ function loop(now){
    if(el>DUR){ride=null;nextAtk=now+140}}
   for(const p of pj){p.x+=p.dx*p.v*dt;p.y+=p.dy*p.v*dt;p.life-=dt;for(const e of en){if(!e.dead&&Math.abs(e.x-p.x)<7&&Math.abs(e.y-p.y)<9){e.dead=1;p.life=0;fx.push({x:e.x,y:e.y,t:now,dx:p.dx>0?1:-1})}}}
   pj=pj.filter(p=>p.life>0&&ok(p.x,p.y))}
- else if(!atk&&now>nextAtk){let best=null,bd=46;for(const e of en){const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d<bd){bd=d;best=e}}if(best)startAtk(best.x>=hero.x?1:-1)}
  if(atk){atk.t+=dt*1000;const stp=atk.steps[atk.k];if(atk.t>=stp.d){atk.t=0;atk.k++;atk.prev=null;if(atk.k>=3){atk=null;nextAtk=now+160}}}
  if(atk&&atk.k===2&&!atk.hit){atk.hit=true;for(const e of en){const ex=(e.x-hero.x)*atk.face,ey=e.y-hero.y;if(ex>-6&&ex<34&&Math.abs(ey)<18){e.dead=1;fx.push({x:e.x,y:e.y,t:now,dx:atk.face})}}}
  for(let i=en.length-1;i>=0;i--)if(en[i].dead){en.splice(i,1);kills++;spawn()}
