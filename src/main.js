@@ -1,5 +1,6 @@
 
 import {createExtract} from './extract.js';
+import {createMenu} from './menu.js';
 const [W,CH]=await Promise.all(['data/world.json','data/characters.json'].map(u=>fetch(u).then(r=>r.json())));
 const RD=await fetch('data/ride.json').then(r=>r.json()),HN=await fetch('data/heroine.json').then(r=>r.json());
 const D={...W,...CH,ride:RD,ground:'assets/map/ground_grass.jpg',ground2:'assets/map/ground_mud.jpg',coll:'assets/map/coll.png',
@@ -126,11 +127,16 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW
   equip(w){wpm=w;ride=null;atk=null;pj=[];nextAtk=0;document.querySelectorAll('#ws button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===w))},
   hit(e,now){e.dead=1;fx.push({x:e.x,y:e.y,t:now,dx:hero.face})},
   reset(){hero.x=WW/2;hero.y=WW/2;heroM='B';kills=0;en.length=0;fx=[];rip=[];fp=[];joy=null;for(const k in keys)keys[k]=0;this.equip('none')}
+ });
+ menu=createMenu({c,images:IM,data:D,objects:objs,
+  character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
+  clearInput(){joy=null;for(const k in keys)keys[k]=0}
  });requestAnimationFrame(loop)}
-let extract;
+let extract,menu;
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
 function loop(now){
  const dt=Math.min(.05,(now-last)/1000||0);last=now;
+ if(menu?.visible){menu.draw(now);requestAnimationFrame(loop);return}
  if(extract?.finished){requestAnimationFrame(loop);return}
  c.setTransform(HD,0,0,HD,0,0);
  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
