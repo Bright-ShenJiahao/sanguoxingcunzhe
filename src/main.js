@@ -32,7 +32,8 @@ let CS='m';const SETS={m:{pre:'hb_',gpre:'hbg_',size:D.hbsize,grip:D.grip,walk:[
 for(let r=0;r<5;r++)SETS['f'+r]={pre:'hh'+r+'_',size:[HN.size[0]/2,HN.size[1]/2],grip:HN.rows[r],walk:[2,3,4,5,6,7,8]};
 let hairG=false,weaponAttack=null,pj=[],CM,mmc,wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
-const hero={x:WW/2,y:WW/2,face:1};const CO=objs.filter(o=>o.r);
+const AT=({n:[.5,.12],s:[.5,.88],w:[.12,.5],e:[.88,.5]})[new URLSearchParams(location.search).get('at')]||[.5,.5];
+const hero={x:WW*AT[0],y:WW*AT[1],face:1};const CO=objs.filter(o=>o.r);
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WW)return 1;return CM[(y*WW+x)*4]}
 function blocked(x,y){
  if(water(x,y)===1||water(x-3,y)===1||water(x+3,y)===1||water(x,y-2)===1)return true;
@@ -71,7 +72,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW
  });
  survival=createSurvival({hero,enemies:en,get kills(){return kills},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
-  reset(){hero.x=WW/2;hero.y=WW/2;hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm='short';joy=null;for(const k in keys)keys[k]=0}
+  reset(){hero.x=WW*AT[0];hero.y=WW*AT[1];hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm='short';joy=null;for(const k in keys)keys[k]=0}
  });requestAnimationFrame(loop)}
 let menu,survival;const weather=createWeather();
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
@@ -121,7 +122,7 @@ function loop(now){
  items.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
  c.imageSmoothingEnabled=true;
  if(ov.cld){c.save();const T=640,dr=now*.011;const ox0=(((-cx+dr)%T)+T)%T,oy0=(((-cy+dr*.45)%T)+T)%T;for(let x=ox0-T;x<VW;x+=T)for(let y=oy0-T;y<VH;y+=T)c.drawImage(cloud,x,y,T,T);c.restore()}
- weather.draw(c,now,dt,VW,VH);
+ weather.draw(c,now,dt,VW,VH,hero.x,hero.y,WW);
  fx=fx.filter(f=>now-f.t<220);for(const f of fx){const k=(now-f.t)/220;c.strokeStyle=`rgba(255,255,245,${1-k})`;c.lineWidth=1;c.beginPath();c.arc(f.x-cx+f.dx*k*10,f.y-cy-10,3+k*9,0,6.3);c.stroke()}
  const m=$('mm').getContext('2d'),k=84/WW;m.drawImage(mmc,0,0);m.strokeStyle='#fff';m.strokeRect(cx*k,cy*k,VW*k,VH*k);m.fillStyle='#fff';m.fillRect(hero.x*k-1.5,hero.y*k-1.5,3,3);
  if($('pos'))$('pos').textContent='位置 '+Math.round(hero.x)+', '+Math.round(hero.y)+(inSh?' · 正在涉水（速度×0.55）':'')+' · 逻辑画布 480×300，输出 960×600，主角高约 25 像素';
