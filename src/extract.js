@@ -5,7 +5,7 @@ export function createExtract(game) {
  let active=false,finished=false,chests=[],exits=[],bag=[],started=0,hp=100,hold=0,lastMagic=0;
  const button=document.createElement('button');button.textContent='搜打撤';
  const bar=document.createElement('div');bar.className='sw';bar.append(button);
- document.getElementById('hs').before(bar);
+ document.querySelector('.wrap').append(bar);
  const hud=document.createElement('div');hud.setAttribute('role','status');
  hud.style.cssText='position:absolute;left:3%;bottom:3%;padding:8px;background:#14231de8;color:white;font:13px system-ui;pointer-events:none;white-space:pre-line';
  const result=document.createElement('div');

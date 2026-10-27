@@ -218,5 +218,5 @@ function loop(now){
  if(ov.mist){const g=c.createLinearGradient(0,0,0,VH*.5);g.addColorStop(0,'rgba(206,226,214,.30)');g.addColorStop(1,'rgba(206,226,214,0)');c.fillStyle=g;c.fillRect(0,0,VW,VH*.5)}
  const m=$('mm').getContext('2d'),k=84/WW;m.drawImage(mmc[GK],0,0);m.strokeStyle='#fff';m.strokeRect(cx*k,cy*k,VW*k,VH*k);m.fillStyle='#fff';m.fillRect(hero.x*k-1.5,hero.y*k-1.5,3,3);
  extract?.minimap(m,k);
- $('pos').textContent='位置 '+Math.round(hero.x)+', '+Math.round(hero.y)+(inSh?' · 正在涉水（速度×0.55）':'')+(atk?' · 出招：'+atk.mv:'')+' · 逻辑画布 480×300，输出 960×600，主角高约 25 像素';
+ if($('pos'))$('pos').textContent='位置 '+Math.round(hero.x)+', '+Math.round(hero.y)+(inSh?' · 正在涉水（速度×0.55）':'')+(atk?' · 出招：'+atk.mv:'')+' · 逻辑画布 480×300，输出 960×600，主角高约 25 像素';
  requestAnimationFrame(loop)}
