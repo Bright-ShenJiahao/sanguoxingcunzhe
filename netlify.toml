@@ -1,5 +1,7 @@
 [build]
-  publish = "."
+  # 只发布玩游戏需要的文件，不把 art_src（原图底稿）、docs、tools 发布出去
+  command = "rm -rf dist && mkdir dist && cp -r index.html src data assets dist/"
+  publish = "dist"
 
 [functions]
   directory = "netlify/functions"
@@ -9,3 +11,9 @@
   for = "/api/scores"
   [headers.values]
     Cache-Control = "no-store"
+
+# 图片素材缓存 1 小时，回访几乎秒开（改图后最多 1 小时生效）
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=3600"

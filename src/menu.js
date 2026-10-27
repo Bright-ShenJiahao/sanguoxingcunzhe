@@ -57,7 +57,11 @@ export function createMenu(game){
  const preview=root.querySelector('canvas').getContext('2d');
  const KINDS=['grunt_club','blade','spear','archer','shield','blade','grunt_club','spear'];
  const actors=KINDS.map((k,i)=>({k,sx:(i-3.5)*.2,sy:((i*5)%3-1)*.2,ph:i*1.7}));
- root.querySelector('.menu-start').onclick=()=>{
+ let starting=false;
+ root.querySelector('.menu-start').onclick=async()=>{
+  if(starting)return;starting=true;
+  try{await game.ready?.()}catch{/* 加载失败也进入游戏 */}
+  starting=false;
   visible=false;root.hidden=true;document.body.classList.remove('menu-open');game.clearInput();game.c.canvas.width=960;game.c.canvas.height=600;
   document.getElementById('cv').setAttribute('tabindex','-1');document.getElementById('cv').focus({preventScroll:true});
   game.onStart();

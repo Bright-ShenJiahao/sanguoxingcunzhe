@@ -24,7 +24,10 @@ D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);ld('g
 for(const k in D.spr)ld('s_'+k,D.spr[k]);
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
-for(let r=0;r<5;r++)for(let i=0;i<9;i++)ld('hh'+r+'_'+i,'assets/characters/heroine/r'+r+'_w'+i+'.png');
+// 女主发型按需下载：选中哪一套才加载哪一套（每套 9 帧）
+const rowP={};function loadRow(r){return rowP[r]||(rowP[r]=Promise.all(Array.from({length:9},(_,i)=>new Promise(res=>{const m=new Image();m.onload=()=>{IM['hh'+r+'_'+i]=m;res()};m.onerror=res;m.src='assets/characters/heroine/r'+r+'_w'+i+'.png'}))))}
+const curRow=()=>CS[0]=='f'?+CS[1]:-1;
+
 for(let i=0;i<8;i++)ld('hbg_'+i,'assets/characters/hero_b/g_w'+i+'.png');
 let CS='m';const SETS={m:{pre:'hb_',gpre:'hbg_',size:D.hbsize,grip:D.grip,walk:[2,3,4,5,6,7]}};
 for(let r=0;r<5;r++)SETS['f'+r]={pre:'hh'+r+'_',size:[HN.size[0]/2,HN.size[1]/2],grip:HN.rows[r],walk:[2,3,4,5,6,7,8]};
@@ -62,7 +65,7 @@ function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());co
  cloud=document.createElement('canvas');cloud.width=n;cloud.height=n;const x=cloud.getContext('2d'),im=x.createImageData(n,n);for(let j=0;j<n;j++)for(let i=0;i<n;i++){const val=v(i,j)*.7+v(i*2,j*2)*.3,a=Math.max(0,Math.min(1,(val-.5)/.22))*.26;const k=(j*n+i)*4;im.data[k]=18;im.data[k+1]=40;im.data[k+2]=28;im.data[k+3]=a*255}x.putImageData(im,0,0)}
 function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW;const x=t.getContext('2d');x.drawImage(IM.coll,0,0);CM=x.getImageData(0,0,WW,WW).data;
  mmc=document.createElement('canvas');mmc.width=84;mmc.height=84;mmc.getContext('2d').drawImage(IM.ground,0,0,84,84);
- document.querySelectorAll('#cs button').forEach(b=>b.onclick=()=>{CS=b.dataset.c;document.querySelectorAll('#cs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+ document.querySelectorAll('#cs button').forEach(b=>b.onclick=()=>{CS=b.dataset.c;if(curRow()>=0)loadRow(curRow());document.querySelectorAll('#cs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
  mkCloud();for(let i=0;i<14;i++)spawn();
  extract=createExtract({hero,size:WW,ok,enemies:extractEnemies,spawn,
   get kills(){return kills},get weapon(){return wpm},
@@ -72,7 +75,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW
  });
  menu=createMenu({c,images:IM,data:D,objects:objs,enemies:ED,
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
-  clearInput(){joy=null;for(const k in keys)keys[k]=0},onStart(){survival.start()}
+  clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>curRow()>=0?loadRow(curRow()):Promise.resolve(),onStart(){survival.start()}
  });
  survival=createSurvival({hero,enemies:en,get kills(){return kills},get extractActive(){return extract.active},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
