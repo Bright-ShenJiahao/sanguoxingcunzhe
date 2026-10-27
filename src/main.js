@@ -6,7 +6,7 @@ import {createEnemies} from './enemies.js';
 import {createWeather} from './weather.js';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const RD=await fetch('data/ride.json').then(r=>r.json()),HN=await fetch('data/heroine.json').then(r=>r.json());
-const D={...W,...CH,ride:RD,ground:'assets/map/ground_grass.jpg',ground2:'assets/map/ground_mud.jpg',coll:'assets/map/coll.png',
+const D={...W,...CH,ride:RD,ground:'assets/map/ground_grass.jpg',coll:'assets/map/coll.png',
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),VW=480,VH=300,WW=D.WW,HD=D.HD;
 const $=id=>document.getElementById(id);
@@ -19,12 +19,11 @@ st.addEventListener('pointermove',e=>{if(joy){joy.dx=e.clientX-joy.x;joy.dy=e.cl
 ['pointerup','pointercancel'].forEach(n=>st.addEventListener(n,()=>joy=null));
 const ov={sh:false,cld:true,fp:true,mist:false};
 const IM={};let left=0;
-function ld(k,s){left++;const i=new Image();i.onload=()=>{IM[k]=i;if(--left==0)start()};i.src=s}
-D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);ld('ground',D.ground);ld('ground2',D.ground2);ld('coll',D.coll);
+let tot=0;function ld(k,s){left++;tot++;const i=new Image();i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};i.src=s}
+D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);ld('ground',D.ground);ld('coll',D.coll);
 for(const k in D.spr)ld('s_'+k,D.spr[k]);
-for(const cl of ['base','one'])D.hf[cl].forEach((u,i)=>ld('hf_'+cl+'_'+i,u));for(const k in D.en2)ld('e_'+k,D.en2[k]);ld('wpn',D.wpn2);
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
-ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');for(let i=0;i<8;i++)ld('rh_'+i,'assets/characters/ride/horse_'+i+'.png');for(let i=0;i<3;i++){ld('rr_'+i,'assets/characters/ride/rider_'+i+'.png');ld('rg_'+i,'assets/characters/ride/rider_g_'+i+'.png')}
+ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
 for(let r=0;r<5;r++)for(let i=0;i<9;i++)ld('hh'+r+'_'+i,'assets/characters/heroine/r'+r+'_w'+i+'.png');
 for(let i=0;i<8;i++)ld('hbg_'+i,'assets/characters/hero_b/g_w'+i+'.png');
 let CS='m';const SETS={m:{pre:'hb_',gpre:'hbg_',size:D.hbsize,grip:D.grip,walk:[2,3,4,5,6,7]}};
@@ -121,12 +120,10 @@ function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());co
 function tintSet(){if(IM2.done)return;IM2.done=1;for(const k in D.spr){const im=IM['s_'+k],t=document.createElement('canvas');t.width=im.width;t.height=im.height;const x=t.getContext('2d');x.filter='saturate(.58) brightness(.86) sepia(.16) hue-rotate(-6deg)';x.drawImage(im,0,0);IM2['s_'+k]=t}}
 const SPR=k=>(GK=='ground2'&&IM2[k])||IM[k];
 function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW;const x=t.getContext('2d');x.drawImage(IM.coll,0,0);CM=x.getImageData(0,0,WW,WW).data;
- for(const g of['ground','ground2']){const m_=document.createElement('canvas');m_.width=84;m_.height=84;m_.getContext('2d').drawImage(IM[g],0,0,84,84);mmc[g]=m_}
+ for(const g of['ground']){const m_=document.createElement('canvas');m_.width=84;m_.height=84;m_.getContext('2d').drawImage(IM[g],0,0,84,84);mmc[g]=m_}
  document.querySelectorAll('#ws button').forEach(b=>b.onclick=()=>{wpm=b.dataset.w;if(wpm!='none'&&heroM=='A'){heroM='B';document.querySelectorAll('#hs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.h=='B'))}document.querySelectorAll('#ws button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
  document.querySelectorAll('#cs button').forEach(b=>b.onclick=()=>{CS=b.dataset.c;document.querySelectorAll('#cs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
  document.querySelectorAll('#hs button').forEach(b=>b.onclick=()=>{if(b.dataset.h=='G'){hairG=!hairG;b.setAttribute('aria-pressed',hairG);return}heroM=b.dataset.h;ride=null;document.querySelectorAll('#hs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.h=='G'?hairG:x===b))});
- document.querySelectorAll('#gs button').forEach(b=>b.onclick=()=>{GK=b.dataset.g;if(GK=='ground2')tintSet();document.querySelectorAll('#gs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
- document.querySelectorAll('#ovs button').forEach(b=>b.onclick=()=>{const k=b.dataset.o;ov[k]=!ov[k];b.setAttribute('aria-pressed',ov[k])});
  mkCloud();for(let i=0;i<14;i++)spawn();
  extract=createExtract({hero,size:WW,ok,enemies:extractEnemies,spawn,
   get kills(){return kills},get weapon(){return wpm},
@@ -134,7 +131,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW
   hit(e,now){hitEnemy(e,now,hero.face)},
   reset(){hero.x=WW/2;hero.y=WW/2;heroM='B';kills=0;en.length=0;enemySystem.reset();fx=[];rip=[];fp=[];joy=null;for(const k in keys)keys[k]=0;this.equip('none')}
  });
- menu=createMenu({c,images:IM,data:D,objects:objs,
+ menu=createMenu({c,images:IM,data:D,objects:objs,enemies:ED,
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},onStart(){survival.start()}
  });

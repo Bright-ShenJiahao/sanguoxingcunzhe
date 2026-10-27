@@ -16,8 +16,23 @@ canvas#cv{position:absolute;inset:0;width:100%;height:100%}
 .sw button{font:inherit;font-size:14px;padding:8px 16px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
 .sw button[aria-pressed=true]{background:var(--on);color:#fff;border-color:var(--on)}
 .hint{font-size:13px;color:var(--muted)}
-body.loading{background:#07101b}body.loading .wrap{visibility:hidden}body.loading::before{content:"加载中…";position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:#9fb0c8;font-size:18px;letter-spacing:.2em}
+body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
+#boot{position:fixed;inset:0;z-index:60;overflow:hidden;background:#07101b url(assets/map/boot.jpg) center/cover;transition:opacity .5s}
+#boot::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,#07101bcc,#050c16aa)}
+#boot .sd{position:absolute;image-rendering:pixelated;will-change:transform}
+#boot .tx{position:absolute;left:0;right:0;bottom:16vh;text-align:center;color:#c9d8e8;font-size:16px;letter-spacing:.35em}
+#boot .bar{position:absolute;left:50%;bottom:11vh;width:min(320px,60vw);height:4px;margin-left:calc(min(320px,60vw)/-2);background:#ffffff22;border-radius:2px;overflow:hidden}
+#boot .bar i{display:block;height:100%;width:4%;background:#f0d58a;transition:width .25s}
 </style></head><body class="loading">
+<div id="boot"><div class="tx">加载中…</div><div class="bar"><i id="bootbar"></i></div></div>
+<script>
+(function(){var b=document.getElementById('boot');if(!b)return;var K=['grunt_club','blade','spear','shield','archer'],L=[];
+for(var i=0;i<5;i++){var k=K[i],f=[];for(var j=0;j<6;j++){var im=new Image();im.src='assets/characters/enemies/'+k+'/walk'+j+'.png';f.push(im.src)}
+var el=document.createElement('img');el.className='sd';el.style.bottom=(24+i*5)+'vh';el.style.height='84px';b.appendChild(el);L.push({el:el,f:f,x:-i*220,v:70+i*14})}
+var last=performance.now();function tick(n){if(!document.getElementById('boot'))return;var dt=Math.min(.05,(n-last)/1000);last=n;var w=innerWidth;
+for(var i=0;i<L.length;i++){var o=L[i];o.x+=o.v*dt;if(o.x>w+120)o.x=-160;o.el.src=o.f[Math.floor(n/110+i)%6];o.el.style.transform='translateX('+Math.round(o.x)+'px)'}
+requestAnimationFrame(tick)}requestAnimationFrame(tick)})();
+</script>
 <div class="wrap">
 <div class="stage" id="st"><canvas id="cv" width="960" height="600" aria-label="写实俯瞰风野外地图，小兵挥刀斩敌"></canvas><div id="kc">斩敌 0</div><canvas id="mm" width="84" height="84"></canvas></div>
 <div class="sw" role="group" aria-label="角色" id="cs"><button data-c="m" aria-pressed="true">男主</button><button data-c="f0" aria-pressed="false">女主·长直发</button><button data-c="f1" aria-pressed="false">女主·短发</button><button data-c="f2" aria-pressed="false">女主·卷发</button><button data-c="f3" aria-pressed="false">女主·红发带</button><button data-c="f4" aria-pressed="false">女主·丸子头</button></div>

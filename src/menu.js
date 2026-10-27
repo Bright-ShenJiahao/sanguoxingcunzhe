@@ -7,7 +7,7 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 .menu-open{overflow:hidden}
 .menu-open #st{position:fixed;inset:0;width:100%;height:100%;border:0;border-radius:0;aspect-ratio:auto}
 .menu-open #cv{object-fit:cover}
-.menu-open #st>:not(#cv),.menu-open .wrap>.sw,.menu-open #debug-panel{display:none!important}
+.menu-open #st>:not(#cv),.menu-open .wrap>.sw{display:none!important}
 #main-menu{position:fixed;inset:0;z-index:10;background:linear-gradient(100deg,#07101b80,#050c1670);display:flex;align-items:center;justify-content:center;gap:clamp(40px,9vw,150px);padding:32px;box-sizing:border-box;overflow:auto;color:#f5f7fb}
 #main-menu[hidden]{display:none}
 .menu-profile{width:300px;flex-shrink:0;text-align:center}
@@ -29,10 +29,6 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 #main-menu #cs button{font-size:13px;padding:12px 8px;border:1px solid #83abe354;border-radius:5px;background:#0c225a55;text-align:left;color:#ecf5ff}
 #main-menu #cs button[aria-pressed=true]{background:#77a9f044;border-color:#c1e0ff;box-shadow:inset 3px 0 #e2cb87}
 .menu-note{color:#c3d3ef;font-size:12px;line-height:1.8;margin-top:20px;border-top:1px solid #9ebfe432;padding-top:16px}
-#debug-panel{padding:12px;border:1px solid #566879;border-radius:6px}
-#debug-panel[hidden]{display:none}
-#debug-panel summary{cursor:pointer;margin-bottom:12px}
-#debug-panel .sw{margin:10px 0}
 button:focus-visible,summary:focus-visible{outline:2px solid #e9d398;outline-offset:4px}
 @media(max-width:700px){#main-menu{gap:25px;padding:20px}.menu-profile{width:240px}.menu-title{font-size:36px}.menu-panel{width:310px;padding:18px}}
 @media(max-width:560px){#main-menu{flex-direction:column;justify-content:flex-start;gap:24px;padding:28px 18px}.menu-profile{width:100%}.menu-title{font-size:36px;margin-bottom:18px}.menu-card{height:140px;width:200px}.menu-card canvas{height:136px;width:170px}.menu-character{margin:10px 0}.menu-panel{width:min(100%,360px)}.menu-eyebrow{margin-bottom:8px}.menu-name input{padding:9px 12px}}
@@ -51,40 +47,42 @@ export function createMenu(game){
   <h2 class="menu-section">角色</h2><div class="menu-characters"></div>
   <div class="menu-note">WASD / 方向键移动 · 靠近敌人自动攻击<br>移动端在地图上拖动即可行走</div>
  </nav>`;
- document.body.append(root);document.body.classList.remove('loading');document.body.classList.add('menu-open');document.title='三国幸存者 · 无名之辈外传';
+ document.body.append(root);document.body.classList.remove('loading');{const bt=document.getElementById('boot');if(bt){bt.style.opacity='0';setTimeout(()=>bt.remove(),500)}}document.body.classList.add('menu-open');document.title='三国幸存者 · 无名之辈外传';
  const cs=document.getElementById('cs');root.querySelector('.menu-characters').append(cs);
  const input=root.querySelector('input'),caption=root.querySelector('.menu-character');
  try{input.value=localStorage.getItem('sanguo.playerName')||''}catch{/* 隐私模式仍可游玩。 */}
  input.addEventListener('input',()=>{try{localStorage.setItem('sanguo.playerName',input.value)}catch{}});
  // 阻断名字输入与菜单点击进入原来的全局移动按键处理。
  root.addEventListener('keydown',e=>e.stopPropagation());root.addEventListener('keyup',e=>e.stopPropagation());
- const debug=document.createElement('details');debug.id='debug-panel';debug.hidden=new URLSearchParams(location.search).get('debug')!=='1';
- const summary=document.createElement('summary');summary.textContent='调试';debug.append(summary);
- const wrap=document.querySelector('.wrap');
- for(const node of [...wrap.children])if(node.matches('header,#hs,#ws,#gs,#ovs,.hint'))debug.append(node);
- wrap.append(debug);
  const preview=root.querySelector('canvas').getContext('2d');
- const actors=Array.from({length:6},(_,i)=>({k:['grunt','blade','spear','archer','shield','grunt'][i],x:460+i*58,y:540+(i%3)*65}));
+ const KINDS=['grunt_club','blade','spear','archer','shield','blade','grunt_club','spear'];
+ const actors=KINDS.map((k,i)=>({k,sx:(i-3.5)*.2,sy:((i*5)%3-1)*.2,ph:i*1.7}));
  root.querySelector('.menu-start').onclick=()=>{
-  visible=false;root.hidden=true;document.body.classList.remove('menu-open');game.clearInput();
+  visible=false;root.hidden=true;document.body.classList.remove('menu-open');game.clearInput();game.c.canvas.width=960;game.c.canvas.height=600;
   document.getElementById('cv').setAttribute('tabindex','-1');document.getElementById('cv').focus({preventScroll:true});
   game.onStart();
  };
  document.documentElement.classList.remove('menu-loading');
  return {get visible(){return visible},show(){visible=true;root.hidden=false;document.body.classList.add('menu-open');root.querySelector('.menu-start').focus()},draw(now){
-  const {c,images,data}=game,t=now/1000;
-  const cx=380+Math.sin(t/30)*110,cy=420+Math.cos(t/37)*95;
-  c.setTransform(data.HD,0,0,data.HD,0,0);c.imageSmoothingEnabled=true;
-  c.drawImage(images.ground,cx*data.HD,cy*data.HD,480*data.HD,300*data.HD,0,0,480,300);
-  const items=game.objects.map(o=>({y:o.y,draw(){c.imageSmoothingEnabled=true;c.drawImage(images['s_'+o.k],o.x-cx-o.w/2,o.y-cy-o.h,o.w,o.h)}}));
+  const {c,images,data,enemies}=game,t=now/1000,cv=c.canvas,HD=data.HD,WW=data.WW;
+  // 画布跟窗口一样大，按整数倍（和游戏内同样的像素大小）绘制，视野比游戏内更宽，背景清晰不糊。
+  const dpr=Math.min(2,window.devicePixelRatio||1),W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);
+  if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
+  const S=Math.max(HD*dpr,W/WW,H/WW),vw=W/S,vh=H/S;
+  const mx=620+Math.sin(t/30)*110,my=580+Math.cos(t/37)*95;
+  const cx=Math.max(0,Math.min(WW-vw,mx-vw/2)),cy=Math.max(0,Math.min(WW-vh,my-vh/2));
+  c.setTransform(S,0,0,S,0,0);c.imageSmoothingEnabled=true;
+  c.drawImage(images.ground,cx*HD,cy*HD,vw*HD,vh*HD,0,0,vw,vh);
+  const items=game.objects.filter(o=>o.x>cx-80&&o.x<cx+vw+80&&o.y>cy&&o.y<cy+vh+120).map(o=>({y:o.y,draw(){c.imageSmoothingEnabled=true;c.drawImage(images['s_'+o.k],o.x-cx-o.w/2,o.y-cy-o.h,o.w,o.h)}}));
   for(const [i,a] of actors.entries()){
-   const x=a.x+Math.sin(t/5+i)*27,y=a.y+Math.cos(t/6+i)*18,[w,h]=data.esize2[a.k];
-   items.push({y,draw(){c.save();c.translate(x-cx,y-cy-Math.floor(t*5+i)%2);c.scale(Math.cos(t/5+i)>=0?1:-1,1);c.imageSmoothingEnabled=false;c.drawImage(images['e_'+a.k],-w/2,-h);c.restore()}});
+   const wx=mx+a.sx*vw+Math.sin(t/5+a.ph)*55,wy=my+a.sy*vh+Math.cos(t/6+a.ph)*22;
+   const face=Math.cos(t/5+a.ph)>=0?1:-1,fr=enemies[a.k].frames['walk'+(Math.floor(t*9+i)%6)],im=images['en_'+a.k+'_walk'+(Math.floor(t*9+i)%6)];
+   items.push({y:wy,draw(){c.save();c.translate(Math.round(wx-cx),Math.round(wy-cy));c.scale(face,1);c.imageSmoothingEnabled=false;c.drawImage(im,-fr.anchor[0],-fr.anchor[1],fr.size[0],fr.size[1]);c.restore()}});
   }
   items.sort((a,b)=>a.y-b.y).forEach(item=>item.draw());
   const {image,size,label}=game.character(Math.floor(now/650)%2);
   preview.clearRect(0,0,200,160);preview.imageSmoothingEnabled=false;
-  const scale=2.6;preview.drawImage(image,100-size[0]*scale/2,145-size[1]*scale,size[0]*scale,size[1]*scale);
+  const scale=2.6;if(image)preview.drawImage(image,100-size[0]*scale/2,145-size[1]*scale,size[0]*scale,size[1]*scale);
   caption.textContent=label;
  }};
 }
