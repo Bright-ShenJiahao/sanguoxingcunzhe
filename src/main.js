@@ -3,6 +3,7 @@ import {createExtract} from './extract.js';
 import {createMenu} from './menu.js';
 import {createSurvival} from './survival.js';
 import {createEnemies} from './enemies.js';
+import {createWeather} from './weather.js';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const RD=await fetch('data/ride.json').then(r=>r.json()),HN=await fetch('data/heroine.json').then(r=>r.json());
 const D={...W,...CH,ride:RD,ground:'assets/map/ground_grass.jpg',ground2:'assets/map/ground_mud.jpg',coll:'assets/map/coll.png',
@@ -141,7 +142,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
   reset(){hero.x=WW/2;hero.y=WW/2;hero.face=1;kills=0;en.length=0;enemySystem.reset();ride=null;atk=null;pj=[];fx=[];rip=[];fp=[];swoosh=[];nextAtk=0;wpm='short';joy=null;for(const k in keys)keys[k]=0;document.querySelectorAll('#ws button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===wpm))}
  });requestAnimationFrame(loop)}
-let extract,menu,survival;
+let extract,menu,survival;const weather=createWeather();
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
 function loop(now){
  const dt=Math.min(.05,(now-last)/1000||0);last=now;
@@ -203,6 +204,7 @@ function loop(now){
  items.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
  c.imageSmoothingEnabled=true;
  if(ov.cld){c.save();const T=640,dr=now*.011;const ox0=(((-cx+dr)%T)+T)%T,oy0=(((-cy+dr*.45)%T)+T)%T;for(let x=ox0-T;x<VW;x+=T)for(let y=oy0-T;y<VH;y+=T)c.drawImage(cloud,x,y,T,T);c.restore()}
+ weather.draw(c,now,dt,VW,VH);
  if(atk&&hinfo){const g=hinfo.g,a0=[g.tail[0]+g.d[0]*L0*.35,g.tail[1]+g.d[1]*L0*.35],cl=hinfo.cl;
   const A=loc(a0,cl),T2=loc(g.head,cl),w=(p)=>[hero.x+hinfo.face*p[0],hero.y+p[1]];
   const curv={a:w(A),t:w(T2)};
