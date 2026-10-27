@@ -1,4 +1,5 @@
 
+import {createExtract} from './extract.js';
 const [W,CH]=await Promise.all(['data/world.json','data/characters.json'].map(u=>fetch(u).then(r=>r.json())));
 const RD=await fetch('data/ride.json').then(r=>r.json());
 const D={...W,...CH,ride:RD,ground:'assets/map/ground_grass.jpg',ground2:'assets/map/ground_mud.jpg',coll:'assets/map/coll.png',
@@ -115,10 +116,18 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW
  document.querySelectorAll('#hs button').forEach(b=>b.onclick=()=>{if(b.dataset.h=='G'){hairG=!hairG;b.setAttribute('aria-pressed',hairG);return}heroM=b.dataset.h;ride=null;document.querySelectorAll('#hs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.h=='G'?hairG:x===b))});
  document.querySelectorAll('#gs button').forEach(b=>b.onclick=()=>{GK=b.dataset.g;if(GK=='ground2')tintSet();document.querySelectorAll('#gs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
  document.querySelectorAll('#ovs button').forEach(b=>b.onclick=()=>{const k=b.dataset.o;ov[k]=!ov[k];b.setAttribute('aria-pressed',ov[k])});
- mkCloud();for(let i=0;i<14;i++)spawn();requestAnimationFrame(loop)}
+ mkCloud();for(let i=0;i<14;i++)spawn();
+ extract=createExtract({hero,size:WW,ok,enemies:en,spawn,
+  get kills(){return kills},get weapon(){return wpm},
+  equip(w){wpm=w;ride=null;atk=null;pj=[];nextAtk=0;document.querySelectorAll('#ws button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===w))},
+  hit(e,now){e.dead=1;fx.push({x:e.x,y:e.y,t:now,dx:hero.face})},
+  reset(){hero.x=WW/2;hero.y=WW/2;heroM='B';kills=0;en.length=0;fx=[];rip=[];fp=[];joy=null;for(const k in keys)keys[k]=0;this.equip('none')}
+ });requestAnimationFrame(loop)}
+let extract;
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
 function loop(now){
  const dt=Math.min(.05,(now-last)/1000||0);last=now;
+ if(extract?.finished){requestAnimationFrame(loop);return}
  c.setTransform(HD,0,0,HD,0,0);
  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
  if(joy){const L=Math.hypot(joy.dx,joy.dy);if(L>8){dx=joy.dx/L;dy=joy.dy/L}}
@@ -128,7 +137,7 @@ function loop(now){
  if(ok(nx,hero.y))hero.x=nx;if(ok(hero.x,ny))hero.y=ny;
  if(inSh&&moving&&Math.random()<dt*7)rip.push({x:hero.x,y:hero.y,t:now});
  for(const e of en){const ax=hero.x-e.x,ay=hero.y-e.y,d=Math.hypot(ax,ay)||1;e.face=ax>0?1:-1;
-  const s2=e.sp*(water(e.x,e.y)===2?.6:1)*dt*60;if(d>13){const mx=ax/d*s2,my=ay/d*s2;
+  const s2=e.sp*(water(e.x,e.y)===2?.6:1)*dt*60*(extract?.speed||1);if(d>13){const mx=ax/d*s2,my=ay/d*s2;
    if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}else{const sx=-my*1.6,sy=mx*1.6;if(ok(e.x+sx,e.y+sy)){e.x+=sx;e.y+=sy}}}}
  for(let i=0;i<en.length;i++)for(let j=i+1;j<en.length;j++){const a=en[i],b=en[j],ddx=b.x-a.x,ddy=b.y-a.y,d=Math.hypot(ddx,ddy);if(d>0&&d<10){const f=(10-d)/24;if(ok(a.x-ddx/d*f,a.y-ddy/d*f)){a.x-=ddx/d*f;a.y-=ddy/d*f}if(ok(b.x+ddx/d*f,b.y+ddy/d*f)){b.x+=ddx/d*f;b.y+=ddy/d*f}}}
  if(wpm!='none'&&wpm!='magic'){const RNG=(wpm=='bow'||wpm=='xbow'),DUR={short:380,none:380,long:430,bow:560,xbow:380,magic:380}[wpm]||380;
@@ -141,12 +150,14 @@ function loop(now){
   pj=pj.filter(p=>p.life>0&&ok(p.x,p.y))}
  if(atk){atk.t+=dt*1000;const stp=atk.steps[atk.k];if(atk.t>=stp.d){atk.t=0;atk.k++;atk.prev=null;if(atk.k>=3){atk=null;nextAtk=now+160}}}
  if(atk&&atk.k===2&&!atk.hit){atk.hit=true;for(const e of en){const ex=(e.x-hero.x)*atk.face,ey=e.y-hero.y;if(ex>-6&&ex<34&&Math.abs(ey)<18){e.dead=1;fx.push({x:e.x,y:e.y,t:now,dx:atk.face})}}}
- for(let i=en.length-1;i>=0;i--)if(en[i].dead){en.splice(i,1);kills++;spawn()}
- while(en.length<16)spawn();
+ for(let i=en.length-1;i>=0;i--)if(en[i].dead){en.splice(i,1);kills++;if(!extract?.active)spawn()}
+ if(!extract?.active)while(en.length<16)spawn();
+ extract?.update(dt,now,moving);
  $('kc').textContent='斩敌 '+kills;
  const cx=Math.round(Math.min(WW-VW,Math.max(0,hero.x-VW/2))),cy=Math.round(Math.min(WW-VH,Math.max(0,hero.y-VH/2)));
  c.imageSmoothingEnabled=true;
  c.drawImage(IM[GK],cx*HD,cy*HD,VW*HD,VH*HD,0,0,VW,VH);
+ extract?.draw(c,cx,cy);
  const px=Math.round(hero.x-cx),py=Math.round(hero.y-cy);
  if(ov.fp){if(moving&&!inSh&&Math.hypot(hero.x-fpl.x,hero.y-fpl.y)>7){fpl={x:hero.x,y:hero.y};fp.push({x:hero.x+fpside*2.2,y:hero.y,t:now});fpside=-fpside}
   fp=fp.filter(f=>now-f.t<5200);for(const f of fp){const a=1-(now-f.t)/5200;c.fillStyle=`rgba(30,20,12,${(GK=='ground2'?.34:.16)*a})`;c.beginPath();c.ellipse(f.x-cx,f.y-cy-1,1.7,1,0,0,6.3);c.fill()}}
@@ -186,5 +197,6 @@ function loop(now){
   if(cy<E)fog(0,-cy,0,-cy+E,0,0,VW,E-cy);if(cy>WW-VH-E)fog(0,WW-cy,0,WW-cy-E,0,WW-cy-E,VW,E)}
  if(ov.mist){const g=c.createLinearGradient(0,0,0,VH*.5);g.addColorStop(0,'rgba(206,226,214,.30)');g.addColorStop(1,'rgba(206,226,214,0)');c.fillStyle=g;c.fillRect(0,0,VW,VH*.5)}
  const m=$('mm').getContext('2d'),k=84/WW;m.drawImage(mmc[GK],0,0);m.strokeStyle='#fff';m.strokeRect(cx*k,cy*k,VW*k,VH*k);m.fillStyle='#fff';m.fillRect(hero.x*k-1.5,hero.y*k-1.5,3,3);
+ extract?.minimap(m,k);
  $('pos').textContent='位置 '+Math.round(hero.x)+', '+Math.round(hero.y)+(inSh?' · 正在涉水（速度×0.55）':'')+(atk?' · 出招：'+atk.mv:'')+' · 逻辑画布 480×300，输出 960×600，主角高约 25 像素';
  requestAnimationFrame(loop)}
