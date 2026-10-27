@@ -1,0 +1,812 @@
+{
+  "grunt_club": {
+    "hp": 2,
+    "speed": 29,
+    "reach": 24,
+    "damage": 12,
+    "frames": {
+      "idle0": {
+        "src": "assets/characters/enemies/grunt_club/idle0.png",
+        "size": [
+          16.0,
+          20.0
+        ],
+        "anchor": [
+          9.47,
+          20.16
+        ]
+      },
+      "idle1": {
+        "src": "assets/characters/enemies/grunt_club/idle1.png",
+        "size": [
+          15.5,
+          20.0
+        ],
+        "anchor": [
+          9.31,
+          20.16
+        ]
+      },
+      "walk0": {
+        "src": "assets/characters/enemies/grunt_club/walk0.png",
+        "size": [
+          17.5,
+          20.5
+        ],
+        "anchor": [
+          10.12,
+          20.16
+        ]
+      },
+      "walk1": {
+        "src": "assets/characters/enemies/grunt_club/walk1.png",
+        "size": [
+          17.0,
+          20.5
+        ],
+        "anchor": [
+          9.14,
+          20.16
+        ]
+      },
+      "walk2": {
+        "src": "assets/characters/enemies/grunt_club/walk2.png",
+        "size": [
+          16.5,
+          20.5
+        ],
+        "anchor": [
+          9.47,
+          20.16
+        ]
+      },
+      "walk3": {
+        "src": "assets/characters/enemies/grunt_club/walk3.png",
+        "size": [
+          16.5,
+          20.5
+        ],
+        "anchor": [
+          9.22,
+          20.16
+        ]
+      },
+      "walk4": {
+        "src": "assets/characters/enemies/grunt_club/walk4.png",
+        "size": [
+          16.5,
+          20.5
+        ],
+        "anchor": [
+          8.82,
+          20.16
+        ]
+      },
+      "walk5": {
+        "src": "assets/characters/enemies/grunt_club/walk5.png",
+        "size": [
+          16.5,
+          20.5
+        ],
+        "anchor": [
+          9.8,
+          20.16
+        ]
+      },
+      "windup": {
+        "src": "assets/characters/enemies/grunt_club/windup.png",
+        "size": [
+          18.0,
+          22.0
+        ],
+        "anchor": [
+          13.39,
+          21.55
+        ]
+      },
+      "strike": {
+        "src": "assets/characters/enemies/grunt_club/strike.png",
+        "size": [
+          23.0,
+          17.5
+        ],
+        "anchor": [
+          10.37,
+          17.22
+        ]
+      },
+      "recover": {
+        "src": "assets/characters/enemies/grunt_club/recover.png",
+        "size": [
+          17.0,
+          18.5
+        ],
+        "anchor": [
+          10.2,
+          17.96
+        ]
+      },
+      "hurt": {
+        "src": "assets/characters/enemies/grunt_club/hurt.png",
+        "size": [
+          20.0,
+          18.0
+        ],
+        "anchor": [
+          14.53,
+          17.71
+        ]
+      },
+      "fall": {
+        "src": "assets/characters/enemies/grunt_club/fall.png",
+        "size": [
+          26.5,
+          15.0
+        ],
+        "anchor": [
+          12.49,
+          14.37
+        ]
+      },
+      "down": {
+        "src": "assets/characters/enemies/grunt_club/down.png",
+        "size": [
+          32.0,
+          9.5
+        ],
+        "anchor": [
+          16.08,
+          7.92
+        ]
+      }
+    }
+  },
+  "blade": {
+    "hp": 2,
+    "speed": 32,
+    "reach": 27,
+    "damage": 12,
+    "frames": {
+      "idle0": {
+        "src": "assets/characters/enemies/blade/idle0.png",
+        "size": [
+          18.0,
+          23.0
+        ],
+        "anchor": [
+          9.14,
+          22.94
+        ]
+      },
+      "idle1": {
+        "src": "assets/characters/enemies/blade/idle1.png",
+        "size": [
+          17.5,
+          23.0
+        ],
+        "anchor": [
+          8.98,
+          22.94
+        ]
+      },
+      "walk0": {
+        "src": "assets/characters/enemies/blade/walk0.png",
+        "size": [
+          19.5,
+          21.5
+        ],
+        "anchor": [
+          11.43,
+          21.14
+        ]
+      },
+      "walk1": {
+        "src": "assets/characters/enemies/blade/walk1.png",
+        "size": [
+          20.5,
+          21.0
+        ],
+        "anchor": [
+          12.08,
+          20.82
+        ]
+      },
+      "walk2": {
+        "src": "assets/characters/enemies/blade/walk2.png",
+        "size": [
+          20.0,
+          20.5
+        ],
+        "anchor": [
+          12.65,
+          20.49
+        ]
+      },
+      "walk3": {
+        "src": "assets/characters/enemies/blade/walk3.png",
+        "size": [
+          20.5,
+          20.5
+        ],
+        "anchor": [
+          12.9,
+          20.49
+        ]
+      },
+      "walk4": {
+        "src": "assets/characters/enemies/blade/walk4.png",
+        "size": [
+          21.0,
+          21.0
+        ],
+        "anchor": [
+          12.82,
+          20.57
+        ]
+      },
+      "walk5": {
+        "src": "assets/characters/enemies/blade/walk5.png",
+        "size": [
+          21.0,
+          21.0
+        ],
+        "anchor": [
+          13.96,
+          20.82
+        ]
+      },
+      "windup": {
+        "src": "assets/characters/enemies/blade/windup.png",
+        "size": [
+          19.5,
+          24.0
+        ],
+        "anchor": [
+          14.94,
+          23.84
+        ]
+      },
+      "strike": {
+        "src": "assets/characters/enemies/blade/strike.png",
+        "size": [
+          24.5,
+          17.5
+        ],
+        "anchor": [
+          12.0,
+          17.39
+        ]
+      },
+      "recover": {
+        "src": "assets/characters/enemies/blade/recover.png",
+        "size": [
+          23.0,
+          18.5
+        ],
+        "anchor": [
+          13.47,
+          18.04
+        ]
+      },
+      "hurt": {
+        "src": "assets/characters/enemies/blade/hurt.png",
+        "size": [
+          19.5,
+          18.0
+        ],
+        "anchor": [
+          14.61,
+          17.8
+        ]
+      },
+      "fall": {
+        "src": "assets/characters/enemies/blade/fall.png",
+        "size": [
+          29.0,
+          17.5
+        ],
+        "anchor": [
+          12.65,
+          16.98
+        ]
+      },
+      "down": {
+        "src": "assets/characters/enemies/blade/down.png",
+        "size": [
+          37.5,
+          10.0
+        ],
+        "anchor": [
+          21.22,
+          8.24
+        ]
+      }
+    }
+  },
+  "spear": {
+    "hp": 2,
+    "speed": 27,
+    "reach": 36,
+    "damage": 12,
+    "frames": {
+      "idle0": {
+        "src": "assets/characters/enemies/spear/idle0.png",
+        "size": [
+          16.0,
+          25.0
+        ],
+        "anchor": [
+          9.39,
+          25.14
+        ]
+      },
+      "idle1": {
+        "src": "assets/characters/enemies/spear/idle1.png",
+        "size": [
+          15.5,
+          25.0
+        ],
+        "anchor": [
+          9.14,
+          25.14
+        ]
+      },
+      "walk0": {
+        "src": "assets/characters/enemies/spear/walk0.png",
+        "size": [
+          22.0,
+          20.5
+        ],
+        "anchor": [
+          12.33,
+          20.33
+        ]
+      },
+      "walk1": {
+        "src": "assets/characters/enemies/spear/walk1.png",
+        "size": [
+          22.0,
+          20.5
+        ],
+        "anchor": [
+          12.33,
+          20.24
+        ]
+      },
+      "walk2": {
+        "src": "assets/characters/enemies/spear/walk2.png",
+        "size": [
+          21.0,
+          20.5
+        ],
+        "anchor": [
+          12.33,
+          20.33
+        ]
+      },
+      "walk3": {
+        "src": "assets/characters/enemies/spear/walk3.png",
+        "size": [
+          22.0,
+          20.5
+        ],
+        "anchor": [
+          12.9,
+          20.41
+        ]
+      },
+      "walk4": {
+        "src": "assets/characters/enemies/spear/walk4.png",
+        "size": [
+          22.0,
+          20.5
+        ],
+        "anchor": [
+          12.33,
+          20.41
+        ]
+      },
+      "walk5": {
+        "src": "assets/characters/enemies/spear/walk5.png",
+        "size": [
+          22.0,
+          20.5
+        ],
+        "anchor": [
+          13.47,
+          20.41
+        ]
+      },
+      "windup": {
+        "src": "assets/characters/enemies/spear/windup.png",
+        "size": [
+          24.0,
+          19.0
+        ],
+        "anchor": [
+          12.9,
+          18.61
+        ]
+      },
+      "strike": {
+        "src": "assets/characters/enemies/spear/strike.png",
+        "size": [
+          35.5,
+          17.5
+        ],
+        "anchor": [
+          9.39,
+          17.55
+        ]
+      },
+      "recover": {
+        "src": "assets/characters/enemies/spear/recover.png",
+        "size": [
+          23.0,
+          19.0
+        ],
+        "anchor": [
+          9.47,
+          18.45
+        ]
+      },
+      "hurt": {
+        "src": "assets/characters/enemies/spear/hurt.png",
+        "size": [
+          24.5,
+          19.5
+        ],
+        "anchor": [
+          14.29,
+          19.27
+        ]
+      },
+      "fall": {
+        "src": "assets/characters/enemies/spear/fall.png",
+        "size": [
+          28.5,
+          15.5
+        ],
+        "anchor": [
+          11.84,
+          14.86
+        ]
+      },
+      "down": {
+        "src": "assets/characters/enemies/spear/down.png",
+        "size": [
+          44.5,
+          9.0
+        ],
+        "anchor": [
+          16.08,
+          7.51
+        ]
+      }
+    }
+  },
+  "shield": {
+    "hp": 3,
+    "speed": 22,
+    "reach": 25,
+    "damage": 14,
+    "frames": {
+      "idle0": {
+        "src": "assets/characters/enemies/shield/idle0.png",
+        "size": [
+          17.0,
+          20.0
+        ],
+        "anchor": [
+          9.22,
+          20.08
+        ]
+      },
+      "idle1": {
+        "src": "assets/characters/enemies/shield/idle1.png",
+        "size": [
+          17.0,
+          20.0
+        ],
+        "anchor": [
+          9.22,
+          20.08
+        ]
+      },
+      "walk0": {
+        "src": "assets/characters/enemies/shield/walk0.png",
+        "size": [
+          17.5,
+          20.0
+        ],
+        "anchor": [
+          9.22,
+          20.08
+        ]
+      },
+      "walk1": {
+        "src": "assets/characters/enemies/shield/walk1.png",
+        "size": [
+          18.5,
+          20.5
+        ],
+        "anchor": [
+          10.29,
+          20.08
+        ]
+      },
+      "walk2": {
+        "src": "assets/characters/enemies/shield/walk2.png",
+        "size": [
+          18.0,
+          20.5
+        ],
+        "anchor": [
+          10.2,
+          20.08
+        ]
+      },
+      "walk3": {
+        "src": "assets/characters/enemies/shield/walk3.png",
+        "size": [
+          18.0,
+          20.0
+        ],
+        "anchor": [
+          9.88,
+          20.08
+        ]
+      },
+      "walk4": {
+        "src": "assets/characters/enemies/shield/walk4.png",
+        "size": [
+          18.5,
+          20.5
+        ],
+        "anchor": [
+          10.04,
+          20.08
+        ]
+      },
+      "walk5": {
+        "src": "assets/characters/enemies/shield/walk5.png",
+        "size": [
+          18.5,
+          20.5
+        ],
+        "anchor": [
+          10.61,
+          20.08
+        ]
+      },
+      "windup": {
+        "src": "assets/characters/enemies/shield/windup.png",
+        "size": [
+          18.0,
+          22.0
+        ],
+        "anchor": [
+          11.76,
+          22.2
+        ]
+      },
+      "strike": {
+        "src": "assets/characters/enemies/shield/strike.png",
+        "size": [
+          30.0,
+          17.5
+        ],
+        "anchor": [
+          9.63,
+          17.71
+        ]
+      },
+      "recover": {
+        "src": "assets/characters/enemies/shield/recover.png",
+        "size": [
+          18.0,
+          19.0
+        ],
+        "anchor": [
+          10.86,
+          18.69
+        ]
+      },
+      "hurt": {
+        "src": "assets/characters/enemies/shield/hurt.png",
+        "size": [
+          22.0,
+          18.0
+        ],
+        "anchor": [
+          16.0,
+          17.88
+        ]
+      },
+      "fall": {
+        "src": "assets/characters/enemies/shield/fall.png",
+        "size": [
+          28.0,
+          15.0
+        ],
+        "anchor": [
+          14.61,
+          14.29
+        ]
+      },
+      "down": {
+        "src": "assets/characters/enemies/shield/down.png",
+        "size": [
+          45.0,
+          9.5
+        ],
+        "anchor": [
+          20.49,
+          7.84
+        ]
+      }
+    }
+  },
+  "archer": {
+    "hp": 1,
+    "speed": 25,
+    "reach": 130,
+    "damage": 12,
+    "frames": {
+      "idle0": {
+        "src": "assets/characters/enemies/archer/idle0.png",
+        "size": [
+          16.5,
+          20.5
+        ],
+        "anchor": [
+          9.06,
+          20.08
+        ]
+      },
+      "idle1": {
+        "src": "assets/characters/enemies/archer/idle1.png",
+        "size": [
+          16.5,
+          20.5
+        ],
+        "anchor": [
+          8.98,
+          20.08
+        ]
+      },
+      "walk0": {
+        "src": "assets/characters/enemies/archer/walk0.png",
+        "size": [
+          16.0,
+          20.5
+        ],
+        "anchor": [
+          8.73,
+          20.08
+        ]
+      },
+      "walk1": {
+        "src": "assets/characters/enemies/archer/walk1.png",
+        "size": [
+          16.0,
+          20.5
+        ],
+        "anchor": [
+          8.73,
+          20.08
+        ]
+      },
+      "walk2": {
+        "src": "assets/characters/enemies/archer/walk2.png",
+        "size": [
+          16.0,
+          20.5
+        ],
+        "anchor": [
+          9.47,
+          20.08
+        ]
+      },
+      "walk3": {
+        "src": "assets/characters/enemies/archer/walk3.png",
+        "size": [
+          16.0,
+          20.5
+        ],
+        "anchor": [
+          9.39,
+          20.08
+        ]
+      },
+      "walk4": {
+        "src": "assets/characters/enemies/archer/walk4.png",
+        "size": [
+          16.0,
+          20.5
+        ],
+        "anchor": [
+          9.47,
+          20.08
+        ]
+      },
+      "walk5": {
+        "src": "assets/characters/enemies/archer/walk5.png",
+        "size": [
+          16.0,
+          21.0
+        ],
+        "anchor": [
+          9.71,
+          20.08
+        ]
+      },
+      "windup": {
+        "src": "assets/characters/enemies/archer/windup.png",
+        "size": [
+          23.0,
+          22.5
+        ],
+        "anchor": [
+          11.92,
+          22.45
+        ]
+      },
+      "strike": {
+        "src": "assets/characters/enemies/archer/strike.png",
+        "size": [
+          19.5,
+          22.0
+        ],
+        "anchor": [
+          11.59,
+          21.96
+        ]
+      },
+      "arrow": {
+        "src": "assets/characters/enemies/archer/arrow.png",
+        "size": [
+          13.5,
+          2.5
+        ],
+        "anchor": [
+          4.73,
+          15.1
+        ]
+      },
+      "hurt": {
+        "src": "assets/characters/enemies/archer/hurt.png",
+        "size": [
+          19.5,
+          19.0
+        ],
+        "anchor": [
+          13.71,
+          18.78
+        ]
+      },
+      "fall": {
+        "src": "assets/characters/enemies/archer/fall.png",
+        "size": [
+          25.0,
+          17.0
+        ],
+        "anchor": [
+          11.51,
+          16.65
+        ]
+      },
+      "down": {
+        "src": "assets/characters/enemies/archer/down.png",
+        "size": [
+          39.5,
+          11.0
+        ],
+        "anchor": [
+          19.02,
+          9.88
+        ]
+      }
+    }
+  }
+}

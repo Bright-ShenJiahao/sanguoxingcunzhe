@@ -40,14 +40,14 @@ export function createSurvival(game){
  }
  dialog.querySelector('.retry').onclick=start;
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};
- return {start,get finished(){return finished},update(dt){
+ return {start,get finished(){return finished},damage(amount){
+  if(!playing||finished||game.extractActive||cooldown>0)return;
+  hp=Math.max(0,hp-amount);cooldown=.75;render();if(hp===0)die();
+ },update(dt){
   // 搜打撤继续使用原有血量、计时和结算，不重复扣血或混入生存榜。
   if(game.extractActive){if(playing)stop();return}
   if(!playing||finished)return;
   elapsed+=dt;cooldown=Math.max(0,cooldown-dt);
-  if(cooldown===0&&game.enemies.some(e=>!e.dead&&Math.hypot(e.x-game.hero.x,e.y-game.hero.y)<17)){
-   hp=Math.max(0,hp-12);cooldown=.75;
-  }
-  render();if(hp===0)die();
+  render();
  }};
 }

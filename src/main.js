@@ -2,7 +2,8 @@
 import {createExtract} from './extract.js';
 import {createMenu} from './menu.js';
 import {createSurvival} from './survival.js';
-const [W,CH]=await Promise.all(['data/world.json','data/characters.json'].map(u=>fetch(u).then(r=>r.json())));
+import {createEnemies} from './enemies.js';
+const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const RD=await fetch('data/ride.json').then(r=>r.json()),HN=await fetch('data/heroine.json').then(r=>r.json());
 const D={...W,...CH,ride:RD,ground:'assets/map/ground_grass.jpg',ground2:'assets/map/ground_mud.jpg',coll:'assets/map/coll.png',
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
@@ -21,6 +22,7 @@ function ld(k,s){left++;const i=new Image();i.onload=()=>{IM[k]=i;if(--left==0)s
 D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);ld('ground',D.ground);ld('ground2',D.ground2);ld('coll',D.coll);
 for(const k in D.spr)ld('s_'+k,D.spr[k]);
 for(const cl of ['base','one'])D.hf[cl].forEach((u,i)=>ld('hf_'+cl+'_'+i,u));for(const k in D.en2)ld('e_'+k,D.en2[k]);ld('wpn',D.wpn2);
+for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');for(let i=0;i<8;i++)ld('rh_'+i,'assets/characters/ride/horse_'+i+'.png');for(let i=0;i<3;i++){ld('rr_'+i,'assets/characters/ride/rider_'+i+'.png');ld('rg_'+i,'assets/characters/ride/rider_g_'+i+'.png')}
 for(let r=0;r<5;r++)for(let i=0;i<9;i++)ld('hh'+r+'_'+i,'assets/characters/heroine/r'+r+'_w'+i+'.png');
 for(let i=0;i<8;i++)ld('hbg_'+i,'assets/characters/hero_b/g_w'+i+'.png');
@@ -106,10 +108,12 @@ function drawHero(px,py,moving,now,shadowOnly){
  for(const f of g.fists){const s=loc(f,cl);c.save();c.beginPath();c.arc(s[0],s[1],4.2*S,0,7);c.clip();c.drawImage(img,ox,oy);c.restore()}
  c.restore();
  return{g,cl,face}}
-const KINDS=['grunt','grunt','blade','spear','archer','shield'];
 const en=[];let kills=0,fx=[];
+const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>survival?.damage(amount)});
+const extractEnemies=new Proxy(en,{get(target,key,receiver){if(key==='some')return ()=>enemySystem.extractContact;return Reflect.get(target,key,receiver)}});
+function hitEnemy(e,now,dx){if(enemySystem.hit(e))fx.push({x:e.x,y:e.y,t:now,dx})}
 function spawn(){for(let n=0;n<30;n++){const a=Math.random()*6.28,r=150+Math.random()*90,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
- if(x<30||y<30||x>WW-30||y>WW-30||!ok(x,y))continue;const k=KINDS[Math.random()*KINDS.length|0];en.push({k,x,y,sp:(.32+Math.random()*.2)*(k=='shield'?.8:1),face:1,ph:Math.random()*9});return}}
+ if(x<30||y<30||x>WW-30||y>WW-30||!ok(x,y))continue;en.push(enemySystem.make(x,y));return}}
 let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;
 function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());const v=(x,y)=>{const fx=x/n*8,fy=y/n*8,x0=Math.floor(fx),y0=Math.floor(fy),tx=fx-x0,ty=fy-y0,s=t=>t*t*(3-2*t),q=(a,b)=>g[((b%8+8)%8)*8+((a%8+8)%8)];const a=q(x0,y0)*(1-s(tx))+q(x0+1,y0)*s(tx),b=q(x0,y0+1)*(1-s(tx))+q(x0+1,y0+1)*s(tx);return a*(1-s(ty))+b*s(ty)};
  cloud=document.createElement('canvas');cloud.width=n;cloud.height=n;const x=cloud.getContext('2d'),im=x.createImageData(n,n);for(let j=0;j<n;j++)for(let i=0;i<n;i++){const val=v(i,j)*.7+v(i*2,j*2)*.3,a=Math.max(0,Math.min(1,(val-.5)/.22))*.26;const k=(j*n+i)*4;im.data[k]=18;im.data[k+1]=40;im.data[k+2]=28;im.data[k+3]=a*255}x.putImageData(im,0,0)}
@@ -123,11 +127,11 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW
  document.querySelectorAll('#gs button').forEach(b=>b.onclick=()=>{GK=b.dataset.g;if(GK=='ground2')tintSet();document.querySelectorAll('#gs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
  document.querySelectorAll('#ovs button').forEach(b=>b.onclick=()=>{const k=b.dataset.o;ov[k]=!ov[k];b.setAttribute('aria-pressed',ov[k])});
  mkCloud();for(let i=0;i<14;i++)spawn();
- extract=createExtract({hero,size:WW,ok,enemies:en,spawn,
+ extract=createExtract({hero,size:WW,ok,enemies:extractEnemies,spawn,
   get kills(){return kills},get weapon(){return wpm},
   equip(w){wpm=w;ride=null;atk=null;pj=[];nextAtk=0;document.querySelectorAll('#ws button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===w))},
-  hit(e,now){e.dead=1;fx.push({x:e.x,y:e.y,t:now,dx:hero.face})},
-  reset(){hero.x=WW/2;hero.y=WW/2;heroM='B';kills=0;en.length=0;fx=[];rip=[];fp=[];joy=null;for(const k in keys)keys[k]=0;this.equip('none')}
+  hit(e,now){hitEnemy(e,now,hero.face)},
+  reset(){hero.x=WW/2;hero.y=WW/2;heroM='B';kills=0;en.length=0;enemySystem.reset();fx=[];rip=[];fp=[];joy=null;for(const k in keys)keys[k]=0;this.equip('none')}
  });
  menu=createMenu({c,images:IM,data:D,objects:objs,
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
@@ -135,7 +139,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW
  });
  survival=createSurvival({hero,enemies:en,get kills(){return kills},get extractActive(){return extract.active},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
-  reset(){hero.x=WW/2;hero.y=WW/2;hero.face=1;kills=0;en.length=0;ride=null;atk=null;pj=[];fx=[];rip=[];fp=[];swoosh=[];nextAtk=0;wpm='short';joy=null;for(const k in keys)keys[k]=0;document.querySelectorAll('#ws button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===wpm))}
+  reset(){hero.x=WW/2;hero.y=WW/2;hero.face=1;kills=0;en.length=0;enemySystem.reset();ride=null;atk=null;pj=[];fx=[];rip=[];fp=[];swoosh=[];nextAtk=0;wpm='short';joy=null;for(const k in keys)keys[k]=0;document.querySelectorAll('#ws button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===wpm))}
  });requestAnimationFrame(loop)}
 let extract,menu,survival;
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
@@ -152,21 +156,19 @@ function loop(now){
  const sp=72*dt*(inSh?.55:1)*(atk?.6:1)*(heroM=='R'?1.7:1);let nx=Math.min(WW-14,Math.max(14,hero.x+dx*sp)),ny=Math.min(WW-10,Math.max(14,hero.y+dy*sp));
  if(ok(nx,hero.y))hero.x=nx;if(ok(hero.x,ny))hero.y=ny;
  if(inSh&&moving&&Math.random()<dt*7)rip.push({x:hero.x,y:hero.y,t:now});
- for(const e of en){const ax=hero.x-e.x,ay=hero.y-e.y,d=Math.hypot(ax,ay)||1;e.face=ax>0?1:-1;
-  const s2=e.sp*(water(e.x,e.y)===2?.6:1)*dt*60*(extract?.speed||1);if(d>13){const mx=ax/d*s2,my=ay/d*s2;
-   if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}else{const sx=-my*1.6,sy=mx*1.6;if(ok(e.x+sx,e.y+sy)){e.x+=sx;e.y+=sy}}}}
- for(let i=0;i<en.length;i++)for(let j=i+1;j<en.length;j++){const a=en[i],b=en[j],ddx=b.x-a.x,ddy=b.y-a.y,d=Math.hypot(ddx,ddy);if(d>0&&d<10){const f=(10-d)/24;if(ok(a.x-ddx/d*f,a.y-ddy/d*f)){a.x-=ddx/d*f;a.y-=ddy/d*f}if(ok(b.x+ddx/d*f,b.y+ddy/d*f)){b.x+=ddx/d*f;b.y+=ddy/d*f}}}
+ enemySystem.update(en,dt,extract?.speed||1);
+ for(let i=0;i<en.length;i++)for(let j=i+1;j<en.length;j++){const a=en[i],b=en[j];if(a.dead||b.dead)continue;const ddx=b.x-a.x,ddy=b.y-a.y,d=Math.hypot(ddx,ddy);if(d>0&&d<10){const f=(10-d)/24;if(ok(a.x-ddx/d*f,a.y-ddy/d*f)){a.x-=ddx/d*f;a.y-=ddy/d*f}if(ok(b.x+ddx/d*f,b.y+ddy/d*f)){b.x+=ddx/d*f;b.y+=ddy/d*f}}}
  if(wpm!='none'&&wpm!='magic'){const RNG=(wpm=='bow'||wpm=='xbow'),DUR={short:380,none:380,long:430,bow:560,xbow:380,magic:380}[wpm]||380;
-  if(!ride&&now>nextAtk){let best=null,bd=RNG?150:52;for(const e of en){const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d<bd){bd=d;best=e}}if(best){hero.face=best.x>=hero.x?1:-1;ride={t0:now,dur:DUR,hit:false,tx:best.x,ty:best.y}}}
+  if(!ride&&now>nextAtk){let best=null,bd=RNG?150:52;for(const e of en){if(e.dead)continue;const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d<bd){bd=d;best=e}}if(best){hero.face=best.x>=hero.x?1:-1;ride={t0:now,dur:DUR,hit:false,tx:best.x,ty:best.y}}}
   if(ride){const el=now-ride.t0;
    if(RNG){const rel=wpm=='bow'?.62:.5;if(!ride.hit&&el>DUR*rel){ride.hit=true;const ax=ride.tx-hero.x,ay=ride.ty-(hero.y-10),L2=Math.hypot(ax,ay)||1;pj.push({x:hero.x+hero.face*8,y:hero.y,dx:ax/L2,dy:(ride.ty-hero.y)/L2,v:wpm=='bow'?190:260,life:.7})}}
-   else if(!ride.hit&&el>(wpm=='long'?190:170)){ride.hit=true;const reach=wpm=='long'?54:46,wid=wpm=='long'?14:22;for(const e of en){const ex=(e.x-hero.x)*hero.face,ey=e.y-hero.y;if(ex>-8&&ex<reach&&Math.abs(ey)<wid){e.dead=1;fx.push({x:e.x,y:e.y,t:now,dx:hero.face})}}}
+   else if(!ride.hit&&el>(wpm=='long'?190:170)){ride.hit=true;const reach=wpm=='long'?54:46,wid=wpm=='long'?14:22;for(const e of en){const ex=(e.x-hero.x)*hero.face,ey=e.y-hero.y;if(ex>-8&&ex<reach&&Math.abs(ey)<wid)hitEnemy(e,now,hero.face)}}
    if(el>DUR){ride=null;nextAtk=now+140}}
-  for(const p of pj){p.x+=p.dx*p.v*dt;p.y+=p.dy*p.v*dt;p.life-=dt;for(const e of en){if(!e.dead&&Math.abs(e.x-p.x)<7&&Math.abs(e.y-p.y)<9){e.dead=1;p.life=0;fx.push({x:e.x,y:e.y,t:now,dx:p.dx>0?1:-1})}}}
+  for(const p of pj){p.x+=p.dx*p.v*dt;p.y+=p.dy*p.v*dt;p.life-=dt;for(const e of en){if(!e.dead&&Math.abs(e.x-p.x)<7&&Math.abs(e.y-p.y)<9){hitEnemy(e,now,p.dx>0?1:-1);p.life=0;break}}}
   pj=pj.filter(p=>p.life>0&&ok(p.x,p.y))}
  if(atk){atk.t+=dt*1000;const stp=atk.steps[atk.k];if(atk.t>=stp.d){atk.t=0;atk.k++;atk.prev=null;if(atk.k>=3){atk=null;nextAtk=now+160}}}
- if(atk&&atk.k===2&&!atk.hit){atk.hit=true;for(const e of en){const ex=(e.x-hero.x)*atk.face,ey=e.y-hero.y;if(ex>-6&&ex<34&&Math.abs(ey)<18){e.dead=1;fx.push({x:e.x,y:e.y,t:now,dx:atk.face})}}}
- for(let i=en.length-1;i>=0;i--)if(en[i].dead){en.splice(i,1);kills++;if(!extract?.active)spawn()}
+ if(atk&&atk.k===2&&!atk.hit){atk.hit=true;for(const e of en){const ex=(e.x-hero.x)*atk.face,ey=e.y-hero.y;if(ex>-6&&ex<34&&Math.abs(ey)<18)hitEnemy(e,now,atk.face)}}
+ for(let i=en.length-1;i>=0;i--){const e=en[i];if(e.dead&&!e.counted){e.counted=true;kills++}if(e.expired){en.splice(i,1);if(!extract?.active)spawn()}}
  if(!extract?.active)while(en.length<16)spawn();
  extract?.update(dt,now,moving);
  survival?.update(dt);
@@ -184,8 +186,8 @@ function loop(now){
   for(const o of objs){const sx=o.x-cx,sy=o.y-cy;if(sx<-120||sx>VW+120||sy<-20||sy>VH+160)continue;const im=IM['s_'+o.k];
    if(o.k.startsWith('tuft')||o.k.startsWith('flow')||o.k.startsWith('dry'))continue;const q=sshadow(im);c.globalAlpha=o.k.startsWith('bush')?.30:o.k.startsWith('stone')?.28:.36;c.drawImage(q.cv,sx-q.x0/HD,sy-q.y0/HD,q.cv.width/HD,q.cv.height/HD)}
   c.globalAlpha=1;
-  for(const e of en){const sx=e.x-cx,sy=e.y-cy;if(sx<-30||sx>VW+30||sy<-10||sy>VH+40)continue;const [w,h]=D.esize2[e.k],im=IM['e_'+e.k];
-   c.save();c.translate(Math.round(sx),Math.round(sy));c.transform(1,0,SH[0],-SH[1],0,0);c.scale(e.face,1);c.globalAlpha=.26;c.imageSmoothingEnabled=false;c.drawImage(sil(im),-Math.floor(w/2),-h);c.restore()}
+  for(const e of en){const sx=e.x-cx,sy=e.y-cy;if(sx<-60||sx>VW+60||sy<-30||sy>VH+60)continue;const {f,im}=enemySystem.getFrame(e,now);
+   c.save();c.translate(Math.round(sx),Math.round(sy));c.transform(1,0,SH[0],-SH[1],0,0);c.scale(e.face,1);c.globalAlpha=.26*(e.alpha??1);c.imageSmoothingEnabled=false;c.drawImage(sil(im),-f.anchor[0],-f.anchor[1],f.size[0],f.size[1]);c.restore()}
   c.imageSmoothingEnabled=true;drawHero(px,py,moving,now,true)}
  else{contact(px,py,16)}
  const items=[];
@@ -194,7 +196,8 @@ function loop(now){
   o.a+=(ta-o.a)*Math.min(1,dt*10);
   items.push({y:o.y,f:()=>{c.imageSmoothingEnabled=true;c.globalAlpha=o.a;c.drawImage(SPR('s_'+o.k),sx-o.w/2,sy-o.h,o.w,o.h);c.globalAlpha=1}})}
  for(const p of pj){const sx=p.x-cx,sy=p.y-cy;items.push({y:p.y+1,f:()=>{c.strokeStyle='#eadfc2';c.lineWidth=1;c.beginPath();c.moveTo(sx-p.dx*7,sy-9-p.dy*7);c.lineTo(sx,sy-9);c.stroke();c.fillStyle='#9aa0a6';c.fillRect(sx-.7,sy-9.7,1.6,1.4);c.fillStyle='rgba(18,40,20,.25)';c.fillRect(sx-1,sy-1,2,1)}})}
- for(const e of en){const sx=e.x-cx,sy=e.y-cy;if(sx<-30||sx>VW+30||sy<-10||sy>VH+40)continue;const [w,h]=D.esize2[e.k];items.push({y:e.y,f:()=>{const x=Math.round(sx),y=Math.round(sy);if(!ov.sh)contact(x,y,w);const bob=Math.floor(now/180+e.ph)%2;c.save();c.imageSmoothingEnabled=false;c.translate(x,y-bob);if(e.face<0)c.scale(-1,1);c.drawImage(IM['e_'+e.k],-Math.floor(w/2),-h);c.restore();if(water(e.x,e.y)===2){c.fillStyle='rgba(200,228,232,.6)';c.fillRect(x-7,y-4,14,4)}}})}
+ for(const e of en){const sx=e.x-cx,sy=e.y-cy;if(sx<-60||sx>VW+60||sy<-30||sy>VH+60)continue;items.push({y:e.y,f:()=>{if(!ov.sh&&!e.dead)contact(sx,sy,16);enemySystem.draw(e,c,cx,cy,now)}})}
+ items.push({y:hero.y+1,f:()=>enemySystem.drawArrows(c,cx,cy)});
  let hinfo=null;
  items.push({y:hero.y,f:()=>{c.imageSmoothingEnabled=false;hinfo=drawHero(px,py,moving,now,false);if(inSh){c.fillStyle='rgba(200,228,232,.6)';c.fillRect(px-7,py-4,14,4)}}});
  items.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
