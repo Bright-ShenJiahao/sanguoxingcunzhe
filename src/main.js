@@ -1,7 +1,7 @@
 
 import {createExtract} from './extract.js';
 const [W,CH]=await Promise.all(['data/world.json','data/characters.json'].map(u=>fetch(u).then(r=>r.json())));
-const RD=await fetch('data/ride.json').then(r=>r.json());
+const RD=await fetch('data/ride.json').then(r=>r.json()),HN=await fetch('data/heroine.json').then(r=>r.json());
 const D={...W,...CH,ride:RD,ground:'assets/map/ground_grass.jpg',ground2:'assets/map/ground_mud.jpg',coll:'assets/map/coll.png',
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),VW=480,VH=300,WW=D.WW,HD=D.HD;
@@ -20,7 +20,10 @@ D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);ld('g
 for(const k in D.spr)ld('s_'+k,D.spr[k]);
 for(const cl of ['base','one'])D.hf[cl].forEach((u,i)=>ld('hf_'+cl+'_'+i,u));for(const k in D.en2)ld('e_'+k,D.en2[k]);ld('wpn',D.wpn2);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');for(let i=0;i<8;i++)ld('rh_'+i,'assets/characters/ride/horse_'+i+'.png');for(let i=0;i<3;i++){ld('rr_'+i,'assets/characters/ride/rider_'+i+'.png');ld('rg_'+i,'assets/characters/ride/rider_g_'+i+'.png')}
+for(let r=0;r<4;r++)for(let i=0;i<9;i++)ld('hh'+r+'_'+i,'assets/characters/heroine/r'+r+'_w'+i+'.png');
 for(let i=0;i<8;i++)ld('hbg_'+i,'assets/characters/hero_b/g_w'+i+'.png');
+let CS='m';const SETS={m:{pre:'hb_',gpre:'hbg_',size:D.hbsize,grip:D.grip,walk:[2,3,4,5,6,7]}};
+for(let r=0;r<4;r++)SETS['f'+r]={pre:'hh'+r+'_',size:[HN.size[0]/2,HN.size[1]/2],grip:HN.rows[r],walk:[2,3,4,5,6,7,8]};
 let hairG=false,ride=null,pj=[],CM,GK='ground',mmc={},IM2={},heroM='B',wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
 const hero={x:WW/2,y:WW/2,face:1};const CO=objs.filter(o=>o.r);
@@ -75,8 +78,8 @@ function drawRide(px,py,moving,now){
  c.restore()}
 function drawHero(px,py,moving,now,shadowOnly){
  if(heroM=='R'){if(!shadowOnly)drawRide(px,py,moving,now);return}
- if(heroM!='A'&&!atk){if(shadowOnly)return;const f=moving?[2,3,4,5,6,7][Math.floor(now/105)%6]:Math.floor(now/650)%2,im=IM[(hairG?'hbg_':'hb_')+f],[w,h]=D.hbsize;c.save();c.translate(px,py);c.scale(hero.face*HK,HK);c.imageSmoothingEnabled=false;
- const RH=D.grip.front,FH=D.grip.front,tl=p=>[(p[0]-D.hbsize[0])/2,(p[1]-D.hbsize[1]*2)/2];
+ if(heroM!='A'&&!atk){if(shadowOnly)return;const ST=SETS[CS],f=moving?ST.walk[Math.floor(now/105)%ST.walk.length]:Math.floor(now/650)%2,im=IM[(hairG&&ST.gpre?ST.gpre:ST.pre)+f],[w,h]=ST.size;c.save();c.translate(px,py);c.scale(hero.face*HK,HK);c.imageSmoothingEnabled=false;
+ const RH=ST.grip.front,FH=ST.grip.front,tl=p=>[(p[0]-ST.size[0])/2,(p[1]-ST.size[1]*2)/2];
  const wi=IM['wp_'+wpm],T=ride?Math.min(1,(now-ride.t0)/ride.dur):0,sw=Math.min(1,T*1.25);
  if(wpm=='long'&&!ride){c.save();c.translate(-3,-12);c.rotate(-.5);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
  c.drawImage(im,-w/2,-h,w,h);
@@ -113,6 +116,7 @@ const SPR=k=>(GK=='ground2'&&IM2[k])||IM[k];
 function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW;const x=t.getContext('2d');x.drawImage(IM.coll,0,0);CM=x.getImageData(0,0,WW,WW).data;
  for(const g of['ground','ground2']){const m_=document.createElement('canvas');m_.width=84;m_.height=84;m_.getContext('2d').drawImage(IM[g],0,0,84,84);mmc[g]=m_}
  document.querySelectorAll('#ws button').forEach(b=>b.onclick=()=>{wpm=b.dataset.w;if(wpm!='none'&&heroM=='A'){heroM='B';document.querySelectorAll('#hs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.h=='B'))}document.querySelectorAll('#ws button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+ document.querySelectorAll('#cs button').forEach(b=>b.onclick=()=>{CS=b.dataset.c;document.querySelectorAll('#cs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
  document.querySelectorAll('#hs button').forEach(b=>b.onclick=()=>{if(b.dataset.h=='G'){hairG=!hairG;b.setAttribute('aria-pressed',hairG);return}heroM=b.dataset.h;ride=null;document.querySelectorAll('#hs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.h=='G'?hairG:x===b))});
  document.querySelectorAll('#gs button').forEach(b=>b.onclick=()=>{GK=b.dataset.g;if(GK=='ground2')tintSet();document.querySelectorAll('#gs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
  document.querySelectorAll('#ovs button').forEach(b=>b.onclick=()=>{const k=b.dataset.o;ov[k]=!ov[k];b.setAttribute('aria-pressed',ov[k])});
