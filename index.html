@@ -1,0 +1,32 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>写实俯瞰野地</title>
+
+<style>
+:root{--bg:#EEF2EA;--fg:#1E2823;--muted:#5C6B62;--line:#CCD8CF;--on:#3c6d5c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#11171A;--fg:#E4EAE6;--muted:#97A59D;--line:#2A3630;--on:#5a9a84;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#11171A;--fg:#E4EAE6;--muted:#97A59D;--line:#2A3630;--on:#5a9a84;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;padding-block:18px 28px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+h1{font-size:22px;margin:0;letter-spacing:.04em}
+p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+.stage{position:relative;container-type:inline-size;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#8fb25a;touch-action:none;aspect-ratio:480/300;user-select:none}
+canvas#cv{position:absolute;inset:0;width:100%;height:100%}
+#kc{position:absolute;left:1.5cqw;top:1.5cqw;background:#33492a;color:#f2f7f3;border:.4cqw solid #e8f1ec;border-radius:.9cqw;font-size:2cqw;font-weight:600;padding:.6cqw 1.6cqw}
+#mm{position:absolute;right:1.5cqw;top:1.5cqw;width:14cqw;height:14cqw;border:.4cqw solid #e8f1ec;border-radius:.6cqw;background:#222}
+.sw{display:flex;gap:8px;flex-wrap:wrap}
+.sw button{font:inherit;font-size:14px;padding:8px 16px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
+.sw button[aria-pressed=true]{background:var(--on);color:#fff;border-color:var(--on)}
+.hint{font-size:13px;color:var(--muted)}
+</style></head><body>
+<div class="wrap">
+<header><h1>写实俯瞰野地</h1><p>参照《三国群英传8》的做法：地面只有一张草底，靠大块明暗和浅色斑变化；路是踩亮的软边草径，没有草土交界；地表质感由灌木团、高草丛、野花铺出，树成林，岩石做地标。河水深蓝、岸边白浪沫，浅滩用你新出的清澈河床，河两侧浅滩加宽，河中间有一座木桥（沿草径往河边走）。WASD 或方向键走动，手机在画面里拖动，靠近敌人自动出刀。</p></header>
+<div class="stage" id="st"><canvas id="cv" width="960" height="600" aria-label="写实俯瞰风野外地图，小兵挥刀斩敌"></canvas><div id="kc">斩敌 0</div><canvas id="mm" width="84" height="84"></canvas></div>
+<div class="sw" role="group" aria-label="人物" id="hs"><button data-h="A" aria-pressed="true">人物 A：调色版（现有）</button><button data-h="B" aria-pressed="false">人物 B：细像素版（攻击时换回旧帧）</button></div>
+<div class="sw" role="group" aria-label="武器" id="ws"><button data-w="none" aria-pressed="true">武器：无</button><button data-w="short" aria-pressed="false">短武器·柳叶刀</button><button data-w="long" aria-pressed="false">长武器·长枪（背在身后）</button><button data-w="bow" aria-pressed="false">弓·汉弓</button><button data-w="magic" aria-pressed="false">法器·八卦铜镜（悬浮）</button></div>
+<div class="hint">武器只在“人物 B”的站立和走路时显示；一出刀就换回旧帧，不显示这些武器。</div>
+<div class="sw" role="group" aria-label="地面" id="gs"><button data-g="ground" aria-pressed="true">草地</button><button data-g="ground2" aria-pressed="false">湿泥地</button></div>
+<div class="sw" role="group" aria-label="效果开关" id="ovs"><button data-o="cld" aria-pressed="true">云影</button><button data-o="fp" aria-pressed="true">脚印</button></div>
+<div class="hint" id="pos"></div>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body></html>
