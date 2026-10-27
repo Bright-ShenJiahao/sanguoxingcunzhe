@@ -48,16 +48,17 @@ function geom(cls,idx,isAtk){const cl=HC[cls];let d,fists;
  return{cl,d,fists,tail,head,sy:L0/WP.h}}
 const loc=(p,cl)=>[(p[0]-cl.feet[0])*S,(p[1]-cl.feet[1])*S];
 const SH=[-.5,.26]; // 影子：向右下投射
-const RIDE_K=.68; // 骑马整体缩放：让骑手头身大小≈步行时的男主
+const RIDE_K=.55,HR=.85,HK=.8; // RIDE_K 骑马整体缩放；HR 马相对骑手再缩；HK 步行人物缩放
+// // 骑马整体缩放：让骑手头身大小≈步行时的男主
 function drawRide(px,py,moving,now){
  const hm=D.ride.horse,rm=D.ride.rider,seq=[2,3,4,5,6,7],hi=moving?seq[Math.floor(now/110)%6]:Math.floor(now/700)%2,hd=hm[hi],him=IM['rh_'+hi];
  const bk=hd.buckle,sx=bk[0]-1,sy=bk[1]-13,bob=moving?Math.sin(now/110*Math.PI/1)*.0:0;
  let ri=0;const rim=IM[(hairG?'rg_':'rr_')+ri],rsz=rm[ri];
  c.save();c.translate(px,py);c.scale(hero.face*RIDE_K,RIDE_K);c.imageSmoothingEnabled=false;
- c.fillStyle='rgba(18,40,20,.22)';c.beginPath();c.ellipse(0,-1,hd.size[0]*.36,2.6,0,0,6.3);c.fill();
+ c.fillStyle='rgba(18,40,20,.22)';c.beginPath();c.ellipse(0,-1,hd.size[0]*HR*.36,2.6,0,0,6.3);c.fill();
  const ox=-bk[0],oy=-hd.size[1]; // 马：镫扣 x 对齐，底边落地
- c.drawImage(him,ox,oy,hd.size[0],hd.size[1]);
- const seatX=ox+sx,seatY=oy+sy+(moving?Math.abs(Math.sin(now/110*Math.PI/1))*-1.2:0);
+ c.save();c.scale(HR,HR);c.drawImage(him,ox,oy,hd.size[0],hd.size[1]);c.restore();
+ const seatX=(ox+sx)*HR,seatY=(oy+sy)*HR+(moving?Math.abs(Math.sin(now/110*Math.PI/1))*-1.2:0);
  const hip=[5,17],hand=[11.5,15.5];
  const T=ride?Math.min(1,(now-ride.t0)/ride.dur):0,LN={short:2.2,long:3.2,bow:-.8,xbow:-.4,none:2.2}[wpm]||0,lunge=ride?LN*Math.sin(T*Math.PI):0;
  c.drawImage(rim,seatX+(ride?lunge:0)-hip[0],seatY-hip[1],rsz.size[0],rsz.size[1]);
@@ -73,7 +74,7 @@ function drawRide(px,py,moving,now){
  c.restore()}
 function drawHero(px,py,moving,now,shadowOnly){
  if(heroM=='R'){if(!shadowOnly)drawRide(px,py,moving,now);return}
- if(heroM!='A'&&!atk){if(shadowOnly)return;const f=moving?[2,3,4,5,6,7][Math.floor(now/105)%6]:Math.floor(now/650)%2,im=IM[(hairG?'hbg_':'hb_')+f],[w,h]=D.hbsize;c.save();c.translate(px,py);c.scale(hero.face,1);c.imageSmoothingEnabled=false;
+ if(heroM!='A'&&!atk){if(shadowOnly)return;const f=moving?[2,3,4,5,6,7][Math.floor(now/105)%6]:Math.floor(now/650)%2,im=IM[(hairG?'hbg_':'hb_')+f],[w,h]=D.hbsize;c.save();c.translate(px,py);c.scale(hero.face*HK,HK);c.imageSmoothingEnabled=false;
  const RH=D.grip.front,FH=D.grip.front,tl=p=>[(p[0]-D.hbsize[0])/2,(p[1]-D.hbsize[1]*2)/2];
  const wi=IM['wp_'+wpm],T=ride?Math.min(1,(now-ride.t0)/ride.dur):0,sw=Math.min(1,T*1.25);
  if(wpm=='long'&&!ride){c.save();c.translate(-3,-12);c.rotate(-.5);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
