@@ -1,6 +1,7 @@
 
 const [W,CH]=await Promise.all(['data/world.json','data/characters.json'].map(u=>fetch(u).then(r=>r.json())));
-const D={...W,...CH,ground:'assets/map/ground_grass.jpg',ground2:'assets/map/ground_mud.jpg',coll:'assets/map/coll.png',
+const RD=await fetch('data/ride.json').then(r=>r.json());
+const D={...W,...CH,ride:RD,ground:'assets/map/ground_grass.jpg',ground2:'assets/map/ground_mud.jpg',coll:'assets/map/coll.png',
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),VW=480,VH=300,WW=D.WW,HD=D.HD;
 const $=id=>document.getElementById(id);
@@ -17,7 +18,9 @@ function ld(k,s){left++;const i=new Image();i.onload=()=>{IM[k]=i;if(--left==0)s
 D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);ld('ground',D.ground);ld('ground2',D.ground2);ld('coll',D.coll);
 for(const k in D.spr)ld('s_'+k,D.spr[k]);
 for(const cl of ['base','one'])D.hf[cl].forEach((u,i)=>ld('hf_'+cl+'_'+i,u));for(const k in D.en2)ld('e_'+k,D.en2[k]);ld('wpn',D.wpn2);
-let CM,GK='ground',mmc={},IM2={},heroM='A',wpm='none';const R=D.coll_r;
+for(let i=0;i<8;i++)ld('rh_'+i,'assets/characters/ride/horse_'+i+'.png');for(let i=0;i<3;i++){ld('rr_'+i,'assets/characters/ride/rider_'+i+'.png');ld('rg_'+i,'assets/characters/ride/rider_g_'+i+'.png')}
+for(let i=0;i<6;i++)ld('hbg_'+i,'assets/characters/hero_b/g_f'+i+'.png');
+let hairG=false,ride=null,CM,GK='ground',mmc={},IM2={},heroM='A',wpm='none';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
 const hero={x:WW/2,y:WW/2,face:1};const CO=objs.filter(o=>o.r);
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WW)return 1;return CM[(y*WW+x)*4]}
@@ -45,8 +48,28 @@ function geom(cls,idx,isAtk){const cl=HC[cls];let d,fists;
  return{cl,d,fists,tail,head,sy:L0/WP.h}}
 const loc=(p,cl)=>[(p[0]-cl.feet[0])*S,(p[1]-cl.feet[1])*S];
 const SH=[-.5,.26]; // 影子：向右下投射
+function drawRide(px,py,moving,now){
+ const hm=D.ride.horse,rm=D.ride.rider,seq=[2,3,4,5,6,7],hi=moving?seq[Math.floor(now/110)%6]:Math.floor(now/700)%2,hd=hm[hi],him=IM['rh_'+hi];
+ const bk=hd.buckle,sx=bk[0]-1,sy=bk[1]-13,bob=moving?Math.sin(now/110*Math.PI/1)*.0:0;
+ const T=ride?Math.min(1,(now-ride.t0)/ride.dur):0;
+ let ri=0;if(ride&&wpm=='none')ri=2;const rim=IM[(hairG?'rg_':'rr_')+ri],rsz=rm[ri];
+ c.save();c.translate(px,py);c.scale(hero.face,1);c.imageSmoothingEnabled=false;
+ c.fillStyle='rgba(18,40,20,.22)';c.beginPath();c.ellipse(0,-1,hd.size[0]*.36,2.6,0,0,6.3);c.fill();
+ const ox=-bk[0],oy=-hd.size[1]; // 马：镫扣 x 对齐，底边落地
+ c.drawImage(him,ox,oy,hd.size[0],hd.size[1]);
+ const seatX=ox+sx,seatY=oy+sy+(moving?Math.abs(Math.sin(now/110*Math.PI/1))*-1.2:0);
+ const hip=[5,17],hand=[11.5,15.5];
+ c.drawImage(rim,seatX-hip[0],seatY-hip[1],rsz.size[0],rsz.size[1]);
+ if(wpm!='none'){const wi=IM['wp_'+wpm],hx=seatX-hip[0]+hand[0],hy=seatY-hip[1]+hand[1];c.save();c.translate(hx,hy);
+  if(wpm=='short'){const a=ride?(-.9+2.1*T):.55;c.rotate(a);c.scale(.5,.5);c.drawImage(wi,-3.04,-28*.85)}
+  else if(wpm=='long'){const th=ride?-.15:-.55,pt=ride?Math.sin(T*Math.PI)*12:0;c.rotate(th+1.57);c.translate(0,-pt);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height*.55)}
+  else if(wpm=='bow'){c.scale(-.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2)}
+  else if(wpm=='magic'){c.translate(-4,-12+Math.sin(now/380)*1.2);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2)}
+  c.restore()}
+ c.restore()}
 function drawHero(px,py,moving,now,shadowOnly){
- if(heroM!='A'&&!atk){if(shadowOnly)return;const f=moving?[2,3,4,5][Math.floor(now/150)%4]:Math.floor(now/650)%2,im=IM['hb_'+f],[w,h]=D.hbsize;c.save();c.translate(px,py);c.scale(hero.face,1);c.imageSmoothingEnabled=false;
+ if(heroM=='R'){if(!shadowOnly)drawRide(px,py,moving,now);return}
+ if(heroM!='A'&&!atk){if(shadowOnly)return;const f=moving?[2,3,4,5][Math.floor(now/150)%4]:Math.floor(now/650)%2,im=IM[(hairG?'hbg_':'hb_')+f],[w,h]=D.hbsize;c.save();c.translate(px,py);c.scale(hero.face,1);c.imageSmoothingEnabled=false;
  const RH=[[3.1,35.6],[3.5,35],[2.75,35],[2.6,34.4],[2.9,33.5],[3.1,33.5]],FH=[[23.1,35.6],[22,35.5],[26,32.5],[25.7,30.6],[24.7,31.5],[27.5,31.5]],tl=p=>[(p[0]-15)/2,(p[1]-50)/2];
  const wi=IM['wp_'+wpm];
  if(wpm=='long'){c.save();c.translate(-3,-12);c.rotate(-.5);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
@@ -80,7 +103,7 @@ const SPR=k=>(GK=='ground2'&&IM2[k])||IM[k];
 function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW;const x=t.getContext('2d');x.drawImage(IM.coll,0,0);CM=x.getImageData(0,0,WW,WW).data;
  for(const g of['ground','ground2']){const m_=document.createElement('canvas');m_.width=84;m_.height=84;m_.getContext('2d').drawImage(IM[g],0,0,84,84);mmc[g]=m_}
  document.querySelectorAll('#ws button').forEach(b=>b.onclick=()=>{wpm=b.dataset.w;if(wpm!='none'&&heroM=='A'){heroM='B';document.querySelectorAll('#hs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.h=='B'))}document.querySelectorAll('#ws button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
- document.querySelectorAll('#hs button').forEach(b=>b.onclick=()=>{heroM=b.dataset.h;document.querySelectorAll('#hs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
+ document.querySelectorAll('#hs button').forEach(b=>b.onclick=()=>{if(b.dataset.h=='G'){hairG=!hairG;b.setAttribute('aria-pressed',hairG);return}heroM=b.dataset.h;ride=null;document.querySelectorAll('#hs button').forEach(x=>x.setAttribute('aria-pressed',x.dataset.h=='G'?hairG:x===b))});
  document.querySelectorAll('#gs button').forEach(b=>b.onclick=()=>{GK=b.dataset.g;if(GK=='ground2')tintSet();document.querySelectorAll('#gs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
  document.querySelectorAll('#ovs button').forEach(b=>b.onclick=()=>{const k=b.dataset.o;ov[k]=!ov[k];b.setAttribute('aria-pressed',ov[k])});
  mkCloud();for(let i=0;i<14;i++)spawn();requestAnimationFrame(loop)}
@@ -92,14 +115,16 @@ function loop(now){
  if(joy){const L=Math.hypot(joy.dx,joy.dy);if(L>8){dx=joy.dx/L;dy=joy.dy/L}}
  const L=Math.hypot(dx,dy),moving=L>0;if(moving){dx/=L;dy/=L;if(dx&&!atk)hero.face=dx>0?1:-1}
  const inSh=water(hero.x,hero.y)===2;
- const sp=72*dt*(inSh?.55:1)*(atk?.6:1);let nx=Math.min(WW-14,Math.max(14,hero.x+dx*sp)),ny=Math.min(WW-10,Math.max(14,hero.y+dy*sp));
+ const sp=72*dt*(inSh?.55:1)*(atk?.6:1)*(heroM=='R'?1.7:1);let nx=Math.min(WW-14,Math.max(14,hero.x+dx*sp)),ny=Math.min(WW-10,Math.max(14,hero.y+dy*sp));
  if(ok(nx,hero.y))hero.x=nx;if(ok(hero.x,ny))hero.y=ny;
  if(inSh&&moving&&Math.random()<dt*7)rip.push({x:hero.x,y:hero.y,t:now});
  for(const e of en){const ax=hero.x-e.x,ay=hero.y-e.y,d=Math.hypot(ax,ay)||1;e.face=ax>0?1:-1;
   const s2=e.sp*(water(e.x,e.y)===2?.6:1)*dt*60;if(d>13){const mx=ax/d*s2,my=ay/d*s2;
    if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}else{const sx=-my*1.6,sy=mx*1.6;if(ok(e.x+sx,e.y+sy)){e.x+=sx;e.y+=sy}}}}
  for(let i=0;i<en.length;i++)for(let j=i+1;j<en.length;j++){const a=en[i],b=en[j],ddx=b.x-a.x,ddy=b.y-a.y,d=Math.hypot(ddx,ddy);if(d>0&&d<10){const f=(10-d)/24;if(ok(a.x-ddx/d*f,a.y-ddy/d*f)){a.x-=ddx/d*f;a.y-=ddy/d*f}if(ok(b.x+ddx/d*f,b.y+ddy/d*f)){b.x+=ddx/d*f;b.y+=ddy/d*f}}}
- if(!atk&&now>nextAtk){let best=null,bd=46;for(const e of en){const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d<bd){bd=d;best=e}}if(best)startAtk(best.x>=hero.x?1:-1)}
+ if(heroM=='R'){if(!ride&&now>nextAtk){let best=null,bd=52;for(const e of en){const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d<bd){bd=d;best=e}}if(best){hero.face=best.x>=hero.x?1:-1;ride={t0:now,dur:380,hit:false}}}
+ if(ride){if(!ride.hit&&now-ride.t0>170){ride.hit=true;for(const e of en){const ex=(e.x-hero.x)*hero.face,ey=e.y-hero.y;if(ex>-8&&ex<46&&Math.abs(ey)<22){e.dead=1;fx.push({x:e.x,y:e.y,t:now,dx:hero.face})}}}if(now-ride.t0>ride.dur){ride=null;nextAtk=now+140}}}
+ else if(!atk&&now>nextAtk){let best=null,bd=46;for(const e of en){const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d<bd){bd=d;best=e}}if(best)startAtk(best.x>=hero.x?1:-1)}
  if(atk){atk.t+=dt*1000;const stp=atk.steps[atk.k];if(atk.t>=stp.d){atk.t=0;atk.k++;atk.prev=null;if(atk.k>=3){atk=null;nextAtk=now+160}}}
  if(atk&&atk.k===2&&!atk.hit){atk.hit=true;for(const e of en){const ex=(e.x-hero.x)*atk.face,ey=e.y-hero.y;if(ex>-6&&ex<34&&Math.abs(ey)<18){e.dead=1;fx.push({x:e.x,y:e.y,t:now,dx:atk.face})}}}
  for(let i=en.length-1;i>=0;i--)if(en[i].dead){en.splice(i,1);kills++;spawn()}
