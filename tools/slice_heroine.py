@@ -15,12 +15,16 @@ for y in range(H0):
     if (not rp[y] or y==H0-1) and st is not None:
         if y-st>40:rows.append((st,y if not rp[y] else y+1))
         st=None
-rows=rows[:3]+[(472,619),(625,724)];print('rows',rows)
+START=int(sys.argv[2]) if len(sys.argv)>2 else 0
+if START==0:rows=rows[:3]+[(472,619),(625,724)]
+print('rows',rows)
 skin=(abs(src[...,0]-240)<32)&(abs(src[...,1]-185)<40)&(src[...,2]<165)&(src[...,0]-src[...,2]>60)
 white=(src.min(2)>205)
-meta={'rows':[]};gh=max(b-a for a,b in rows);s=LH*HD/gh
+meta=json.load(open(ROOT+'/data/heroine.json')) if START else {'rows':[]}
+new_rows=[];gh=max(b-a for a,b in rows);s=LH*HD/gh
 cw,ch=int(round(CWs*s)),int(round(gh*s))
-for ri,(ya,yb) in enumerate(rows):
+for ri0,(ya,yb) in enumerate(rows):
+    ri=ri0+START
     yb=ya+gh if yb-ya<gh else yb;ya=yb-gh   # 统一行高，脚底在底
     d=cv2.dilate(fg[ya:yb].astype(np.uint8),np.ones((9,45),np.uint8));n,lab,stt,_=cv2.connectedComponentsWithStats(d)
     comps=sorted([stt[i] for i in range(1,n) if stt[i][4]>1500],key=lambda t:t[0])
@@ -39,6 +43,6 @@ for ri,(ya,yb) in enumerate(rows):
         for nm,pk in (('front',xx.argmax() if len(xx) else 0),('back',xx.argmin() if len(xx) else 0)):
             if not len(xx):fr[nm].append([cw*.5,ch*.5]);continue
             near=(abs(xx-xx[pk])<24)&(abs(yy-yy[pk])<24);fr[nm].append([round(float(xx[near].mean()*s),1),round(float(yy[near].mean()*s),1)])
-    meta['rows'].append({'n':len(comps),**fr})
-meta['size']=[cw,ch]
+    (meta['rows'].__setitem__(ri,{'n':len(comps),**fr}) if START else meta['rows'].append({'n':len(comps),**fr}))
+meta['size']=[cw,ch]if not START else meta['size']
 json.dump(meta,open(ROOT+'/data/heroine.json','w'),separators=(',',':'));print([r['n'] for r in meta['rows']],meta['size'])

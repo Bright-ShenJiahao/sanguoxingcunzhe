@@ -26,7 +26,7 @@
 
 ## 女主（多发型）
 - `art_src/characters/heroine_5styles.png`：5 行 × 9 帧（前2待机 + 后7走路）。`tools/slice_heroine.py` 切成 `assets/characters/heroine/r{行}_w{帧}.png` 并写 `data/heroine.json`（含前/后手位置）。
-- 行：0 长直发（当前默认女主）、1 短发、2 卷发、3 红发带、4 丸子头（第 5 行原图被截断，暂不使用）。以后换发型/玩家自定义外观走这个结构。
+- 行：0 长直发（当前默认女主）、1 短发、2 卷发、3 红发带、3、4 行（红发带、丸子头）来自后补的 `heroine_rows_3_4.png`，用 `python3 tools/slice_heroine.py art_src/characters/heroine_rows_3_4.png 3` 覆盖。以后换发型/玩家自定义外观走这个结构。
 - 女主暂无专属骑手，骑马时沿用男骑手。
 
 ## 待重做美术（用户出图）

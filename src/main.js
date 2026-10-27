@@ -20,10 +20,10 @@ D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);ld('g
 for(const k in D.spr)ld('s_'+k,D.spr[k]);
 for(const cl of ['base','one'])D.hf[cl].forEach((u,i)=>ld('hf_'+cl+'_'+i,u));for(const k in D.en2)ld('e_'+k,D.en2[k]);ld('wpn',D.wpn2);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');for(let i=0;i<8;i++)ld('rh_'+i,'assets/characters/ride/horse_'+i+'.png');for(let i=0;i<3;i++){ld('rr_'+i,'assets/characters/ride/rider_'+i+'.png');ld('rg_'+i,'assets/characters/ride/rider_g_'+i+'.png')}
-for(let r=0;r<4;r++)for(let i=0;i<9;i++)ld('hh'+r+'_'+i,'assets/characters/heroine/r'+r+'_w'+i+'.png');
+for(let r=0;r<5;r++)for(let i=0;i<9;i++)ld('hh'+r+'_'+i,'assets/characters/heroine/r'+r+'_w'+i+'.png');
 for(let i=0;i<8;i++)ld('hbg_'+i,'assets/characters/hero_b/g_w'+i+'.png');
 let CS='m';const SETS={m:{pre:'hb_',gpre:'hbg_',size:D.hbsize,grip:D.grip,walk:[2,3,4,5,6,7]}};
-for(let r=0;r<4;r++)SETS['f'+r]={pre:'hh'+r+'_',size:[HN.size[0]/2,HN.size[1]/2],grip:HN.rows[r],walk:[2,3,4,5,6,7,8]};
+for(let r=0;r<5;r++)SETS['f'+r]={pre:'hh'+r+'_',size:[HN.size[0]/2,HN.size[1]/2],grip:HN.rows[r],walk:[2,3,4,5,6,7,8]};
 let hairG=false,ride=null,pj=[],CM,GK='ground',mmc={},IM2={},heroM='B',wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
 const hero={x:WW/2,y:WW/2,face:1};const CO=objs.filter(o=>o.r);
