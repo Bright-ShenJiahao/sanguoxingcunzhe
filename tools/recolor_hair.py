@@ -16,5 +16,5 @@ for i in range(3):
     s=f'{ROOT}/assets/characters/ride/rider_{i}.png';im=Image.open(s)
     # 眼睛位置（逻辑坐标 7.5..12.5 × 6.5..10，乘 2）不改色
     recolor(s,s.replace('rider_','rider_g_'),.42,skip=(19,14,29,19),xmax=34)
-for s in glob.glob(f'{ROOT}/assets/characters/hero_b/f*.png'):
-    recolor(s,os.path.dirname(s)+'/g_'+os.path.basename(s),.30)
+for s in glob.glob(f'{ROOT}/assets/characters/hero_b/w*.png'):
+    recolor(s,os.path.dirname(s)+'/g_'+os.path.basename(s),.46,skip=(17,15,30,23))

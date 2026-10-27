@@ -19,7 +19,7 @@ D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);ld('g
 for(const k in D.spr)ld('s_'+k,D.spr[k]);
 for(const cl of ['base','one'])D.hf[cl].forEach((u,i)=>ld('hf_'+cl+'_'+i,u));for(const k in D.en2)ld('e_'+k,D.en2[k]);ld('wpn',D.wpn2);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');for(let i=0;i<8;i++)ld('rh_'+i,'assets/characters/ride/horse_'+i+'.png');for(let i=0;i<3;i++){ld('rr_'+i,'assets/characters/ride/rider_'+i+'.png');ld('rg_'+i,'assets/characters/ride/rider_g_'+i+'.png')}
-for(let i=0;i<6;i++)ld('hbg_'+i,'assets/characters/hero_b/g_f'+i+'.png');
+for(let i=0;i<8;i++)ld('hbg_'+i,'assets/characters/hero_b/g_w'+i+'.png');
 let hairG=false,ride=null,pj=[],CM,GK='ground',mmc={},IM2={},heroM='B',wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
 const hero={x:WW/2,y:WW/2,face:1};const CO=objs.filter(o=>o.r);
@@ -73,8 +73,8 @@ function drawRide(px,py,moving,now){
  c.restore()}
 function drawHero(px,py,moving,now,shadowOnly){
  if(heroM=='R'){if(!shadowOnly)drawRide(px,py,moving,now);return}
- if(heroM!='A'&&!atk){if(shadowOnly)return;const f=moving?[2,3,4,5][Math.floor(now/150)%4]:Math.floor(now/650)%2,im=IM[(hairG?'hbg_':'hb_')+f],[w,h]=D.hbsize;c.save();c.translate(px,py);c.scale(hero.face,1);c.imageSmoothingEnabled=false;
- const RH=[[3.1,35.6],[3.5,35],[2.75,35],[2.6,34.4],[2.9,33.5],[3.1,33.5]],FH=[[23.1,35.6],[22,35.5],[26,32.5],[25.7,30.6],[24.7,31.5],[27.5,31.5]],tl=p=>[(p[0]-15)/2,(p[1]-50)/2];
+ if(heroM!='A'&&!atk){if(shadowOnly)return;const f=moving?[2,3,4,5,6,7][Math.floor(now/105)%6]:Math.floor(now/650)%2,im=IM[(hairG?'hbg_':'hb_')+f],[w,h]=D.hbsize;c.save();c.translate(px,py);c.scale(hero.face,1);c.imageSmoothingEnabled=false;
+ const RH=D.grip.front,FH=D.grip.front,tl=p=>[(p[0]-D.hbsize[0])/2,(p[1]-D.hbsize[1]*2)/2];
  const wi=IM['wp_'+wpm],T=ride?Math.min(1,(now-ride.t0)/ride.dur):0,sw=Math.min(1,T*1.25);
  if(wpm=='long'&&!ride){c.save();c.translate(-3,-12);c.rotate(-.5);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
  c.drawImage(im,-w/2,-h,w,h);

@@ -20,6 +20,10 @@
 - 旧的 hero_old 攻击帧（劈/横扫/撩）已废弃，仅留存档。
 - 出图提示词见 docs/ART_PROMPTS.md。
 
+## 当前主角（步行）
+- `art_src/characters/hero_walk8.png`：8 帧（2 待机 + 6 走路，朝右）；`tools/slice_walk.py` 切成 `assets/characters/hero_b/w0..w7.png`，并量出前/后手位置写入 `data/characters.json` 的 `grip`。绿发版 `g_w*.png` 由 `tools/recolor_hair.py` 生成。
+- 不再出劈/砸/抬手等全身攻击帧。
+
 ## 待重做美术（用户出图）
 主角 B 走路 6–8 帧（左右腿交替）、劈/横扫/撩、受击/倒地/起身、各握法；武器细像素重绘；黄巾 12 帧 × 多兵种。
 
