@@ -68,9 +68,10 @@ export function createMenu(game){
  root.querySelector('.menu-start').onclick=()=>{
   visible=false;root.hidden=true;document.body.classList.remove('menu-open');game.clearInput();
   document.getElementById('cv').setAttribute('tabindex','-1');document.getElementById('cv').focus({preventScroll:true});
+  game.onStart();
  };
  document.documentElement.classList.remove('menu-loading');
- return {get visible(){return visible},draw(now){
+ return {get visible(){return visible},show(){visible=true;root.hidden=false;document.body.classList.add('menu-open');root.querySelector('.menu-start').focus()},draw(now){
   const {c,images,data}=game,t=now/1000;
   const cx=380+Math.sin(t/30)*110,cy=420+Math.cos(t/37)*95;
   c.setTransform(data.HD,0,0,data.HD,0,0);c.imageSmoothingEnabled=true;

@@ -1,6 +1,7 @@
 
 import {createExtract} from './extract.js';
 import {createMenu} from './menu.js';
+import {createSurvival} from './survival.js';
 const [W,CH]=await Promise.all(['data/world.json','data/characters.json'].map(u=>fetch(u).then(r=>r.json())));
 const RD=await fetch('data/ride.json').then(r=>r.json()),HN=await fetch('data/heroine.json').then(r=>r.json());
 const D={...W,...CH,ride:RD,ground:'assets/map/ground_grass.jpg',ground2:'assets/map/ground_mud.jpg',coll:'assets/map/coll.png',
@@ -130,13 +131,18 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WW
  });
  menu=createMenu({c,images:IM,data:D,objects:objs,
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
-  clearInput(){joy=null;for(const k in keys)keys[k]=0}
+  clearInput(){joy=null;for(const k in keys)keys[k]=0},onStart(){survival.start()}
+ });
+ survival=createSurvival({hero,enemies:en,get kills(){return kills},get extractActive(){return extract.active},
+  clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
+  reset(){hero.x=WW/2;hero.y=WW/2;hero.face=1;kills=0;en.length=0;ride=null;atk=null;pj=[];fx=[];rip=[];fp=[];swoosh=[];nextAtk=0;wpm='short';joy=null;for(const k in keys)keys[k]=0;document.querySelectorAll('#ws button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w===wpm))}
  });requestAnimationFrame(loop)}
-let extract,menu;
+let extract,menu,survival;
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
 function loop(now){
  const dt=Math.min(.05,(now-last)/1000||0);last=now;
  if(menu?.visible){menu.draw(now);requestAnimationFrame(loop);return}
+ if(survival?.finished){requestAnimationFrame(loop);return}
  if(extract?.finished){requestAnimationFrame(loop);return}
  c.setTransform(HD,0,0,HD,0,0);
  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
@@ -163,6 +169,7 @@ function loop(now){
  for(let i=en.length-1;i>=0;i--)if(en[i].dead){en.splice(i,1);kills++;if(!extract?.active)spawn()}
  if(!extract?.active)while(en.length<16)spawn();
  extract?.update(dt,now,moving);
+ survival?.update(dt);
  $('kc').textContent='斩敌 '+kills;
  const cx=Math.round(Math.min(WW-VW,Math.max(0,hero.x-VW/2))),cy=Math.round(Math.min(WW-VH,Math.max(0,hero.y-VH/2)));
  c.imageSmoothingEnabled=true;

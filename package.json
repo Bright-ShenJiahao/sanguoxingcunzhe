@@ -1,0 +1,8 @@
+{
+  "name": "sanguoxingcunzhe",
+  "private": true,
+  "description": "三国幸存者排行榜后端依赖",
+  "dependencies": {
+    "@netlify/blobs": "10.7.13"
+  }
+}
