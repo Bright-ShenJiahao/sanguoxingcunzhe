@@ -47,3 +47,8 @@
 - 男主、骑马（马和骑手）、全部怪物的精灵在切图后要跑一次 `python3 tools/outline.py`（原地描一圈近黑细轮廓，不改尺寸和锚点）。
 - 女主精灵不处理。重新运行 `slice_*.py` 会覆盖为未描边版本，切完必须再跑一次 outline.py。
 - 新增兵种、新角色同样适用。
+
+## 男主多发型
+- `art_src/characters/hero_walk_4styles.png`：4 行 × 8 帧（前2待机 + 后6走路）：光头、军人短寸、古代束发髻、高马尾。`python3 tools/slice_hero_m.py art_src/characters/hero_walk_4styles.png` 切成 `assets/characters/hero_m/r{行}_w{帧}.png` 并写 `data/hero_m.json`（含前/后手位置），再跑 `tools/outline.py`。
+- 身体大小按白 T 与默认男主 hero_b 对齐；游戏里选中某个发型才下载那一套。默认男主（乱发）仍是 hero_b。
+- 男主发型的骑马版（`art_src/characters/riders/rider_male_5styles.png`）和女主骑手暂未接入。

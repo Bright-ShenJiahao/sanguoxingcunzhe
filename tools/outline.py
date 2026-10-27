@@ -19,7 +19,7 @@ def outline(im):
     return ImageEnhance.Color(out).enhance(.92)
 def targets():
     c=ROOT/'assets/characters'
-    for pat in ['hero_b/w*.png','hero_b/g_w*.png','ride/horse_*.png','ride/rider_*.png','enemies/*/*.png']:
+    for pat in ['hero_b/w*.png','hero_b/g_w*.png','hero_m/r*_w*.png','ride/horse_*.png','ride/rider_*.png','enemies/*/*.png']:
         for p in sorted(c.glob(pat)):
             if p.name!='arrow.png': yield p
 if __name__=='__main__':
