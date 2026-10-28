@@ -183,5 +183,5 @@ for k,x,y in gw['objs']:
 size={**gw['size'],**sizes}
 cr={**gw['coll_r'],'nbare1':6,'nbare2':6,'nbare3':6,'nfir1':5,'nfir2':5,'nfir3':5,'nspire1':17,'nspire2':15,'nrmid1':12,'nrmid2':11,'nrsmall1':5,'nrsmall2':5,'nbushL1':6,'nbushL2':6}
 b=gw['bridge']; bw=b['walk']
-wj={'WW':WW,'WH':2560,'HD':HD,'size':size,'coll_r':cr,'objs':allo,'bridge':{'x':b['x'],'y':b['y']+1280,'walk':[bw[0],bw[1]+1280,bw[2],bw[3]+1280]},'snowY':1280}
+wj={'WW':WW,'WH':2560,'HD':HD,'size':size,'coll_r':cr,'objs':allo,'bridge':{'x':b['x'],'y':b['y']+1280,'walk':[bw[0],bw[1]+1280,bw[2],bw[3]+1280]},'snowY':1280,'ver':int(__import__('time').time())}
 json.dump(wj,open(DATA+'world.json','w'),separators=(',',':')); print('world ok',len(allo))

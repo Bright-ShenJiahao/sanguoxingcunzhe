@@ -6,7 +6,7 @@ import {createWeather} from './weather.js';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
-const D={...W,...CH,ground:'assets/map/ground.jpg',coll:'assets/map/coll.png',
+const D={...W,...CH,ground:'assets/map/ground.jpg?v='+W.ver,coll:'assets/map/coll.png?v='+W.ver,
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),VW=480,VH=300,WW=D.WW,WH=D.WH||D.WW,HD=D.HD;
 const $=id=>document.getElementById(id);
