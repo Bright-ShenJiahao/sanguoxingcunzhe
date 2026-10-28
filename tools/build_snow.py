@@ -168,7 +168,7 @@ out[H2:]=GH[OV*HD:]
 Image.fromarray(out).save(OUT+'ground.jpg',quality=70,optimize=True)
 print('ground',out.shape)
 # 碰撞
-col=np.zeros((SH,WW,3),np.uint8); col[...,0]=deep*1+shallow*2
+col=np.zeros((SH,WW,3),np.uint8); col[...,0]=0   # 冰河冻住了，可以直接走过去
 gc=np.array(Image.open(BUILD+'coll.png').convert('RGB'))
 C=np.zeros((2560,WW,3),np.uint8); C[:1280]=col[:1280]
 z=np.where((M[1280:]>=0.5)[...,None],gc[:OV],col[1280:]); C[1280:1280+OV]=z

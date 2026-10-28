@@ -69,9 +69,10 @@ dr=np.abs(X-xc[:,None])/hw[:,None]
 ford=np.zeros(WW,np.float32)
 for c0 in [330,850]: ford=np.maximum(ford,sstep(1-np.abs(yy-c0)/46))
 pe=np.sqrt(((X-250)/105)**2+((Y-980)/62)**2); wob=fbm(70,73,2)*0.07
-dw=np.minimum(dr+wob,pe+wob*1.2); water=dw<1.0
+se=np.sqrt(((X-1310)/450)**2+((Y-1310)/380)**2)+wob*1.6   # 东南角的大海
+dw=np.minimum(np.minimum(dr+wob,pe+wob*1.2),se); water=dw<1.0
 assert not water[WW//2-90:WW//2+90,WW//2-90:WW//2+90].any()
-shallow=water&(((dr+wob)>0.40)&((dr+wob)<1.0)|((pe+wob*1.2)>0.66)&((pe+wob*1.2)<1.0)|((ford[:,None]>0.5)&(dr+wob<1.0))); deep=water&~shallow
+shallow=water&(((dr+wob)>0.40)&((dr+wob)<1.0)|((pe+wob*1.2)>0.66)&((pe+wob*1.2)<1.0)|((ford[:,None]>0.5)&(dr+wob<1.0))|((se>0.80)&(se<1.0))); deep=water&~shallow
 swd=sdist(water)
 def up(a,order=cv2.INTER_LINEAR): return cv2.resize(a.astype(np.float32),(WH,WH),interpolation=order)
 sdH=up(sd)*HD; swdH=up(swd)*HD; waterH=up(water,cv2.INTER_LINEAR)>0.5; shallowH=up(shallow)>0.5
