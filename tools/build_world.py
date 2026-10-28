@@ -291,5 +291,6 @@ coll_r={'broad1':6,'broad2':6,'broad3':5,'broad4':6,'pine1':5,'pine2':5,'spire1'
 Image.fromarray(col).save(BUILD+'coll.png',optimize=True)
 for n,im in spr.items(): im.save(OUT+'sprites/'+n+'.png',optimize=True)
 world={'riverTop':[float(xc[0]),float(hw[0])],'WW':WW,'HD':HD,'size':sizes,'coll_r':coll_r,'objs':objs,
+ 'riverXc':[float(v) for v in xc],'riverHw':[float(v) for v in hw],
  'bridge':{'x':int(BX),'y':int(YB),'walk':[float(wx0),float(wy0),float(wx1),float(wy1)]}}
 json.dump(world,open(BUILD+'world.json','w'),separators=(',',':')); print('world ok',len(objs),'objs')

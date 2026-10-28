@@ -41,6 +41,8 @@ E=np.exp(-np.abs(yg)/150)
 rn=vnoise(160,57,SH,8)[0]; rn=(rn-rn.mean())/(rn.std()+1e-6)
 xc=0.75*WW+110*np.sin(yg/210+0.6)+45*np.sin(yg/83+1.7); xc=xc+(gw['riverTop'][0]-(0.75*WW+110*np.sin(.6)+45*np.sin(1.7)))*E+30*rn*(1-E)
 hwf=30+9*np.sin(yg/140+2.0); hw=hwf+(gw['riverTop'][1]-(30+9*np.sin(2.0)))*E+5*rn*(1-E)
+_g=yg>=0
+xc[_g]=np.array(gw['riverXc'],np.float32)[yg[_g].astype(int)]; hw[_g]=np.array(gw['riverHw'],np.float32)[yg[_g].astype(int)]
 Y,X=np.mgrid[0:SH,0:WW].astype(np.float32)
 wob=fbm(70,73,2,WW,SH)*0.07
 dw=np.abs(X-xc[:,None])/hw[:,None]+wob
@@ -160,6 +162,9 @@ GH=np.array(Image.open(BUILD+'ground_grass.jpg').convert('RGB'))
 MH=cv2.resize(M[1280:],(W2,OV*HD),interpolation=cv2.INTER_LINEAR)[...,None]
 out=np.zeros((H2+(1280-OV)*HD,W2,3),np.uint8)
 out[:2560]=SG[:2560]
+rz=cv2.GaussianBlur(cv2.dilate(waterH[2560:H2].astype(np.uint8),np.ones((61,61),np.uint8)).astype(np.float32),(0,0),22)[...,None]
+srow=np.clip(np.arange(OV*HD,dtype=np.float32)/(OV*HD),0,1); srow=(srow*srow*(3-2*srow))[:,None,None]
+MH=MH*(1-rz)+srow*rz
 zone=SG[2560:H2].astype(np.float32)*(1-MH)+GH[:OV*HD].astype(np.float32)*MH
 out[2560:H2]=np.clip(zone,0,255).astype(np.uint8)
 out[H2:]=GH[OV*HD:]

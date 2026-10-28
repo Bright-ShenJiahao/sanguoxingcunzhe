@@ -130,13 +130,13 @@ a=(up(ramp)*0.9)[...,None]
 base=base*(1-a)+dirt*a
 del dirt,a
 # ---------- 农田区（绿地西南，田埂分块）----------
-FX0,FX1,FY0,FY1=1480,1840,2040,2440
+FX0,FX1,FY0,FY1=1500,1820,2160,2380
 S1=load('farm1.png'); fw_,fh_=(FX1-FX0)*HD,(FY1-FY0)*HD
 tl=[tile_big(seamless(S1[250:504,x0+8:x0+262]),fw_,fh_,300+i) for i,x0 in enumerate((32,338,645,951))]
 dirtc=np.median(S1[790:860,395:440].reshape(-1,3),0).astype(np.float32)
 watc=np.median(S1[700:1000,750:780].reshape(-1,3),0).astype(np.float32)
 F=np.zeros((fh_,fw_,3),np.float32)+dirtc*(1+0.05*fbm(30,401,2,fw_,fh_)[...,None])
-types=[0,1,0,2,3,1,0,1,2]; cwp,chp=(fw_-30)//3,fh_//3
+types=[0,1,2,3,1,0]; cwp,chp=(fw_-30)//3,fh_//2
 for i,t_ in enumerate(types):
     r_,c_=divmod(i,3); x0=30+c_*cwp+12; x1=30+(c_+1)*cwp-12; y0=r_*chp+12; y1=(r_+1)*chp-12
     F[y0:y1,x0:x1]=tl[t_][y0:y1,x0:x1]; F[y0:y0+3,x0:x1]*=0.7; F[y1-3:y1,x0:x1]*=0.8
@@ -189,10 +189,10 @@ spr={n:to_sprite(a,hg) for n,a,hg in zip(mn,comps,mh)}
 wn=['wreed1','wreed2','wreed3','wreed4','wcat1','wcat2','wcat3','wcat4','wlily1','wlily2','wlily3','wlily4','wtuft','wstone','wlog','wpud']
 wh=[70,62,46,64,66,64,68,44,18,20,18,16,28,20,22,26]
 for n,a_,hg in zip(wn,extract('wetland.png',3000,16,313),wh): spr[n]=to_sprite(a_,hg)
-for fn_,nm_,hh_ in (('farm2.png',['fhouse1','fhouse2','fshed','fgran','fbridge','fdock','fdockboat','fboat'],[60,80,48,58,36,34,36,38]),('farm3.png',['fbamb1','fbamb2','fwillow','fpeach','fbuf1','fbuf2','fhay','ftools'],[84,54,104,64,32,30,32,18])):
+for fn_,nm_,hh_ in (('farm2.png',['fhouse1','fhouse2','fshed','fgran','fbridge','fdock','fdockboat','fboat'],[46,60,36,44,30,28,30,32]),('farm3.png',['fbamb1','fbamb2','fwillow','fpeach','fbuf1','fbuf2','fhay','ftools'],[64,40,80,50,26,24,24,14])):
     cs_=extract(fn_,3000,8,500)
     for n,a_,hg in zip(nm_,cs_,hh_): spr[n]=to_sprite(a_,hg)
-for n,a_,hg in zip(['fpond1','fpond2','frack','fshrine'],extract('farm4.png',3000,4,2000),[44,46,42,40]): spr[n]=to_sprite(a_,hg)
+for n,a_,hg in zip(['fpond1','fpond2','frack','fshrine'],extract('farm4.png',3000,4,2000),[38,40,32,32]): spr[n]=to_sprite(a_,hg)
 sc=extract('snowcliff.png',3000,12,313)[3:]
 for n,a_,hg in zip(['srock1','srock2','srock3','srub1','srub2','srub3','sicerock','sreed','sice'],sc,[46,32,20,34,26,16,26,36,14]): spr[n]=to_sprite(a_,hg)
 for n,im in spr.items(): im.save(OUT+'sprites/'+n+'.png',optimize=True)
@@ -235,7 +235,7 @@ for _ in range(120000):
     elif r<0.075: put('mdead',x,y,22) if rng.random()<0.3 else None
     elif r<0.55: put(['mgrass1','mgrass2'][int(rng.integers(2))],x,y,8)
     elif r<0.88:
-        if lvl>0.4 or fm>0.4: put(['mrubble1','mrubble2'][int(rng.integers(2))],x,y,8)
+        pass
     elif nearcl[y,x] and rng.random()<0.5: put('mrock',x,y,10)
     if len(allo)>len(cw['objs'])+500: break
 # 湿地：芦苇香蒲只在大河岸边，睡莲在河里（小），海边不放
@@ -286,12 +286,12 @@ def hamlet(cx,cy,rx,ry,items):
             x=int(cx+rng.uniform(-rx,rx)); y=int(cy+rng.uniform(-ry,ry))
             if okf(x,y) and far(x,y,FR[name]): put(name,x,y,FR[name]); n+=1
             if n>=cnt: break
-hamlet(1660,2020,190,14,[('fhouse2',1),('fhouse1',2),('fshed',1),('fgran',1)])
-hamlet(1660,1995,200,26,[('fbamb1',2),('fbamb2',2),('fpeach',2)])
-hamlet(1660,2240,160,180,[('fbuf1',2),('fbuf2',2)])
-hamlet(1920,2170,50,90,[('fpond1',1),('fpond2',1)])
-hamlet(1500,2008,16,8,[('fshrine',1)])
-hamlet(1862,2240,14,180,[('fhay',3),('ftools',2)])
+hamlet(1660,2145,150,10,[('fhouse2',1),('fhouse1',2),('fshed',1),('fgran',1)])
+hamlet(1660,2118,160,18,[('fbamb1',2),('fbamb2',2),('fpeach',2)])
+hamlet(1660,2270,140,70,[('fbuf1',2),('fbuf2',2)])
+hamlet(1900,2210,30,50,[('fpond1',1),('fpond2',1)])
+hamlet(1510,2150,10,6,[('fshrine',1)])
+hamlet(1845,2270,10,80,[('fhay',3),('ftools',2)])
 for cx,cy,its in ((1650,990,[('fhouse1',2),('fhouse2',1),('fshed',1),('fgran',1),('fhay',2)]),(1600,1560,[('fhouse1',2),('fshed',1),('fhay',2),('fpeach',1)])):
     for dx_,dy_ in ((0,0),(120,0),(-120,40),(0,90),(150,80),(-60,-80)):
         x_,y_=cx+dx_,cy+dy_
@@ -301,8 +301,7 @@ for _ in range(60000):
     x=int(rng.integers(CW+30,N-30)); y=int(rng.integers(1300,N-30)); xl=x-CW
     if seaz[y,xl] or cc[y,xl,0]!=0 or not(12<drv[y,xl]<40) or not okf(x,y) or not far(x,y,24): continue
     put('fwillow',x,y,24); n_+=1
-    if n_>=7: break
-hamlet(2410,2085,60,50,[('fhouse1',2),('fshed',1),('fhay',2),('fpeach',1)])
+    if n_>=4: break
 for _ in range(4000):
     y=int(rng.integers(2120,2260)); xs_=np.where(cc[y,:,0]==0)[0]; xs_=xs_[(xs_+CW<2260)&(xs_+CW>2100)]
     if len(xs_)==0: continue
