@@ -109,7 +109,7 @@ if MODE=='mud':
     base=base*(1-0.86*pud)+pcl*0.86*pud
 pudG=np.zeros((WH,WH),np.float32)
 if MODE!='mud':
-    pg=sstep((fbm(190,321,2,WH)-1.22)/0.35)*np.clip((-swdH-30)/30,0,1)*np.clip(1-pa[...,0]*2,0,1)
+    pg=sstep((fbm(190,321,2,WH)-1.75)/0.35)*np.clip((-swdH-30)/30,0,1)*np.clip(1-pa[...,0]*2,0,1)
     pg=cv2.GaussianBlur(pg,(0,0),5.0); pg=np.clip((pg-0.25)/0.5,0,1); pg=sstep(pg); pudG=pg
     halo=cv2.GaussianBlur(pg,(0,0),10)[...,None]
     base=base*(1-0.30*halo)+np.array([104,92,58],np.float32)*0.30*halo*(0.85+0.3*gl)

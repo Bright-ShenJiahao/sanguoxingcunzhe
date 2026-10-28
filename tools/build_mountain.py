@@ -69,6 +69,8 @@ face=cv2.morphologyEx(face.astype(np.uint8),cv2.MORPH_OPEN,np.ones((3,3),np.uint
 gap=cv2.GaussianBlur(fbm(200,77,2,N,N),(0,0),3)
 face&=(gap>-1.4)
 ramp=np.zeros((N,N),np.float32); nr=0
+rm0=np.zeros((N,N),np.uint8); rm0[:1480,CW:]=np.load(BUILD+'snow_river.npy')
+face&=~cv2.dilate(rm0,np.ones((1,121),np.uint8)).astype(bool)
 print('face px',int(face.sum()),'ramps',nr)
 # ---------- 地面 ----------
 Cen=np.array(Image.open(BUILD+'ground_center.jpg').convert('RGB'))          # 5120 x 2560
@@ -119,7 +121,7 @@ if fw.any():
     icet=tile_big(seamless(load('snow_water.png')),int(fx.max()-x0_+1),int(fy.max()-y0_+1),555)
     shd=(0.9+0.1*np.clip(rows[fw]/FH,0,1)-0.12*(rows[fw]<8))[:,None]
     base[fy,fx]=icet[fy-y0_,fx-x0_]*shd
-del icet
+    del icet
 print('waterfall px',int(fw.sum()))
 del run,ys_,xs2,rows
 fa=cv2.GaussianBlur(face.astype(np.float32),(0,0),7); fa=np.roll(fa,10,0)*(1-face)
@@ -221,7 +223,7 @@ for kk,x,y in cw['objs']:
     wd=wdm[y,x-CW]; rr_=rng.random()
     if kk.startswith(ROCK) and (wd<70 or rr_>(0.8 if nearcl[y,x] else 0.12)): continue
     if kk.startswith(TREE) and (wd<26 or rr_>np.clip(0.35+0.5*fmn[y,x],0.2,1)): continue
-    if kk.startswith(BUSH) and rr_>(0.25 if y>=1280 else (0.6 if wd<60 else (0.2 if fmn[y,x]<-0.3 else 0.5))): continue
+    if kk.startswith(BUSH) and rr_>(0.25 if y>=1280 else (0.3 if wd<60 else (0.1 if fmn[y,x]<-0.3 else 0.22))): continue
     if kk.startswith(('tuft','flow','dry')) and rr_>0.5: continue
     if bl_d[y,x] or ramp_d[y,x] or faceband[y,x]: continue
     allo.append([kk,x,y]); grid.setdefault((int(x//CS),int(y//CS)),[]).append((x,y,6))
@@ -233,7 +235,7 @@ for _ in range(120000):
     lvl=h[y,x]; r=rng.random(); fm=fmn[y,x]
     if r<0.07 and lvl>=0.8 and fm>0.2: put(['mpine1','mpine2','mpine2'][int(rng.integers(3))],x,y,22)
     elif r<0.075: put('mdead',x,y,22) if rng.random()<0.3 else None
-    elif r<0.55: put(['mgrass1','mgrass2'][int(rng.integers(2))],x,y,8)
+    elif r<0.17: put(['mgrass1','mgrass2'][int(rng.integers(2))],x,y,8)
     elif r<0.88:
         pass
     elif nearcl[y,x] and rng.random()<0.5: put('mrock',x,y,10)
@@ -268,7 +270,7 @@ for _ in range(80000):
     wd=wdm[y,x-CW]; r=rng.random()
     if nearcl[y,x] and not faceband[y,x]:
         if r<0.012 and far(x,y,18): put('srock'+str(1+int(rng.integers(3))),x,y,18)
-        elif r<0.03 and far(x,y,14): put('srub'+str(1+int(rng.integers(3))),x,y,14)
+        elif r<0.008 and far(x,y,14): put('srub'+str(1+int(rng.integers(3))),x,y,14)
     elif 8<wd<50 and r<0.02 and far(x,y,16): put(['sicerock','sreed','sice'][int(rng.integers(3))],x,y,16)
 # ---------- 村落与农田 ----------
 allo=[o for o in allo if not (FX0-24<o[1]<FX1+24 and FY0-70<o[2]<FY1+24)]
