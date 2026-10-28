@@ -54,7 +54,7 @@ h=np.minimum(h,hmx)
 h=np.maximum(h,blob(430,560,700,640,7.2,11,0.7)*(1-sstep((X-1000)/500)))
 for b_ in [(520,2180,540,330,2.4,12),(960,1650,300,230,1.9,13)]: h=np.maximum(h,blob(*b_))
 TH=[2.6,4.0,5.4]
-nz=fbm(170,21,2,N,N)*0.18
+nz=fbm(260,21,2,N,N)*0.07
 lv=np.zeros((N,N),np.float32)
 for t in TH: lv+=(h>=t+nz)
 Hc=cv2.GaussianBlur(lv,(0,0),1.2)
@@ -67,7 +67,7 @@ face=((Tn-Hc)>0.5)&(south>0.5)
 face=cv2.morphologyEx(face.astype(np.uint8),cv2.MORPH_OPEN,np.ones((3,3),np.uint8)).astype(bool)
 # ---------- 崖线缺口：崖高沿走向消失成缓坡（不画路）----------
 gap=cv2.GaussianBlur(fbm(200,77,2,N,N),(0,0),3)
-face&=(gap>-0.85)
+face&=(gap>-1.4)
 ramp=np.zeros((N,N),np.float32); nr=0
 print('face px',int(face.sum()),'ramps',nr)
 # ---------- 地面 ----------
@@ -89,7 +89,7 @@ hs=np.minimum(h,2.6)+0.1*np.clip(h-2.6,0,None)
 hs=cv2.GaussianBlur(hs,(0,0),10)
 gx=cv2.Sobel(hs,cv2.CV_32F,1,0,ksize=3)/8; gy=cv2.Sobel(hs,cv2.CV_32F,0,1,ksize=3)/8
 shade=np.clip(1-12*(gx*0.6+gy*0.8)+0.015*h,0.85,1.18)
-base*=up(shade)[...,None]
+base*=up(shade)[...,None]*up(0.93+0.035*Hc)[...,None]
 # 崖面 + 崖脚阴影
 fH=np.repeat(np.repeat(face,2,0),2,1)
 f=fH.astype(np.int32); cs=np.cumsum(f,axis=0); reset=np.maximum.accumulate(np.where(f==0,cs,0),axis=0); run=cs-reset; del cs,reset,f
