@@ -131,28 +131,6 @@ dirt=tile_big(G[0],Wd,Wd,99)*1.14
 a=(up(ramp)*0.9)[...,None]
 base=base*(1-a)+dirt*a
 del dirt,a
-# ---------- 农田（代码生成示例）：草原最南端 ----------
-FX0,FX1,FY0,FY1=1480,2080,2290,2550
-S1=load('farm1.png'); fw_,fh_=(FX1-FX0)*HD,(FY1-FY0)*HD
-tl=[tile_big(seamless(cv2.resize(S1[250:504,x0+8:x0+262],None,fx=0.5,fy=0.5,interpolation=cv2.INTER_AREA)),fw_,fh_,300+i) for i,x0 in enumerate((32,338,645,951))]
-gm=base[2000*HD:2200*HD,1500*HD:1800*HD].reshape(-1,3).mean(0)
-yy_,xx_=np.mgrid[0:fh_,0:fw_].astype(np.float32)
-sd_=np.random.default_rng(7)
-seeds=np.array([(sd_.uniform(.08,.92)*fw_,sd_.uniform(.12,.88)*fh_) for _ in range(11)],np.float32)
-dd=np.stack([np.hypot(xx_-sx,(yy_-sy)*1.25) for sx,sy in seeds],0)
-o_=np.argsort(dd,0); lab_=o_[0]; d1=np.take_along_axis(dd,o_[:1],0)[0]; d2=np.take_along_axis(dd,o_[1:2],0)[0]
-bund=sstep(1-(d2-d1)/9.0)
-cell_t=[0,1,2,3,1,0,2,1,3,0,1]
-F=np.zeros((fh_,fw_,3),np.float32)
-for i in range(len(seeds)):
-    mk=(lab_==i)[...,None]; F=np.where(mk,tl[cell_t[i]],F)
-F=F*0.9+gm*0.1
-bc=np.array([128,112,70],np.float32)*(1+0.1*fbm(20,411,2,fw_,fh_)[...,None])
-F=F*(1-0.85*bund[...,None])+bc*0.85*bund[...,None]
-sup=(np.abs((xx_-fw_/2)/(fw_/2))**3.2+np.abs((yy_-fh_/2)/(fh_/2))**3.2)
-al=sstep((1.0-sup+0.22*fbm(60,412,2,fw_,fh_))/0.28)[...,None]
-reg=base[FY0*HD:FY1*HD,FX0*HD:FX1*HD]; base[FY0*HD:FY1*HD,FX0*HD:FX1*HD]=reg*(1-al)+F*al
-del dd,o_,tl,F
 Cf=np.clip(base,0,255).astype(np.uint8); del base
 Image.fromarray(Cf[:,:2*CW]).save(OUT+'ground_w.jpg',quality=72,optimize=True)
 Image.fromarray(Cf[:,2*CW:]).save(OUT+'ground.jpg',quality=70,optimize=True)
@@ -163,7 +141,6 @@ blocked=cv2.dilate(face.astype(np.uint8),np.ones((3,3),np.uint8)).astype(bool)&~
 cc=np.array(Image.open(BUILD+'coll_center.png').convert('RGB'))      # 2560 x 1280
 C=np.zeros((N,N,3),np.uint8); C[:,CW:]=cc
 C[:,:CW+OV]=np.where((np.concatenate([np.ones((N,CW),np.float32),1-Mx],1)>0.5)[...,None],0,C[:,:CW+OV])
-C[FY0:FY1,FX0:FX1,0]=0
 C[...,0]=np.maximum(C[...,0],blocked*1)
 Image.fromarray(C).save(OUT+'coll.png',optimize=True)
 # ---------- 物件 ----------
@@ -280,7 +257,6 @@ for _ in range(80000):
         elif r<0.008 and far(x,y,14): put('srub'+str(1+int(rng.integers(3))),x,y,14)
     elif 8<wd<50 and r<0.02 and far(x,y,16): put(['sicerock','sreed','sice'][int(rng.integers(3))],x,y,16)
 # ---------- 村落与农田 ----------
-allo=[o for o in allo if not (FX0-24<o[1]<FX1+24 and FY0-70<o[2]<FY1+24)]
 grid.clear()
 for kk,x,y in allo: grid.setdefault((int(x//CS),int(y//CS)),[]).append((x,y,8))
 print('objs',len(allo))
