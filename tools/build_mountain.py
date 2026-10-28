@@ -131,21 +131,28 @@ dirt=tile_big(G[0],Wd,Wd,99)*1.14
 a=(up(ramp)*0.9)[...,None]
 base=base*(1-a)+dirt*a
 del dirt,a
-# ---------- 农田区（绿地西南，田埂分块）----------
-FX0,FX1,FY0,FY1=1500,1820,2160,2380
+# ---------- 农田（代码生成示例）：草原最南端 ----------
+FX0,FX1,FY0,FY1=1480,2080,2290,2550
 S1=load('farm1.png'); fw_,fh_=(FX1-FX0)*HD,(FY1-FY0)*HD
-tl=[tile_big(seamless(S1[250:504,x0+8:x0+262]),fw_,fh_,300+i) for i,x0 in enumerate((32,338,645,951))]
-dirtc=np.median(S1[790:860,395:440].reshape(-1,3),0).astype(np.float32)
-watc=np.median(S1[700:1000,750:780].reshape(-1,3),0).astype(np.float32)
-F=np.zeros((fh_,fw_,3),np.float32)+dirtc*(1+0.05*fbm(30,401,2,fw_,fh_)[...,None])
-types=[0,1,2,3,1,0]; cwp,chp=(fw_-30)//3,fh_//2
-for i,t_ in enumerate(types):
-    r_,c_=divmod(i,3); x0=30+c_*cwp+12; x1=30+(c_+1)*cwp-12; y0=r_*chp+12; y1=(r_+1)*chp-12
-    F[y0:y1,x0:x1]=tl[t_][y0:y1,x0:x1]; F[y0:y0+3,x0:x1]*=0.7; F[y1-3:y1,x0:x1]*=0.8
-F[:,:28]=watc*(1+0.08*fbm(12,402,2,28,fh_)[...,None]); F[:,24:30]*=0.7
-ed=np.minimum(np.minimum(np.arange(fh_)[:,None],fh_-1-np.arange(fh_)[:,None]),np.minimum(np.arange(fw_)[None,:],fw_-1-np.arange(fw_)[None,:])).astype(np.float32)
-al=sstep((ed+24*fbm(40,403,2,fw_,fh_))/46)[...,None]; F*=0.9
+tl=[tile_big(seamless(cv2.resize(S1[250:504,x0+8:x0+262],None,fx=0.5,fy=0.5,interpolation=cv2.INTER_AREA)),fw_,fh_,300+i) for i,x0 in enumerate((32,338,645,951))]
+gm=base[2000*HD:2200*HD,1500*HD:1800*HD].reshape(-1,3).mean(0)
+yy_,xx_=np.mgrid[0:fh_,0:fw_].astype(np.float32)
+sd_=np.random.default_rng(7)
+seeds=np.array([(sd_.uniform(.08,.92)*fw_,sd_.uniform(.12,.88)*fh_) for _ in range(11)],np.float32)
+dd=np.stack([np.hypot(xx_-sx,(yy_-sy)*1.25) for sx,sy in seeds],0)
+o_=np.argsort(dd,0); lab_=o_[0]; d1=np.take_along_axis(dd,o_[:1],0)[0]; d2=np.take_along_axis(dd,o_[1:2],0)[0]
+bund=sstep(1-(d2-d1)/9.0)
+cell_t=[0,1,2,3,1,0,2,1,3,0,1]
+F=np.zeros((fh_,fw_,3),np.float32)
+for i in range(len(seeds)):
+    mk=(lab_==i)[...,None]; F=np.where(mk,tl[cell_t[i]],F)
+F=F*0.9+gm*0.1
+bc=np.array([128,112,70],np.float32)*(1+0.1*fbm(20,411,2,fw_,fh_)[...,None])
+F=F*(1-0.85*bund[...,None])+bc*0.85*bund[...,None]
+sup=(np.abs((xx_-fw_/2)/(fw_/2))**3.2+np.abs((yy_-fh_/2)/(fh_/2))**3.2)
+al=sstep((1.0-sup+0.22*fbm(60,412,2,fw_,fh_))/0.28)[...,None]
 reg=base[FY0*HD:FY1*HD,FX0*HD:FX1*HD]; base[FY0*HD:FY1*HD,FX0*HD:FX1*HD]=reg*(1-al)+F*al
+del dd,o_,tl,F
 Cf=np.clip(base,0,255).astype(np.uint8); del base
 Image.fromarray(Cf[:,:2*CW]).save(OUT+'ground_w.jpg',quality=72,optimize=True)
 Image.fromarray(Cf[:,2*CW:]).save(OUT+'ground.jpg',quality=70,optimize=True)
@@ -156,7 +163,7 @@ blocked=cv2.dilate(face.astype(np.uint8),np.ones((3,3),np.uint8)).astype(bool)&~
 cc=np.array(Image.open(BUILD+'coll_center.png').convert('RGB'))      # 2560 x 1280
 C=np.zeros((N,N,3),np.uint8); C[:,CW:]=cc
 C[:,:CW+OV]=np.where((np.concatenate([np.ones((N,CW),np.float32),1-Mx],1)>0.5)[...,None],0,C[:,:CW+OV])
-C[FY0:FY1,FX0:FX1,0]=0; C[FY0:FY1,FX0:FX0+14,0]=2
+C[FY0:FY1,FX0:FX1,0]=0
 C[...,0]=np.maximum(C[...,0],blocked*1)
 Image.fromarray(C).save(OUT+'coll.png',optimize=True)
 # ---------- 物件 ----------
@@ -276,51 +283,6 @@ for _ in range(80000):
 allo=[o for o in allo if not (FX0-24<o[1]<FX1+24 and FY0-70<o[2]<FY1+24)]
 grid.clear()
 for kk,x,y in allo: grid.setdefault((int(x//CS),int(y//CS)),[]).append((x,y,8))
-FR={'fhouse1':34,'fhouse2':40,'fshed':28,'fgran':22,'fbamb1':22,'fbamb2':14,'fwillow':24,'fpeach':18,'fbuf1':16,'fbuf2':16,'fhay':12,'fpond1':26,'fpond2':26,'frack':14,'fshrine':14,'ftools':8}
-def okf(x,y):
-    if not(24<x<N-24 and 24<y<N-24): return False
-    if x>=CW and cc[y,x-CW,0]!=0: return False
-    return okp(x,y)
-def hamlet(cx,cy,rx,ry,items):
-    for name,cnt in items:
-        n=0
-        for _ in range(6000):
-            x=int(cx+rng.uniform(-rx,rx)); y=int(cy+rng.uniform(-ry,ry))
-            if okf(x,y) and far(x,y,FR[name]): put(name,x,y,FR[name]); n+=1
-            if n>=cnt: break
-hamlet(1660,2145,150,10,[('fhouse2',1),('fhouse1',2),('fshed',1),('fgran',1)])
-hamlet(1660,2118,160,18,[('fbamb1',2),('fbamb2',2),('fpeach',2)])
-hamlet(1660,2270,140,70,[('fbuf1',2),('fbuf2',2)])
-hamlet(1900,2210,30,50,[('fpond1',1),('fpond2',1)])
-hamlet(1510,2150,10,6,[('fshrine',1)])
-hamlet(1845,2270,10,80,[('fhay',3),('ftools',2)])
-for cx,cy,its in ((1650,990,[('fhouse1',2),('fhouse2',1),('fshed',1),('fgran',1),('fhay',2)]),(1600,1560,[('fhouse1',2),('fshed',1),('fhay',2),('fpeach',1)])):
-    for dx_,dy_ in ((0,0),(120,0),(-120,40),(0,90),(150,80),(-60,-80)):
-        x_,y_=cx+dx_,cy+dy_
-        if okf(x_,y_) and not nearcl[y_,x_] and wdm[y_,x_-CW]>90: hamlet(x_,y_,70,45,its); break
-n_=0
-for _ in range(60000):
-    x=int(rng.integers(CW+30,N-30)); y=int(rng.integers(1300,N-30)); xl=x-CW
-    if seaz[y,xl] or cc[y,xl,0]!=0 or not(12<drv[y,xl]<40) or not okf(x,y) or not far(x,y,24): continue
-    put('fwillow',x,y,24); n_+=1
-    if n_>=4: break
-for _ in range(4000):
-    y=int(rng.integers(2120,2260)); xs_=np.where(cc[y,:,0]==0)[0]; xs_=xs_[(xs_+CW<2260)&(xs_+CW>2100)]
-    if len(xs_)==0: continue
-    x=int(xs_[np.argmax(wdm[y,xs_]<9)])+CW if (wdm[y,xs_]<9).any() else 0
-    if x and okf(x,y) and far(x,y,30): put('fdockboat',x,y,2); break
-n_=0
-for _ in range(30000):
-    x=int(rng.integers(2150,2330)); y=int(rng.integers(2050,2400))
-    if cc[y,x-CW,0]!=1 or seaz[y,x-CW] or not far(x,y,40): continue
-    put('fboat',x,y,2); n_+=1
-    if n_>=2: break
-n_=0
-for _ in range(60000):
-    x=int(rng.integers(CW+30,N-30)); y=int(rng.integers(1300,N-30)); xl=x-CW
-    if seaz[y,xl] or cc[y,xl,0]!=0 or not(10<drv[y,xl]<26) or not okf(x,y) or not far(x,y,16): continue
-    put('frack',x,y,14); n_+=1
-    if n_>=2: break
 print('objs',len(allo))
 size={**cw['size'],**sizes}
 cr={**cw['coll_r'],'mpine1':5,'mpine2':5,'mdead':5,'mrock':8}
