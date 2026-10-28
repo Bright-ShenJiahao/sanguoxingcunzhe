@@ -100,6 +100,47 @@ ROADS=[[(1500,1750),(1550,1450),(1650,1150),(1660,800),(1600,450)],[(1500,1750),
 rdist=np.full((N,N),1e4,np.float32)
 for i,pts in enumerate(ROADS): rdist=np.minimum(rdist,pline_dist(pts,warp=30,seed=20+i))
 road=sstep((9-rdist)/5)*(balpha<0.6)*(~water)*np.clip(0.75+0.35*fbm(60,215,2),0.4,1)
+# ---------- 蜀：峡谷河（蜀山脚 -> 峡谷 -> 东流汇入大河）----------
+SWP=[(560,2520),(800,2700),(1050,2880),(1250,2960),(1500,2995),(1850,2955),(2200,2880),(int(xc[2790]),2790)]
+sdS=pline_dist(SWP,warp=18,seed=40)
+swr=sdS/17.0+wob
+swater=swr<1.0
+sford=(np.abs(X-1550)<26)|(np.abs(X-1950)<26)
+water|=swater
+shallow|=swater&((swr>0.45)|sford)
+deep=water&~shallow
+# ---------- 蜀山（多层台地，南面崖壁）+ 峡谷两侧台地 ----------
+mr=np.sqrt(((X+fbm(200,51,2)*40-420)/390)**2+((Y+fbm(200,52,2)*40-2330)/330)**2)
+hm=4.6*np.clip(1-mr,0,1)**0.5
+LV=np.zeros((N,N),np.int8)
+for t in (1.0,2.0,3.0,3.9): LV+=(hm>=t+0.12*fbm(150,53+int(t),2)).astype(np.int8)
+can=pline_dist(SWP[:4],warp=25,seed=41)
+tt=np.clip((X-560)/(1250-560),0,1)
+canyon=(can<175)&(can>62)&(X>600)&(X<1230)&(Y>2450)
+LV=np.maximum(LV,canyon.astype(np.int8))
+LV[(can<62)&(X>560)&(X<1260)]=0
+FACE=44
+Tn=np.roll(LV,FACE,0); Tn[:FACE]=LV[:FACE]
+face=(Tn>LV)
+Bn=np.roll(LV,10,0); Bn[:10]=LV[:10]
+rim=(LV>Bn)
+gapn=cv2.GaussianBlur(fbm(160,57,2),(0,0),3)
+opening=(gapn<-0.75)&(can>62)              # 台地缺口：可以走上去
+face&=~opening; rim&=~opening
+face&=~swater; rim&=~swater
+outer=(hm<1.0)&(can>100)            # 峡谷台地外侧是缓坡，不出崖
+face&=~outer; rim&=~outer
+for mk_ in (face,rim):
+    n_,lb_,st_,_=cv2.connectedComponentsWithStats(mk_.astype(np.uint8),connectivity=8)
+    small=np.isin(lb_,[i for i in range(1,n_) if st_[i][4]<260]); mk_&=~small
+hc=sstep((260-can)/170)*((X>600)&(X<1230)&(Y>2450))*(can>62)
+Hs=cv2.GaussianBlur(np.maximum(hm,hc).astype(np.float32),(0,0),5)
+gx_=cv2.Sobel(Hs,cv2.CV_32F,1,0,ksize=3)/8; gy_=cv2.Sobel(Hs,cv2.CV_32F,0,1,ksize=3)/8
+hshade=np.clip(1-22*(gx_*0.6+gy_*0.8),0.72,1.25)
+f=face.astype(np.int32); cs=np.cumsum(f,0); rst=np.maximum.accumulate(np.where(f==0,cs,0),0); frun=(cs-rst).astype(np.int16); del cs,rst,f
+fsh=np.roll(cv2.GaussianBlur(face.astype(np.float32),(0,0),6),8,0)*(~face)
+cl=load('mountain_tex.png')[648:1183,663:1198][12:372].astype(np.float32); FH=FACE*HD
+Ct=cv2.resize(cl,(round(535*FH/360),FH),interpolation=cv2.INTER_AREA)*np.linspace(1.08,0.68,FH)[:,None,None]*np.array([0.86,0.92,0.84],np.float32)
 # ---------- 海上小岛 ----------
 isl=np.sqrt(((X-3065)/70)**2+((Y-3075)/45)**2)+wob*1.5
 def sdist(m):
@@ -131,6 +172,17 @@ for y0 in range(0,Wd,BH):
     rd=rows_up(road,y0,y1)[...,None]; gl2=col.mean(2,keepdims=True)/max(1,col.mean())
     pc=np.array([188,192,106],np.float32)*(1-w_[1])+np.array([176,178,184],np.float32)*w_[1]
     col=col*(1-0.6*rd)+pc*(0.82+0.3*gl2)*0.6*rd
+    lvb=rows_up(LV.astype(np.float32),y0,y1)[...,None]; col*=(1+0.035*lvb)
+    rr=np.repeat(frun[y0//HD:y1//HD],HD,0)[:, np.repeat(np.arange(N),HD)]
+    fm_=rr>0
+    if fm_.any():
+        ys_,xs_=np.nonzero(fm_); ri=np.clip(2*rr[ys_,xs_].astype(np.int32)-2+((ys_+y0)%2),0,FH-1)
+        col[ys_,xs_]=Ct[ri,xs_%Ct.shape[1]]
+    col*=(1-0.4*rows_up(fsh,y0,y1))[...,None]
+    rmk=rows_up(rim.astype(np.float32),y0,y1)[...,None]
+    col=col*(1-0.8*rmk)+Ct[FH//3][np.arange(Wd)%Ct.shape[1]][None]*0.8*rmk*0.8
+    col*=rows_up(hshade,y0,y1)[...,None]
+    rk=np.clip(lvb-1,0,2)/2*0.45; col=col*(1-rk)+tex('dry',y0,y1)*np.array([0.85,0.88,0.86],np.float32)*rk
     # 河
     sw=rows_up(swd,y0,y1); wat=tex('water',y0,y1)*np.array([0.92,0.98,1.02],np.float32)*(1-0.1*rows_up(deepf,y0,y1)[...,None])
     sh=cv2.GaussianBlur(rows_up(shallow,y0,y1),(0,0),14)[...,None]
@@ -145,6 +197,8 @@ for y0 in range(0,Wd,BH):
         if a1<=a0: continue
         old[a0-y0:a1-y0,dx0*HD:dx0*HD+(sx1-sx0)*HD]=OG[a0-dy0*HD+sy0*HD:a1-dy0*HD+sy0*HD,sx0*HD:sx1*HD]
     col=col*(1-ba)+old*ba
+    sv=rows_up(sdS,y0,y1); sm=(rows_up(swr,y0,y1)<1.0)[...,None]&(ba>0.01)
+    col=np.where(sm,wat,col)
     iv=rows_up(isl,y0,y1); sand=sstep((1.0-iv)/0.12)[...,None]; gin=sstep((0.8-iv)/0.12)[...,None]
     col=col*(1-sand)+np.array([206,190,140],np.float32)*sand
     col=col*(1-gin)+tex('grass',y0,y1)*0.95*gin
@@ -161,6 +215,8 @@ for i,(nm,(sx0,sy0,sx1,sy1),(dx0,dy0),ed) in enumerate(BLK):
     sl=(slice(dy0,dy0+sy1-sy0),slice(dx0,dx0+sx1-sx0)); m=balpha[sl]>0.5
     C[sl]=np.where(m,OC[sy0:sy1,sx0:sx1],C[sl])
 C[isl<1.0]=0
+C[swater&deep]=1; C[swater&shallow]=2
+C[cv2.dilate((face|rim).astype(np.uint8),np.ones((3,3),np.uint8)).astype(bool)]=1
 C[strm&deep]=1
 # ---------- 物件 ----------
 SP={}
@@ -186,13 +242,15 @@ for i,(nm,(sx0,sy0,sx1,sy1),(dx0,dy0),ed) in enumerate(BLK):
             if balpha[ny,nx]<=0.85 or k not in SP: continue
             if i==1 and RS[max(0,min(1479,y-6)):y+7,max(0,x-1280-int(rad(k))):x-1280+int(rad(k))+1].any(): continue
             if k=='mrock' and rng.random()<0.7: continue
+            if swr[ny,nx]<1.6: continue
             put(k,nx,ny)
 nold=len(objs)
 # 2) 新区域
 SPAWN=(1500,1750)
 wnear=cv2.dilate((C==1).astype(np.uint8)|(C==2),np.ones((25,25),np.uint8)).astype(bool)
+cliffz=cv2.dilate((face|rim).astype(np.uint8),np.ones((41,41),np.uint8)).astype(bool)|(LV>=3)
 fm=fbm(260,555,3); fm2=fbm(120,556,2)
-def free(x,y): return balpha[y,x]<0.15 and rdist[y,x]>14 and not wnear[y,x] and (x-SPAWN[0])**2+(y-SPAWN[1])**2>140**2 and 30<x<N-30 and 30<y<N-30
+def free(x,y): return not cliffz[y,x] and balpha[y,x]<0.15 and rdist[y,x]>14 and not wnear[y,x] and (x-SPAWN[0])**2+(y-SPAWN[1])**2>140**2 and 30<x<N-30 and 30<y<N-30
 def blob(x,y,lst): return max(((x-cx)/rx)**2+((y-cy)/ry)**2 for cx,cy,rx,ry in lst)
 SHU_F=[(330,2930,300,240),(860,2200,230,250),(820,3090,200,110)]
 def inshu(x,y): return min(((x-cx)/rx)**2+((y-cy)/ry)**2 for cx,cy,rx,ry in SHU_F)+0.25*fm2[y,x]<1.0
