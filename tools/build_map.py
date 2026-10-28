@@ -223,6 +223,10 @@ for ri,names,cnt,cond in RULES:
         put(k,x,y); n+=1
         if n>=cnt: break
     stat[RN[ri]+':'+names[0][:5]]=n
+# 独木桥 / 木板桥：放在支流上，桥下可以正常走
+for (bx,by),k in (((2100,2048),'fdock'),((1680,2600),'wlog'),((2020,2475),'wlog'),((2525,1718),'wlog')):
+    ys_,xs_=np.mgrid[by-40:by+41,bx-40:bx+41]; i=np.argmin(sdm[ys_,xs_]); x,y=int(xs_.flat[i]),int(ys_.flat[i])
+    cv2.circle(C,(x,y),int(shw[y,x])+6,0,-1); put(k,x,y); print('桥',k,x,y)
 n=0
 for _ in range(40000):
     x=int(rng.integers(1400,N-30)); y=int(rng.integers(1600,N-30))

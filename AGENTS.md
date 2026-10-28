@@ -52,3 +52,4 @@
 - `art_src/characters/hero_walk_4styles.png`：4 行 × 8 帧（前2待机 + 后6走路）：光头、军人短寸、古代束发髻、高马尾。`python3 tools/slice_hero_m.py art_src/characters/hero_walk_4styles.png` 切成 `assets/characters/hero_m/r{行}_w{帧}.png` 并写 `data/hero_m.json`（含前/后手位置），再跑 `tools/outline.py`。
 - 身体大小按白 T 与默认男主 hero_b 对齐；游戏里选中某个发型才下载那一套。默认男主（乱发）仍是 hero_b。
 - 男主发型的骑马版（`art_src/characters/riders/rider_male_5styles.png`）和女主骑手暂未接入。
+- 注意：assets/map/sprites 里的 wreed/wcat 已缩到 0.55 倍、fdock ×1.7、wlog ×1.5（直接改的成品图）；重跑 build_mountain.py 会覆盖回原尺寸。
