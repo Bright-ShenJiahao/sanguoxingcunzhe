@@ -14,7 +14,7 @@ export function createWeather(){
  let kind=forced||'clear',inten=0,target=forced?1:0,next=null,evReg=null;
  const rain=[],snow=[],splash=[];
  // 各地的随机天气：[天气, 权重]；大部分时间晴天，幽州长时间下雪
- const LOCAL={'幽州·塞外':{p:.85,gap:[6000,15000],dur:[60000,120000],ev:[['lightsnow',.55],['heavysnow',.45]]},
+ const LOCAL={'幽州·塞外':{p:.5,gap:[30000,60000],dur:[30000,50000],ev:[['heavysnow',1]]},
   '北方草原':{p:.45,gap:[40000,80000],dur:[25000,45000],ev:[['wind',.8],['overcast',.2]]},
   '西凉':{p:.45,gap:[40000,80000],dur:[25000,45000],ev:[['sand',.7],['wind',.3]]},
   '中原':{p:.35,gap:[45000,90000],dur:[25000,45000],ev:[['lightrain',.5],['overcast',.5]]},
@@ -82,18 +82,23 @@ export function createWeather(){
  const NAMES=[['wn','北境·大雪'],['ws','南方·多雨'],['ww','西陲·干旱'],['we','东滨·海雾']];
  let zname='中原',ztime=-1e9,zfirst=true;
  const ZS={wn:0,ws:0,ww:0,we:0},RK={'幽州·塞外':'wn','江南':'ws','西凉':'ww','蜀':'we'};
+ let snowBase=0;
  function draw(c,now,dt,VW,VH,hx,hy,WW,WH,rg){
   update(dt,now,rg);
   let nm=rg||'中原';
   if(nm!==zname){zname=nm;if(!zfirst||nm!=='中原')ztime=now}zfirst=false;
-  const gi=inten,ys=rg==='幽州·塞外'?1:0,wd=rg==='西凉'?.35:0;
+  snowBase+=((rg==='幽州·塞外'?1:0)-snowBase)*Math.min(1,dt*0.6);
+  const gi=inten,ys=snowBase,wd=rg==='西凉'?.35:0;
   c.save();
   if(gi>.01&&kind==='overcast'){c.fillStyle=`rgba(40,52,72,${.2*gi})`;c.fillRect(0,0,VW,VH)}
   if(gi>.01&&kind==='fog')drawFog(c,now,VW,VH,gi);
   if(wd>0||(gi>.01&&kind==='sand'))drawDry(c,now,dt,VW,VH,Math.max(wd,kind==='sand'?gi:0));
   if(gi>.01&&(kind==='wind'||kind==='sand'))drawWind(c,now,dt,VW,VH,gi);
   if(ys)snowGround(c,VW,VH,ys);
-  if(gi>.01&&RAIN[kind])drawRain(c,now,dt,VW,VH,gi,RAIN[kind]);else if(gi>.01&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
+  if(gi>.01&&RAIN[kind])drawRain(c,now,dt,VW,VH,gi,RAIN[kind]);
+  else if(gi>.3&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
+  else if(ys>.01)drawSnow(c,now,dt,VW,VH,ys,SNOW.lightsnow);          // 幽州平时一直小雪，暴雪时换大雪
+  else if(gi>.01&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
   drawTime(c,VW,VH,clock(now));
   // 进入新地区时的名字提示
   const a=now-ztime;if(a<3000){const al=a<300?a/300:a>2300?(3000-a)/700:1;c.globalAlpha=al;c.font='bold 11px "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(8,14,24,.85)';c.strokeText(zname,VW/2,30);c.fillStyle='#f7e3a6';c.fillText(zname,VW/2,30)}
