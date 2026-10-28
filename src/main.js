@@ -10,7 +10,7 @@ const D={...W,...CH,gt:[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),coll:'assets/map/
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),WW=D.WW,WH=D.WH||D.WW,HD=D.HD;
 let VW=480,VH=300,SC=HD;
-function fit(){const dpr=Math.min(2,devicePixelRatio||1),k=Math.max(1.5,innerHeight/300);const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;VW=W/SC;VH=H/SC}
+function fit(){const dpr=Math.min(2,devicePixelRatio||1),k=Math.max(2,Math.min(4,Math.round(innerHeight/380)));const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;VW=W/SC;VH=H/SC}
 addEventListener('resize',()=>{if(!menu?.visible)fit()});
 const $=id=>document.getElementById(id);
 const keys={};let joy=null;
