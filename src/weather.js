@@ -88,7 +88,7 @@ export function createWeather(){
   update(dt,now,rg);
   let nm=rg||'中原';
   if(nm!==zname){zname=nm;if(!zfirst||nm!=='中原')ztime=now}zfirst=false;
-  snowBase+=((rg==='幽州·塞外'?1:0)-snowBase)*Math.min(1,dt*0.6);
+  snowBase+=((rg==='幽州·塞外'?1:0)-snowBase)*Math.min(1,dt*1.5);
   const gi=inten,ys=snowBase,wd=rg==='西凉'?.35:0;
   c.save();
   if(gi>.01&&kind==='overcast'){c.fillStyle=`rgba(40,52,72,${.2*gi})`;c.fillRect(0,0,VW,VH)}

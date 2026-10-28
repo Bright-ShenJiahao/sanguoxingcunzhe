@@ -279,7 +279,7 @@ for i,(nm,(sx0,sy0,sx1,sy1),(dx0,dy0),ed) in enumerate(BLK):
     for k,x,y in L['objs']:
         if sx0<=x<sx1 and sy0<=y<sy1:
             nx,ny=x-sx0+dx0,y-sy0+dy0
-            if balpha[ny,nx]<=0.85 or k not in SP: continue
+            if balpha[ny,nx]<=0.5 or k not in SP: continue
             if i==1 and RS[max(0,min(1479,y-6)):y+7,max(0,x-1280-int(rad(k))):x-1280+int(rad(k))+1].any(): continue
             if k=='mrock' and rng.random()<0.7: continue
             if swr[ny,nx]<1.6: continue
@@ -291,7 +291,7 @@ wnear=cv2.dilate((C==1).astype(np.uint8)|(C==2),np.ones((25,25),np.uint8)).astyp
 icez=cv2.dilate(icem.astype(np.uint8),np.ones((17,17),np.uint8)).astype(bool)
 cliffz=cv2.dilate((face|rimC|wfall).astype(np.uint8),np.ones((41,41),np.uint8)).astype(bool)|(LV>=3)
 fm=fbm(260,555,3); fm2=fbm(120,556,2)
-def free(x,y): return not icez[y,x] and not cliffz[y,x] and balpha[y,x]<0.15 and rdist[y,x]>14 and not wnear[y,x] and (x-SPAWN[0])**2+(y-SPAWN[1])**2>140**2 and 30<x<N-30 and 30<y<N-30
+def free(x,y): return not icez[y,x] and not cliffz[y,x] and balpha[y,x]<0.6 and rdist[y,x]>14 and not wnear[y,x] and (x-SPAWN[0])**2+(y-SPAWN[1])**2>140**2 and 30<x<N-30 and 30<y<N-30
 def blob(x,y,lst): return max(((x-cx)/rx)**2+((y-cy)/ry)**2 for cx,cy,rx,ry in lst)
 SHU_F=[(330,2930,300,240),(860,2200,230,250),(820,3090,200,110)]
 def inshu(x,y): return min(((x-cx)/rx)**2+((y-cy)/ry)**2 for cx,cy,rx,ry in SHU_F)+0.25*fm2[y,x]<1.0
@@ -302,12 +302,12 @@ RULES=[ # 区域, 素材, 数量, 条件
  (3,['broad1','broad2','broad3','pine1'],22,lambda x,y:fm[y,x]>1.35),
  (2,['broad2','pine2'],10,lambda x,y:fm[y,x]>1.5),
  (5,['broad1','broad2','broad3','broad4','pine1','pine2'],200,lambda x,y:fm[y,x]>0.7 or fm2[y,x]>1.5),
- (1,['nbush1','nbush2','nbush3','nbush4','nbush5','nbush6'],90,lambda x,y:True),
+ (1,['nbush1','nbush2','nbush3','nbush4','nbush5','nbush6'],130,lambda x,y:True),
  (4,['bushL1','bushL2','bushM1','bushM2','bushS1','bushS2'],240,lambda x,y:inshu(x,y) or fm[y,x]>0.6),
  (3,['bushM1','bushS1','bushS2'],50,lambda x,y:True),
  (2,['bushS1','bushS2'],30,lambda x,y:True),
  (5,['bushM1','bushM2','bushS1','bushS2'],60,lambda x,y:True),
- (1,['ntuft1','ntuft2','ntuft3','ntuft4','ntuft5','ntuft6'],180,lambda x,y:True),
+ (1,['ntuft1','ntuft2','ntuft3','ntuft4','ntuft5','ntuft6'],420,lambda x,y:True),
  (2,['dry1','dry2','tuft1','tuft2'],230,lambda x,y:True),
  (3,['tuft1','tuft2','tuft3','tuft4','flowW','flowY'],150,lambda x,y:True),
  (4,['tuft1','tuft3','tuft4'],120,lambda x,y:True),
