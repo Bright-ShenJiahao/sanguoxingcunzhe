@@ -41,7 +41,7 @@ for(let r=0;r<4;r++)SETS['m'+(r+1)]={pre:'hm'+r+'_',size:[HM.size[0]/2,HM.size[1
 for(let r=0;r<5;r++)SETS['f'+r]={pre:'hh'+r+'_',size:[HN.size[0]/2,HN.size[1]/2],grip:HN.rows[r],walk:[2,3,4,5,6,7,8]};
 let hairG=false,weaponAttack=null,pj=[],CM,mmc,wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
-const AT=({n:[.75,.1],s:[.75,.94],w:[.2,.58],e:[.94,.75]})[new URLSearchParams(location.search).get('at')]||[.75,.75];
+const AT=({n:[.75,.1],s:[.75,.94],w:[.12,.79],e:[.94,.75]})[new URLSearchParams(location.search).get('at')]||[.75,.75];
 const hero={x:WW*AT[0],y:WH*AT[1],face:1};const CO=objs.filter(o=>o.r);
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WH)return 1;return CM[(y*WW+x)*4]}
 function blocked(x,y){
