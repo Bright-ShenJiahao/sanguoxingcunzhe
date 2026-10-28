@@ -6,7 +6,7 @@
 - 旧画风（水墨、粗像素地图）已移除。
 
 ## 尺寸与坐标
-- 逻辑画布 480×300，渲染 960×600（HD=2）；世界 2560×2560 逻辑像素：西列 x<1280 为山地峡谷（灰盒），中列为北雪(y<1280)南草(y≥1280)，出生点在草地中央 1920,1920；地面分两张图 ground_w.jpg(西)、ground.jpg(中)。
+- 逻辑画布 480×300，渲染 960×600（HD=2）；世界 3200×3200 逻辑像素，分区：西凉(西北)、幽州·塞外(东北雪原)、北方草原、中原(出生点 1500,1750)、蜀(西南)、江南(东南，河口入海)。地面是 2×2 分块 assets/map/g{x}{y}.jpg（每块 1600 逻辑像素），区域名查 world.json 的 rmap/rnames。
 - 主角高约 25 逻辑像素；精灵脚底为锚点，按 y 排序绘制。
 - coll.png：R=1 深水/阻挡，R=2 浅滩/水洼（减速 ×0.55）。树、石底部有圆形碰撞（coll_r）。
 
@@ -33,7 +33,7 @@
 主角 B 走路 6–8 帧（左右腿交替）、劈/横扫/撩、受击/倒地/起身、各握法；武器细像素重绘；黄巾 12 帧 × 多兵种。
 
 ## 重新生成地图
-`tools/build_world.sh`：依次 build_world.py（草地区）→ build_snow.py（北雪，拼在草地北边）→ build_mountain.py（西部山地，写 assets/map/ground.jpg、ground_w.jpg、coll.png、data/world.json），中间产物在 art_src/build/。素材在 art_src/map（snow.png 雪地、snow_trees.png、snow_water.png 冰河）。
+`tools/build_world.sh` → `tools/build_map.py`：旧的西凉/雪原/江南块从 art_src/build/legacy_*（扩图前成品）整块平移保留，其余区域按规则生成；主河在新区域接上；物件统一摆放（按素材实际宽度算间距、禁放水边/出生点），最后打印重叠数和未使用素材，并输出 art_src/build/preview_map.png、preview_objs.png。
 
 ## 协作规则（第一次接手先读这里）
 1. 运行：`python3 -m http.server 8000`，打开 http://localhost:8000 ，能看到地图、人物、可操作即正常。

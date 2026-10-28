@@ -59,13 +59,14 @@ export function createWeather(){
  // 区域气候：按主角在地图上的位置（北雪、南雨、西旱、东雾，中间随机天气）
  const NAMES=[['wn','北境·大雪'],['ws','南方·多雨'],['ww','西陲·干旱'],['we','东滨·海雾']];
  let zname='中原',ztime=-1e9,zfirst=true;
- function draw(c,now,dt,VW,VH,hx,hy,WW,WH){
+ const ZS={wn:0,ws:0,ww:0,we:0},RK={'幽州·塞外':'wn','江南':'ws','西凉':'ww','蜀':'we'};
+ function draw(c,now,dt,VW,VH,hx,hy,WW,WH,rg){
   update(dt,now);
   let wn=0,ws=0,ww=0,we=0;
-  if(!forced&&hx!=null){const u=hx/WW,v=hy/(WH||WW),r=a=>Math.max(0,Math.min(1,a)),g=WH?r((v-.45)/.1):1;const gn=WH?r((u-.45)/.1):1;wn=(WH?r((.55-v)/.12):r((.36-v)/.18))*gn;ws=(WH?r((v-.82)/.1):r((v-.64)/.18))*gn;ww=WH?r((.45-u)/.1):r((.36-u)/.18)*g;we=WH?r((u-.86)/.08)*g:r((u-.64)/.18)*g;const sm=wn+ws+ww+we;if(sm>1){wn/=sm;ws/=sm;ww/=sm;we/=sm}}
+  if(!forced&&rg){for(const k in ZS){const tg=RK[rg]===k?1:0;ZS[k]+=(tg-ZS[k])*Math.min(1,dt*0.8)}({wn,ws,ww,we}=ZS)}
   const wc=1-(wn+ws+ww+we),gi=inten*wc,Z={wn,ws,ww,we};
   // 地区名提示
-  let nm='中原';for(const [k,t] of NAMES)if(Z[k]>=.5)nm=t;
+  let nm=rg||'中原';
   if(nm!==zname){zname=nm;if(!zfirst||nm!=='中原')ztime=now}zfirst=false;
   c.save();
   if(gi>.01&&kind==='overcast'){c.fillStyle=`rgba(40,52,72,${.2*gi})`;c.fillRect(0,0,VW,VH)}
