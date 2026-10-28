@@ -90,14 +90,27 @@ hs=cv2.GaussianBlur(hs,(0,0),10)
 gx=cv2.Sobel(hs,cv2.CV_32F,1,0,ksize=3)/8; gy=cv2.Sobel(hs,cv2.CV_32F,0,1,ksize=3)/8
 shade=np.clip(1-12*(gx*0.6+gy*0.8)+0.015*h,0.85,1.18)
 base*=up(shade)[...,None]*up(0.93+0.035*Hc)[...,None]
+# 雪岩崖壁条纹理
+def snow_strip():
+    T=load('snowcliff.png'); hard=((np.minimum(T[...,0],T[...,2]).astype(np.int32)-T[...,1])<70).astype(np.uint8)
+    k,lb,st,_=cv2.connectedComponentsWithStats(cv2.dilate(hard,np.ones((9,9),np.uint8)))
+    cs=sorted([st[i] for i in range(1,k) if st[i][4]>3000 and st[i][1]<300],key=lambda c:c[0])[:3]
+    parts=[]
+    for x,y,w,h_,_ in cs:
+        p=T[y+int(h_*.06):y+int(h_*.86),x+8:x+w-8].copy()
+        m=((np.minimum(p[...,0],p[...,2]).astype(np.int32)-p[...,1])>60).astype(np.uint8)
+        p=cv2.inpaint(p,cv2.dilate(m,np.ones((5,5),np.uint8)),5,cv2.INPAINT_TELEA)
+        parts.append(cv2.resize(p,(round(p.shape[1]*FH/p.shape[0]),FH),interpolation=cv2.INTER_AREA))
+    return np.concatenate(parts,1).astype(np.float32)
+Cs=snow_strip(); print('snow strip',Cs.shape)
 # 崖面 + 崖脚阴影
 fH=np.repeat(np.repeat(face,2,0),2,1)
 f=fH.astype(np.int32); cs=np.cumsum(f,axis=0); reset=np.maximum.accumulate(np.where(f==0,cs,0),axis=0); run=cs-reset; del cs,reset,f
 ys_,xs2=np.nonzero(fH)
 rows=np.minimum(run[ys_,xs2]-1,FH-1)
 base[ys_,xs2]=Ct[rows,xs2%Ct.shape[1]]
-sn=(xs2>=2*(CW+OV))&(ys_<2*1300)
-base[ys_[sn],xs2[sn]]=base[ys_[sn],xs2[sn]]*0.5+np.array([196,203,216],np.float32)*0.5
+sn=(xs2>=2*(CW+60))&(ys_<2*1300)
+base[ys_[sn],xs2[sn]]=Cs[rows[sn],xs2[sn]%Cs.shape[1]]
 del run,ys_,xs2,rows
 fa=cv2.GaussianBlur(face.astype(np.float32),(0,0),7); fa=np.roll(fa,10,0)*(1-face)
 base*=(1-0.42*up(fa))[...,None]
@@ -150,6 +163,8 @@ spr={n:to_sprite(a,hg) for n,a,hg in zip(mn,comps,mh)}
 wn=['wreed1','wreed2','wreed3','wreed4','wcat1','wcat2','wcat3','wcat4','wlily1','wlily2','wlily3','wlily4','wtuft','wstone','wlog','wpud']
 wh=[70,62,46,64,66,64,68,44,30,34,30,26,28,20,22,26]
 for n,a_,hg in zip(wn,extract('wetland.png',3000,16,313),wh): spr[n]=to_sprite(a_,hg)
+sc=extract('snowcliff.png',3000,12,313)[3:]
+for n,a_,hg in zip(['srock1','srock2','srock3','srub1','srub2','srub3','sicerock','sreed','sice'],sc,[46,32,20,34,26,16,26,36,14]): spr[n]=to_sprite(a_,hg)
 for n,im in spr.items(): im.save(OUT+'sprites/'+n+'.png',optimize=True)
 sizes={n:[im.width/HD,im.height/HD] for n,im in spr.items()}
 bl_d=cv2.dilate(blocked.astype(np.uint8),np.ones((25,25),np.uint8)).astype(bool)
@@ -207,9 +222,19 @@ for _ in range(60000):
     elif r<0.9 and wd<24 and far(x,y,14): put('wstone',x,y,14)
     elif r<0.94 and wd<30 and far(x,y,18): put('wpud',x,y,18)
     elif r<0.96 and far(x,y,22): put('wlog',x,y,22)
+# 雪地：岩石在崖脚，碎石堆在崖脚，冰河岸边小件
+for _ in range(80000):
+    x=int(rng.integers(CW+OV+20,N-20)); y=int(rng.integers(30,1290))
+    if cc[y,x-CW,0]!=0 or bl_d[y,x]: continue
+    wd=wdm[y,x-CW]; r=rng.random()
+    if nearcl[y,x] and not faceband[y,x]:
+        if r<0.012 and far(x,y,18): put('srock'+str(1+int(rng.integers(3))),x,y,18)
+        elif r<0.03 and far(x,y,14): put('srub'+str(1+int(rng.integers(3))),x,y,14)
+    elif 8<wd<50 and r<0.02 and far(x,y,16): put(['sicerock','sreed','sice'][int(rng.integers(3))],x,y,16)
 print('objs',len(allo))
 size={**cw['size'],**sizes}
 cr={**cw['coll_r'],'mpine1':5,'mpine2':5,'mdead':5,'mrock':8}
+cr.update({'srock1':14,'srock2':10,'srock3':6,'sicerock':8})
 for k_ in ('bushL1','bushL2'): cr.pop(k_,None)
 b=cw['bridge']; bw=b['walk']
 wj={'WW':N,'WH':N,'HD':HD,'size':size,'coll_r':cr,'objs':allo,'bridge':{'x':b['x']+CW,'y':b['y'],'walk':[bw[0]+CW,bw[1],bw[2]+CW,bw[3]]},
