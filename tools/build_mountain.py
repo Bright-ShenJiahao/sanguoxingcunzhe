@@ -114,11 +114,10 @@ base[ys_[sn],xs2[sn]]=Cs[rows[sn],xs2[sn]%Cs.shape[1]]
 rmk=np.zeros((N,N),np.uint8); rmk[:1480,CW:]=np.load(BUILD+'snow_river.npy').astype(np.uint8)
 rmk=cv2.dilate(rmk,np.ones((1,9),np.uint8)); rmH=np.repeat(np.repeat(rmk,2,0),2,1)
 fw=rmH[ys_,xs2]>0
-cn=vnoise(5,321,Wd,8)[0]; cn=(cn-cn.mean())/(cn.std()+1e-6)
-t_=np.clip(0.5+0.28*cn[xs2[fw]]+0.25*(rows[fw]/FH),0,1)[:,None]
-ice_=np.array([214,236,248],np.float32)*(1-t_)+np.array([112,168,208],np.float32)*t_
-ice_[rows[fw]<9]=[236,244,250]
-base[ys_[fw],xs2[fw]]=ice_
+icet=tile_big(seamless(load('snow_water.png')),Wd,Wd,555)
+shd=(0.9+0.1*np.clip(rows[fw]/FH,0,1)-0.12*(rows[fw]<8))[:,None]
+base[ys_[fw],xs2[fw]]=icet[ys_[fw],xs2[fw]]*shd
+del icet
 print('waterfall px',int(fw.sum()))
 del run,ys_,xs2,rows
 fa=cv2.GaussianBlur(face.astype(np.float32),(0,0),7); fa=np.roll(fa,10,0)*(1-face)
