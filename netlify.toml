@@ -2,6 +2,8 @@
   # 只发布玩游戏需要的文件，不把 art_src（原图底稿）、docs、tools 发布出去
   command = "rm -rf dist && mkdir dist && cp -r index.html src data assets dist/"
   publish = "dist"
+  # 只部署 main，其他分支（如 preview 试玩分支）跳过构建，节省额度
+  ignore = "test \"$BRANCH\" != \"main\""
 
 [functions]
   directory = "netlify/functions"

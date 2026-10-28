@@ -41,7 +41,14 @@
 3. 游戏逻辑都在 `src/main.js`；人物/武器素材清单在 `data/characters.json`，骑马数据在 `data/ride.json`。
 4. 接入新美术：把 PNG 放进 `assets/characters/...`，在 `data/*.json` 登记路径和尺寸，再在 `src/main.js` 里引用；保持 脚底锚点、画布大小 与旧图一致。
 5. 改完只做基本检查：页面能打开、控制台无报错、能走动。不需要写大量测试。
-6. 一次提交只做一件事，提交信息用中文，直接推到 `main`（Netlify 会自动部署）。
+6. 一次提交只做一件事，提交信息用中文。**发布流程（先试玩、确认后再上线，节省 Netlify 构建额度）**：
+   - 日常改动只在本地 `git commit`，不要推 `main`。
+   - 需要用户看效果时：`git push origin HEAD:preview`，给出试玩网址 `https://raw.githack.com/Bright-ShenJiahao/sanguoxingcunzhe/preview/index.html`（测试参数照常加在后面，如 `?x=1500&y=1750&weather=blizzard&hour=子`）。
+   - 只有用户明确说“推送”或“上线”时才推 `main`：先 `git pull --rebase`，再 `git push`。禁止 force push。
+   - netlify.toml 里设置了 `ignore`，Netlify 只构建 main，其他分支跳过。
+   - 本项目是纯静态文件，不需要打包；如果以后加了打包步骤，推 preview 前必须先在本地打包并把结果一起提交（试玩网址只读仓库里的现成文件）。
+   - 试玩网址没有后端：Netlify Functions（如 /api/scores 排行榜）、云存档等用不了，属正常；需要时在调试模式里用本地测试数据代替。
+   - 每次交付说明三件事：改了什么、试玩网址、main 上还有几个未推送的提交。
 
 ## 精灵轮廓统一（细而黑，和女主一致）
 - 男主、骑马（马和骑手）、全部怪物的精灵在切图后要跑一次 `python3 tools/outline.py`（原地描一圈近黑细轮廓，不改尺寸和锚点）。
