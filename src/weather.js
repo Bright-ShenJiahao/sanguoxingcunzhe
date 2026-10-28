@@ -6,15 +6,16 @@ const RAIN={
  heavyrain:{n:440,wind:-100,v:[340,440],len:[8,14],tint:.5,a:.78,lw:1.1,splash:100}};
 const SNOW={
  lightsnow:{n:150,wind:-3,v:[14,26],tint:.22,white:.1,big:.35,haze:0},
- heavysnow:{n:430,wind:-24,v:[32,58],tint:.34,white:.2,big:.5,haze:.3}};
-const ALL=['lightrain','heavyrain','lightsnow','heavysnow','fog','overcast'];
+ heavysnow:{n:430,wind:-24,v:[32,58],tint:.34,white:.2,big:.5,haze:.3},
+ blizzard:{n:800,wind:-90,v:[60,100],tint:.42,white:.3,big:.6,haze:.55}};
+const ALL=['lightrain','heavyrain','lightsnow','heavysnow','blizzard','fog','overcast'];
 export function createWeather(){
  const q=new URLSearchParams(location.search).get('weather');
  const forced=ALL.includes(q)?q:null;
  let kind=forced||'clear',inten=0,target=forced?1:0,next=null,evReg=null;
  const rain=[],snow=[],splash=[];
  // 各地的随机天气：[天气, 权重]；大部分时间晴天，幽州长时间下雪
- const LOCAL={'幽州·塞外':{p:.5,gap:[30000,60000],dur:[30000,50000],ev:[['heavysnow',1]]},
+ const LOCAL={'幽州·塞外':{p:.5,gap:[30000,60000],dur:[30000,50000],ev:[['blizzard',1]]},
   '北方草原':{p:.45,gap:[40000,80000],dur:[25000,45000],ev:[['wind',.8],['overcast',.2]]},
   '西凉':{p:.45,gap:[40000,80000],dur:[25000,45000],ev:[['sand',.7],['wind',.3]]},
   '中原':{p:.35,gap:[45000,90000],dur:[25000,45000],ev:[['lightrain',.5],['overcast',.5]]},
@@ -56,7 +57,7 @@ export function createWeather(){
  function drawSnow(c,now,dt,VW,VH,i,P){
   c.fillStyle=`rgba(210,224,242,${P.tint*i})`;c.fillRect(0,0,VW,VH);
   c.fillStyle=`rgba(244,248,255,${P.white*i})`;c.fillRect(0,0,VW,VH);
-  const N=Math.floor(P.n*i);while(snow.length<460)snow.push({x:R(0,VW),y:R(0,VH),k:Math.random(),s:Math.random(),ph:R(0,6.3)});
+  const N=Math.floor(P.n*i);while(snow.length<820)snow.push({x:R(0,VW),y:R(0,VH),k:Math.random(),s:Math.random(),ph:R(0,6.3)});
   c.fillStyle=`rgba(255,255,255,${.92*i})`;
   for(let k=0;k<snow.length;k++){const p=snow[k],v=P.v[0]+(P.v[1]-P.v[0])*p.k;
    p.y+=v*dt;p.x+=(Math.sin(now*.0012+p.ph)*9+P.wind*1.4)*dt;if(p.y>VH+4){p.y=-4;p.x=R(0,VW+40)}if(p.x<-4)p.x+=VW+8;if(p.x>VW+4)p.x-=VW+8;
@@ -97,7 +98,7 @@ export function createWeather(){
   if(ys)snowGround(c,VW,VH,ys);
   if(gi>.01&&RAIN[kind])drawRain(c,now,dt,VW,VH,gi,RAIN[kind]);
   else if(gi>.3&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
-  else if(ys>.01)drawSnow(c,now,dt,VW,VH,ys,SNOW.lightsnow);          // 幽州平时一直小雪，暴雪时换大雪
+  else if(ys>.01)drawSnow(c,now,dt,VW,VH,ys,SNOW.heavysnow);          // 幽州平时一直下雪（原来的大雪），暴雪更大
   else if(gi>.01&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
   drawTime(c,VW,VH,clock(now));
   // 进入新地区时的名字提示
