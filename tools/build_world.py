@@ -65,9 +65,10 @@ sd=sdist(path)+fbm(22,41,2)*1.8
 Y,X=np.mgrid[0:WW,0:WW].astype(np.float32); yy=np.arange(WW,dtype=np.float32)
 xc=0.75*WW+110*np.sin(yy/210+0.6)+45*np.sin(yy/83+1.7)+30*fbm(160,57,2)[0]
 hw=30+9*np.sin(yy/140+2.0)+5*fbm(120,61,2)[0]
+hw=hw*(1+1.5*sstep((yy-700)/420))   # 南段大河
 dr=np.abs(X-xc[:,None])/hw[:,None]
 ford=np.zeros(WW,np.float32)
-for c0 in [330,850]: ford=np.maximum(ford,sstep(1-np.abs(yy-c0)/46))
+for c0 in [330,850,985]: ford=np.maximum(ford,sstep(1-np.abs(yy-c0)/46))
 pe=np.sqrt(((X-250)/105)**2+((Y-980)/62)**2); wob=fbm(70,73,2)*0.07
 se=np.sqrt(((X-1310)/450)**2+((Y-1310)/380)**2)+wob*1.6   # 东南角的大海
 dw=np.minimum(np.minimum(dr+wob,pe+wob*1.2),se); water=dw<1.0

@@ -252,13 +252,13 @@ for _ in range(90000):
     if seaz[y,xl]: continue
     sh=cc[y,xl,0]
     if sh==2 and rv[y,xl]:
-        if rng.random()<0.03 and far(x,y,22): put('wlily'+str(1+int(rng.integers(4))),x,y,22)
+        if rng.random()<(0.07 if y>2180 else 0.03) and far(x,y,22): put('wlily'+str(1+int(rng.integers(4))),x,y,22)
         continue
     if sh!=0 or bl_d[y,x]: continue
-    d=drv[y,xl]
-    if d<8 or d>26: continue
+    d=drv[y,xl]; mar=y>2180
+    if d<8 or d>(60 if mar else 26): continue
     r=rng.random()
-    if rng.random()>0.3: continue
+    if rng.random()>(0.55 if mar else 0.3): continue
     if r<0.8 and far(x,y,14): put('wreed'+str(1+int(rng.integers(4))) if rng.random()<.5 else 'wcat'+str(1+int(rng.integers(4))),x,y,14)
     elif r<0.95 and far(x,y,22): put('wlog',x,y,22)
 # 雪地：岩石在崖脚，碎石堆在崖脚，冰河岸边小件
@@ -302,6 +302,18 @@ for _ in range(60000):
     if seaz[y,xl] or cc[y,xl,0]!=0 or not(12<drv[y,xl]<40) or not okf(x,y) or not far(x,y,24): continue
     put('fwillow',x,y,24); n_+=1
     if n_>=7: break
+hamlet(2410,2085,60,50,[('fhouse1',2),('fshed',1),('fhay',2),('fpeach',1)])
+for _ in range(4000):
+    y=int(rng.integers(2120,2260)); xs_=np.where(cc[y,:,0]==0)[0]; xs_=xs_[(xs_+CW<2260)&(xs_+CW>2100)]
+    if len(xs_)==0: continue
+    x=int(xs_[np.argmax(wdm[y,xs_]<9)])+CW if (wdm[y,xs_]<9).any() else 0
+    if x and okf(x,y) and far(x,y,30): put('fdockboat',x,y,2); break
+n_=0
+for _ in range(30000):
+    x=int(rng.integers(2150,2330)); y=int(rng.integers(2050,2400))
+    if cc[y,x-CW,0]!=1 or seaz[y,x-CW] or not far(x,y,40): continue
+    put('fboat',x,y,2); n_+=1
+    if n_>=2: break
 n_=0
 for _ in range(60000):
     x=int(rng.integers(CW+30,N-30)); y=int(rng.integers(1300,N-30)); xl=x-CW
