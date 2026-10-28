@@ -125,6 +125,7 @@ function loop(now){
   const sx=f.x-cx,sy=f.y-cy;if(sx<-60||sx>VW+60||sy<-40||sy>VH+40)continue;const dir=Math.cos(f.a)>=0?1:-1,L=22*f.s,tw=Math.sin(f.p)*3*f.s;
   c.save();c.translate(sx,sy);c.scale(dir,1);c.fillStyle='rgba(8,32,66,.34)';c.beginPath();c.ellipse(0,0,L,L*.28,0,0,6.3);c.fill();c.beginPath();c.moveTo(-L*.8,0);c.lineTo(-L*1.5,-L*.34+tw);c.lineTo(-L*1.5,L*.34+tw);c.closePath();c.fill();c.restore()}
  contact(px,py,16);
+ c.save();c.font='7px monospace';c.textBaseline='bottom';c.fillStyle='rgba(0,0,0,.45)';c.fillRect(3,VH-13,64,10);c.fillStyle='#fff';c.fillText('x '+Math.round(hero.x)+'  y '+Math.round(hero.y),6,VH-5);c.restore();
  const items=[];
  for(const o of objs){const sx=o.x-cx,sy=o.y-cy;if(sx<-60||sx>VW+60||sy<-10||sy>VH+100)continue;
   const inx=Math.abs(hero.x-o.x)<o.w*.4,iny=hero.y<o.y-2&&hero.y>o.y-o.h*.9;const fade=/^(broad|pine|spire|bushL|nfir|nbare|nspire|nbush|fhouse|fshed|fgran|fbamb1|fwillow|fpeach)/.test(o.k);const ta=(fade&&inx&&iny)?.42:1;
