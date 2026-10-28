@@ -44,11 +44,27 @@ T=np.clip(T,0,1); T=cv2.GaussianBlur(T,(0,0),1.3)
 FACE=18                                           # 崖面高度（逻辑像素）
 Tn=np.roll(T,FACE,axis=0); Tn[:FACE]=T[:FACE]      # 每个像素取它北边 FACE 像素处的高度
 face=np.clip((Tn-T)*Q*1.2,0,1)                    # 北边更高 -> 这里是朝南的崖面
-blocked=(T>=0.5)|((face>0.35)&(Tn>=0.5))
+# ---------- 坡道：每段可爬的崖面开几条缺口，缺口处没有崖面、可通行 ----------
+Fm=((face>0.35)&(Tn<0.75)).astype(np.uint8)          # 通向山峰（最高层）的崖面不开坡
+nl,lab,st,_=cv2.connectedComponentsWithStats(Fm,connectivity=8)
+ramp=np.zeros((H,WL),np.float32); rr=np.random.default_rng(77); nramp=0
+for i in range(1,nl):
+    x,y,w,hg,area=st[i]
+    if area<1800 or w<70: continue
+    cnt=max(1,int(w//300))
+    for k_ in range(cnt):
+        cx=int(x+(k_+0.5+(rr.random()-0.5)*0.5)*w/cnt)
+        ys_=np.where(lab[:,max(0,cx-40):cx+40]==i)[0]
+        if len(ys_)==0: continue
+        cv2.rectangle(ramp,(cx-26,int(ys_.min())-8),(cx+26,int(ys_.max())+12),1.0,-1); nramp+=1
+ramp=np.clip(cv2.GaussianBlur(ramp,(0,0),9)*1.5,0,1)
+face=face*(1-ramp)
+blocked=(T>=0.75)|(face>0.35)
+print('ramps',nramp)
 gx=cv2.Sobel(cv2.GaussianBlur(h,(0,0),8),cv2.CV_32F,1,0,ksize=3)/8; gy=cv2.Sobel(cv2.GaussianBlur(h,(0,0),8),cv2.CV_32F,0,1,ksize=3)/8
 shade=np.clip(1-60*(gx*0.6+gy*0.8),0.8,1.25)
 up=lambda a:cv2.resize(a.astype(np.float32),(WL*HD,H*HD),interpolation=cv2.INTER_LINEAR)
-hH=up(h); shH=up(shade); TH=up(T); fH=up(face)
+hH=up(h); shH=up(shade); TH=up(T); fH=up(face); rH=up(ramp)[...,None]
 stops=[(0.0,(162,140,94)),(0.25,(140,120,86)),(0.5,(122,108,88)),(0.75,(128,122,114)),(1.0,(172,168,162))]
 col=np.zeros((H*HD,WL*HD,3),np.float32)
 xs=np.array([s[0] for s in stops],np.float32)
@@ -57,6 +73,11 @@ tile=seamless(cv2.cvtColor(cv2.imread(SRC+'grass.png'),cv2.COLOR_BGR2RGB),720).m
 tile=(tile-tile.mean())/(tile.std()+1e-6)
 big=np.tile(tile,(H*HD//720+2,WL*HD//720+2))[:H*HD,:WL*HD]
 col*=(1+0.10*big[...,None]+0.04*fbm(18,21,2,WL*HD,H*HD)[...,None])*shH[...,None]
+# 坡道：土黄色斜坡，带一道道台阶横纹
+yy_=np.arange(H*HD)[:,None]
+steps=np.where((yy_%(10*HD))<2*HD,0.93,1.0)[...,None]
+rc=np.array([158,136,98],np.float32)*steps*(0.92+0.12*np.sin(np.arange(WL*HD)[None,:,None]/9.0))
+col=col*(1-0.7*rH)+rc*0.7*rH
 # 崖面：深褐色竖纹，越靠崖脚越暗
 vs=cv2.resize(np.random.default_rng(5).random((8,(WL*HD)//3+3)).astype(np.float32),((WL*HD)//3*3+9,H*HD),interpolation=cv2.INTER_CUBIC)[:H*HD,:WL*HD]
 fc=np.array([88,72,60],np.float32)*(0.72+0.7*vs[...,None])
