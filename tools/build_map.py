@@ -74,6 +74,34 @@ ford=sstep(1-np.abs(yy-1760)/46)[:,None]
 pond=np.sqrt(((X-2170)/105)**2+((Y-2900)/62)**2)+wob*1.2      # 旧江南块左边被切掉的池塘补全
 water=((dr<1.0)&gap[:,None])|(pond<1.0)
 shallow=water&((dr>0.40)|(ford>0.5))&~(pond<0.66); deep=water&~shallow
+# ---------- 江南水网：支流 + 池塘 ----------
+def pline_dist(pts,warp=22,seed=0):
+    mk=np.ones((N,N),np.uint8); cv2.polylines(mk,[np.array(pts,np.int32)],False,0,1)
+    d=cv2.distanceTransform(mk,cv2.DIST_L2,5)
+    mx=(X+fbm(160,600+seed,2)*warp).astype(np.float32); my=(Y+fbm(160,700+seed,2)*warp).astype(np.float32)
+    return cv2.remap(d,mx,my,cv2.INTER_LINEAR,borderMode=cv2.BORDER_REPLICATE)
+STREAMS=[([(xc[1880],1880),(2600,1935),(2250,1995),(1950,2100),(1750,2250),(1650,2480),(1720,2720)],15),
+         ([(1950,2100),(1985,2350),(2060,2600),(2100,2860)],10),
+         ([(xc[1650],1650),(2650,1700),(2400,1735)],10)]
+sdm=np.full((N,N),1e4,np.float32); shw=np.ones((N,N),np.float32)
+for i,(pts,w) in enumerate(STREAMS):
+    d=pline_dist(pts,seed=i); sel=d/w<sdm/shw; sdm=np.where(sel,d,sdm); shw=np.where(sel,w,shw)
+sr=sdm/shw+wob
+PONDS=[(1720,2780,95,60),(2380,1745,70,45),(1580,2050,55,40)]
+pd=np.full((N,N),9.,np.float32)
+for cx,cy,rx,ry in PONDS: pd=np.minimum(pd,np.sqrt(((X-cx)/rx)**2+((Y-cy)/ry)**2)+wob*1.2)
+strm=(sr<1.0)&(balpha<0.5)
+water|=strm|(pd<1.0)
+shallow|=(strm&((sr>0.45)|(shw<12)))|((pd<1.0)&(pd>0.62))
+deep=water&~shallow
+# ---------- 道路：中原出发通往各区 ----------
+ROADS=[[(1500,1750),(1550,1450),(1650,1150),(1660,800),(1600,450)],[(1500,1750),(1200,1600),(950,1330)],
+       [(1500,1750),(1900,1790),(2400,1765),(int(xc[1760]-hw[1760]),1760)],[(1500,1750),(1250,2050),(1000,2400)]]
+rdist=np.full((N,N),1e4,np.float32)
+for i,pts in enumerate(ROADS): rdist=np.minimum(rdist,pline_dist(pts,warp=30,seed=20+i))
+road=sstep((9-rdist)/5)*(balpha<0.6)*(~water)*np.clip(0.75+0.35*fbm(60,215,2),0.4,1)
+# ---------- 海上小岛 ----------
+isl=np.sqrt(((X-3065)/70)**2+((Y-3075)/45)**2)+wob*1.5
 def sdist(m):
     m=m.astype(np.uint8); return cv2.distanceTransform(m,cv2.DIST_L2,5)-cv2.distanceTransform(1-m,cv2.DIST_L2,5)
 swd=sdist(water)
@@ -100,6 +128,9 @@ for y0 in range(0,Wd,BH):
     col=gr*(w_[3]+w_[4]*TINT['shu']+w_[5]*TINT['jn'])+stp*w_[2]
     col+=tex('snow',y0,y1)*w_[1]+tex('dry',y0,y1)*w_[0]
     col*=(1+rows_up(lo,y0,y1))[...,None]
+    rd=rows_up(road,y0,y1)[...,None]; gl2=col.mean(2,keepdims=True)/max(1,col.mean())
+    pc=np.array([188,192,106],np.float32)*(1-w_[1])+np.array([176,178,184],np.float32)*w_[1]
+    col=col*(1-0.6*rd)+pc*(0.82+0.3*gl2)*0.6*rd
     # 河
     sw=rows_up(swd,y0,y1); wat=tex('water',y0,y1)*np.array([0.92,0.98,1.02],np.float32)*(1-0.1*rows_up(deepf,y0,y1)[...,None])
     sh=cv2.GaussianBlur(rows_up(shallow,y0,y1),(0,0),14)[...,None]
@@ -114,6 +145,9 @@ for y0 in range(0,Wd,BH):
         if a1<=a0: continue
         old[a0-y0:a1-y0,dx0*HD:dx0*HD+(sx1-sx0)*HD]=OG[a0-dy0*HD+sy0*HD:a1-dy0*HD+sy0*HD,sx0*HD:sx1*HD]
     col=col*(1-ba)+old*ba
+    iv=rows_up(isl,y0,y1); sand=sstep((1.0-iv)/0.12)[...,None]; gin=sstep((0.8-iv)/0.12)[...,None]
+    col=col*(1-sand)+np.array([206,190,140],np.float32)*sand
+    col=col*(1-gin)+tex('grass',y0,y1)*0.95*gin
     out[y0:y1]=np.clip(col,0,255).astype(np.uint8)
     print('band',y0,flush=True)
 for ty in range(2):
@@ -126,6 +160,8 @@ C=np.zeros((N,N),np.uint8); C[deep]=1; C[shallow]=2
 for i,(nm,(sx0,sy0,sx1,sy1),(dx0,dy0),ed) in enumerate(BLK):
     sl=(slice(dy0,dy0+sy1-sy0),slice(dx0,dx0+sx1-sx0)); m=balpha[sl]>0.5
     C[sl]=np.where(m,OC[sy0:sy1,sx0:sx1],C[sl])
+C[isl<1.0]=0
+C[strm&deep]=1
 # ---------- 物件 ----------
 SP={}
 for f in os.listdir(OUT+'sprites'):
@@ -156,7 +192,7 @@ nold=len(objs)
 SPAWN=(1500,1750)
 wnear=cv2.dilate((C==1).astype(np.uint8)|(C==2),np.ones((25,25),np.uint8)).astype(bool)
 fm=fbm(260,555,3); fm2=fbm(120,556,2)
-def free(x,y): return balpha[y,x]<0.15 and not wnear[y,x] and (x-SPAWN[0])**2+(y-SPAWN[1])**2>140**2 and 30<x<N-30 and 30<y<N-30
+def free(x,y): return balpha[y,x]<0.15 and rdist[y,x]>14 and not wnear[y,x] and (x-SPAWN[0])**2+(y-SPAWN[1])**2>140**2 and 30<x<N-30 and 30<y<N-30
 def blob(x,y,lst): return max(((x-cx)/rx)**2+((y-cy)/ry)**2 for cx,cy,rx,ry in lst)
 SHU_F=[(330,2930,300,240),(860,2200,230,250),(820,3090,200,110)]
 def inshu(x,y): return min(((x-cx)/rx)**2+((y-cy)/ry)**2 for cx,cy,rx,ry in SHU_F)+0.25*fm2[y,x]<1.0
@@ -187,6 +223,24 @@ for ri,names,cnt,cond in RULES:
         put(k,x,y); n+=1
         if n>=cnt: break
     stat[RN[ri]+':'+names[0][:5]]=n
+n=0
+for _ in range(40000):
+    x=int(rng.integers(1400,N-30)); y=int(rng.integers(1600,N-30))
+    if balpha[y,x]>0.3 or rdist[y,x]<14: continue
+    d=sdm[y,x]-shw[y,x]
+    if C[y,x]==2 and strm[y,x] and n<300 and rng.random()<0.08:
+        k='wlily'+str(1+int(rng.integers(4)))
+        if far(x,y,rad(k)): put(k,x,y)
+        continue
+    if C[y,x]!=0 or not(4<d<18): continue
+    k=['wreed1','wreed2','wreed3','wcat1','wcat2','wcat3'][int(rng.integers(6))]
+    if far(x,y,rad(k)): put(k,x,y); n+=1
+    if n>=170: break
+stat['芦苇']=n
+for _ in range(3):
+    x=int(3065+rng.uniform(-30,30)); y=int(3075+rng.uniform(-15,15))
+    k=['broad1','pine2'][int(rng.integers(2))]
+    if far(x,y,rad(k)): put(k,x,y)
 print('old objs',nold,'new',len(objs)-nold,stat)
 # 灌木 -> 减速区
 BUSH=('bush','nbush','wreed','wcat')
