@@ -43,8 +43,8 @@ for i,(nm,(sx0,sy0,sx1,sy1),(dx0,dy0),ed) in enumerate(BLK):
 # ---------- 新区域的地貌权重 ----------
 wx=fbm(420,31,3)*95; wy=fbm(420,32,3)*95; X2=X+wx; Y2=Y+wy
 r_dry=sstep((1330-Y2)/130)*sstep((1100-X2)/130)
-r_snow=sstep((1330-Y2)/130)*sstep((X2-1080)/130)
-r_step=sstep((Y2-1290)/110)*sstep((1720-Y2)/140)*sstep((X2-1100)/140)
+r_snow=sstep((1530-Y2)/130)*sstep((X2-1080)/130)*np.maximum(sstep((1330-Y2)/130),sstep((X2-1500)/200))
+r_step=sstep((Y2-1290)/110)*np.minimum(1,sstep((Y2-1500)/110)+sstep((1500-X2)/200))*sstep((1850-Y2)/140)*sstep((X2-1100)/140)
 r_shu=sstep((Y2-1330)/130)*sstep((1180-X2)/150)
 r_jn=sstep((X2-1450)/170)*sstep((Y2-1650)/170)
 r_zy=np.full((N,N),0.28,np.float32)
@@ -117,6 +117,13 @@ deep=water&~shallow
 mr=np.sqrt(((X+fbm(200,51,2)*40-420)/390)**2+((Y+fbm(200,52,2)*40-2330)/330)**2)
 hm=4.6*np.clip(1-mr,0,1)**0.5
 LV=np.zeros((N,N),np.int8)
+# 雪原：一道东西向的雪岩台地（北高南低，崖面朝南），两端收进北边；两处缺口
+env=sstep((X-1180)/220)*sstep((2060-X)/220)
+yline=760+70*np.sin(X/170)+30*fbm(200,81,2)
+snowpl=(Y<yline)&(X>1180)&(X<2080)&(balpha<0.5)
+LV+=snowpl.astype(np.int8)
+icem=(np.sqrt(((X-1640)/160)**2+((Y-1010)/85)**2)+wob*1.4)<1.0          # 冰湖（可以走）
+icem&=balpha<0.5
 for t in (1.0,2.0,3.0,3.9): LV+=(hm>=t+0.12*fbm(150,53+int(t),2)).astype(np.int8)
 cis=np.clip(ci+0.25*fbm(120,61,2)*(ci>0.05),0,1)
 bank=(cis>0.5)&(can<260)
@@ -132,8 +139,8 @@ B3=np.roll(LV,3,0); B3[:3]=LV[:3]; rimV=(LV>B3)
 MPATH=[(860,2190),(740,2070),(540,2005),(320,2050),(170,2230),(210,2420),(360,2470),(470,2400),(520,2290),(430,2250),(410,2320)]
 mdist=pline_dist(MPATH,warp=8,seed=60)
 gapn=cv2.GaussianBlur(fbm(160,57,2),(0,0),3)
-opening=((gapn<-1.0)&(ci<0.2))|(mdist<20)
-outer=(hm<1.0)&(can>150)                                         # 峡谷山地外侧是缓坡，不出崖
+opening=((gapn<-1.0)&(ci<0.2)&(Y>1500))|(mdist<20)|(snowpl.any()&((np.abs(X-1400)<45)|(np.abs(X-1820)<45))&(Y<1100))
+outer=(hm<1.0)&(can>150)&(Y>1500)                                         # 峡谷山地外侧是缓坡，不出崖
 wfall=face0&swater&(ci<0.3)&~(lake<1.0)                                   # 河穿过崖壁 = 瀑布
 face=face0&~opening&~(swater&(ci<0.3))&~outer; rimC&=~opening&~outer&~swater; rimV&=~opening&~outer&~swater
 for mk_ in (face,rimC,rimV):
@@ -149,6 +156,17 @@ f=face.astype(np.int32); cs=np.cumsum(f,0); rst=np.maximum.accumulate(np.where(f
 f=wfall.astype(np.int32); cs=np.cumsum(f,0); rst=np.maximum.accumulate(np.where(f==0,cs,0),0); wrun=(cs-rst).astype(np.int16); del cs,rst,f
 fsh=np.roll(cv2.GaussianBlur(face.astype(np.float32),(0,0),6),8,0)*(~face)
 cl=load('mountain_tex.png')[648:1183,663:1198][12:372].astype(np.float32); FH=FACE*HD
+def snow_strip():
+    T_=load('snowcliff.png'); hard=((np.minimum(T_[...,0],T_[...,2]).astype(np.int32)-T_[...,1])<70).astype(np.uint8)
+    k,lb,st,_=cv2.connectedComponentsWithStats(cv2.dilate(hard,np.ones((9,9),np.uint8)))
+    cs=sorted([st[i] for i in range(1,k) if st[i][4]>3000 and st[i][1]<300],key=lambda c:c[0])[:3]; parts=[]
+    for x,y,w,h_,_ in cs:
+        p=T_[y+int(h_*.06):y+int(h_*.86),x+8:x+w-8].copy()
+        mm=((np.minimum(p[...,0],p[...,2]).astype(np.int32)-p[...,1])>60).astype(np.uint8)
+        p=cv2.inpaint(p,cv2.dilate(mm,np.ones((5,5),np.uint8)),5,cv2.INPAINT_TELEA)
+        parts.append(cv2.resize(p,(round(p.shape[1]*FH/p.shape[0]),FH),interpolation=cv2.INTER_AREA))
+    return np.concatenate(parts,1).astype(np.float32)
+Cs=snow_strip()
 Ct=cv2.resize(cl,(round(535*FH/360),FH),interpolation=cv2.INTER_AREA)*np.linspace(1.08,0.68,FH)[:,None,None]*np.array([0.86,0.92,0.84],np.float32)
 # ---------- 海上小岛 ----------
 isl=np.sqrt(((X-3065)/70)**2+((Y-3075)/45)**2)+wob*1.5
@@ -157,9 +175,9 @@ def sdist(m):
 swd=sdist(water)
 # ---------- 贴图 ----------
 g=seamless(load('grass.png'),720); lum=g.mean(2,keepdims=True); g=lum+(g-lum)*0.82; g=g*np.array([1.03,1.0,0.90],np.float32)
-TEX={'grass':g,'snow':seamless(load('snow.png'),720)*np.array([0.90,0.93,1.0],np.float32)*0.90,
+TEX={'ice':seamless(load('snow_water.png'),640)*np.array([1.0,1.0,1.02],np.float32),'grass':g,'snow':seamless(load('snow.png'),720)*np.array([0.90,0.93,1.0],np.float32)*0.90,
      'dry':seamless(load('mountain_tex.png')[51:586,57:592],535),'water':seamless(load('water.png'),640),'shal':seamless(load('shallow.png'),640)}
-MK={k:np.clip((vnoise(150,s)-.5)*2.2+.5,0,1) for k,s in (('grass',3),('snow',5),('dry',7),('water',8),('shal',9))}
+MK={k:np.clip((vnoise(150,s)-.5)*2.2+.5,0,1) for k,s in (('ice',11),('grass',3),('snow',5),('dry',7),('water',8),('shal',9))}
 def rows_up(a,y0,y1):   # 逻辑分辨率数组 -> 高清行段
     return cv2.resize(np.ascontiguousarray(a[y0//HD:y1//HD]).astype(np.float32),(Wd,y1-y0),interpolation=cv2.INTER_LINEAR)
 def tex(k,y0,y1):
@@ -186,7 +204,8 @@ for y0 in range(0,Wd,BH):
     fm_=rr>0
     if fm_.any():
         ys_,xs_=np.nonzero(fm_); ri=np.clip(2*rr[ys_,xs_].astype(np.int32)-2+((ys_+y0)%2),0,FH-1)
-        col[ys_,xs_]=Ct[ri,xs_%Ct.shape[1]]
+        cs_=Ct[ri,xs_%Ct.shape[1]]; sw_=w_[1][ys_,xs_]
+        col[ys_,xs_]=cs_*(1-sw_)+Cs[ri,xs_%Cs.shape[1]]*sw_
     col*=(1-0.4*rows_up(fsh,y0,y1))[...,None]
     rmk=rows_up(rimV.astype(np.float32),y0,y1)[...,None]
     col=col*(1-0.55*rmk)+(col*1.18+18)*0.55*rmk
@@ -198,6 +217,10 @@ for y0 in range(0,Wd,BH):
     wat=wat*(1-0.7*sh)+tex('shal',y0,y1)*0.7*sh
     bt=np.clip(1+sw/14,0,1)*((sw<=0)&(sw>-14)); col=col*(1-0.45*bt[...,None])+np.array([92,104,66],np.float32)*0.45*bt[...,None]
     wm=((sw>0)&~fm_)[...,None]; col=np.where(wm,wat,col)
+    im_=cv2.GaussianBlur(rows_up(icem.astype(np.float32),y0,y1),(0,0),3)[...,None]
+    sn_=w_[1]*(sw>0)[...,None]+im_*(1-w_[1]*(sw>0)[...,None])
+    if sn_.max()>0.01:
+        ic=tex('ice',y0,y1)*0.82+np.array([226,236,246],np.float32)*0.18; col=col*(1-sn_)+ic*sn_
     wr=np.repeat(wrun[y0//HD:y1//HD],HD,0)[:, np.repeat(np.arange(N),HD)]
     if (wr>0).any():
         ys_,xs_=np.nonzero(wr>0); k_=np.clip(2*wr[ys_,xs_].astype(np.float32)/FH,0,1)
@@ -231,6 +254,7 @@ for i,(nm,(sx0,sy0,sx1,sy1),(dx0,dy0),ed) in enumerate(BLK):
     C[sl]=np.where(m,OC[sy0:sy1,sx0:sx1],C[sl])
 C[isl<1.0]=0
 C[swater&deep]=1; C[swater&shallow]=2
+C[(RW[1]>0.5)&(balpha<0.5)&(C==1)&~(face0|rimC)]=0                  # 雪原里的河冻住了，可以走
 C[cv2.dilate((face|rimC).astype(np.uint8),np.ones((3,3),np.uint8)).astype(bool)]=1
 C[wfall]=1
 C[strm&deep]=1
@@ -264,25 +288,26 @@ nold=len(objs)
 # 2) 新区域
 SPAWN=(1500,1750)
 wnear=cv2.dilate((C==1).astype(np.uint8)|(C==2),np.ones((25,25),np.uint8)).astype(bool)
+icez=cv2.dilate(icem.astype(np.uint8),np.ones((17,17),np.uint8)).astype(bool)
 cliffz=cv2.dilate((face|rimC|wfall).astype(np.uint8),np.ones((41,41),np.uint8)).astype(bool)|(LV>=3)
 fm=fbm(260,555,3); fm2=fbm(120,556,2)
-def free(x,y): return not cliffz[y,x] and balpha[y,x]<0.15 and rdist[y,x]>14 and not wnear[y,x] and (x-SPAWN[0])**2+(y-SPAWN[1])**2>140**2 and 30<x<N-30 and 30<y<N-30
+def free(x,y): return not icez[y,x] and not cliffz[y,x] and balpha[y,x]<0.15 and rdist[y,x]>14 and not wnear[y,x] and (x-SPAWN[0])**2+(y-SPAWN[1])**2>140**2 and 30<x<N-30 and 30<y<N-30
 def blob(x,y,lst): return max(((x-cx)/rx)**2+((y-cy)/ry)**2 for cx,cy,rx,ry in lst)
 SHU_F=[(330,2930,300,240),(860,2200,230,250),(820,3090,200,110)]
 def inshu(x,y): return min(((x-cx)/rx)**2+((y-cy)/ry)**2 for cx,cy,rx,ry in SHU_F)+0.25*fm2[y,x]<1.0
 RULES=[ # 区域, 素材, 数量, 条件
- (1,['nfir1','nfir2','nfir3','nbare1','nbare2','nbare3'],260,lambda x,y:fm[y,x]>0.45),
+ (1,['nfir1','nfir2','nfir3','nbare1','nbare2','nbare3'],420,lambda x,y:fm[y,x]>0.45),
  (4,['broad1','broad2','broad3','broad4','pine1','pine2'],620,lambda x,y:inshu(x,y)),
  (4,['pine1','pine2','broad1','broad3'],140,lambda x,y:bank[y,x] and can[y,x]>60),
  (3,['broad1','broad2','broad3','pine1'],22,lambda x,y:fm[y,x]>1.35),
  (2,['broad2','pine2'],10,lambda x,y:fm[y,x]>1.5),
  (5,['broad1','broad2','broad3','broad4','pine1','pine2'],200,lambda x,y:fm[y,x]>0.7 or fm2[y,x]>1.5),
- (1,['nbush1','nbush2','nbush3','nbush4','nbush5','nbush6'],60,lambda x,y:True),
+ (1,['nbush1','nbush2','nbush3','nbush4','nbush5','nbush6'],90,lambda x,y:True),
  (4,['bushL1','bushL2','bushM1','bushM2','bushS1','bushS2'],240,lambda x,y:inshu(x,y) or fm[y,x]>0.6),
  (3,['bushM1','bushS1','bushS2'],50,lambda x,y:True),
  (2,['bushS1','bushS2'],30,lambda x,y:True),
  (5,['bushM1','bushM2','bushS1','bushS2'],60,lambda x,y:True),
- (1,['ntuft1','ntuft2','ntuft3','ntuft4','ntuft5','ntuft6'],120,lambda x,y:True),
+ (1,['ntuft1','ntuft2','ntuft3','ntuft4','ntuft5','ntuft6'],180,lambda x,y:True),
  (2,['dry1','dry2','tuft1','tuft2'],230,lambda x,y:True),
  (3,['tuft1','tuft2','tuft3','tuft4','flowW','flowY'],150,lambda x,y:True),
  (4,['tuft1','tuft3','tuft4'],120,lambda x,y:True),
