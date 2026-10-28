@@ -92,7 +92,9 @@ pd=np.full((N,N),9.,np.float32)
 for cx,cy,rx,ry in PONDS: pd=np.minimum(pd,np.sqrt(((X-cx)/rx)**2+((Y-cy)/ry)**2)+wob*1.2)
 strm=(sr<1.0)&(balpha<0.5)
 water|=strm|(pd<1.0)
-shallow|=(strm&((sr>0.45)|(shw<12)))|((pd<1.0)&(pd>0.62))
+sfd=np.zeros((N,N),bool)
+for fx,fy in ((1800,2170),(2350,1960)): sfd|=np.hypot(X-fx,Y-fy)<34     # 支流只留两处浅滩
+shallow|=(strm&((sr>0.8)|sfd))|((pd<1.0)&(pd>0.62))
 deep=water&~shallow
 # ---------- 道路：中原出发通往各区 ----------
 ROADS=[[(1500,1750),(1550,1450),(1650,1150),(1660,800),(1600,450)],[(1500,1750),(1200,1600),(950,1330)],
@@ -323,10 +325,30 @@ for ri,names,cnt,cond in RULES:
         put(k,x,y); n+=1
         if n>=cnt: break
     stat[RN[ri]+':'+names[0][:5]]=n
-# 独木桥 / 木板桥：放在支流上，桥下可以正常走
-for (bx,by),k in (((2100,2048),'fdock'),((1680,2600),'wlog'),((2020,2475),'wlog'),((2525,1718),'wlog')):
-    ys_,xs_=np.mgrid[by-40:by+41,bx-40:bx+41]; i=np.argmin(sdm[ys_,xs_]); x,y=int(xs_.flat[i]),int(ys_.flat[i])
-    cv2.circle(C,(x,y),int(shw[y,x])+6,0,-1); put(k,x,y); print('桥',k,x,y)
+# 石拱桥：只架在支流走向接近南北的地方，桥横跨河面（东西向），桥心对准河心
+from PIL import Image as _I
+_bs=_I.open(OUT+'sprites/fbridge.png')
+cands=[]
+for pts,w in STREAMS:
+    for (x0,y0),(x1,y1) in zip(pts[:-1],pts[1:]):
+        dx,dy=x1-x0,y1-y0
+        if abs(dy)>1.6*abs(dx):
+            for t in (0.35,0.65):
+                cx,cy=int(x0+dx*t),int(y0+dy*t); ys_,xs_=np.mgrid[cy-30:cy+31,cx-30:cx+31]
+                i=np.argmin(sdm[ys_,xs_]); cands.append((int(xs_.flat[i]),int(ys_.flat[i])))
+bi=0
+for x,y in cands:
+    if balpha[y,x]>0.3 or any((x-o[1])**2+(y-o[2])**2<260**2 for o in objs if o[0].startswith('bridge')): continue
+    row=np.where(water[y,max(0,x-80):x+81])[0]
+    if not len(row): continue
+    span=row.max()-row.min()+1; cxw=max(0,x-80)+(row.min()+row.max())//2
+    wl=span+26; s=wl*HD/_bs.width; im=_bs.resize((round(_bs.width*s),round(_bs.height*s)),_I.LANCZOS)
+    k='bridge%d'%bi; im.save(OUT+'sprites/'+k+'.png'); SP[k]=[im.width/HD,im.height/HD]
+    hh=SP[k][1]; ay=int(y+hh*0.42)
+    C[y-7:y+8,cxw-wl//2:cxw+wl//2+1]=0
+    cxw,ay=int(cxw),int(ay); objs.append([k,cxw,ay]); grid.setdefault((int(cxw//CS),int(ay//CS)),[]).append((cxw,y,wl/2)); print('桥',k,cxw,y,span)
+    bi+=1
+    if bi>=4: break
 n=0
 for _ in range(40000):
     x=int(rng.integers(1400,N-30)); y=int(rng.integers(1600,N-30))
