@@ -62,7 +62,7 @@ export function createMenu(game){
   if(starting)return;starting=true;
   try{await game.ready?.()}catch{/* 加载失败也进入游戏 */}
   starting=false;
-  visible=false;root.hidden=true;document.body.classList.remove('menu-open');game.clearInput();game.c.canvas.width=960;game.c.canvas.height=600;
+  visible=false;root.hidden=true;document.body.classList.remove('menu-open');game.clearInput();game.fit();
   document.getElementById('cv').setAttribute('tabindex','-1');document.getElementById('cv').focus({preventScroll:true});
   game.onStart();
  };

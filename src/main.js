@@ -8,7 +8,10 @@ const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
 const D={...W,...CH,ground:'assets/map/ground.jpg?v='+W.ver,ground_w:'assets/map/ground_w.jpg?v='+W.ver,coll:'assets/map/coll.png?v='+W.ver,
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
-const cv=document.getElementById('cv'),c=cv.getContext('2d'),VW=480,VH=300,WW=D.WW,WH=D.WH||D.WW,HD=D.HD;
+const cv=document.getElementById('cv'),c=cv.getContext('2d'),WW=D.WW,WH=D.WH||D.WW,HD=D.HD;
+let VW=480,VH=300,SC=HD;
+function fit(){const dpr=Math.min(2,devicePixelRatio||1),k=Math.max(2,Math.min(4,Math.round(innerHeight/380)));const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;VW=W/SC;VH=H/SC}
+addEventListener('resize',()=>{if(!menu?.visible)fit()});
 const $=id=>document.getElementById(id);
 const keys={};let joy=null;
 addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=1;if(e.key.startsWith('Arrow'))e.preventDefault()});
@@ -63,7 +66,7 @@ function drawHero(px,py,moving,now){
 const en=[];let kills=0,fx=[];
 const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>survival?.damage(amount)});
 function hitEnemy(e,now,dx){if(enemySystem.hit(e))fx.push({x:e.x,y:e.y,t:now,dx})}
-function spawn(){for(let n=0;n<30;n++){const a=Math.random()*6.28,r=150+Math.random()*90,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
+function spawn(){for(let n=0;n<30;n++){const a=Math.random()*6.28,r=Math.hypot(VW,VH)/2+20+Math.random()*90,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
  if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;en.push(enemySystem.make(x,y));return}}
 let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;
 function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());const v=(x,y)=>{const fx=x/n*8,fy=y/n*8,x0=Math.floor(fx),y0=Math.floor(fy),tx=fx-x0,ty=fy-y0,s=t=>t*t*(3-2*t),q=(a,b)=>g[((b%8+8)%8)*8+((a%8+8)%8)];const a=q(x0,y0)*(1-s(tx))+q(x0+1,y0)*s(tx),b=q(x0,y0+1)*(1-s(tx))+q(x0+1,y0+1)*s(tx);return a*(1-s(ty))+b*s(ty)};
@@ -74,7 +77,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
  mkCloud();for(let i=0;i<14;i++)spawn();
  menu=createMenu({c,images:IM,data:D,drawGround,objects:objs,enemies:ED,
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
-  clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>needLoad()?loadSet(CS):Promise.resolve(),onStart(){survival.start()}
+  clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>needLoad()?loadSet(CS):Promise.resolve(),fit,onStart(){survival.start()}
  });
  survival=createSurvival({hero,enemies:en,get kills(){return kills},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
@@ -87,7 +90,7 @@ function loop(now){
  const dt=Math.min(.05,(now-last)/1000||0);last=now;
  if(menu?.visible){menu.draw(now);requestAnimationFrame(loop);return}
  if(survival?.finished){requestAnimationFrame(loop);return}
- c.setTransform(HD,0,0,HD,0,0);
+ c.setTransform(SC,0,0,SC,0,0);
  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
  if(joy){const L=Math.hypot(joy.dx,joy.dy);if(L>8){dx=joy.dx/L;dy=joy.dy/L}}
  const L=Math.hypot(dx,dy),moving=L>0;if(moving){dx/=L;dy/=L;if(dx)hero.face=dx>0?1:-1}

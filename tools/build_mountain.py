@@ -63,6 +63,11 @@ blocked=(T>=0.75)|(face>0.35)
 print('ramps',nramp)
 gx=cv2.Sobel(cv2.GaussianBlur(h,(0,0),8),cv2.CV_32F,1,0,ksize=3)/8; gy=cv2.Sobel(cv2.GaussianBlur(h,(0,0),8),cv2.CV_32F,0,1,ksize=3)/8
 shade=np.clip(1-60*(gx*0.6+gy*0.8),0.8,1.25)
+# 山峰层：山脊起伏 + 西北光照，看得出是一座山
+pk=cv2.GaussianBlur((T>=0.75).astype(np.float32),(0,0),6)
+rg=1-np.abs(fbm(85,31,3,WL,H)); rg=cv2.GaussianBlur(rg,(0,0),1.6)
+rx=cv2.Sobel(rg,cv2.CV_32F,1,0,ksize=3)/8; ry=cv2.Sobel(rg,cv2.CV_32F,0,1,ksize=3)/8
+pshade=1+pk*(np.clip(-9*(rx*0.6+ry*0.8),-0.55,0.55)+0.28*(rg-0.6))
 up=lambda a:cv2.resize(a.astype(np.float32),(WL*HD,H*HD),interpolation=cv2.INTER_LINEAR)
 hH=up(h); shH=up(shade); TH=up(T); fH=up(face); rH=up(ramp)[...,None]
 stops=[(0.0,(162,140,94)),(0.25,(140,120,86)),(0.5,(122,108,88)),(0.75,(128,122,114)),(1.0,(172,168,162))]
@@ -72,6 +77,7 @@ for ch in range(3): col[...,ch]=np.interp(TH,xs,[s[1][ch] for s in stops])
 tile=seamless(cv2.cvtColor(cv2.imread(SRC+'grass.png'),cv2.COLOR_BGR2RGB),720).mean(2)
 tile=(tile-tile.mean())/(tile.std()+1e-6)
 big=np.tile(tile,(H*HD//720+2,WL*HD//720+2))[:H*HD,:WL*HD]
+col*=up(pshade)[...,None]
 col*=(1+0.10*big[...,None]+0.04*fbm(18,21,2,WL*HD,H*HD)[...,None])*shH[...,None]
 # 坡道：土黄色斜坡，带一道道台阶横纹
 yy_=np.arange(H*HD)[:,None]
@@ -109,6 +115,11 @@ for _ in range(80000):
     if T[y,x]<0.25 and kind!='rsmall': continue      # 大石头长在山脚的坡上，不堵谷底
     if not freeish(x,y,r) or not far(x,y,r+8): continue
     put(kind+str(1+int(rng.integers(2))),x,y,r)
+for _ in range(60000):
+    x,y=[int(v) for v in rng.integers(24,[WL-24,H-24])]
+    if T[y,x]<0.75 or face[y,x]>0.2 or not far(x,y,30,.6): continue
+    put(rng.choice(['spire1','spire2','spire1','spire2','rmid1','rmid2']),x,y,26)
+print('peak rocks',len(objs))
 nt=0
 for _ in range(30000):
     x,y=[int(v) for v in rng.integers(24,[WL-24,H-24])]

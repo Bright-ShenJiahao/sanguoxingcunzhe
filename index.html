@@ -16,6 +16,11 @@ canvas#cv{position:absolute;inset:0;width:100%;height:100%}
 .sw button{font:inherit;font-size:14px;padding:8px 16px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
 .sw button[aria-pressed=true]{background:var(--on);color:#fff;border-color:var(--on)}
 .hint{font-size:13px;color:var(--muted)}
+body.survival-playing{padding:0;overflow:hidden}
+.survival-playing .wrap>:not(#st){display:none}
+.survival-playing #st{position:fixed;inset:0;width:100%;height:100%;border:0;border-radius:0;aspect-ratio:auto}
+.survival-playing #mm{width:min(14cqw,28vmin,200px);height:min(14cqw,28vmin,200px)}
+.survival-playing #kc{font-size:clamp(12px,2cqw,18px)}
 body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
 #boot{position:fixed;inset:0;z-index:60;overflow:hidden;background:#07101b;transition:opacity .5s}
 #boot .bg{position:absolute;inset:0;background:url(assets/map/boot.jpg) repeat-x 0 0/auto 100%}
