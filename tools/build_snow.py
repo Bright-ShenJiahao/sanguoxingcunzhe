@@ -34,6 +34,7 @@ snow=two_layer(seamless(load('snow.png'),720),5,720)
 snow=snow*np.array([0.90,0.93,1.0],np.float32)*0.90          # 压暗、偏冷，别白得发光
 ice=two_layer(seamless(load('snow_water.png'),640),8,640)
 ice=ice*np.array([1.0,1.0,1.02],np.float32)
+shal_ice=two_layer(seamless(load('snow_shallow.png'),640),9,640)
 # 河（接草地的河继续向北）
 yy=np.arange(SH,dtype=np.float32); yg=yy-1280
 E=np.exp(-np.abs(yg)/150)
@@ -59,7 +60,7 @@ wat=ice*(1-0.08*deepf)
 et=np.clip(1-swdH/14,0,1)[...,None]**1.6
 wat=wat*(1-0.5*et)+np.array([226,238,248],np.float32)*0.5*et
 shs=cv2.GaussianBlur(shallowH.astype(np.float32),(0,0),14)[...,None]
-wat=wat*(1-0.45*shs)+(ice*0.5+np.array([200,222,238],np.float32)*0.5)*0.45*shs
+wat=wat*(1-0.7*shs)+shal_ice*0.7*shs
 base=np.where(waterH[...,None],wat,base)
 SG=np.clip(base,0,255).astype(np.uint8); del base,snow,ice,wat
 print('snow ground ok')
@@ -97,16 +98,12 @@ def to_sprite(arr,h,sat=1.0,val=1.0,tint=(1,1,1)):
 spr={}
 tn=['nbare1','nfir1','nfir2','nbare2','nbare3','nfir3']; th=[84,92,98,68,76,74]
 for n,a in zip(tn,extract('snow_trees.png',12000,6)): spr[n]=to_sprite(a,h=th[tn.index(n)],sat=.95,val=.93,tint=(.97,.99,1.03))
-def snowify(src,name,cap,seed,dry=False):
-    im=np.array(Image.open(OUT+'sprites/'+src+'.png').convert('RGBA')).astype(np.float32); H,W=im.shape[:2]
-    ys=np.arange(H)[:,None]/H; nz=vnoise(5,seed,W,H)
-    w=np.clip((np.clip(0.6-ys,0,None)/0.6)**.8*cap*(0.6+0.8*nz),0,1)[...,None]
-    rgb=im[...,:3]; l=rgb.mean(2,keepdims=True); rgb=(l+(rgb-l)*(0.55 if dry else 0.8))*(np.array([1.0,0.97,0.88]) if dry else np.array([0.95,0.98,1.04]))
-    rgb=rgb*(1-w)+np.array([232,240,250],np.float32)*w
-    spr[name]=Image.fromarray(np.dstack([np.clip(rgb,0,255),im[...,3]]).astype(np.uint8))
-for k in ['bushL1','bushL2','bushM1','bushM2','bushS1','bushS2']: snowify(k,'n'+k,.85,sum(map(ord,k))%997)
-for k in ['spire1','spire2','rmid1','rmid2','rsmall1','rsmall2']: snowify(k,'n'+k,.75,sum(map(ord,k))%991)
-for k in ['dry1','dry2','tuft1','tuft2']: snowify(k,'n'+k,.35,sum(map(ord,k))%983,dry=True)
+bn=['nbush1','nbush2','nbush3','nbush4','nbush5','nbush6']; bh=[40,42,34,48,40,24]
+for n,h,a in zip(bn,bh,extract('snow_bush.png',8000,6)): spr[n]=to_sprite(a,h,.95,.95,(.98,.99,1.02))
+rn_=['nspire1','nspire2','nrsmall1','nrmid1','nrmid2','nrsmall2']; rh=[74,68,16,36,30,15]
+for n,h,a in zip(rn_,rh,extract('snow_rocks.png',5000,6)): spr[n]=to_sprite(a,h,.95,.95)
+un=['ntuft1','ntuft2','ntuft3','ntuft4','ntuft5','ntuft6']; uh=[26,26,16,24,20,14]
+for n,h,a in zip(un,uh,extract('snow_tufts.png',3000,6)): spr[n]=to_sprite(a,h,.95,.95)
 sizes={n:[im.width/HD,im.height/HD] for n,im in spr.items()}
 # ---------- 摆放 ----------
 objs=[]; grid={}; CS=40
@@ -145,16 +142,16 @@ for _ in range(26000):
     if not okpos(x,y,10): continue
     p=np.clip(0.17+0.22*forest[y,x]+0.15*dens[y,x],0.04,0.9)
     if rng.random()>p: continue
-    kind=['L','M','M','S','S','S'][int(rng.integers(6))]; r={'L':17,'M':12,'S':8}[kind]
+    k_=['nbush1','nbush2','nbush4','nbush5','nbush3','nbush3','nbush6','nbush6'][int(rng.integers(8))]; r={'nbush3':12,'nbush6':8}.get(k_,17)
     if not far(x,y,r): continue
-    put('nbush'+kind+str(1+int(rng.integers(2))),x,y,r)
+    put(k_,x,y,r)
 nb=len(objs)
 for _ in range(30000):
     x,y=[int(v) for v in rng.integers(16,[WW-16,SH-16])]
     if M[y,x]>0.02 or water[y,x] or swd[y,x]>-4: continue
     p=np.clip(0.10+0.08*dens[y,x]-0.06*forest[y,x],0.02,0.3)
     if rng.random()>p or not far(x,y,12,.3): continue
-    put(['ndry1','ndry2','ntuft1','ntuft2'][int(rng.integers(4))],x,y,6)
+    put(un[int(rng.integers(6))],x,y,6)
     if len(objs)-nb>500: break
 print('snow objs',len(objs),'trees',nt)
 # ---------- 拼接 ----------
@@ -181,7 +178,7 @@ for k,x,y in gw['objs']:
     if y<OV and M[1280+y,x]<0.5: continue
     allo.append([k,x,y+1280])
 size={**gw['size'],**sizes}
-cr={**gw['coll_r'],'nbare1':6,'nbare2':6,'nbare3':6,'nfir1':5,'nfir2':5,'nfir3':5,'nspire1':17,'nspire2':15,'nrmid1':12,'nrmid2':11,'nrsmall1':5,'nrsmall2':5,'nbushL1':6,'nbushL2':6}
+cr={**gw['coll_r'],'nbare1':6,'nbare2':6,'nbare3':6,'nfir1':5,'nfir2':5,'nfir3':5,'nspire1':17,'nspire2':15,'nrmid1':12,'nrmid2':11,'nrsmall1':5,'nrsmall2':5,'nbush1':6,'nbush2':6,'nbush4':6,'nbush5':6}
 b=gw['bridge']; bw=b['walk']
 wj={'WW':WW,'WH':2560,'HD':HD,'size':size,'coll_r':cr,'objs':allo,'bridge':{'x':b['x'],'y':b['y']+1280,'walk':[bw[0],bw[1]+1280,bw[2],bw[3]+1280]},'snowY':1280,'ver':int(__import__('time').time())}
 json.dump(wj,open(DATA+'world.json','w'),separators=(',',':')); print('world ok',len(allo))

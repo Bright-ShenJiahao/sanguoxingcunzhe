@@ -118,7 +118,7 @@ function loop(now){
  contact(px,py,16);
  const items=[];
  for(const o of objs){const sx=o.x-cx,sy=o.y-cy;if(sx<-60||sx>VW+60||sy<-10||sy>VH+100)continue;
-  const inx=Math.abs(hero.x-o.x)<o.w*.4,iny=hero.y<o.y-2&&hero.y>o.y-o.h*.9;const fade=/^(broad|pine|spire|bushL|nfir|nbare|nspire|nbushL)/.test(o.k);const ta=(fade&&inx&&iny)?.42:1;
+  const inx=Math.abs(hero.x-o.x)<o.w*.4,iny=hero.y<o.y-2&&hero.y>o.y-o.h*.9;const fade=/^(broad|pine|spire|bushL|nfir|nbare|nspire|nbush)/.test(o.k);const ta=(fade&&inx&&iny)?.42:1;
   o.a+=(ta-o.a)*Math.min(1,dt*10);
   items.push({y:o.y,f:()=>{c.imageSmoothingEnabled=true;c.globalAlpha=o.a;c.drawImage(IM['s_'+o.k],sx-o.w/2,sy-o.h,o.w,o.h);c.globalAlpha=1}})}
  for(const p of pj){const sx=p.x-cx,sy=p.y-cy;items.push({y:p.y+1,f:()=>{c.strokeStyle='#eadfc2';c.lineWidth=1;c.beginPath();c.moveTo(sx-p.dx*7,sy-9-p.dy*7);c.lineTo(sx,sy-9);c.stroke();c.fillStyle='#9aa0a6';c.fillRect(sx-.7,sy-9.7,1.6,1.4);c.fillStyle='rgba(18,40,20,.25)';c.fillRect(sx-1,sy-1,2,1)}})}
