@@ -46,7 +46,7 @@ r_dry=sstep((1330-Y2)/130)*sstep((1100-X2)/130)
 r_snow=sstep((1330-Y2)/130)*sstep((X2-1080)/130)
 r_step=sstep((Y2-1290)/110)*sstep((1720-Y2)/140)*sstep((X2-1100)/140)
 r_shu=sstep((Y2-1330)/130)*sstep((1180-X2)/150)
-r_jn=sstep((X2-1720)/170)*sstep((Y2-1880)/170)
+r_jn=sstep((X2-1450)/170)*sstep((Y2-1650)/170)
 r_zy=np.full((N,N),0.28,np.float32)
 RW=np.stack([r_dry,r_snow,r_step,r_zy,r_shu,r_jn]); RW=RW/RW.sum(0,keepdims=True)
 RN=['西凉','幽州·塞外','北方草原','中原','蜀','江南']
@@ -55,17 +55,25 @@ reg=np.argmax(RW,0).astype(np.int8)
 for i,b in enumerate(BLK): reg=np.where((bown==i)&(balpha>0.5),RN.index(b[0]),reg)
 # ---------- 主河：雪原块底部 -> 江南块顶部 ----------
 G=json.load(open(BUILD+'world.json'))
-xb=G['riverXc'][0]-200+2120+0; hb=G['riverHw'][0]          # 旧草地局部 x -> 新世界 x（旧 1280+x，裁掉 1480，放到 2120）
-xb=1280+G['riverXc'][0]-1480+2120; xe=1280+G['riverXc'][200]-1480+2120; he=G['riverHw'][200]
-yy=np.arange(N,dtype=np.float32); t_=np.clip((yy-1280)/840,0,1)
-xc=(1-sstep(t_))*xb+sstep(t_)*xe-150*np.sin(np.pi*t_)*np.sin(np.pi*t_*1.6+0.4)
-hw=(1-t_)*hb+t_*he+4*np.sin(yy/90)
-gap=(yy>=1150)&(yy<=2250)
+OFF=2120-1480+1280          # 旧草地/雪地局部 x -> 新世界 x
+RS=np.load(BUILD+'snow_river.npy')
+yy=np.arange(N,dtype=np.float32); xc=np.zeros(N,np.float32); hw=np.zeros(N,np.float32)
+for y in range(0,1280):
+    c=np.where(RS[y])[0]
+    if len(c): xc[y]=c.mean()+OFF; hw[y]=(c.max()-c.min())/2+1
+for y in range(2120,N):
+    xc[y]=G['riverXc'][y-2120+200]+OFF; hw[y]=G['riverHw'][y-2120+200]
+xb,hb,xe,he=xc[1279],hw[1279],xc[2120],hw[2120]
+t_=np.clip((yy-1280)/840,0,1); mid=(yy>=1280)&(yy<2120)
+xc[mid]=((1-sstep(t_))*xb+sstep(t_)*xe-150*np.sin(np.pi*t_)*np.sin(np.pi*t_*1.6+0.4))[mid]
+hw[mid]=((1-t_)*hb+t_*he+4*np.sin(yy/90)*np.sin(np.pi*t_))[mid]
+gap=(yy>=1060)&(yy<=2320)
 wob=fbm(70,73,2)*0.07
 dr=np.abs(X-xc[:,None])/hw[:,None]+wob
 ford=sstep(1-np.abs(yy-1760)/46)[:,None]
-water=(dr<1.0)&gap[:,None]
-shallow=water&((dr>0.40)|(ford>0.5)); deep=water&~shallow
+pond=np.sqrt(((X-2170)/105)**2+((Y-2900)/62)**2)+wob*1.2      # 旧江南块左边被切掉的池塘补全
+water=((dr<1.0)&gap[:,None])|(pond<1.0)
+shallow=water&((dr>0.40)|(ford>0.5))&~(pond<0.66); deep=water&~shallow
 def sdist(m):
     m=m.astype(np.uint8); return cv2.distanceTransform(m,cv2.DIST_L2,5)-cv2.distanceTransform(1-m,cv2.DIST_L2,5)
 swd=sdist(water)
@@ -139,7 +147,10 @@ for i,(nm,(sx0,sy0,sx1,sy1),(dx0,dy0),ed) in enumerate(BLK):
     for k,x,y in L['objs']:
         if sx0<=x<sx1 and sy0<=y<sy1:
             nx,ny=x-sx0+dx0,y-sy0+dy0
-            if balpha[ny,nx]>0.85 and k in SP: put(k,nx,ny)
+            if balpha[ny,nx]<=0.85 or k not in SP: continue
+            if i==1 and RS[max(0,min(1479,y-6)):y+7,max(0,x-1280-int(rad(k))):x-1280+int(rad(k))+1].any(): continue
+            if k=='mrock' and rng.random()<0.7: continue
+            put(k,nx,ny)
 nold=len(objs)
 # 2) 新区域
 SPAWN=(1500,1750)
@@ -154,7 +165,7 @@ RULES=[ # 区域, 素材, 数量, 条件
  (4,['broad1','broad2','broad3','broad4','pine1','pine2'],620,lambda x,y:inshu(x,y)),
  (3,['broad1','broad2','broad3','pine1'],22,lambda x,y:fm[y,x]>1.35),
  (2,['broad2','pine2'],10,lambda x,y:fm[y,x]>1.5),
- (5,['broad1','broad3','broad4'],30,lambda x,y:fm[y,x]>1.0),
+ (5,['broad1','broad2','broad3','broad4','pine1','pine2'],200,lambda x,y:fm[y,x]>0.7 or fm2[y,x]>1.5),
  (1,['nbush1','nbush2','nbush3','nbush4','nbush5','nbush6'],60,lambda x,y:True),
  (4,['bushL1','bushL2','bushM1','bushM2','bushS1','bushS2'],240,lambda x,y:inshu(x,y) or fm[y,x]>0.6),
  (3,['bushM1','bushS1','bushS2'],50,lambda x,y:True),
