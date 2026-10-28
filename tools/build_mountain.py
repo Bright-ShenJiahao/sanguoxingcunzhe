@@ -45,12 +45,14 @@ def blob(cx,cy,rx,ry,hmax,seed,pw=0.7):
     r=np.sqrt(((X+wx-cx)/rx)**2+((Y+wy-cy)/ry)**2)
     p=np.clip(1-r+0.11*fbm(170,seed,2,N,N),0,1)
     return hmax*p**pw
-HL=[(430,520,780,680,7.0,11),            # 西北大山：山脚缓坡，山腰山顶多层崖
-    (520,2180,540,330,2.5,12),(960,1650,300,230,2.0,13),   # 西南干旱丘陵：只有缓坡
-    (1560,1760,300,240,3.6,14),          # 绿地高地
-    (1760,560,330,260,3.6,15)]           # 雪地高地
-h=np.zeros((N,N),np.float32)
-for b in HL: h=np.maximum(h,blob(*b))
+ridge=np.zeros((N,N),np.uint8)
+cv2.polylines(ridge,[np.array([(150,1100),(330,640),(700,300),(1250,200),(1800,330),(2300,520)],np.int32)],False,1,60)
+rd=cv2.distanceTransform(1-ridge,cv2.DIST_L2,5)+wx*0.8+wy*0.5
+hmx=7.2-2.6*sstep((X-900)/1100)
+h=hmx*1.12*np.clip(1-np.maximum(rd,0)/720+0.08*fbm(170,11,2,N,N),0,1)**0.75
+h=np.minimum(h,hmx)
+h=np.maximum(h,blob(430,560,700,640,7.2,11,0.7)*(1-sstep((X-1000)/500)))
+for b_ in [(520,2180,540,330,2.4,12),(960,1650,300,230,1.9,13)]: h=np.maximum(h,blob(*b_))
 TH=[2.6,4.0,5.4]
 nz=fbm(170,21,2,N,N)*0.18
 lv=np.zeros((N,N),np.float32)
@@ -63,23 +65,10 @@ south=np.clip((-gyb/(np.hypot(gxb,gyb)+1e-4)-0.2)/0.4,0,1)       # 高处在北�
 south=cv2.GaussianBlur(south,(0,0),6)
 face=((Tn-Hc)>0.5)&(south>0.5)
 face=cv2.morphologyEx(face.astype(np.uint8),cv2.MORPH_OPEN,np.ones((3,3),np.uint8)).astype(bool)
-# ---------- 坡道：每段崖壁开口子 ----------
-ramp_m=np.zeros((N,N),np.uint8)
-nl,lab,st,_=cv2.connectedComponentsWithStats(face.astype(np.uint8),connectivity=8)
-nr=0
-for i in range(1,nl):
-    x0,y0,w_,hh_,area=st[i]
-    if area<500 or w_<50: continue
-    n=max(1,int(round(w_/340)))
-    for k in range(n):
-        x=int(x0+(k+0.5)*w_/n); sl=36 if (nr%2==0) else -36
-        ys=np.where(lab[:,max(0,x-8):x+8]==i)[0]
-        if len(ys)==0: continue
-        cv2.line(ramp_m,(x-sl,int(ys.max())+36),(x+sl,int(ys.min())-48),1,40); nr+=1
-ramp=np.clip(cv2.GaussianBlur(ramp_m.astype(np.float32),(0,0),5)*1.6,0,1)
-face&=~(ramp>0.35)
-Image.fromarray((np.dstack([face*255,(lv*60).clip(0,255),(ramp*255)])).astype(np.uint8)).resize((640,640)).save('/tmp/claude-0/-home-claude/b6fcd064-da0c-5ebc-9c98-f983720bd619/scratchpad/dbg.png')
-print('h max',h.max(),[(lv==i).mean() for i in range(4)])
+# ---------- 崖线缺口：崖高沿走向消失成缓坡（不画路）----------
+gap=cv2.GaussianBlur(fbm(200,77,2,N,N),(0,0),3)
+face&=(gap>-0.85)
+ramp=np.zeros((N,N),np.float32); nr=0
 print('face px',int(face.sum()),'ramps',nr)
 # ---------- 地面 ----------
 Cen=np.array(Image.open(BUILD+'ground_center.jpg').convert('RGB'))          # 5120 x 2560
@@ -107,6 +96,8 @@ f=fH.astype(np.int32); cs=np.cumsum(f,axis=0); reset=np.maximum.accumulate(np.wh
 ys_,xs2=np.nonzero(fH)
 rows=np.minimum(run[ys_,xs2]-1,FH-1)
 base[ys_,xs2]=Ct[rows,xs2%Ct.shape[1]]
+sn=(xs2>=2*(CW+OV))&(ys_<2*1300)
+base[ys_[sn],xs2[sn]]=base[ys_[sn],xs2[sn]]*0.5+np.array([196,203,216],np.float32)*0.5
 del run,ys_,xs2,rows
 fa=cv2.GaussianBlur(face.astype(np.float32),(0,0),7); fa=np.roll(fa,10,0)*(1-face)
 base*=(1-0.42*up(fa))[...,None]
@@ -172,9 +163,17 @@ def far(x,y,r,kk=1.0):
                 if (x-o[0])**2+(y-o[1])**2<(r+kk*o[2])**2: return False
     return True
 def put(k,x,y,r): allo.append([k,x,y]); grid.setdefault((int(x//CS),int(y//CS)),[]).append((x,y,r))
+wdm=cv2.distanceTransform((cc[...,0]==0).astype(np.uint8),cv2.DIST_L2,5)
+fmn=fbm(210,555,3,N,N)
+nearcl=cv2.dilate(face.astype(np.uint8),np.ones((161,161),np.uint8)).astype(bool)
+ROCK=('spire','rmid','rsmall','nspire','nrmid','nrsmall'); TREE=('broad','pine','nfir','nbare'); BUSH=('bush','nbush')
 for kk,x,y in cw['objs']:
     x+=CW
     if x<CW+OV and Mx[y,x-CW]<0.5: continue
+    wd=wdm[y,x-CW]; rr_=rng.random()
+    if kk.startswith(ROCK) and (wd<70 or rr_>(0.8 if nearcl[y,x] else 0.12)): continue
+    if kk.startswith(TREE) and (wd<26 or rr_>np.clip(0.35+0.5*fmn[y,x],0.2,1)): continue
+    if kk.startswith(BUSH) and rr_>(0.6 if wd<60 else (0.2 if fmn[y,x]<-0.3 else 0.5)): continue
     if bl_d[y,x] or ramp_d[y,x] or faceband[y,x]: continue
     allo.append([kk,x,y]); grid.setdefault((int(x//CS),int(y//CS)),[]).append((x,y,6))
 def okp(x,y): return not (bl_d[y,x] or ramp_d[y,x] or faceband[y,x])
@@ -182,27 +181,24 @@ def okp(x,y): return not (bl_d[y,x] or ramp_d[y,x] or faceband[y,x])
 for _ in range(120000):
     x,y=[int(v) for v in rng.integers(24,[CW-10,N-24])]
     if not okp(x,y) or not far(x,y,22): continue
-    lvl=h[y,x]; r=rng.random()
-    if r<0.07 and lvl>=0.8: put(['mpine1','mpine2','mpine2'][int(rng.integers(3))],x,y,22)
-    elif r<0.085: put('mdead',x,y,22)
+    lvl=h[y,x]; r=rng.random(); fm=fmn[y,x]
+    if r<0.07 and lvl>=0.8 and fm>0.2: put(['mpine1','mpine2','mpine2'][int(rng.integers(3))],x,y,22)
+    elif r<0.075: put('mdead',x,y,22) if rng.random()<0.3 else None
     elif r<0.55: put(['mgrass1','mgrass2'][int(rng.integers(2))],x,y,8)
-    elif r<0.88: put(['mrubble1','mrubble2'][int(rng.integers(2))],x,y,8)
-    else: put('mrock',x,y,10)
-    if len(allo)>len(cw['objs'])+900: break
-# 绿地高地、雪地高地：树
-def forest(cx,cy,rx,ry,names,cnt,r):
-    n=0
-    for _ in range(40000):
-        x=int(cx+rng.uniform(-rx,rx)); y=int(cy+rng.uniform(-ry,ry))
-        if not(0<x<N and 0<y<N) or h[y,x]<0.4 or not okp(x,y) or not far(x,y,r): continue
-        put(names[int(rng.integers(len(names)))],x,y,r); n+=1
-        if n>=cnt: break
-forest(1560,1760,300,240,['broad1','broad2','broad3','pine1','pine2'],22,22)
-forest(1760,560,330,260,['nfir1','nfir2','nfir3','nbare1','nbare2','nbare3'],24,22)
+    elif r<0.88:
+        if lvl>0.4 or fm>0.4: put(['mrubble1','mrubble2'][int(rng.integers(2))],x,y,8)
+    elif nearcl[y,x] and rng.random()<0.5: put('mrock',x,y,10)
+    if len(allo)>len(cw['objs'])+500: break
 print('objs',len(allo))
 size={**cw['size'],**sizes}
 cr={**cw['coll_r'],'mpine1':5,'mpine2':5,'mdead':5,'mrock':8}
+for k_ in ('bushL1','bushL2'): cr.pop(k_,None)
 b=cw['bridge']; bw=b['walk']
 wj={'WW':N,'WH':N,'HD':HD,'size':size,'coll_r':cr,'objs':allo,'bridge':{'x':b['x']+CW,'y':b['y'],'walk':[bw[0]+CW,bw[1],bw[2]+CW,bw[3]]},
     'snowY':1280,'snowX':CW,'ver':int(time.time())}
+bm=np.zeros((N,N),np.uint8)
+for kk,x,y in allo:
+    if kk.startswith(BUSH): cv2.circle(bm,(int(x),int(y)),int(size[kk][0]*0.38),1,-1)
+C[...,0]=np.where((bm>0)&(C[...,0]==0),3,C[...,0])
+Image.fromarray(C).save(OUT+'coll.png',optimize=True)
 json.dump(wj,open(DATA+'world.json','w'),separators=(',',':')); print('world ok')
