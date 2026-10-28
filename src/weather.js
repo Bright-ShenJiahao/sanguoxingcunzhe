@@ -62,7 +62,7 @@ export function createWeather(){
  function draw(c,now,dt,VW,VH,hx,hy,WW,WH){
   update(dt,now);
   let wn=0,ws=0,ww=0,we=0;
-  if(!forced&&hx!=null){const u=hx/WW,v=hy/(WH||WW),r=a=>Math.max(0,Math.min(1,a)),g=WH?r((v-.45)/.1):1;wn=WH?r((.55-v)/.12):r((.36-v)/.18);ws=WH?r((v-.82)/.1):r((v-.64)/.18);ww=r((.36-u)/.18)*g;we=r((u-.64)/.18)*g;const sm=wn+ws+ww+we;if(sm>1){wn/=sm;ws/=sm;ww/=sm;we/=sm}}
+  if(!forced&&hx!=null){const u=hx/WW,v=hy/(WH||WW),r=a=>Math.max(0,Math.min(1,a)),g=WH?r((v-.45)/.1):1;const gn=WH?r((u-.45)/.1):1;wn=(WH?r((.55-v)/.12):r((.36-v)/.18))*gn;ws=(WH?r((v-.82)/.1):r((v-.64)/.18))*gn;ww=WH?r((.45-u)/.1):r((.36-u)/.18)*g;we=WH?r((u-.86)/.08)*g:r((u-.64)/.18)*g;const sm=wn+ws+ww+we;if(sm>1){wn/=sm;ws/=sm;ww/=sm;we/=sm}}
   const wc=1-(wn+ws+ww+we),gi=inten*wc,Z={wn,ws,ww,we};
   // 地区名提示
   let nm='中原';for(const [k,t] of NAMES)if(Z[k]>=.5)nm=t;

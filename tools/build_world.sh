@@ -5,3 +5,4 @@ set -e
 cd "$(dirname "$0")/.."
 python3 tools/build_world.py
 python3 tools/build_snow.py
+python3 tools/build_mountain.py

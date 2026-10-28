@@ -11,7 +11,7 @@ p{margin:4px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
 .stage{position:relative;container-type:inline-size;border:1px solid var(--line);border-radius:4px;overflow:hidden;background:#8fb25a;touch-action:none;aspect-ratio:480/300;user-select:none}
 canvas#cv{position:absolute;inset:0;width:100%;height:100%}
 #kc{position:absolute;left:1.5cqw;top:1.5cqw;background:#33492a;color:#f2f7f3;border:.4cqw solid #e8f1ec;border-radius:.9cqw;font-size:2cqw;font-weight:600;padding:.6cqw 1.6cqw}
-#mm{position:absolute;right:1.5cqw;top:1.5cqw;width:12cqw;height:24cqw;border:.4cqw solid #e8f1ec;border-radius:.6cqw;background:#222}
+#mm{position:absolute;right:1.5cqw;top:1.5cqw;width:14cqw;height:14cqw;border:.4cqw solid #e8f1ec;border-radius:.6cqw;background:#222}
 .sw{display:flex;gap:8px;flex-wrap:wrap}
 .sw button{font:inherit;font-size:14px;padding:8px 16px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--fg);cursor:pointer}
 .sw button[aria-pressed=true]{background:var(--on);color:#fff;border-color:var(--on)}
@@ -53,7 +53,7 @@ if(t>.35){tp.className='on';var k=Math.min(T.length,Math.floor((t-.35)/.075));tt
 requestAnimationFrame(tick)}requestAnimationFrame(tick)})();
 </script>
 <div class="wrap">
-<div class="stage" id="st"><canvas id="cv" width="960" height="600" aria-label="写实俯瞰风野外地图，小兵挥刀斩敌"></canvas><div id="kc">斩敌 0</div><canvas id="mm" width="84" height="168"></canvas></div>
+<div class="stage" id="st"><canvas id="cv" width="960" height="600" aria-label="写实俯瞰风野外地图，小兵挥刀斩敌"></canvas><div id="kc">斩敌 0</div><canvas id="mm" width="84" height="84"></canvas></div>
 <div class="sw" role="group" aria-label="角色" id="cs"><button data-c="m" aria-pressed="true">男主</button><button data-c="m1" aria-pressed="false">男主·光头</button><button data-c="m2" aria-pressed="false">男主·短寸</button><button data-c="m3" aria-pressed="false">男主·束发</button><button data-c="m4" aria-pressed="false">男主·高马尾</button><button data-c="f0" aria-pressed="false">女主·长直发</button><button data-c="f1" aria-pressed="false">女主·短发</button><button data-c="f2" aria-pressed="false">女主·卷发</button><button data-c="f3" aria-pressed="false">女主·红发带</button><button data-c="f4" aria-pressed="false">女主·丸子头</button></div>
 </div>
 

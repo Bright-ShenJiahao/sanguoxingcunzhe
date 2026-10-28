@@ -1,5 +1,5 @@
 """北部雪地 + 与草地拼接。先跑 build_world.py（草地区 -> art_src/build/），再跑本脚本。
-最终输出：assets/map/ground.jpg、coll.png、sprites/n*.png，data/world.json（世界 1280 x 2560，北雪南草）。"""
+输出：中间产物 art_src/build/ground_center.jpg、coll_center.png、world_center.json，以及 assets/map/sprites/n*.png。最后由 build_mountain.py 拼上西边山地。"""
 import numpy as np, cv2, json, os
 from PIL import Image
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -162,7 +162,7 @@ out[:2560]=SG[:2560]
 zone=SG[2560:H2].astype(np.float32)*(1-MH)+GH[:OV*HD].astype(np.float32)*MH
 out[2560:H2]=np.clip(zone,0,255).astype(np.uint8)
 out[H2:]=GH[OV*HD:]
-Image.fromarray(out).save(OUT+'ground.jpg',quality=70,optimize=True)
+Image.fromarray(out).save(BUILD+'ground_center.jpg',quality=88)
 print('ground',out.shape)
 # 碰撞
 col=np.zeros((SH,WW,3),np.uint8); col[...,0]=0   # 冰河冻住了，可以直接走过去
@@ -170,7 +170,7 @@ gc=np.array(Image.open(BUILD+'coll.png').convert('RGB'))
 C=np.zeros((2560,WW,3),np.uint8); C[:1280]=col[:1280]
 z=np.where((M[1280:]>=0.5)[...,None],gc[:OV],col[1280:]); C[1280:1280+OV]=z
 C[1280+OV:]=gc[OV:]
-Image.fromarray(C).save(OUT+'coll.png',optimize=True)
+Image.fromarray(C).save(BUILD+'coll_center.png',optimize=True)
 for n,im in spr.items(): im.save(OUT+'sprites/'+n+'.png',optimize=True)
 # 物件合并
 allo=[o for o in objs if not (o[2]>=1280 and M[o[2],o[1]]>=0.5)]   # 雪物件在过渡带只保留偏雪的位置
@@ -181,4 +181,4 @@ size={**gw['size'],**sizes}
 cr={**gw['coll_r'],'nbare1':6,'nbare2':6,'nbare3':6,'nfir1':5,'nfir2':5,'nfir3':5,'nspire1':17,'nspire2':15,'nrmid1':12,'nrmid2':11,'nrsmall1':5,'nrsmall2':5,'nbush1':6,'nbush2':6,'nbush4':6,'nbush5':6}
 b=gw['bridge']; bw=b['walk']
 wj={'WW':WW,'WH':2560,'HD':HD,'size':size,'coll_r':cr,'objs':allo,'bridge':{'x':b['x'],'y':b['y']+1280,'walk':[bw[0],bw[1]+1280,bw[2],bw[3]+1280]},'snowY':1280,'ver':int(__import__('time').time())}
-json.dump(wj,open(DATA+'world.json','w'),separators=(',',':')); print('world ok',len(allo))
+json.dump(wj,open(BUILD+'world_center.json','w'),separators=(',',':')); print('world ok',len(allo))

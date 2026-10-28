@@ -68,15 +68,15 @@ export function createMenu(game){
  };
  document.documentElement.classList.remove('menu-loading');
  return {get visible(){return visible},show(){visible=true;root.hidden=false;document.body.classList.add('menu-open');root.querySelector('.menu-start').focus()},draw(now){
-  const {c,images,data,enemies}=game,t=now/1000,cv=c.canvas,HD=data.HD,WW=data.WW,WH=data.WH||WW,oy=WH-WW;
+  const {c,images,data,enemies}=game,t=now/1000,cv=c.canvas,HD=data.HD,WW=data.WW,WH=data.WH||WW,oy=WH-1280,ox=WW-1280;
   // 画布跟窗口一样大，按整数倍（和游戏内同样的像素大小）绘制，视野比游戏内更宽，背景清晰不糊。
   const dpr=Math.min(2,window.devicePixelRatio||1),W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);
   if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}
   const S=Math.max(HD*dpr,W/WW,H/WW),vw=W/S,vh=H/S;
-  const mx=620+Math.sin(t/30)*110,my=oy+580+Math.cos(t/37)*95;
+  const mx=ox+620+Math.sin(t/30)*110,my=oy+580+Math.cos(t/37)*95;
   const cx=Math.max(0,Math.min(WW-vw,mx-vw/2)),cy=Math.max(0,Math.min(WH-vh,my-vh/2));
   c.setTransform(S,0,0,S,0,0);c.imageSmoothingEnabled=true;
-  c.drawImage(images.ground,cx*HD,cy*HD,vw*HD,vh*HD,0,0,vw,vh);
+  game.drawGround(c,cx,cy,vw,vh,0,0,vw,vh);
   const items=game.objects.filter(o=>o.x>cx-80&&o.x<cx+vw+80&&o.y>cy&&o.y<cy+vh+120).map(o=>({y:o.y,draw(){c.imageSmoothingEnabled=true;c.drawImage(images['s_'+o.k],o.x-cx-o.w/2,o.y-cy-o.h,o.w,o.h)}}));
   for(const [i,a] of actors.entries()){
    const wx=mx+a.sx*vw+Math.sin(t/5+a.ph)*55,wy=my+a.sy*vh+Math.cos(t/6+a.ph)*22;

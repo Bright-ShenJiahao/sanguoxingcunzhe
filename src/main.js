@@ -6,7 +6,7 @@ import {createWeather} from './weather.js';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
-const D={...W,...CH,ground:'assets/map/ground.jpg?v='+W.ver,coll:'assets/map/coll.png?v='+W.ver,
+const D={...W,...CH,ground:'assets/map/ground.jpg?v='+W.ver,ground_w:'assets/map/ground_w.jpg?v='+W.ver,coll:'assets/map/coll.png?v='+W.ver,
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),VW=480,VH=300,WW=D.WW,WH=D.WH||D.WW,HD=D.HD;
 const $=id=>document.getElementById(id);
@@ -20,7 +20,7 @@ st.addEventListener('pointermove',e=>{if(joy){joy.dx=e.clientX-joy.x;joy.dy=e.cl
 const ov={cld:true,fp:true};
 const IM={};let left=0;
 let tot=0;function ld(k,s){left++;tot++;const i=new Image();i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};i.src=s}
-D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);ld('ground',D.ground);ld('coll',D.coll);
+D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);ld('ground',D.ground);ld('ground_w',D.ground_w);ld('coll',D.coll);
 for(const k in D.spr)ld('s_'+k,D.spr[k]);
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
@@ -38,7 +38,7 @@ for(let r=0;r<4;r++)SETS['m'+(r+1)]={pre:'hm'+r+'_',size:[HM.size[0]/2,HM.size[1
 for(let r=0;r<5;r++)SETS['f'+r]={pre:'hh'+r+'_',size:[HN.size[0]/2,HN.size[1]/2],grip:HN.rows[r],walk:[2,3,4,5,6,7,8]};
 let hairG=false,weaponAttack=null,pj=[],CM,mmc,wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
-const AT=({n:[.5,.1],s:[.5,.94],w:[.12,.75],e:[.88,.75]})[new URLSearchParams(location.search).get('at')]||[.5,.75];
+const AT=({n:[.75,.1],s:[.75,.94],w:[.2,.58],e:[.94,.75]})[new URLSearchParams(location.search).get('at')]||[.75,.75];
 const hero={x:WW*AT[0],y:WH*AT[1],face:1};const CO=objs.filter(o=>o.r);
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WH)return 1;return CM[(y*WW+x)*4]}
 function blocked(x,y){
@@ -69,10 +69,10 @@ let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;
 function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());const v=(x,y)=>{const fx=x/n*8,fy=y/n*8,x0=Math.floor(fx),y0=Math.floor(fy),tx=fx-x0,ty=fy-y0,s=t=>t*t*(3-2*t),q=(a,b)=>g[((b%8+8)%8)*8+((a%8+8)%8)];const a=q(x0,y0)*(1-s(tx))+q(x0+1,y0)*s(tx),b=q(x0,y0+1)*(1-s(tx))+q(x0+1,y0+1)*s(tx);return a*(1-s(ty))+b*s(ty)};
  cloud=document.createElement('canvas');cloud.width=n;cloud.height=n;const x=cloud.getContext('2d'),im=x.createImageData(n,n);for(let j=0;j<n;j++)for(let i=0;i<n;i++){const val=v(i,j)*.7+v(i*2,j*2)*.3,a=Math.max(0,Math.min(1,(val-.5)/.22))*.26;const k=(j*n+i)*4;im.data[k]=18;im.data[k+1]=40;im.data[k+2]=28;im.data[k+3]=a*255}x.putImageData(im,0,0)}
 function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH;const x=t.getContext('2d');x.drawImage(IM.coll,0,0);CM=x.getImageData(0,0,WW,WH).data;
- mmc=document.createElement('canvas');mmc.width=84;mmc.height=Math.round(84*WH/WW);mmc.getContext('2d').drawImage(IM.ground,0,0,mmc.width,mmc.height);
+ mmc=document.createElement('canvas');mmc.width=84;mmc.height=Math.round(84*WH/WW);{const g=mmc.getContext('2d');g.drawImage(IM.ground_w,0,0,mmc.width/2,mmc.height);g.drawImage(IM.ground,mmc.width/2,0,mmc.width/2,mmc.height)}
  document.querySelectorAll('#cs button').forEach(b=>b.onclick=()=>{CS=b.dataset.c;if(needLoad())loadSet(CS);document.querySelectorAll('#cs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
  mkCloud();for(let i=0;i<14;i++)spawn();
- menu=createMenu({c,images:IM,data:D,objects:objs,enemies:ED,
+ menu=createMenu({c,images:IM,data:D,drawGround,objects:objs,enemies:ED,
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>needLoad()?loadSet(CS):Promise.resolve(),onStart(){survival.start()}
  });
@@ -80,6 +80,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
   reset(){hero.x=WW*AT[0];hero.y=WH*AT[1];hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm='short';joy=null;for(const k in keys)keys[k]=0}
  });requestAnimationFrame(loop)}
+function drawGround(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const CWd=1280,z=dw/sw;for(const [k,x0] of [['ground_w',0],['ground',CWd]]){const a=Math.max(sx,x0),b=Math.min(sx+sw,x0+CWd);if(b<=a)continue;const ex=(k=='ground_w'&&b<sx+sw)?.5:0;ctx.drawImage(IM[k],(a-x0)*HD,sy*HD,(b-a+ex)*HD,sh*HD,dx+(a-sx)*z,dy,(b-a+ex)*z,dh)}}
 let menu,survival;const weather=createWeather();
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
 function loop(now){
@@ -110,7 +111,7 @@ function loop(now){
  $('kc').textContent='斩敌 '+kills;
  const cx=Math.round(Math.min(WW-VW,Math.max(0,hero.x-VW/2))),cy=Math.round(Math.min(WH-VH,Math.max(0,hero.y-VH/2)));
  c.imageSmoothingEnabled=true;
- c.drawImage(IM.ground,cx*HD,cy*HD,VW*HD,VH*HD,0,0,VW,VH);
+ drawGround(c,cx,cy,VW,VH,0,0,VW,VH);
  const px=Math.round(hero.x-cx),py=Math.round(hero.y-cy);
  if(ov.fp){if(moving&&!inSh&&Math.hypot(hero.x-fpl.x,hero.y-fpl.y)>7){fpl={x:hero.x,y:hero.y};fp.push({x:hero.x+fpside*2.2,y:hero.y,t:now});fpside=-fpside}
   fp=fp.filter(f=>now-f.t<5200);for(const f of fp){const a=1-(now-f.t)/5200;c.fillStyle=`rgba(30,20,12,${.16*a})`;c.beginPath();c.ellipse(f.x-cx,f.y-cy-1,1.7,1,0,0,6.3);c.fill()}}
