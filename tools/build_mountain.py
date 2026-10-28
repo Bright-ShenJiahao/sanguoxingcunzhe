@@ -147,6 +147,9 @@ def to_sprite(arr,hgt):
 comps=extract('mountain_misc.png',3000,9,420)[1:]
 mn=['mpine1','mpine2','mdead','mgrass1','mgrass2','mrubble1','mrubble2','mrock']; mh=[72,46,64,28,19,24,15,18]
 spr={n:to_sprite(a,hg) for n,a,hg in zip(mn,comps,mh)}
+wn=['wreed1','wreed2','wreed3','wreed4','wcat1','wcat2','wcat3','wcat4','wlily1','wlily2','wlily3','wlily4','wtuft','wstone','wlog','wpud']
+wh=[70,62,46,64,66,64,68,44,30,34,30,26,28,20,22,26]
+for n,a_,hg in zip(wn,extract('wetland.png',3000,16,313),wh): spr[n]=to_sprite(a_,hg)
 for n,im in spr.items(): im.save(OUT+'sprites/'+n+'.png',optimize=True)
 sizes={n:[im.width/HD,im.height/HD] for n,im in spr.items()}
 bl_d=cv2.dilate(blocked.astype(np.uint8),np.ones((25,25),np.uint8)).astype(bool)
@@ -189,6 +192,21 @@ for _ in range(120000):
         if lvl>0.4 or fm>0.4: put(['mrubble1','mrubble2'][int(rng.integers(2))],x,y,8)
     elif nearcl[y,x] and rng.random()<0.5: put('mrock',x,y,10)
     if len(allo)>len(cw['objs'])+500: break
+# 湿地：芦苇香蒲在水边，睡莲在浅水，泥地小件在岸边
+ys0=1300
+for _ in range(60000):
+    x=int(rng.integers(CW+30,N-30)); y=int(rng.integers(ys0,N-30)); wd=wdm[y,x-CW]; sh=cc[y,x-CW,0]
+    if sh==2:
+        if rng.random()<0.05 and far(x,y,26): put('wlily'+str(1+int(rng.integers(4))),x,y,26)
+        continue
+    if sh!=0 or wd<6 or wd>60 or bl_d[y,x]: continue
+    r=rng.random(); p=0.5 if wd<30 else 0.12
+    if rng.random()>p: continue
+    if r<0.55 and far(x,y,14): put('wreed'+str(1+int(rng.integers(4))) if rng.random()<.5 else 'wcat'+str(1+int(rng.integers(4))),x,y,14)
+    elif r<0.8 and far(x,y,10): put('wtuft',x,y,10)
+    elif r<0.9 and wd<24 and far(x,y,14): put('wstone',x,y,14)
+    elif r<0.94 and wd<30 and far(x,y,18): put('wpud',x,y,18)
+    elif r<0.96 and far(x,y,22): put('wlog',x,y,22)
 print('objs',len(allo))
 size={**cw['size'],**sizes}
 cr={**cw['coll_r'],'mpine1':5,'mpine2':5,'mdead':5,'mrock':8}
@@ -198,7 +216,7 @@ wj={'WW':N,'WH':N,'HD':HD,'size':size,'coll_r':cr,'objs':allo,'bridge':{'x':b['x
     'snowY':1280,'snowX':CW,'ver':int(time.time())}
 bm=np.zeros((N,N),np.uint8)
 for kk,x,y in allo:
-    if kk.startswith(BUSH): cv2.circle(bm,(int(x),int(y)),int(size[kk][0]*0.38),1,-1)
+    if kk.startswith(BUSH+('wreed','wcat')): cv2.circle(bm,(int(x),int(y)),int(size[kk][0]*0.38),1,-1)
 C[...,0]=np.where((bm>0)&(C[...,0]==0),3,C[...,0])
 Image.fromarray(C).save(OUT+'coll.png',optimize=True)
 json.dump(wj,open(DATA+'world.json','w'),separators=(',',':')); print('world ok')
