@@ -49,6 +49,7 @@ ford=np.zeros(SH,np.float32)
 for c0 in (430,940): ford=np.maximum(ford,sstep(1-np.abs(yy-c0)/46))
 shallow=water&((dw>0.40)|(ford[:,None]>0.5)); deep=water&~shallow
 swd=sdist(water)
+np.save(BUILD+'snow_river.npy',water)
 def up(a,o=cv2.INTER_LINEAR): return cv2.resize(a.astype(np.float32),(W2,H2),interpolation=o)
 swdH=up(swd)*HD; waterH=up(water)>0.5; shallowH=up(shallow)>0.5
 lo=fbm(300,201,3,W2,H2); mid=fbm(120,203,2,W2,H2)

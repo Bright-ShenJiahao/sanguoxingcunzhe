@@ -111,6 +111,15 @@ rows=np.minimum(run[ys_,xs2]-1,FH-1)
 base[ys_,xs2]=Ct[rows,xs2%Ct.shape[1]]
 sn=(xs2>=2*(CW+60))&(ys_<2*1300)
 base[ys_[sn],xs2[sn]]=Cs[rows[sn],xs2[sn]%Cs.shape[1]]
+rmk=np.zeros((N,N),np.uint8); rmk[:1480,CW:]=np.load(BUILD+'snow_river.npy').astype(np.uint8)
+rmk=cv2.dilate(rmk,np.ones((1,9),np.uint8)); rmH=np.repeat(np.repeat(rmk,2,0),2,1)
+fw=rmH[ys_,xs2]>0
+cn=vnoise(5,321,Wd,8)[0]; cn=(cn-cn.mean())/(cn.std()+1e-6)
+t_=np.clip(0.5+0.28*cn[xs2[fw]]+0.25*(rows[fw]/FH),0,1)[:,None]
+ice_=np.array([214,236,248],np.float32)*(1-t_)+np.array([112,168,208],np.float32)*t_
+ice_[rows[fw]<9]=[236,244,250]
+base[ys_[fw],xs2[fw]]=ice_
+print('waterfall px',int(fw.sum()))
 del run,ys_,xs2,rows
 fa=cv2.GaussianBlur(face.astype(np.float32),(0,0),7); fa=np.roll(fa,10,0)*(1-face)
 base*=(1-0.42*up(fa))[...,None]
@@ -161,7 +170,7 @@ comps=extract('mountain_misc.png',3000,9,420)[1:]
 mn=['mpine1','mpine2','mdead','mgrass1','mgrass2','mrubble1','mrubble2','mrock']; mh=[72,46,64,28,19,24,15,18]
 spr={n:to_sprite(a,hg) for n,a,hg in zip(mn,comps,mh)}
 wn=['wreed1','wreed2','wreed3','wreed4','wcat1','wcat2','wcat3','wcat4','wlily1','wlily2','wlily3','wlily4','wtuft','wstone','wlog','wpud']
-wh=[70,62,46,64,66,64,68,44,30,34,30,26,28,20,22,26]
+wh=[70,62,46,64,66,64,68,44,18,20,18,16,28,20,22,26]
 for n,a_,hg in zip(wn,extract('wetland.png',3000,16,313),wh): spr[n]=to_sprite(a_,hg)
 sc=extract('snowcliff.png',3000,12,313)[3:]
 for n,a_,hg in zip(['srock1','srock2','srock3','srub1','srub2','srub3','sicerock','sreed','sice'],sc,[46,32,20,34,26,16,26,36,14]): spr[n]=to_sprite(a_,hg)
@@ -191,7 +200,8 @@ for kk,x,y in cw['objs']:
     wd=wdm[y,x-CW]; rr_=rng.random()
     if kk.startswith(ROCK) and (wd<70 or rr_>(0.8 if nearcl[y,x] else 0.12)): continue
     if kk.startswith(TREE) and (wd<26 or rr_>np.clip(0.35+0.5*fmn[y,x],0.2,1)): continue
-    if kk.startswith(BUSH) and rr_>(0.6 if wd<60 else (0.2 if fmn[y,x]<-0.3 else 0.5)): continue
+    if kk.startswith(BUSH) and rr_>(0.25 if y>=1280 else (0.6 if wd<60 else (0.2 if fmn[y,x]<-0.3 else 0.5))): continue
+    if kk.startswith(('tuft','flow','dry')) and rr_>0.5: continue
     if bl_d[y,x] or ramp_d[y,x] or faceband[y,x]: continue
     allo.append([kk,x,y]); grid.setdefault((int(x//CS),int(y//CS)),[]).append((x,y,6))
 def okp(x,y): return not (bl_d[y,x] or ramp_d[y,x] or faceband[y,x])
@@ -207,21 +217,29 @@ for _ in range(120000):
         if lvl>0.4 or fm>0.4: put(['mrubble1','mrubble2'][int(rng.integers(2))],x,y,8)
     elif nearcl[y,x] and rng.random()<0.5: put('mrock',x,y,10)
     if len(allo)>len(cw['objs'])+500: break
-# 湿地：芦苇香蒲在水边，睡莲在浅水，泥地小件在岸边
-ys0=1300
-for _ in range(60000):
-    x=int(rng.integers(CW+30,N-30)); y=int(rng.integers(ys0,N-30)); wd=wdm[y,x-CW]; sh=cc[y,x-CW,0]
-    if sh==2:
-        if rng.random()<0.05 and far(x,y,26): put('wlily'+str(1+int(rng.integers(4))),x,y,26)
+# 湿地：芦苇香蒲只在大河岸边，睡莲在河里（小），海边不放
+from scipy import ndimage
+wlab,_=ndimage.label(cc[...,0]>0)
+bx0=cw['bridge']['x']; by0=cw['bridge']['y']
+rowx=np.where(cc[by0,:,0]>0)[0]; rl=wlab[by0,rowx[np.argmin(abs(rowx-bx0))]]
+XL,YL=np.meshgrid(np.arange(CW),np.arange(N)-1280)
+seaz=(((XL-1310)/450.)**2+((YL-1310)/380.)**2)<1.45
+rv=(wlab==rl)&~seaz; rv[:1300]=False
+drv=cv2.distanceTransform((~rv).astype(np.uint8),cv2.DIST_L2,5)
+for _ in range(90000):
+    x=int(rng.integers(CW+30,N-30)); y=int(rng.integers(1300,N-30)); xl=x-CW
+    if seaz[y,xl]: continue
+    sh=cc[y,xl,0]
+    if sh==2 and rv[y,xl]:
+        if rng.random()<0.03 and far(x,y,22): put('wlily'+str(1+int(rng.integers(4))),x,y,22)
         continue
-    if sh!=0 or wd<6 or wd>60 or bl_d[y,x]: continue
-    r=rng.random(); p=0.5 if wd<30 else 0.12
-    if rng.random()>p: continue
-    if r<0.55 and far(x,y,14): put('wreed'+str(1+int(rng.integers(4))) if rng.random()<.5 else 'wcat'+str(1+int(rng.integers(4))),x,y,14)
-    elif r<0.8 and far(x,y,10): put('wtuft',x,y,10)
-    elif r<0.9 and wd<24 and far(x,y,14): put('wstone',x,y,14)
-    elif r<0.94 and wd<30 and far(x,y,18): put('wpud',x,y,18)
-    elif r<0.96 and far(x,y,22): put('wlog',x,y,22)
+    if sh!=0 or bl_d[y,x]: continue
+    d=drv[y,xl]
+    if d<8 or d>26: continue
+    r=rng.random()
+    if rng.random()>0.3: continue
+    if r<0.8 and far(x,y,14): put('wreed'+str(1+int(rng.integers(4))) if rng.random()<.5 else 'wcat'+str(1+int(rng.integers(4))),x,y,14)
+    elif r<0.95 and far(x,y,22): put('wlog',x,y,22)
 # 雪地：岩石在崖脚，碎石堆在崖脚，冰河岸边小件
 for _ in range(80000):
     x=int(rng.integers(CW+OV+20,N-20)); y=int(rng.integers(30,1290))

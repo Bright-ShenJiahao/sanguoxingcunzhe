@@ -68,6 +68,7 @@ const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>s
 function hitEnemy(e,now,dx){if(enemySystem.hit(e))fx.push({x:e.x,y:e.y,t:now,dx})}
 function spawn(){for(let n=0;n<30;n++){const a=Math.random()*6.28,r=Math.hypot(VW,VH)/2+20+Math.random()*90,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
  if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;en.push(enemySystem.make(x,y));return}}
+let fish=null;const deepAt=(x,y,r)=>x>2100&&y>2200&&[[0,0],[r,0],[-r,0],[0,r*.6],[0,-r*.6]].every(([a,b])=>water(x+a,y+b)===1);
 let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;
 function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());const v=(x,y)=>{const fx=x/n*8,fy=y/n*8,x0=Math.floor(fx),y0=Math.floor(fy),tx=fx-x0,ty=fy-y0,s=t=>t*t*(3-2*t),q=(a,b)=>g[((b%8+8)%8)*8+((a%8+8)%8)];const a=q(x0,y0)*(1-s(tx))+q(x0+1,y0)*s(tx),b=q(x0,y0+1)*(1-s(tx))+q(x0+1,y0+1)*s(tx);return a*(1-s(ty))+b*s(ty)};
  cloud=document.createElement('canvas');cloud.width=n;cloud.height=n;const x=cloud.getContext('2d'),im=x.createImageData(n,n);for(let j=0;j<n;j++)for(let i=0;i<n;i++){const val=v(i,j)*.7+v(i*2,j*2)*.3,a=Math.max(0,Math.min(1,(val-.5)/.22))*.26;const k=(j*n+i)*4;im.data[k]=18;im.data[k+1]=40;im.data[k+2]=28;im.data[k+3]=a*255}x.putImageData(im,0,0)}
@@ -119,6 +120,10 @@ function loop(now){
  if(ov.fp){if(moving&&!inSh&&Math.hypot(hero.x-fpl.x,hero.y-fpl.y)>7){fpl={x:hero.x,y:hero.y};fp.push({x:hero.x+fpside*2.2,y:hero.y,t:now});fpside=-fpside}
   fp=fp.filter(f=>now-f.t<5200);for(const f of fp){const a=1-(now-f.t)/5200;c.fillStyle=`rgba(30,20,12,${.16*a})`;c.beginPath();c.ellipse(f.x-cx,f.y-cy-1,1.7,1,0,0,6.3);c.fill()}}
  rip=rip.filter(r=>now-r.t<520);for(const r of rip){const k=(now-r.t)/520;c.strokeStyle=`rgba(250,252,250,${.9*(1-k)})`;c.lineWidth=.8;c.beginPath();c.ellipse(r.x-cx,r.y-cy-1,3+k*9,1.5+k*4,0,0,6.3);c.stroke()}
+ if(!fish){fish=[];let g=0;while(fish.length<7&&g++<4000){const x=2150+Math.random()*400,y=2250+Math.random()*300;if(deepAt(x,y,34))fish.push({x,y,a:Math.random()*6.28,v:12+Math.random()*12,s:.8+Math.random()*.8,p:Math.random()*6})}}
+ for(const f of fish){const nx=f.x+Math.cos(f.a)*f.v*dt,ny=f.y+Math.sin(f.a)*f.v*dt*.6;if(deepAt(nx,ny,34)&&deepAt(f.x+Math.cos(f.a)*30,f.y+Math.sin(f.a)*18,24)){f.x=nx;f.y=ny}else f.a+=1.4+Math.random();f.a+=Math.sin(now/1700+f.p)*dt*.5;f.p+=dt*5;
+  const sx=f.x-cx,sy=f.y-cy;if(sx<-60||sx>VW+60||sy<-40||sy>VH+40)continue;const dir=Math.cos(f.a)>=0?1:-1,L=22*f.s,tw=Math.sin(f.p)*3*f.s;
+  c.save();c.translate(sx,sy);c.scale(dir,1);c.fillStyle='rgba(8,32,66,.34)';c.beginPath();c.ellipse(0,0,L,L*.28,0,0,6.3);c.fill();c.beginPath();c.moveTo(-L*.8,0);c.lineTo(-L*1.5,-L*.34+tw);c.lineTo(-L*1.5,L*.34+tw);c.closePath();c.fill();c.restore()}
  contact(px,py,16);
  const items=[];
  for(const o of objs){const sx=o.x-cx,sy=o.y-cy;if(sx<-60||sx>VW+60||sy<-10||sy>VH+100)continue;
