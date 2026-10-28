@@ -43,6 +43,8 @@ for ri0,(ya,yb) in enumerate(rows):
         for nm,pk in (('front',xx.argmax() if len(xx) else 0),('back',xx.argmin() if len(xx) else 0)):
             if not len(xx):fr[nm].append([cw*.5,ch*.5]);continue
             near=(abs(xx-xx[pk])<24)&(abs(yy-yy[pk])<24);fr[nm].append([round(float(xx[near].mean()*s),1),round(float(yy[near].mean()*s),1)])
-    (meta['rows'].__setitem__(ri,{'n':len(comps),**fr}) if START else meta['rows'].append({'n':len(comps),**fr}))
+    row={'n':len(comps),**fr,**({'size':[cw,ch]} if START else {})}
+    if START: meta['rows']=meta['rows'][:ri]+[row]+meta['rows'][ri+1:]
+    else: meta['rows'].append(row)
 meta['size']=[cw,ch]if not START else meta['size']
 json.dump(meta,open(ROOT+'/data/heroine.json','w'),separators=(',',':'));print([r['n'] for r in meta['rows']],meta['size'])

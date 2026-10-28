@@ -15,13 +15,14 @@ for y in range(H0):
     if (not rp[y] or y==H0-1) and st is not None:
         if y-st>40:rows.append((st,y))
         st=None
-assert len(rows)==4,rows
+START=int(sys.argv[2]) if len(sys.argv)>2 else 0   # 追加单行：python3 tools/slice_hero_m.py 新行.png 4
+assert len(rows)==(1 if START else 4),rows
 CW=W0/8;gh=max(b-a for a,b in rows)
 # 身体比例：默认男主 hero_b 白T 高 15 个素材像素；本表第一帧白T 高度量出来后求缩放
 ya,yb=rows[0];ys,xs=np.nonzero(white[ya:yb,:int(CW)]);wh=ys.max()-ys.min()+1
 s=15.0/wh;cw,ch=int(round(CW*s)),int(round(gh*s));print('rows',rows,'scale',round(s,4),'size',cw,ch)
-meta={'size':[cw,ch],'rows':[]}
-for ri,(ya,yb) in enumerate(rows):
+meta=json.load(open(ROOT+'/data/hero_m.json')) if START else {'size':[cw,ch],'rows':[]}
+for ri,(ya,yb) in enumerate(rows,START):
     ya=yb-gh;fr={'front':[],'back':[]}
     for i in range(8):
         x0=int(round(i*CW));x1=int(round((i+1)*CW))
@@ -34,5 +35,6 @@ for ri,(ya,yb) in enumerate(rows):
         for nm,pk in (('front',xx.argmax() if len(xx) else 0),('back',xx.argmin() if len(xx) else 0)):
             if not len(xx):fr[nm].append([cw*.5,ch*.6]);continue
             near=(abs(xx-xx[pk])<26)&(abs(yy-yy[pk])<26);fr[nm].append([round(float(xx[near].mean()*s),1),round(float(yy[near].mean()*s),1)])
-    meta['rows'].append(fr)
+    if START: fr['size']=[cw,ch]; meta['rows']=meta['rows'][:ri]+[fr]
+    else: meta['rows'].append(fr)
 json.dump(meta,open(ROOT+'/data/hero_m.json','w'),separators=(',',':'))

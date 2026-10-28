@@ -37,8 +37,8 @@ const needLoad=()=>CS!=='m';
 
 for(let i=0;i<8;i++)ld('hbg_'+i,'assets/characters/hero_b/g_w'+i+'.png');
 let CS='m';const SETS={m:{pre:'hb_',gpre:'hbg_',size:D.hbsize,grip:D.grip,walk:[2,3,4,5,6,7]}};
-for(let r=0;r<4;r++)SETS['m'+(r+1)]={pre:'hm'+r+'_',size:[HM.size[0]/2,HM.size[1]/2],grip:HM.rows[r],walk:[2,3,4,5,6,7]};
-for(let r=0;r<5;r++)SETS['f'+r]={pre:'hh'+r+'_',size:[HN.size[0]/2,HN.size[1]/2],grip:HN.rows[r],walk:[2,3,4,5,6,7,8]};
+for(let r=0;r<HM.rows.length;r++){const z=HM.rows[r].size||HM.size;SETS['m'+(r+1)]={pre:'hm'+r+'_',size:[z[0]/2,z[1]/2],grip:HM.rows[r],walk:[2,3,4,5,6,7]}};
+for(let r=0;r<HN.rows.length;r++)SETS['f'+r]={pre:'hh'+r+'_',size:(z=>[z[0]/2,z[1]/2])(HN.rows[r].size||HN.size),grip:HN.rows[r],walk:[2,3,4,5,6,7,8]};
 let hairG=false,weaponAttack=null,pj=[],CM,mmc,wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
 const QP=new URLSearchParams(location.search);const AT=QP.get('x')?[+QP.get('x')/D.WW,+QP.get('y')/D.WH]:({n:[.8,.15],s:[.85,.85],w:[.15,.2],e:[.95,.6],sw:[.15,.85]})[QP.get('at')]||[D.spawn[0]/D.WW,D.spawn[1]/D.WH];

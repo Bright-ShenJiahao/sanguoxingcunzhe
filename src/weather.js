@@ -7,7 +7,6 @@ const RAIN={
 const SNOW={
  lightsnow:{n:150,wind:-3,v:[14,26],tint:.22,white:.1,big:.35,haze:0},
  heavysnow:{n:430,wind:-24,v:[32,58],tint:.34,white:.2,big:.5,haze:.3},
- yousnow:{n:430,wind:-24,v:[32,58],tint:.18,white:.06,big:.5,haze:.1},
  blizzard:{n:800,wind:-90,v:[60,100],tint:.42,white:.3,big:.6,haze:.55}};
 const ALL=['lightrain','heavyrain','lightsnow','heavysnow','blizzard','fog','overcast'];
 export function createWeather(){
@@ -79,7 +78,7 @@ export function createWeather(){
   const v=c.createRadialGradient(VW/2,VH/2,80,VW/2,VH/2,Math.hypot(VW,VH)*.55);v.addColorStop(0,'rgba(196,138,54,0)');v.addColorStop(1,`rgba(196,138,54,${.3*i})`);c.fillStyle=v;c.fillRect(0,0,VW,VH)}
  // 北部积雪：画面去色，偏冷白
  function snowGround(c,VW,VH,i){
-  c.globalCompositeOperation='saturation';c.fillStyle=`rgba(128,128,128,${.35*i})`;c.fillRect(0,0,VW,VH);c.globalCompositeOperation='source-over'}
+  c.globalCompositeOperation='saturation';c.fillStyle=`rgba(128,128,128,${.5*i})`;c.fillRect(0,0,VW,VH);c.globalCompositeOperation='source-over'}
  // 区域气候：按主角在地图上的位置（北雪、南雨、西旱、东雾，中间随机天气）
  const NAMES=[['wn','北境·大雪'],['ws','南方·多雨'],['ww','西陲·干旱'],['we','东滨·海雾']];
  let zname='中原',ztime=-1e9,zfirst=true;
@@ -99,7 +98,7 @@ export function createWeather(){
   if(ys)snowGround(c,VW,VH,ys);
   if(gi>.01&&RAIN[kind])drawRain(c,now,dt,VW,VH,gi,RAIN[kind]);
   else if(gi>.3&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
-  else if(ys>.01)drawSnow(c,now,dt,VW,VH,ys,SNOW.yousnow);          // 幽州平时一直下雪（原来的大雪），暴雪更大
+  else if(ys>.01)drawSnow(c,now,dt,VW,VH,ys,SNOW.heavysnow);          // 幽州平时一直下雪（原来的大雪），暴雪更大
   else if(gi>.01&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
   drawTime(c,VW,VH,clock(now));
   // 进入新地区时的名字提示
