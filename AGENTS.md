@@ -6,7 +6,7 @@
 - 旧画风（水墨、粗像素地图）已移除。
 
 ## 尺寸与坐标
-- 逻辑画布 480×300，渲染 960×600（HD=2）；世界 1280² 逻辑像素。
+- 逻辑画布 480×300，渲染 960×600（HD=2）；世界 1280×2560 逻辑像素（北雪南草，雪地在 y<1280，草地在 y≥1280，出生点在草地中央 640,1920）。
 - 主角高约 25 逻辑像素；精灵脚底为锚点，按 y 排序绘制。
 - coll.png：R=1 深水/阻挡，R=2 浅滩/水洼（减速 ×0.55）。树、石底部有圆形碰撞（coll_r）。
 
@@ -33,7 +33,7 @@
 主角 B 走路 6–8 帧（左右腿交替）、劈/横扫/撩、受击/倒地/起身、各握法；武器细像素重绘；黄巾 12 帧 × 多兵种。
 
 ## 重新生成地图
-`tools/build_world.sh`（读 art_src/map，写 assets/map 与 data/world.json）。
+`tools/build_world.sh`：先 build_world.py 生成草地区（写 art_src/build/），再 build_snow.py 生成雪地并拼接（写 assets/map/ground.jpg、coll.png、sprites、data/world.json）。素材在 art_src/map（snow.png 雪地、snow_trees.png、snow_water.png 冰河）。
 
 ## 协作规则（第一次接手先读这里）
 1. 运行：`python3 -m http.server 8000`，打开 http://localhost:8000 ，能看到地图、人物、可操作即正常。

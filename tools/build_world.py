@@ -5,6 +5,8 @@ ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SRC=os.path.join(ROOT,'art_src','map')+os.sep
 OUT=os.path.join(ROOT,'assets','map')+os.sep
 DATA=os.path.join(ROOT,'data')+os.sep
+BUILD=os.path.join(ROOT,'art_src','build')+os.sep   # 中间产物（草地区），再由 build_snow.py 拼接成最终世界
+os.makedirs(BUILD,exist_ok=True)
 os.makedirs(OUT+'sprites',exist_ok=True)
 def b64(im,fmt='PNG',q=88):
     b=io.BytesIO()
@@ -160,7 +162,7 @@ G=np.clip(base,0,255).astype(np.uint8)
 del grass,water_t,shal_t,base
 if MODE=='mud':
     Image.fromarray(G).save(OUT+'ground_mud.jpg',quality=84); print('mud ok'); sys.exit()
-Image.fromarray(G).save(OUT+'ground_grass.jpg',quality=84)
+Image.fromarray(G).save(BUILD+'ground_grass.jpg',quality=88)
 col=np.zeros((WW,WW,3),np.uint8); col[...,0]=deep*1+shallow*2
 pudL=cv2.resize(pudG,(WW,WW),interpolation=cv2.INTER_AREA)>0.5
 col[...,0]=np.where(pudL&(col[...,0]==0),2,col[...,0])
@@ -284,8 +286,8 @@ objs=[o for o in objs if not o[0].startswith('stone')]
 if MODE!='mud': objs=[o for o in objs if not pudL[int(o[2]),int(o[1])]]
 for _n in [n for n in spr if n.startswith('stone')]: spr.pop(_n); sizes.pop(_n)
 coll_r={'broad1':6,'broad2':6,'broad3':5,'broad4':6,'pine1':5,'pine2':5,'spire1':17,'spire2':15,'rmid1':12,'rmid2':11,'rsmall1':5,'rsmall2':5,'bushL1':6,'bushL2':6}
-Image.fromarray(col).save(OUT+'coll.png',optimize=True)
+Image.fromarray(col).save(BUILD+'coll.png',optimize=True)
 for n,im in spr.items(): im.save(OUT+'sprites/'+n+'.png',optimize=True)
-world={'WW':WW,'HD':HD,'size':sizes,'coll_r':coll_r,'objs':objs,
+world={'riverTop':[float(xc[0]),float(hw[0])],'WW':WW,'HD':HD,'size':sizes,'coll_r':coll_r,'objs':objs,
  'bridge':{'x':int(BX),'y':int(YB),'walk':[float(wx0),float(wy0),float(wx1),float(wy1)]}}
-json.dump(world,open(DATA+'world.json','w'),separators=(',',':')); print('world ok',len(objs),'objs')
+json.dump(world,open(BUILD+'world.json','w'),separators=(',',':')); print('world ok',len(objs),'objs')
