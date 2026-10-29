@@ -43,9 +43,9 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   else if(S.t>=S.eliteT){S.eliteT=S.t+R(60,110);e.elite=true;e.k='gob_shaman';e.hp=e.hpMax=Math.ceil(10*(1+S.t/150));e.sc=1.1;e.summonT=4}
  }
  function dmg(base){return base*(1+0.1*S.p.atk)}
- function nearest(r,from=hero){let b=null,bd=r*r;for(const e of en){if(e.dead||!TER.shoot(hero.x,hero.y,e.x,e.y))continue;const d=(e.x-from.x)**2+(e.y-from.y)**2;if(d<bd){bd=d;b=e}}return b}
+ function nearest(r,from=hero){let b=null,bd=r*r;for(const e of en){if(e.dead)continue;const d=(e.x-from.x)**2+(e.y-from.y)**2;if(d<bd){bd=d;b=e}}return b}
  function hitArc(ang,range,half,amount,opts={}){
-  let n=0;for(const e of en){if(e.dead)continue;const dx=e.x-hero.x,dy=(e.y-hero.y)*1.15,d=Math.hypot(dx,dy);if(d>range+4*(e.sc||1)||!TER.melee(hero.x,hero.y,e.x,e.y))continue;
+  let n=0;for(const e of en){if(e.dead)continue;const dx=e.x-hero.x,dy=(e.y-hero.y)*1.15,d=Math.hypot(dx,dy);if(d>range+4*(e.sc||1))continue;
    let a=Math.atan2(dy,dx)-ang;a=Math.atan2(Math.sin(a),Math.cos(a));if(Math.abs(a)>half&&d>10)continue;
    let v=amount,crit=false;if(opts.crit&&Math.random()<opts.crit){v*=opts.cm;crit=true}
    strike(e,v,Math.sign(dx)||1,crit);if(opts.kb)knock(e,opts.kb);n++}return n}
@@ -126,11 +126,11 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0)S.cd[k]=FIRE[k](S.w[k])}
   for(const s of S.shots){
    if(s.k==='hammer'){s.t+=dt;if(!s.done&&s.t>=s.d){s.done=true;S.fx.push({k:'ring',x:s.x,y:s.y,r:s.r,t:0,d:.3});
-     for(const e of en){if(e.dead)continue;if((e.x-s.x)**2+((e.y-s.y)*1.3)**2<(s.r+4*(e.sc||1))**2&&TER.shoot(hero.x,hero.y,e.x,e.y)){strike(e,s.dm,Math.sign(e.x-s.x)||1);if(!e.dead){const dx=e.x-s.x,dy=e.y-s.y,l=Math.hypot(dx,dy)||1,k=e.boss?2:12;if(ok(e.x+dx/l*k,e.y+dy/l*k)){e.x+=dx/l*k;e.y+=dy/l*k}}}}}
+     for(const e of en){if(e.dead)continue;if((e.x-s.x)**2+((e.y-s.y)*1.3)**2<(s.r+4*(e.sc||1))**2){strike(e,s.dm,Math.sign(e.x-s.x)||1);if(!e.dead){const dx=e.x-s.x,dy=e.y-s.y,l=Math.hypot(dx,dy)||1,k=e.boss?2:12;if(ok(e.x+dx/l*k,e.y+dy/l*k)){e.x+=dx/l*k;e.y+=dy/l*k}}}}}
      s.dead=s.t>s.d+.05;continue}
    s.x+=s.dx*s.v*dt;s.y+=s.dy*s.v*dt;s.life-=dt;
-   for(const e of en){if(e.dead||s.hit.has(e))continue;const r=6*(e.sc||1);if(Math.abs(e.x-s.x)<r&&Math.abs(e.y-10*(e.sc||1)-s.y)<r+4&&TER.shoot(hero.x,hero.y,e.x,e.y)){s.hit.add(e);strike(e,s.dm,s.dx>0?1:-1);if(s.pierce--<=0){s.life=0;break}}}
-   s.dead=s.life<=0||TER.water(s.x,s.y+10)===1}
+   for(const e of en){if(e.dead||s.hit.has(e))continue;const r=6*(e.sc||1);if(Math.abs(e.x-s.x)<r&&Math.abs(e.y-10*(e.sc||1)-s.y)<r+4){s.hit.add(e);strike(e,s.dm,s.dx>0?1:-1);if(s.pierce--<=0){s.life=0;break}}}
+   s.dead=s.life<=0||!ok(s.x,s.y+10)}
   S.shots=S.shots.filter(s=>!s.dead);
   // 经验珠
   const mr=30*(1+.25*S.p.mag);

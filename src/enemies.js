@@ -28,10 +28,10 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    if(e.state==='windup'){
     if(e.timer>=.45){
      e.state='strike';e.timer=0;
-     if(stats.ranged&&TER.shoot(e.x,e.y,hero.x,hero.y)){
+     if(stats.ranged){
       const len=Math.hypot(ax,ay)||1;
       arrows.push({k:e.k,x:e.x,y:e.y-10,dx:ax/len,dy:ay/len,life:1.6,dm:stats.damage*(e.dmgMul||1)*(e.elite?1.3:1)});
-     }else if(!stats.ranged&&d<=(stats.reach+5)*(e.sc||1)&&TER.melee(e.x,e.y,hero.x,hero.y)){onHit(stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1))}
+     }else if(d<=(stats.reach+5)*(e.sc||1)){onHit(stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1))}
     }
    }else if(e.state==='strike'){
     if(e.timer>=.2){e.state='recover';e.timer=0}
@@ -39,11 +39,9 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     if(e.timer>=.45){e.state='move';e.timer=0;e.cooldown=.55+Math.random()*.35}
    }else{
     e.cooldown=Math.max(0,e.cooldown-dt);
-    const same=TER.melee(e.x,e.y,hero.x,hero.y)||(stats.ranged&&TER.shoot(e.x,e.y,hero.x,hero.y));
-    if(same&&d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
-    if(!same||d>stats.reach*(e.sc||1)*.85){
-     const fd=(!same||TER.inMount(e.x,e.y))&&TER.dir(e.x,e.y),ux=fd?fd[0]:ax/d,uy=fd?fd[1]:ay/d;
-     const oldx=e.x,oldy=e.y,dist=(e.boss?.8:1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
+    if(d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
+    if(d>stats.reach*(e.sc||1)*.85){
+     const oldx=e.x,oldy=e.y,dist=(e.boss?.8:1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ax/d*dist,my=ay/d*dist;
      if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}
      else if(ok(e.x-my*1.6,e.y+mx*1.6)){e.x-=my*1.6;e.y+=mx*1.6}
      e.moving=e.x!==oldx||e.y!==oldy;
@@ -55,7 +53,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    const vx=p.x-oldx,vy=p.y-oldy,v2=vx*vx+vy*vy;
    const t=v2?Math.max(0,Math.min(1,((hero.x-oldx)*vx+(hero.y-10-oldy)*vy)/v2)):0;
    if(Math.hypot(oldx+vx*t-hero.x,oldy+vy*t-(hero.y-10))<8){onHit(p.dm);arrows.splice(i,1)}
-   else if(p.life<=0||water(p.x,p.y+10)===1)arrows.splice(i,1);
+   else if(p.life<=0||!ok(p.x,p.y+10))arrows.splice(i,1);
   }
  }
  function frame(e,now){
