@@ -1,4 +1,4 @@
-// 黄巾兵：动作、受击、死亡与弓箭；玩家与搜打撤规则由调用方接收命中事件。
+// 敌人（哥布林）：动作、受击、死亡与远程弹；命中事件交给调用方。
 export function createEnemies({data,images,hero,ok,water,onHit}){
  const kinds=Object.keys(data).filter(k=>(data[k].role||'normal')==='normal'),arrows=[];
  let bag=[];
@@ -34,7 +34,6 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      }else if(d<=(stats.reach+5)*(e.sc||1)){onHit(stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1))}
     }
    }else if(e.state==='strike'){
-    // 搜打撤沿用原本按时间扣血的接口，仅在可命中的打击帧开启。
     if(e.timer>=.2){e.state='recover';e.timer=0}
    }else if(e.state==='recover'){
     if(e.timer>=.45){e.state='move';e.timer=0;e.cooldown=.55+Math.random()*.35}

@@ -30,14 +30,14 @@
 - 女主暂无专属骑手，骑马时沿用男骑手。
 
 ## 待重做美术（用户出图）
-主角 B 走路 6–8 帧（左右腿交替）、劈/横扫/撩、受击/倒地/起身、各握法；武器细像素重绘；黄巾 12 帧 × 多兵种。
+（当前设定：异世界幸存者；敌人为哥布林，`tools/slice_goblins.py` 切图；黄巾兵素材保留不用。）
 
 ## 重新生成地图
 `tools/build_world.sh` → `tools/build_map.py`：旧的西凉/雪原/江南块从 art_src/build/legacy_*（扩图前成品）整块平移保留，其余区域按规则生成；主河在新区域接上；物件统一摆放（按素材实际宽度算间距、禁放水边/出生点），最后打印重叠数和未使用素材，并输出 art_src/build/preview_map.png、preview_objs.png。
 
 ## 协作规则（第一次接手先读这里）
 1. 运行：`python3 -m http.server 8000`，打开 http://localhost:8000 ，能看到地图、人物、可操作即正常。
-2. 只改你被分配的任务涉及的文件；不要重新生成或改动 `assets/map/`、`data/world.json`（地图已定稿）。
+2. 只改你被分配的任务涉及的文件；地图由 tools/build_stage.py 生成，不要手改 `assets/map/`、`data/world.json`。
 3. 游戏逻辑都在 `src/main.js`；人物/武器素材清单在 `data/characters.json`，骑马数据在 `data/ride.json`。
 4. 接入新美术：把 PNG 放进 `assets/characters/...`，在 `data/*.json` 登记路径和尺寸，再在 `src/main.js` 里引用；保持 脚底锚点、画布大小 与旧图一致。
 5. 改完只做基本检查：页面能打开、控制台无报错、能走动。不需要写大量测试。
@@ -60,3 +60,9 @@
 - 身体大小按白 T 与默认男主 hero_b 对齐；游戏里选中某个发型才下载那一套。默认男主（乱发）仍是 hero_b。
 - 男主发型的骑马版（`art_src/characters/riders/rider_male_5styles.png`）和女主骑手暂未接入。
 - 注意：assets/map/sprites 里的 wreed/wcat 已缩到 0.55 倍、fdock ×1.7、wlog ×1.5（直接改的成品图）；重跑 build_mountain.py 会覆盖回原尺寸。
+
+## 设定与界面（当前）
+- 游戏名：异世界幸存者 · 无名之辈外传。设计总表见 docs/GAME_DESIGN.md。
+- 敌人：哥布林小兵/刀手/弓手/盾兵，精英萨满，10 分钟 Boss 哥布林大王（data/enemies.json，role 字段）。
+- 局内成长在 src/run.js；主菜单与备战/选关在 src/menu.js；加载动画在 index.html（卧室 assets/ui/bedroom.jpg、坐姿 hero_b/sit0-2）。
+- 主角按原图 1:1 绘制（HK=1），不要再缩放。

@@ -1,4 +1,4 @@
-// 主界面独立绘制演示场景，不推进实际游戏或搜打撤计时。
+// 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
 style.textContent=`
