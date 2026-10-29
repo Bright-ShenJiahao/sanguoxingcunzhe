@@ -17,6 +17,14 @@ G=np.zeros((H*HD,W*HD,3),np.uint8)
 for t in J['tiles']['list']:
     tx,ty=int(t[1]),int(t[2]); im=np.array(Image.open(OLD+t+'.jpg').convert('RGB')); G[ty*T*HD:ty*T*HD+im.shape[0],tx*T*HD:tx*T*HD+im.shape[1]]=im
 C0=np.array(Image.open(OLD+'coll.png').convert('RGB'))[...,0]
+# 手工补崖：池塘下游小溪东岸（x 574~606, y 846~892），接上旁边的崖壁
+for x in range(574,607):
+    t=(x-574)/32; ya,yb=int(858-12*t),int(898-8*t)          # 上沿/下沿随 x 渐变，与右边崖壁衔接
+    src=608+(x-574)%20
+    for y in range(ya,yb):
+        sy=850+int((y-ya)/(yb-ya)*38)
+        G[y*HD:(y+1)*HD,x*HD:(x+1)*HD]=G[sy*HD:(sy+1)*HD,src*HD:(src+1)*HD]
+    C0[ya:yb,x]=1
 g=cv2.resize(G,(W,H),interpolation=cv2.INTER_AREA).astype(int)
 blue=g[...,2]>g[...,1]+5
 wat0=((C0>=1)&blue)|(C0==2)
