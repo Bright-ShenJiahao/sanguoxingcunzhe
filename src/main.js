@@ -89,7 +89,18 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
   reset(){run.reset();hero.x=WW*AT[0];hero.y=WH*AT[1];hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm='short';joy=null;for(const k in keys)keys[k]=0}
  });run=createRun({hero,en,images:IM,survival,ok,makeEnemy:(x,y,k)=>enemySystem.make(x,y,k),hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});dbg=createDebug({world:D,hero,en,run,survival,weather,hit:(e,v)=>hitEnemy(e,performance.now(),1,v)});dbg?.show(false);requestAnimationFrame(loop)}
-function drawGround(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const T=D.tiles.T,z=dw/sw;for(const k of D.gt){const x0=+k[1]*T,y0=+k[2]*T,a=Math.max(sx,x0),b=Math.min(sx+sw,x0+T,WW),c0=Math.max(sy,y0),c1=Math.min(sy+sh,y0+T,WH);if(b<=a||c1<=c0)continue;const ex=b<sx+sw&&b<WW?.5:0,ey=c1<sy+sh&&c1<WH?.5:0;ctx.drawImage(IM[k],(a-x0)*HD,(c0-y0)*HD,(b-a+ex)*HD,(c1-c0+ey)*HD,dx+(a-sx)*z,dy+(c0-sy)*z,(b-a+ex)*z,(c1-c0+ey)*z)}}
+function drawGroundRaw(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const T=D.tiles.T,z=dw/sw;for(const k of D.gt){const x0=+k[1]*T,y0=+k[2]*T,a=Math.max(sx,x0),b=Math.min(sx+sw,x0+T,WW),c0=Math.max(sy,y0),c1=Math.min(sy+sh,y0+T,WH);if(b<=a||c1<=c0)continue;const ex=b<sx+sw&&b<WW?.5:0,ey=c1<sy+sh&&c1<WH?.5:0;ctx.drawImage(IM[k],(a-x0)*HD,(c0-y0)*HD,(b-a+ex)*HD,(c1-c0+ey)*HD,dx+(a-sx)*z,dy+(c0-sy)*z,(b-a+ex)*z,(c1-c0+ey)*z)}}
+// 地面缓存：按当前屏幕缩放把地面切成 256 格的小块，各缩放一次存起来，之后每帧原样贴（画面不变，省显卡）
+const GC=new Map(),GCH=256;
+function gChunk(i,j,s){const key=i+','+j+','+s;let e=GC.get(key);if(e){GC.delete(key);GC.set(key,e);return e}
+ const n=Math.ceil(GCH*s),cv2=document.createElement('canvas');cv2.width=n;cv2.height=n;const g=cv2.getContext('2d');g.imageSmoothingQuality='high';
+ drawGroundRaw(g,i*GCH,j*GCH,GCH,GCH,0,0,n,n);GC.set(key,cv2);if(GC.size>48)GC.delete(GC.keys().next().value);return cv2}
+function drawGround(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const m=ctx.getTransform(),s=+(m.a*dw/sw).toFixed(3);
+ if(m.b||m.c||s>8){drawGroundRaw(ctx,sx,sy,sw,sh,dx,dy,dw,dh);return}
+ const ox=m.e+dx*m.a,oy=m.f+dy*m.d;ctx.save();ctx.setTransform(1,0,0,1,0,0);
+ for(let j=Math.max(0,Math.floor(sy/GCH));j*GCH<Math.min(WH,sy+sh);j++)for(let i=Math.max(0,Math.floor(sx/GCH));i*GCH<Math.min(WW,sx+sw);i++)
+  ctx.drawImage(gChunk(i,j,s),Math.round(ox+(i*GCH-sx)*s),Math.round(oy+(j*GCH-sy)*s));
+ ctx.restore()}
 let menu,survival,run,dbg;const weather=createWeather();
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
 let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimationFrame(loop);return}flT=now;   // 锁帧：游戏 60、菜单 30
