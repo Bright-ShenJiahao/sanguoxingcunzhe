@@ -25,6 +25,11 @@ for x in range(574,607):
         sy=850+int((y-ya)/(yb-ya)*38)
         G[y*HD:(y+1)*HD,x*HD:(x+1)*HD]=G[sy*HD:(sy+1)*HD,src*HD:(src+1)*HD]
     C0[ya:yb,x]=1
+# 东边旧木桥（画在地面图上的）抹掉，换成代码画的桥
+BX0,BY0,BX1,BY1=2706,924,2892,974
+bmk=(np.array(Image.open(ROOT+'/art_src/map/bridge_wood.png'))[...,3]>0).astype(np.uint8)
+bmk=cv2.dilate(bmk,np.ones((7,7),np.uint8)); bm2=np.zeros((H*HD,W*HD),np.uint8); bm2[BY0*HD:BY1*HD,BX0*HD:BX1*HD]=bmk
+G=cv2.inpaint(G,bm2,9,cv2.INPAINT_TELEA)
 g=cv2.resize(G,(W,H),interpolation=cv2.INTER_AREA).astype(int)
 blue=g[...,2]>g[...,1]+5
 wat0=((C0>=1)&blue)|(C0==2)
@@ -61,6 +66,9 @@ for k_,x,y in J0['objs']:                              # 原桥位：局部用�
         watw[y0_:y1_,x0_:x1_]|=cv2.morphologyEx(watw[y0_:y1_,x0_:x1_].astype(np.uint8),cv2.MORPH_CLOSE,disk(14)).astype(bool)
 # 用户标的：把池塘和下面的湖连起来
 cv2.line(watw.view(np.uint8),(1738,1088),(1738,1122),1,14)
+_y0,_y1,_x0,_x1=BY0-40,BY1+40,BX0-20,BX1+20
+watw[_y0:_y1,_x0:_x1]|=cv2.morphologyEx(watw[_y0:_y1,_x0:_x1].astype(np.uint8),cv2.MORPH_CLOSE,disk(26)).astype(bool)
+watw=(blur(watw,4.5)>0.5)                              # 河岸圆滑，去掉棱角和锯齿
 watw[:40]=False
 n,lab,st,_=cv2.connectedComponentsWithStats(watw.astype(np.uint8))
 for i in range(1,n):
@@ -80,13 +88,19 @@ for k_,x,y in J0['objs']:
     if k_.startswith('bridge'):
         m=np.zeros_like(watw); cv2.circle(m.view(np.uint8),(x,y),22,1,-1); ford|=m.astype(bool); fords.append((x,y))
 ford=dil(ford,WID+3)&watw
+# 用户标的红线：沿线的河道整段改成可涉水的浅滩
+shm=np.zeros((H,W),np.uint8)
+for L_ in json.load(open(ROOT+'/art_src/map/shallows.json')): cv2.polylines(shm,[np.array(L_['点'],np.int32)],False,1,60)
+ford|=(shm>0)&watw
 print('过河点',len(fords))
 C=C0.copy(); C[watw]=1; C[ford]=2
 C[(C0==2)&~watw]=0
 # ---------- 木桥（art_src/map/bridges.json：用户画的线；沿线延伸到两岸） ----------
 BRS=[]
 for L_ in json.load(open(ROOT+'/art_src/map/bridges.json')):
-    (x0,y0),(x1,y1)=L_['点'][0],L_['点'][-1]; mx,my=(x0+x1)/2,(y0+y1)/2; ux,uy=x1-x0,y1-y0; l=np.hypot(ux,uy); ux/=l; uy/=l
+    (x0,y0),(x1,y1)=L_['点'][0],L_['点'][-1]
+    if x1<x0: x0,y0,x1,y1=x1,y1,x0,y0                 # 统一从左到右，木纹亮面朝上
+    mx,my=(x0+x1)/2,(y0+y1)/2; ux,uy=x1-x0,y1-y0; l=np.hypot(ux,uy); ux/=l; uy/=l
     ext=[]
     for sg in (-1,1):
         t=0
@@ -145,7 +159,7 @@ for y0 in range(0,H*HD,BH):
     lite=tile(TW,y0,h,Wd,331)*0.55+np.array([150,196,206],np.float32)*0.45
     dk=np.clip((s-1)/9,0,1)
     wc=lite*(1-dk)+deep*dk
-    fk=L(fordb); wc=wc*(1-fk)+(tile(TS,y0,h,Wd,77)*0.7+np.array([196,206,188],np.float32)*0.3)*fk
+    fk=L(fordb); wc=wc*(1-fk)+(tile(TS,y0,h,Wd,77)*0.7+np.array([150,190,200],np.float32)*0.2)*fk
     fw=1.8+3.0*L(seanear)                                # 海浪更宽，外面再一道
     foam=np.clip(1-(s-0.2)/fw,0,1)*(s>-0.5)*(0.55+0.45*k)
     foam=np.maximum(foam,0.45*L(seanear)*np.clip(1-np.abs(s-8)/1.5,0,1)*k)
@@ -293,7 +307,7 @@ print('水边',nr)
 by_,bx_=np.nonzero(beach&(dsea>5)&(dsea<14)); BB=[]
 for j in rng.permutation(len(bx_))[:3000]:
     x,y=int(bx_[j]),int(by_[j])
-    if rng.random()<0.3 and all((x-a)**2+(y-b)**2>120**2 for a,b in BB) and far(x,y,10): BB.append((x,y)); put(['wlog','rsmall1','rsmall1'][rng.integers(3)],x,y,10)
+    if rng.random()<0.3 and all((x-a)**2+(y-b)**2>120**2 for a,b in BB) and far(x,y,10): BB.append((x,y)); put('wlog',x,y,10)
 def nearbr(x,y):
     for (ax,ay),(bx,by) in BRS:
         u=np.array([bx-ax,by-ay]); l=np.linalg.norm(u); t=np.clip(((x-ax)*u[0]+(y-ay)*u[1])/l**2,0,1)
