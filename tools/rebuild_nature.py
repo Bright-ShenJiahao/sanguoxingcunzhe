@@ -21,6 +21,16 @@ g=cv2.resize(G,(W,H),interpolation=cv2.INTER_AREA).astype(int)
 blue=g[...,2]>g[...,1]+5
 wat0=((C0>=1)&blue)|(C0==2)
 rockc=(C0==1)&~blue                                     # 崖壁、山体
+yy_,xx_=np.mgrid[0:H,0:W]
+mtr=rockc&(xx_<850)&(yy_<1100)&(yy_>300)
+mount=cv2.morphologyEx(dil(mtr,25).astype(np.uint8),cv2.MORPH_CLOSE,disk(60))
+inv=(1-mount).astype(np.uint8); cv2.floodFill(inv,None,(W-1,H-1),2); mount=(mount>0)|(inv==1)   # 西边的山（填满内部）
+back=np.zeros_like(rockc)                               # 山的背面：画面上没有崖壁的台地边 → 改成能走的缓坡
+n,lab,st,_=cv2.connectedComponentsWithStats(mtr.astype(np.uint8))
+for i in range(1,n):
+    m=lab==i; px=g[m]
+    if (px[:,0]-px[:,1]).mean()<0: back|=m
+print('山背面台地边',back.sum())
 # ---------- 新水域 ----------
 watc=cv2.morphologyEx(wat0.astype(np.uint8),cv2.MORPH_CLOSE,disk(7)).astype(bool)   # 把桥面那条缝补上
 land_ok=(C0==0)&~dil(rockc,5)
@@ -52,6 +62,7 @@ ford=dil(ford,WID+3)&watw
 print('过河点',len(fords))
 C=C0.copy(); C[watw]=1; C[ford]=2
 C[(C0==2)&~watw]=0
+C[back]=0
 Image.fromarray(np.dstack([C,np.zeros_like(C),np.zeros_like(C)])).save(MAP+'coll.png',optimize=True)
 # ---------- 画水 ----------
 S=900
@@ -66,6 +77,17 @@ din=cv2.distanceTransform(watw.astype(np.uint8),cv2.DIST_L2,5); dout=cv2.distanc
 sd=np.where(watw,din-0.5,-(dout-0.5))                   # 有符号距离：水里为正
 nz=blur(rng.random((H//6+1,W//6+1)),1.0); nz=cv2.resize((nz-nz.min())/(np.ptp(nz)+1e-6),(W,H))
 fordb=blur(ford,3)
+n,lab,st,_=cv2.connectedComponentsWithStats(watw.astype(np.uint8))
+sea=watw&(cv2.blur(watw.astype(np.float32),(121,121))>0.55)&(xx_>2500)&(yy_>1000)&(xx_>2500)&(yy_>1000)   # 大片开阔水面 = 海（河道太窄不算）
+sea=cv2.morphologyEx(sea.astype(np.uint8),cv2.MORPH_OPEN,disk(10)).astype(bool)
+dsea=cv2.distanceTransform((~sea).astype(np.uint8),cv2.DIST_L2,5)
+bw=18+12*nz                                              # 沙滩宽度带点起伏
+beach=land&(dsea<bw)
+sand=np.clip((bw-dsea)/4,0,1)*land                       # 沙滩（边缘柔和过渡到草地）
+wet=np.clip(1-dsea/7,0,1)*land
+seanear=np.clip(1-dsea/30,0,1)
+backsh=blur(back,2.2); backrim=blur(np.roll(back,-3,0),2.0)
+print('沙滩',beach.sum())
 out=np.zeros_like(G); BH=640; Wd=W*HD
 FU={}
 def up(a,y0,y1):
@@ -77,7 +99,12 @@ for y0 in range(0,H*HD,BH):
     col=G[y0:y1].astype(np.float32)
     s=L(sd); k=L(nz)
     # 岸：湿泥一圈
-    bank=np.clip(1+s/4,0,1)*(s<=0)
+    bank=np.clip(1+s/4,0,1)*(s<=0)*(1-L(seanear))
+    col=col*(1-0.35*L(backsh))+28*L(backrim)            # 背面台地：一条柔和阴影 + 上沿亮边
+    gr_=np.random.default_rng(y0).random((h,Wd,1)).astype(np.float32)
+    sc_=L(sand); wt_=L(wet)
+    sandc=(np.array([222,204,158],np.float32)*(1-wt_)+np.array([168,148,108],np.float32)*wt_)*(0.93+0.12*gr_)
+    col=col*(1-sc_)+sandc*sc_
     col=col*(1-0.45*bank)+np.array([92,84,58],np.float32)*0.45*bank
     # 水：深处深蓝，靠岸变浅
     deep=tile(TW,y0,h,Wd)*np.array([0.62,0.78,0.98],np.float32)
@@ -85,7 +112,9 @@ for y0 in range(0,H*HD,BH):
     dk=np.clip((s-1)/9,0,1)
     wc=lite*(1-dk)+deep*dk
     fk=L(fordb); wc=wc*(1-fk)+(tile(TS,y0,h,Wd,77)*0.7+np.array([196,206,188],np.float32)*0.3)*fk
-    foam=np.clip(1-(s-0.2)/1.8,0,1)*(s>-0.5)*(0.55+0.45*k)
+    fw=1.8+3.0*L(seanear)                                # 海浪更宽，外面再一道
+    foam=np.clip(1-(s-0.2)/fw,0,1)*(s>-0.5)*(0.55+0.45*k)
+    foam=np.maximum(foam,0.45*L(seanear)*np.clip(1-np.abs(s-8)/1.5,0,1)*k)
     wc=wc*(1-foam)+np.array([238,246,248],np.float32)*foam
     a=np.clip(s+0.5,0,1)
     out[y0:y1]=np.clip(col*(1-a)+wc*a,0,255).astype(np.uint8)
@@ -114,6 +143,7 @@ def put(k,x,y,r):
     objs.append([k,int(x),int(y)]); grid.setdefault((int(x)//CS,int(y)//CS),[]).append((x,y,r))
 SPAWN=J['spawn']
 nowater=~dil(watw,6)&~dil(rockc,10)
+notree=mount|dil(beach,6)
 def okpos(x,y,cl=True):
     xi,yi=int(x),int(y)
     if not(8<x<W-8 and 8<y<H-4): return False
@@ -134,50 +164,55 @@ TREE={'con':(['pine1','pine1','pine2'],15),'bir':(['broad2','broad4'],17),'oak':
 nt=0
 for _ in range(260000):
     x,y=rng.uniform(0,W),rng.uniform(0,H); xi,yi=int(x),int(y); d=dens[yi,xi]
-    if d<0.18 or rng.random()>min(1,(d-0.18)*0.6) or not okpos(x,y): continue
-    if d<0.9 and clear[yi,xi]<0.28: continue                 # 林中空地
+    if d<0.18 or rng.random()>min(1,(d-0.18)*0.6) or not okpos(x,y) or notree[yi,xi]: continue
+    if d<0.9 and clear[yi,xi]<0.33: continue                 # 林中空地
     sc={'con':fC[yi,xi]+0.45*north[yi,0]+0.2*d,'bir':fB[yi,xi]-0.12,'oak':fO[yi,xi]-0.15*d}
     sp=max(sc,key=sc.get); ks,r=TREE[sp]; k=ks[rng.integers(len(ks))]
-    if far(x,y,r*(0.8 if d>0.8 else 1.0)): put(k,x,y,r*(0.8 if d>0.8 else 1.0)); nt+=1
+    if far(x,y,r): put(k,x,y,r); nt+=1                # 树间留出能走的空隙
 # 草地上的孤树：橡树 1~3 棵一组
 for _ in range(9000):
     x,y=rng.uniform(0,W),rng.uniform(0,H)
-    if dens[int(y),int(x)]>0.12 or rng.random()>0.05 or not okpos(x,y) or not far(x,y,110): continue
+    if dens[int(y),int(x)]>0.12 or rng.random()>0.05 or not okpos(x,y) or notree[int(y),int(x)] or not far(x,y,110): continue
     for m in range(rng.integers(1,4)):
         xx,yy=x+rng.normal(0,22)*(m>0),y+rng.normal(0,16)*(m>0)
-        if okpos(xx,yy) and far(xx,yy,18): put(['broad1','broad3'][rng.integers(2)],xx,yy,18); nt+=1
+        if okpos(xx,yy) and not notree[int(yy),int(xx)] and far(xx,yy,18): put(['broad1','broad3'][rng.integers(2)],xx,yy,18); nt+=1
 # 水边柳树
 wl=np.nonzero((dout>7)&(dout<12)&~dil(rockc,10))
 for j in rng.permutation(len(wl[0]))[:3000]:
     y,x=int(wl[0][j]),int(wl[1][j])
-    if rng.random()<0.3 and okpos(x,y) and far(x,y,95) and not watw[max(0,y-60):y,max(0,x-20):x+20].any(): put('willow',x,y,20)
+    if rng.random()<0.3 and okpos(x,y) and not notree[y,x] and far(x,y,95) and not watw[max(0,y-60):y,max(0,x-20):x+20].any(): put('willow',x,y,20)
 print('树',nt)
 # 灌木：一团一团，同一团同一种
-CL=[('heather',['bushM2','bushS2'],.28),('gorse',['bushL1'],.18),('bramble',['bushL2'],.14),('hawthorn',['bushM1'],.14),('fern',['tuft1','tuft4'],.26)]
+EDGE=[(['bushL2'],.3),(['bushM1'],.3),(['bushL1'],.15),(['tuft1','tuft4'],.25)]   # 林缘：荆棘、山楂、金雀花、蕨
 nb=0
-for _ in range(40000):
-    x,y=rng.uniform(0,W),rng.uniform(0,H); d=dens[int(y),int(x)]
-    if d>0.75 or rng.random()>0.2 or not okpos(x,y) or not far(x,y,45): continue
-    p=np.array([c[2] for c in CL]); p[4]+=0.3*d; p/=p.sum(); nm,ks,_=CL[rng.choice(len(CL),p=p)]
-    for _ in range(rng.integers(3,8)):
-        xx,yy=x+rng.normal(0,18),y+rng.normal(0,12); k=ks[rng.integers(len(ks))]; r=SZ[k][0]*0.38
+for _ in range(60000):
+    x,y=rng.uniform(0,W),rng.uniform(0,H); xi,yi=int(x),int(y); d=dens[yi,xi]
+    if mount[yi,xi]:
+        if rng.random()>0.04: continue
+        ks=[['bushM2','bushS2'],['bushL1']][rng.integers(2)]
+    else:
+        if not(0.1<d<0.55) or rng.random()>0.25*(1-abs(d-0.3)/0.3) or beach[yi,xi]: continue
+        ks=EDGE[rng.choice(len(EDGE),p=[e[1] for e in EDGE])][0]
+    if not okpos(x,y) or not far(x,y,40): continue
+    for _ in range(rng.integers(3,7)):
+        xx,yy=x+rng.normal(0,16),y+rng.normal(0,11); k=ks[rng.integers(len(ks))]; r=SZ[k][0]*0.38
         if okpos(xx,yy) and far(xx,yy,r): put(k,xx,yy,r); nb+=1
 # 林下：蕨类、毛地黄
 for _ in range(30000):
     x,y=rng.uniform(0,W),rng.uniform(0,H); d=dens[int(y),int(x)]
-    if not(0.35<d<1.0) or rng.random()>0.08 or not okpos(x,y): continue
+    if not(0.35<d<1.0) or rng.random()>0.08 or not okpos(x,y) or mount[int(y),int(x)]: continue
     k=['tuft1','tuft4','tuft3'][rng.choice(3,p=[.45,.4,.15])]
     if far(x,y,8): put(k,x,y,8); nb+=1
 # 野花：草地上小片
 for _ in range(6000):
     x,y=rng.uniform(0,W),rng.uniform(0,H)
-    if dens[int(y),int(x)]>0.3 or rng.random()>0.1 or not okpos(x,y,False) or not far(x,y,60): continue
+    if dens[int(y),int(x)]>0.1 or rng.random()>0.06 or not okpos(x,y,False) or beach[int(y),int(x)] or not far(x,y,80): continue
     for _ in range(rng.integers(2,6)):
         xx,yy=x+rng.normal(0,14),y+rng.normal(0,9)
         if okpos(xx,yy,False) and far(xx,yy,5): put(['tuft2','bushS1'][rng.integers(2)],xx,yy,5); nb+=1
 print('灌木草花',nb)
 # 水边：芦苇、香蒲成丛（避开过河点）
-bankz=(dout>0.5)&(dout<4)&~dil(ford,14)&~dil(rockc,8); by,bx=np.nonzero(bankz); nr=0; RC=[]
+bankz=(dout>0.5)&(dout<4)&~dil(ford,14)&~dil(rockc,8)&(dsea>40); by,bx=np.nonzero(bankz); nr=0; RC=[]
 for j in rng.permutation(len(bx))[:20000]:
     x,y=int(bx[j]),int(by[j])
     if y<50 or rng.random()>0.25 or any((x-a)**2+(y-b)**2<55**2 for a,b in RC): continue
@@ -187,13 +222,18 @@ for j in rng.permutation(len(bx))[:20000]:
         xx,yy=x+rng.normal(0,9),y+rng.normal(0,5); xi,yi=int(xx),int(yy)
         if 0<xi<W and 0<yi<H and dout[yi,xi]<6 and not ford[yi,xi] and far(xx,yy,2): put(ks[rng.integers(3)],xx,yy,6); nr+=1
 # 睡莲：只在大片水面靠边处
-n,lab,st,_=cv2.connectedComponentsWithStats(watw.astype(np.uint8)); big=np.isin(lab,[i for i in range(1,n) if st[i][4]>2500])
+n,lab,st,_=cv2.connectedComponentsWithStats(watw.astype(np.uint8)); big=np.isin(lab,[i for i in range(1,n) if st[i][4]>2500])&~sea
 ly,lx=np.nonzero(big&(din>4)&(din<9)&~dil(ford,20))
 for j in rng.permutation(len(lx))[:6000]:
     x,y=int(lx[j]),int(ly[j])
     if rng.random()<0.15 and far(x,y,70): put(['wlily1','wlily2'][rng.integers(2)],x,y,8)
 print('水边',nr)
 # 石头：过河点放踏脚石；大片水面靠岸处零星河中石；峡谷末端落石
+# 沙滩：零星浮木、卵石
+by_,bx_=np.nonzero(beach&(dsea>5)&(dsea<14)); BB=[]
+for j in rng.permutation(len(bx_))[:3000]:
+    x,y=int(bx_[j]),int(by_[j])
+    if rng.random()<0.3 and all((x-a)**2+(y-b)**2>120**2 for a,b in BB) and far(x,y,10): BB.append((x,y)); put(['wlog','rsmall1','rsmall1'][rng.integers(3)],x,y,10)
 for x,y in fords: put('st%d'%rng.integers(1,5),x,y,10)
 WR=[]
 ry,rx=np.nonzero(big&(din>5)&(din<9)&~dil(ford,30)); nw=0
