@@ -7,7 +7,7 @@ import {createRun} from './run.js';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
-const D={...W,...CH,gt:[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),coll:'assets/map/coll.png?v='+W.ver,
+const D={...W,...CH,gt:W.tiles.list||[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),coll:'assets/map/coll.png?v='+W.ver,
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),WW=D.WW,WH=D.WH||D.WW,HD=D.HD;
 let VW=480,VH=300,SC=HD;
@@ -44,7 +44,7 @@ for(let r=0;r<HN.rows.length;r++)SETS['f'+r]={pre:'hh'+r+'_',size:(z=>[z[0]/2,z[
 let hairG=false,weaponAttack=null,pj=[],CM,mmc,wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
 const QP=new URLSearchParams(location.search);const AT=QP.get('x')?[+QP.get('x')/D.WW,+QP.get('y')/D.WH]:({n:[.8,.15],s:[.85,.85],w:[.15,.2],e:[.95,.6],sw:[.15,.85]})[QP.get('at')]||[D.spawn[0]/D.WW,D.spawn[1]/D.WH];
-const region=(x,y)=>{const i=D.rmap[Math.min(63,Math.max(0,Math.floor(y/D.WH*64)))*64+Math.min(63,Math.max(0,Math.floor(x/D.WW*64)))];return D.rnames[i]};
+const region=(x,y)=>{const [gw,gh]=D.rgrid||[64,64],i=D.rmap[Math.min(gh-1,Math.max(0,Math.floor(y/D.WH*gh)))*gw+Math.min(gw-1,Math.max(0,Math.floor(x/D.WW*gw)))];return D.rnames[i]};
 const hero={x:WW*AT[0],y:WH*AT[1],face:1};const CO=objs.filter(o=>o.r);
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WH)return 1;return CM[(y*WW+x)*4]}
 function blocked(x,y){
@@ -71,12 +71,13 @@ const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>s
 function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg))fx.push({x:e.x,y:e.y,t:now,dx})}
 function spawn(){for(let n=0;n<30;n++){const a=Math.random()*6.28,r=Math.hypot(VW,VH)/2+20+Math.random()*90,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
  if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;const e=enemySystem.make(x,y);run?.onSpawn(e);en.push(e);return}}
-let fish=null;const deepAt=(x,y,r)=>x>2100&&y>2200&&[[0,0],[r,0],[-r,0],[0,r*.6],[0,-r*.6]].every(([a,b])=>water(x+a,y+b)===1);
+let fish=null;const deepAt=(x,y,r)=>x>2100&&y>WH-1000&&[[0,0],[r,0],[-r,0],[0,r*.6],[0,-r*.6]].every(([a,b])=>water(x+a,y+b)===1);
 let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;
 function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());const v=(x,y)=>{const fx=x/n*8,fy=y/n*8,x0=Math.floor(fx),y0=Math.floor(fy),tx=fx-x0,ty=fy-y0,s=t=>t*t*(3-2*t),q=(a,b)=>g[((b%8+8)%8)*8+((a%8+8)%8)];const a=q(x0,y0)*(1-s(tx))+q(x0+1,y0)*s(tx),b=q(x0,y0+1)*(1-s(tx))+q(x0+1,y0+1)*s(tx);return a*(1-s(ty))+b*s(ty)};
  cloud=document.createElement('canvas');cloud.width=n;cloud.height=n;const x=cloud.getContext('2d'),im=x.createImageData(n,n);for(let j=0;j<n;j++)for(let i=0;i<n;i++){const val=v(i,j)*.7+v(i*2,j*2)*.3,a=Math.max(0,Math.min(1,(val-.5)/.22))*.26;const k=(j*n+i)*4;im.data[k]=18;im.data[k+1]=40;im.data[k+2]=28;im.data[k+3]=a*255}x.putImageData(im,0,0)}
 function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH;const x=t.getContext('2d');x.drawImage(IM.coll,0,0);CM=x.getImageData(0,0,WW,WH).data;
- mmc=document.createElement('canvas');mmc.width=84;mmc.height=Math.round(84*WH/WW);{const g=mmc.getContext('2d');for(const k of D.gt){const tx=+k[1],ty=+k[2];g.drawImage(IM[k],tx*mmc.width/2,ty*mmc.height/2,mmc.width/2,mmc.height/2)}}
+ {const mm=$('mm');mm.height=Math.round(84*WH/WW);mm.style.setProperty('--mma',WW/WH)}
+ mmc=document.createElement('canvas');mmc.width=84;mmc.height=Math.round(84*WH/WW);{const g=mmc.getContext('2d');const T=D.tiles.T,s=mmc.width/WW;for(const k of D.gt){const im=IM[k];g.drawImage(im,+k[1]*T*s,+k[2]*T*s,im.width/HD*s,im.height/HD*s)}}
  document.querySelectorAll('#cs button').forEach(b=>b.onclick=()=>{CS=b.dataset.c;if(needLoad())loadSet(CS);document.querySelectorAll('#cs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
  mkCloud();
  menu=createMenu({c,images:IM,data:D,drawGround,objects:objs,enemies:ED,
@@ -87,7 +88,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
   reset(){run.reset();hero.x=WW*AT[0];hero.y=WH*AT[1];hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm='short';joy=null;for(const k in keys)keys[k]=0}
  });run=createRun({hero,en,images:IM,survival,ok,hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});requestAnimationFrame(loop)}
-function drawGround(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const T=D.tiles.T,z=dw/sw;for(const k of D.gt){const x0=+k[1]*T,y0=+k[2]*T,a=Math.max(sx,x0),b=Math.min(sx+sw,x0+T),c0=Math.max(sy,y0),c1=Math.min(sy+sh,y0+T);if(b<=a||c1<=c0)continue;const ex=b<sx+sw?.5:0,ey=c1<sy+sh?.5:0;ctx.drawImage(IM[k],(a-x0)*HD,(c0-y0)*HD,(b-a+ex)*HD,(c1-c0+ey)*HD,dx+(a-sx)*z,dy+(c0-sy)*z,(b-a+ex)*z,(c1-c0+ey)*z)}}
+function drawGround(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const T=D.tiles.T,z=dw/sw;for(const k of D.gt){const x0=+k[1]*T,y0=+k[2]*T,a=Math.max(sx,x0),b=Math.min(sx+sw,x0+T,WW),c0=Math.max(sy,y0),c1=Math.min(sy+sh,y0+T,WH);if(b<=a||c1<=c0)continue;const ex=b<sx+sw&&b<WW?.5:0,ey=c1<sy+sh&&c1<WH?.5:0;ctx.drawImage(IM[k],(a-x0)*HD,(c0-y0)*HD,(b-a+ex)*HD,(c1-c0+ey)*HD,dx+(a-sx)*z,dy+(c0-sy)*z,(b-a+ex)*z,(c1-c0+ey)*z)}}
 let menu,survival,run;const weather=createWeather();
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
 function loop(now){
@@ -126,7 +127,7 @@ function loop(now){
  if(ov.fp){if(moving&&!inSh&&Math.hypot(hero.x-fpl.x,hero.y-fpl.y)>7){fpl={x:hero.x,y:hero.y};fp.push({x:hero.x+fpside*2.2,y:hero.y,t:now});fpside=-fpside}
   fp=fp.filter(f=>now-f.t<5200);for(const f of fp){const a=1-(now-f.t)/5200;c.fillStyle=`rgba(30,20,12,${.16*a})`;c.beginPath();c.ellipse(f.x-cx,f.y-cy-1,1.7,1,0,0,6.3);c.fill()}}
  rip=rip.filter(r=>now-r.t<520);for(const r of rip){const k=(now-r.t)/520;c.strokeStyle=`rgba(250,252,250,${.9*(1-k)})`;c.lineWidth=.8;c.beginPath();c.ellipse(r.x-cx,r.y-cy-1,3+k*9,1.5+k*4,0,0,6.3);c.stroke()}
- if(!fish){fish=[];let g=0;while(fish.length<7&&g++<4000){const x=2150+Math.random()*400,y=2250+Math.random()*300;if(deepAt(x,y,34))fish.push({x,y,a:Math.random()*6.28,v:12+Math.random()*12,s:.8+Math.random()*.8,p:Math.random()*6})}}
+ if(!fish){fish=[];let g=0;while(fish.length<7&&g++<4000){const x=2150+Math.random()*400,y=WH-950+Math.random()*300;if(deepAt(x,y,34))fish.push({x,y,a:Math.random()*6.28,v:12+Math.random()*12,s:.8+Math.random()*.8,p:Math.random()*6})}}
  for(const f of fish){const nx=f.x+Math.cos(f.a)*f.v*dt,ny=f.y+Math.sin(f.a)*f.v*dt*.6;if(deepAt(nx,ny,34)&&deepAt(f.x+Math.cos(f.a)*30,f.y+Math.sin(f.a)*18,24)){f.x=nx;f.y=ny}else f.a+=1.4+Math.random();f.a+=Math.sin(now/1700+f.p)*dt*.5;f.p+=dt*5;
   const sx=f.x-cx,sy=f.y-cy;if(sx<-60||sx>VW+60||sy<-40||sy>VH+40)continue;const dir=Math.cos(f.a)>=0?1:-1,L=22*f.s,tw=Math.sin(f.p)*3*f.s;
   c.save();c.translate(sx,sy);c.scale(dir,1);c.fillStyle='rgba(8,32,66,.34)';c.beginPath();c.ellipse(0,0,L,L*.28,0,0,6.3);c.fill();c.beginPath();c.moveTo(-L*.8,0);c.lineTo(-L*1.5,-L*.34+tw);c.lineTo(-L*1.5,L*.34+tw);c.closePath();c.fill();c.restore()}

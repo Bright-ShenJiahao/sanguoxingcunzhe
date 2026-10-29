@@ -18,12 +18,12 @@ export function createWeather(){
  const LOCAL={'幽州·塞外':{p:.5,gap:[30000,60000],dur:[30000,50000],ev:[['blizzard',1]]},
   '北方草原':{p:.45,gap:[40000,80000],dur:[25000,45000],ev:[['wind',.8],['overcast',.2]]},
   '西凉':{p:.45,gap:[40000,80000],dur:[25000,45000],ev:[['sand',.7],['wind',.3]]},
-  '中原':{p:.35,gap:[45000,90000],dur:[25000,45000],ev:[['lightrain',.5],['overcast',.5]]},
-  '江南':{p:.5,gap:[35000,70000],dur:[30000,50000],ev:[['lightrain',.45],['heavyrain',.25],['fog',.3]]},
-  '蜀':{p:.55,gap:[35000,70000],dur:[30000,50000],ev:[['fog',.65],['lightrain',.35]]}};
+  '翠绿平原':{p:.35,gap:[45000,90000],dur:[25000,45000],ev:[['lightrain',.5],['overcast',.5]]},
+  '水乡湿地':{p:.5,gap:[35000,70000],dur:[30000,50000],ev:[['lightrain',.45],['heavyrain',.25],['fog',.3]]},
+  '迷雾森林':{p:.55,gap:[35000,70000],dur:[30000,50000],ev:[['fog',.65],['lightrain',.35]]}};
  function pickFrom(ev){let s=ev.reduce((a,x)=>a+x[1],0),r=Math.random()*s;for(const x of ev){if((r-=x[1])<=0)return x[0]}return ev[0][0]}
  function update(dt,now,rg){
-  if(!forced){const L=LOCAL[rg]||LOCAL['中原'];
+  if(!forced){const L=LOCAL[rg]||LOCAL['翠绿平原'];
    if(evReg&&rg!==evReg&&kind!=='clear'){target=0;next=Math.min(next,now)}          // 离开该地区：当地天气慢慢散去
    if(next==null)next=now+R(4000,10000);
    if(kind==='clear'){if(now>=next){if(Math.random()<L.p){kind=pickFrom(L.ev);target=1;evReg=rg;next=now+R(...L.dur)}else next=now+R(...L.gap)}}
