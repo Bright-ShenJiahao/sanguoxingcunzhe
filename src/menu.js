@@ -68,7 +68,7 @@ export function createMenu(game){
   <button class="menu-start" type="button"><span>开始游戏<small>进入翠绿之地</small></span><span aria-hidden="true">→</span></button>
   <div class="menu-note">WASD / 方向键移动 · 靠近敌人自动攻击<br>移动端在地图上拖动即可行走</div>
  </nav>`;
- document.body.append(root);document.body.classList.remove('loading');{const bt=document.getElementById('boot');if(bt)setTimeout(()=>{bt.style.opacity='0';setTimeout(()=>bt.remove(),500)},Math.max(0,(window.BOOT_MIN||2300)-performance.now()))}document.body.classList.add('menu-open');document.title='异世界幸存者 · 无名之辈外传';
+ document.body.append(root);document.body.classList.remove('loading');{const bt=document.getElementById('boot');if(bt)const go=()=>{if(performance.now()<(window.BOOT_MIN??2300)){setTimeout(go,100);return}bt.style.opacity='0';setTimeout(()=>bt.remove(),500)};go()}document.body.classList.add('menu-open');document.title='异世界幸存者 · 无名之辈外传';
  const cs=document.getElementById('cs');
  const input=root.querySelector('input'),caption=root.querySelector('.menu-character');
  try{input.value=localStorage.getItem('sanguo.playerName')||''}catch{/* 隐私模式仍可游玩。 */}

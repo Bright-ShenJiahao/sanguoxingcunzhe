@@ -23,7 +23,7 @@ body.survival-playing{padding:0;overflow:hidden}
 .survival-playing #kc{font-size:clamp(12px,2cqw,18px)}
 body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
 #boot{position:fixed;inset:0;z-index:60;overflow:hidden;background:#07101b;transition:opacity .5s}
-#boot .bg{position:absolute;inset:0;background:url(assets/map/boot.jpg) repeat-x 0 0/auto 100%}
+#boot .bg{position:absolute;inset:0;background:url(assets/ui/boot_grass.jpg) repeat-x 0 0/auto 100%}
 #boot::before{content:"";position:absolute;inset:0;z-index:2000;pointer-events:none;background:linear-gradient(180deg,#07101b99,#07101b44 45%,#07101bbb)}
 #boot .sd{position:absolute;left:0;image-rendering:pixelated;transform-origin:50% 100%;will-change:transform}
 #boot .tx{position:absolute;left:0;right:0;bottom:9vh;z-index:2100;text-align:center;color:#c9d8e8;font-size:15px;letter-spacing:.35em}
@@ -42,7 +42,7 @@ body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
 (function(){var b=document.getElementById('boot');if(!b)return;
 // 加载动画：卧室里打掌机 → 掌机爆光 → 房间碎成积木掉落、露出异世界草地 → 哥布林冒出、主角跑路
 var P='assets/characters/',K=innerHeight>=900?3:2,W=innerWidth,H=innerHeight,hb=Math.round(H*.27),hx=Math.round(W*(W<700?.7:.62)),cx0=Math.round(W*.5);
-var seen=false;try{seen=localStorage.getItem('isekai.introSeen')==='1';localStorage.setItem('isekai.introSeen','1')}catch(e){}
+var seen=false;   // 每次都完整播放；点击画面可跳过
 var SKIP=seen?4.1:0;window.BOOT_MIN=seen?2300:6200;
 var kinds=['goblin','gob_blade','gob_shield','gob_archer','goblin'],L=[],lane=[-26,18,-8,30,0,-30,14,24,-14,4];
 function fr(dir,pre,from,to){var a=[];for(var j=from;j<=to;j++){var im=new Image();im.src=P+dir+'/'+pre+j+'.png';a.push(im.src)}return a}
