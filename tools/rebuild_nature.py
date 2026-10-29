@@ -33,22 +33,16 @@ yy_,xx_=np.mgrid[0:H,0:W]
 mtr=rockc&(xx_<850)&(yy_<1100)&(yy_>300)
 mount=cv2.morphologyEx(dil(mtr,25).astype(np.uint8),cv2.MORPH_CLOSE,disk(60))
 inv=(1-mount).astype(np.uint8); cv2.floodFill(inv,None,(W-1,H-1),2); mount=(mount>0)|(inv==1)   # 西边的山（填满内部）
-back=np.zeros_like(rockc); ridge=np.zeros_like(rockc)                               # 山的背面：画面上没有崖壁的台地边 → 改成能走的缓坡
+back=np.zeros_like(rockc); ridge0=np.zeros_like(rockc)                               # 山的背面：画面上没有崖壁的台地边 → 改成能走的缓坡
 n,lab,st,_=cv2.connectedComponentsWithStats(mtr.astype(np.uint8))
 for i in range(1,n):
     m=lab==i; px=g[m]
     if (px[:,0]-px[:,1]).mean()<0:
         if st[i][2]>=170:
             cut=m&(xx_<460)&(yy_>590)          # 内圈台地左下那条斜尾巴：删掉
-            ridge|=m&~cut; back|=cut
+            ridge0|=m&~cut; back|=cut
         else: back|=m                         # 短的：删掉（可走，并抹掉地面上的线）
-print('删掉的短台地线',back.sum(),'保留的高低差',ridge.sum())
-# 高低差：外侧（低处）一条阴影，内侧上沿亮边
-cx_,cy_=np.nonzero(mtr)[1].mean(),np.nonzero(mtr)[0].mean()
-rd=np.hypot(xx_-cx_,yy_-cy_).astype(np.float32)
-rdil=dil(ridge,8); rin=blur(ridge,1.5)
-rmean=cv2.blur((rd*ridge).astype(np.float32),(31,31))/np.maximum(cv2.blur(ridge.astype(np.float32),(31,31)),1e-3)
-ridge_lo=blur(rdil&~ridge&(rd>rmean),2.0); ridge_hi=blur(rdil&~ridge&(rd<rmean)&~dil(ridge,4),1.5)
+print('删掉的短台地线',back.sum(),'保留的高低差',ridge0.sum())
 
 # ---------- 新水域 ----------
 watc=cv2.morphologyEx(wat0.astype(np.uint8),cv2.MORPH_CLOSE,disk(7)).astype(bool)   # 把桥面那条缝补上
@@ -81,8 +75,27 @@ ford=dil(ford,WID+3)&watw
 print('过河点',len(fords))
 C=C0.copy(); C[watw]=1; C[ford]=2
 C[(C0==2)&~watw]=0
-C[back]=0
-C[ridge]=1
+# ---------- 山的高度层：等高线(art_src/map/mountain_levels.json) + 上山路线(mountain_paths.json) ----------
+LV=json.load(open(ROOT+'/art_src/map/mountain_levels.json'))['层']
+PATHS=json.load(open(ROOT+'/art_src/map/mountain_paths.json'))
+lv=np.zeros((H,W),np.uint8); edge=np.zeros((H,W),np.uint8)
+for k,poly in enumerate(LV):
+    m=np.zeros((H,W),np.uint8); cv2.fillPoly(m,[np.array(poly,np.int32)],1); lv[m>0]=k+1
+    cv2.polylines(edge,[np.array(poly,np.int32)],True,1,5)
+pm=np.zeros((H,W),np.uint8)
+for L_ in PATHS:
+    if len(L_['点'])>15: cv2.polylines(pm,[np.array(L_['点'],np.int32)],False,1,18)
+ramp=dil((edge>0)&(pm>0),6)&dil(edge>0,6)
+ridge=(edge>0)&~ramp&~watw
+C[back|ridge0]=0                                   # 旧台地线不再挡路，高低差由等高线决定
+C[ridge]=4; C[ramp&~watw&(C==1)&~rockc]=0     # 4 = 崖坎：挡人不挡箭
+lvo=lv.copy(); lvo[ramp]=255
+print('坡道',int(ramp.sum()),'崖坎',int(ridge.sum()))
+Image.fromarray(lvo).save(MAP+'level.png',optimize=True)
+lo_side=np.zeros((H,W),bool); hi_side=np.zeros((H,W),bool); rd2=dil(ridge,7)&~ridge
+for k in range(1,len(LV)+1):
+    lo_side|=rd2&(lv==k-1); hi_side|=dil(ridge,4)&~ridge&(lv==k)
+rin=blur(ridge,1.2); ridge_lo=blur(lo_side,2.0); ridge_hi=blur(hi_side,1.5); rampb=blur(ramp&~watw,2)
 Image.fromarray(np.dstack([C,np.zeros_like(C),np.zeros_like(C)])).save(MAP+'coll.png',optimize=True)
 # ---------- 画水 ----------
 S=900
@@ -121,6 +134,7 @@ for y0 in range(0,H*HD,BH):
     bank=np.clip(1+s/4,0,1)*(s<=0)*(1-L(seanear))
     rf=L(rin); col=col*(1-rf)+(col*0.55+np.array([70,58,34],np.float32)*0.45)*rf     # 坡面：土色
     col=col*(1-0.5*L(ridge_lo))+36*L(ridge_hi)
+    rp_=L(rampb); col=col*(1-0.5*rp_)+np.array([168,148,98],np.float32)*0.5*rp_     # 坡道：土路
     gr_=np.random.default_rng(y0).random((h,Wd,1)).astype(np.float32)
     sc_=L(sand); wt_=L(wet)
     sandc=(np.array([222,204,158],np.float32)*(1-wt_)+np.array([168,148,108],np.float32)*wt_)*(0.93+0.12*gr_)

@@ -2,6 +2,8 @@
 import {createMenu} from './menu.js';
 import {createSurvival} from './survival.js';
 import {createEnemies} from './enemies.js';
+import {createTerrain} from './terrain.js';
+const TER=window.TER=createTerrain();
 import {createWeather} from './weather.js';
 import {createRun} from './run.js';
 import {createDebug} from './debug.js';
@@ -49,7 +51,7 @@ const region=(x,y)=>{const [gw,gh]=D.rgrid||[64,64],i=D.rmap[Math.min(gh-1,Math.
 const hero={x:WW*AT[0],y:WH*AT[1],face:1};const CO=objs.filter(o=>o.r);
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WH)return 1;return CM[(y*WW+x)*4]}
 function blocked(x,y){
- if(water(x,y)===1||water(x-3,y)===1||water(x+3,y)===1||water(x,y-2)===1)return true;
+ const w0=water(x,y),w1=water(x-3,y),w2=water(x+3,y),w3=water(x,y-2);if(w0===1||w1===1||w2===1||w3===1||w0===4||w1===4||w2===4||w3===4)return true;
  for(const o of CO){const dx=x-o.x,dy=(y-o.y)*1.3;if(dx*dx+dy*dy<(o.r+3)*(o.r+3))return true}return false}
 const ok=(x,y)=>!blocked(x,y);
 const HK=+(new URLSearchParams(location.search).get('hk')||1);let nextAtk=0;
@@ -76,7 +78,7 @@ let fish=null;const deepAt=(x,y,r)=>x>2100&&y>WH-1000&&[[0,0],[r,0],[-r,0],[0,r*
 let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;
 function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());const v=(x,y)=>{const fx=x/n*8,fy=y/n*8,x0=Math.floor(fx),y0=Math.floor(fy),tx=fx-x0,ty=fy-y0,s=t=>t*t*(3-2*t),q=(a,b)=>g[((b%8+8)%8)*8+((a%8+8)%8)];const a=q(x0,y0)*(1-s(tx))+q(x0+1,y0)*s(tx),b=q(x0,y0+1)*(1-s(tx))+q(x0+1,y0+1)*s(tx);return a*(1-s(ty))+b*s(ty)};
  cloud=document.createElement('canvas');cloud.width=n;cloud.height=n;const x=cloud.getContext('2d'),im=x.createImageData(n,n);for(let j=0;j<n;j++)for(let i=0;i<n;i++){const val=v(i,j)*.7+v(i*2,j*2)*.3,a=Math.max(0,Math.min(1,(val-.5)/.22))*.26;const k=(j*n+i)*4;im.data[k]=18;im.data[k+1]=40;im.data[k+2]=28;im.data[k+3]=a*255}x.putImageData(im,0,0)}
-function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH;const x=t.getContext('2d');x.drawImage(IM.coll,0,0);CM=x.getImageData(0,0,WW,WH).data;
+function start(){TER.water=water;TER.load('assets/map/level.png?v='+W.ver,WW,WH);const t=document.createElement('canvas');t.width=WW;t.height=WH;const x=t.getContext('2d');x.drawImage(IM.coll,0,0);CM=x.getImageData(0,0,WW,WH).data;
  {const mm=$('mm');mm.height=Math.round(84*WH/WW);mm.style.setProperty('--mma',WW/WH)}
  mmc=document.createElement('canvas');mmc.width=84;mmc.height=Math.round(84*WH/WW);{const g=mmc.getContext('2d');const T=D.tiles.T,s=mmc.width/WW;for(const k of D.gt){const im=IM[k];g.drawImage(im,+k[1]*T*s,+k[2]*T*s,im.width/HD*s,im.height/HD*s)}}
  document.querySelectorAll('#cs button').forEach(b=>b.onclick=()=>{CS=b.dataset.c;if(needLoad())loadSet(CS);document.querySelectorAll('#cs button').forEach(x=>x.setAttribute('aria-pressed',x===b))});
@@ -108,6 +110,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  const dt=Math.min(.05,(now-last)/1000||0);last=now;
  dbg?.show(!menu?.visible);
  if(menu?.visible){menu.draw(now);requestAnimationFrame(loop);return}
+ if(TER.ready)TER.flow(ok,hero.x,hero.y,now);
  if(survival?.finished){requestAnimationFrame(loop);return}
  const pz=run?.paused,gdt=pz?0:dt;
  c.setTransform(SC,0,0,SC,0,0);
@@ -129,7 +132,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
    else if(!weaponAttack.hit&&el>(wpm=='long'?190:170)){weaponAttack.hit=true;const reach=wpm=='long'?54:46,wid=wpm=='long'?14:22;for(const e of en){const ex=(e.x-hero.x)*hero.face,ey=e.y-hero.y;if(ex>-8&&ex<reach&&Math.abs(ey)<wid)hitEnemy(e,now,hero.face)}}
    if(el>DUR){weaponAttack=null;nextAtk=now+140}}
   for(const p of pj){p.x+=p.dx*p.v*dt;p.y+=p.dy*p.v*dt;p.life-=dt;for(const e of en){if(!e.dead&&Math.abs(e.x-p.x)<7&&Math.abs(e.y-p.y)<9){hitEnemy(e,now,p.dx>0?1:-1);p.life=0;break}}}
-  pj=pj.filter(p=>p.life>0&&ok(p.x,p.y))}
+  pj=pj.filter(p=>p.life>0&&water(p.x,p.y)!==1)}
  for(let i=en.length-1;i>=0;i--){const e=en[i];if(e.dead&&!e.counted){e.counted=true;kills++;run.onKill(e)}if(e.expired)en.splice(i,1)}
  if(!pz){const w=run.want();for(let n=0;n<4&&en.filter(e=>!e.dead).length<w;n++)spawn()}
  survival?.update(gdt);
