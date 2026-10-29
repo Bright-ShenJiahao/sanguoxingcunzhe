@@ -66,3 +66,4 @@
 - 敌人：哥布林小兵/刀手/弓手/盾兵，精英萨满，10 分钟 Boss 哥布林大王（data/enemies.json，role 字段）。
 - 局内成长在 src/run.js；主菜单与备战/选关在 src/menu.js；加载动画在 index.html（卧室 assets/ui/bedroom.jpg、坐姿 hero_b/sit0-2）。
 - 主角按原图 1:1 绘制（HK=1），不要再缩放。
+- 开发者面板：网址加 `?debug`，进游戏后左下角出现（src/debug.js）：无敌、回血、升级、全满级、跳时间/到 Boss、清屏、传送、天气、时辰。
