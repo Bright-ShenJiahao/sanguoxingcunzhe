@@ -30,17 +30,11 @@ n,lab,st,_=cv2.connectedComponentsWithStats(mtr.astype(np.uint8))
 for i in range(1,n):
     m=lab==i; px=g[m]
     if (px[:,0]-px[:,1]).mean()<0:
-        if st[i][2]>=150: ridge|=m            # 长的台地边：有高低差，挡路，画清楚
+        if st[i][2]>=170:
+            cut=m&(xx_<460)&(yy_>590)          # 内圈台地左下那条斜尾巴：删掉
+            ridge|=m&~cut; back|=cut
         else: back|=m                         # 短的：删掉（可走，并抹掉地面上的线）
 print('删掉的短台地线',back.sum(),'保留的高低差',ridge.sum())
-# 抹掉短台地线：在高清底图上局部修补
-Gs=G.copy()
-n2,lab2,st2,_=cv2.connectedComponentsWithStats(back.astype(np.uint8))
-for i in range(1,n2):
-    x_,y_,w_,h_,_=st2[i]; pad=20; X0,Y0=max(0,x_-pad),max(0,y_-pad); X1,Y1=min(W,x_+w_+pad),min(H,y_+h_+pad)
-    mk=cv2.resize(dil(lab2[Y0:Y1,X0:X1]==i,7).astype(np.uint8),((X1-X0)*HD,(Y1-Y0)*HD),interpolation=cv2.INTER_NEAREST)
-    G[Y0*HD:Y1*HD,X0*HD:X1*HD]=cv2.inpaint(G[Y0*HD:Y1*HD,X0*HD:X1*HD],mk,9,cv2.INPAINT_TELEA)
-del Gs
 # 高低差：外侧（低处）一条阴影，内侧上沿亮边
 cx_,cy_=np.nonzero(mtr)[1].mean(),np.nonzero(mtr)[0].mean()
 rd=np.hypot(xx_-cx_,yy_-cy_).astype(np.float32)
@@ -104,14 +98,13 @@ beach=land&(dsea<bw)
 sand=np.clip((bw-dsea)/4,0,1)*land                       # 沙滩（边缘柔和过渡到草地）
 wet=np.clip(1-dsea/7,0,1)*land
 seanear=np.clip(1-dsea/30,0,1)
-backsh=blur(back,2.2); backrim=blur(np.roll(back,-3,0),2.0)
 print('沙滩',beach.sum())
 out=np.zeros_like(G); BH=640; Wd=W*HD
 FU={}
 def up(a,y0,y1):
     k=id(a)
-    if k not in FU: FU[k]=cv2.resize(a.astype(np.float32),(Wd,H*HD),interpolation=cv2.INTER_LINEAR)
-    return FU[k][y0:y1]
+    if k not in FU or FU[k][0] is not a: FU[k]=(a,cv2.resize(a.astype(np.float32),(Wd,H*HD),interpolation=cv2.INTER_LINEAR))
+    return FU[k][1][y0:y1]
 for y0 in range(0,H*HD,BH):
     y1=min(H*HD,y0+BH); h=y1-y0; L=lambda a:up(a,y0,y1)[...,None]
     col=G[y0:y1].astype(np.float32)
