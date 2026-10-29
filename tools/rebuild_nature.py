@@ -25,6 +25,10 @@ for x in range(574,607):
         sy=850+int((y-ya)/(yb-ya)*38)
         G[y*HD:(y+1)*HD,x*HD:(x+1)*HD]=G[sy*HD:(sy+1)*HD,src*HD:(src+1)*HD]
     C0[ya:yb,x]=1
+# 东边旧木桥（画在地面图上的）抹掉，河面接上，换成欧式石拱桥物件
+BX0,BY0,BX1,BY1=2706,924,2892,974
+bm=np.zeros((H,W),np.uint8); bm[BY0:BY1,BX0:BX1]=1
+G=cv2.inpaint(G,cv2.resize(bm,(W*HD,H*HD),interpolation=cv2.INTER_NEAREST),7,cv2.INPAINT_TELEA)
 g=cv2.resize(G,(W,H),interpolation=cv2.INTER_AREA).astype(int)
 blue=g[...,2]>g[...,1]+5
 wat0=((C0>=1)&blue)|(C0==2)
@@ -59,6 +63,8 @@ for k_,x,y in J0['objs']:                              # 原桥位：局部用�
     if k_.startswith('bridge'):
         y0_,y1_,x0_,x1_=max(0,y-70),y+50,max(0,x-60),x+60
         watw[y0_:y1_,x0_:x1_]|=cv2.morphologyEx(watw[y0_:y1_,x0_:x1_].astype(np.uint8),cv2.MORPH_CLOSE,disk(14)).astype(bool)
+wb=np.zeros_like(watw); wb[BY0-6:BY1+6,BX0:BX1]=True; rowc=watw[BY0-8]|watw[BY1+8]
+watw[BY0-6:BY1+6]|=wb[BY0-6:BY1+6]&cv2.dilate(rowc.astype(np.uint8)[None,:],np.ones((1,9),np.uint8)).astype(bool)[0][None,:]
 watw[:40]=False
 n,lab,st,_=cv2.connectedComponentsWithStats(watw.astype(np.uint8))
 for i in range(1,n):
@@ -81,6 +87,7 @@ ford=dil(ford,WID+3)&watw
 print('过河点',len(fords))
 C=C0.copy(); C[watw]=1; C[ford]=2
 C[(C0==2)&~watw]=0
+_bd=np.zeros((H,W),np.uint8); cv2.line(_bd,(2718,928),(2888,974),1,20); C[_bd>0]=0                               # 石拱桥桥面可走
 C[back]=0
 C[ridge]=1
 Image.fromarray(np.dstack([C,np.zeros_like(C),np.zeros_like(C)])).save(MAP+'coll.png',optimize=True)
@@ -149,6 +156,7 @@ def add_sprite(k,src,th):
     ar=np.array(im.resize((ww,hh),Image.LANCZOS)); ar[...,3]=np.where(ar[...,3]>120,255,0)
     Image.fromarray(ar).save(MAP+'sprites/'+k+'.png'); J['size'][k]=[ww/HD,hh/HD]
 add_sprite('willow','willow',64); J['coll_r']['willow']=6
+add_sprite('sbridge','sbridge',78)
 SZ=J['size']
 VEG=('broad','pine','bush','tuft','flow','dry','wcat','wreed','wlily','bridge','rmid','rsmall','wlog','st','wr','rf','willow')
 objs=[o for o in J0['objs'] if not o[0].startswith(VEG)]
@@ -254,6 +262,8 @@ by_,bx_=np.nonzero(beach&(dsea>5)&(dsea<14)); BB=[]
 for j in rng.permutation(len(bx_))[:3000]:
     x,y=int(bx_[j]),int(by_[j])
     if rng.random()<0.3 and all((x-a)**2+(y-b)**2>120**2 for a,b in BB) and far(x,y,10): BB.append((x,y)); put(['wlog','rsmall1','rsmall1'][rng.integers(3)],x,y,10)
+objs=[o for o in objs if not (2690<o[1]<2910 and 900<o[2]<1000)]   # 桥附近清空
+objs.append(['sbridge',2800,950])
 for x,y in fords: put('st%d'%rng.integers(1,5),x,y,10)
 WR=[]
 ry,rx=np.nonzero(big&(din>5)&(din<9)&~dil(ford,30)); nw=0
