@@ -149,7 +149,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  c.save();c.font='7px monospace';c.textBaseline='bottom';c.fillStyle='rgba(0,0,0,.45)';c.fillRect(3,VH-13,124,10);c.fillStyle='#fff';c.fillText(region(hero.x,hero.y)+' · '+weather.shichen(now)+'  x '+Math.round(hero.x)+'  y '+Math.round(hero.y),6,VH-5);c.restore();
  const items=[];
  for(const o of objs){const sx=o.x-cx,sy=o.y-cy;if(sx<-60||sx>VW+60||sy<-10||sy>VH+100)continue;
-  const inx=Math.abs(hero.x-o.x)<o.w*.4,iny=hero.y<o.y-2&&hero.y>o.y-o.h*.9;const fade=/^(broad|pine|spire|bushL|nfir|nbare|nspire|nbush|fhouse|fshed|fgran|fbamb1|fwillow|fpeach)/.test(o.k);const ta=(fade&&inx&&iny)?.42:1;
+  const inx=Math.abs(hero.x-o.x)<o.w*.4,iny=hero.y<o.y-2&&hero.y>o.y-o.h*.9;const fade=/^(broad|pine|spire|bushL|nfir|nbare|nspire|nbush|fhouse|fshed|fgran|fbamb1|fwillow|fpeach|willow)/.test(o.k);const ta=(fade&&inx&&iny)?.42:1;
   o.a+=(ta-o.a)*Math.min(1,dt*10);
   const fl=/^(st\d|wlily)/.test(o.k);   // 踏脚石、睡莲贴地画，永远在人物下面
   items.push({y:fl?-1e9:o.y,f:()=>{c.imageSmoothingEnabled=true;c.globalAlpha=o.a;c.drawImage(IM['s_'+o.k],sx-o.w/2,fl?sy-o.h/2:sy-o.h,o.w,o.h);c.globalAlpha=1}})}

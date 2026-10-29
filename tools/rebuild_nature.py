@@ -1,0 +1,208 @@
+"""第一关：重画河流（加宽、中间深蓝、靠岸变浅、岸边白色水花），只保留能过河的浅滩（含原桥位），
+并按“同种成片”的规则重新摆放树木、灌木、水边植物和石头。
+输入（原始底稿，不会被改）：art_src/build/stage_old/{g00,g10}.jpg、coll.png、world.json
+输出：assets/map/g*.jpg、coll.png、data/world.json 的 objs/size/coll_r。可重复运行。"""
+import numpy as np, cv2, json, os
+from PIL import Image
+Image.MAX_IMAGE_PIXELS=None
+ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+OLD=ROOT+'/art_src/build/stage_old/'; MAP=ROOT+'/assets/map/'
+J=json.load(open(ROOT+'/data/world.json')); J0=json.load(open(OLD+'world.json'))
+HD=J['HD']; T=J['tiles']['T']; W,H=J['WW'],J['WH']; rng=np.random.default_rng(21)
+blur=lambda a,s:cv2.GaussianBlur(a.astype(np.float32),(0,0),s)
+disk=lambda r:cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*r+1,2*r+1))
+dil=lambda m,r:cv2.dilate(m.astype(np.uint8),disk(r)).astype(bool)
+# ---------- 读底稿 ----------
+G=np.zeros((H*HD,W*HD,3),np.uint8)
+for t in J['tiles']['list']:
+    tx,ty=int(t[1]),int(t[2]); im=np.array(Image.open(OLD+t+'.jpg').convert('RGB')); G[ty*T*HD:ty*T*HD+im.shape[0],tx*T*HD:tx*T*HD+im.shape[1]]=im
+C0=np.array(Image.open(OLD+'coll.png').convert('RGB'))[...,0]
+g=cv2.resize(G,(W,H),interpolation=cv2.INTER_AREA).astype(int)
+blue=g[...,2]>g[...,1]+5
+wat0=((C0>=1)&blue)|(C0==2)
+rockc=(C0==1)&~blue                                     # 崖壁、山体
+# ---------- 新水域 ----------
+watc=cv2.morphologyEx(wat0.astype(np.uint8),cv2.MORPH_CLOSE,disk(7)).astype(bool)   # 把桥面那条缝补上
+land_ok=(C0==0)&~dil(rockc,5)
+WID=5
+watw=watc|(dil(watc,WID)&land_ok)
+for k_,x,y in J0['objs']:                              # 原桥位：局部用更大的核把河道接起来
+    if k_.startswith('bridge'):
+        y0_,y1_,x0_,x1_=max(0,y-70),y+50,max(0,x-60),x+60
+        watw[y0_:y1_,x0_:x1_]|=cv2.morphologyEx(watw[y0_:y1_,x0_:x1_].astype(np.uint8),cv2.MORPH_CLOSE,disk(14)).astype(bool)
+watw[:40]=False
+n,lab,st,_=cv2.connectedComponentsWithStats(watw.astype(np.uint8))
+for i in range(1,n):
+    if st[i][4]<40: watw[lab==i]=False
+land=~watw
+# 过河浅滩：原浅滩里两岸都接陆地的 + 原来的桥位
+ford=np.zeros_like(watw)
+n,lab,st,cen=cv2.connectedComponentsWithStats((C0==2).astype(np.uint8))
+fords=[]
+for i in range(1,n):
+    m=lab==i; ring=dil(m,WID+4)&land&~dil(rockc,2)
+    k,_=cv2.connectedComponents(ring.astype(np.uint8))
+    wr_=dil(m,WID+4)&wat0&~dil(m,1)&(C0!=2); k2,_=cv2.connectedComponents(wr_.astype(np.uint8))
+    if k-1>=2 and k2-1>=2 and st[i][4]<2500:   # 两岸都是陆地、上下游都是河 = 真正的过河点
+        ford|=m; fords.append(tuple(cen[i]))
+for k_,x,y in J0['objs']:
+    if k_.startswith('bridge'):
+        m=np.zeros_like(watw); cv2.circle(m.view(np.uint8),(x,y),22,1,-1); ford|=m.astype(bool); fords.append((x,y))
+ford=dil(ford,WID+3)&watw
+print('过河点',len(fords))
+C=C0.copy(); C[watw]=1; C[ford]=2
+C[(C0==2)&~watw]=0
+Image.fromarray(np.dstack([C,np.zeros_like(C),np.zeros_like(C)])).save(MAP+'coll.png',optimize=True)
+# ---------- 画水 ----------
+S=900
+def seamless(t):
+    t=cv2.resize(t,(S,S),interpolation=cv2.INTER_AREA).astype(np.float32); b=int(S*.3)
+    out=np.roll(np.roll(t,S//2,0),S//2,1); e=np.minimum(np.arange(S),S-1-np.arange(S))
+    w=np.clip(np.minimum.outer(e,e)/b,0,1)[...,None]; return out*(1-w)+t*w
+ld=lambda f:np.array(Image.open(ROOT+'/art_src/map/'+f).convert('RGB'))
+TW=seamless(ld('water.png')); TS=seamless(ld('shallow.png'))
+def tile(t,y0,h,w,ox=0): return t[(np.arange(y0,y0+h)[:,None])%S,(np.arange(w)[None,:]+ox)%S]
+din=cv2.distanceTransform(watw.astype(np.uint8),cv2.DIST_L2,5); dout=cv2.distanceTransform(land.astype(np.uint8),cv2.DIST_L2,5)
+sd=np.where(watw,din-0.5,-(dout-0.5))                   # 有符号距离：水里为正
+nz=blur(rng.random((H//6+1,W//6+1)),1.0); nz=cv2.resize((nz-nz.min())/(np.ptp(nz)+1e-6),(W,H))
+fordb=blur(ford,3)
+out=np.zeros_like(G); BH=640; Wd=W*HD
+FU={}
+def up(a,y0,y1):
+    k=id(a)
+    if k not in FU: FU[k]=cv2.resize(a.astype(np.float32),(Wd,H*HD),interpolation=cv2.INTER_LINEAR)
+    return FU[k][y0:y1]
+for y0 in range(0,H*HD,BH):
+    y1=min(H*HD,y0+BH); h=y1-y0; L=lambda a:up(a,y0,y1)[...,None]
+    col=G[y0:y1].astype(np.float32)
+    s=L(sd); k=L(nz)
+    # 岸：湿泥一圈
+    bank=np.clip(1+s/4,0,1)*(s<=0)
+    col=col*(1-0.45*bank)+np.array([92,84,58],np.float32)*0.45*bank
+    # 水：深处深蓝，靠岸变浅
+    deep=tile(TW,y0,h,Wd)*np.array([0.62,0.78,0.98],np.float32)
+    lite=tile(TW,y0,h,Wd,331)*0.55+np.array([150,196,206],np.float32)*0.45
+    dk=np.clip((s-1)/9,0,1)
+    wc=lite*(1-dk)+deep*dk
+    fk=L(fordb); wc=wc*(1-fk)+(tile(TS,y0,h,Wd,77)*0.7+np.array([196,206,188],np.float32)*0.3)*fk
+    foam=np.clip(1-(s-0.2)/1.8,0,1)*(s>-0.5)*(0.55+0.45*k)
+    wc=wc*(1-foam)+np.array([238,246,248],np.float32)*foam
+    a=np.clip(s+0.5,0,1)
+    out[y0:y1]=np.clip(col*(1-a)+wc*a,0,255).astype(np.uint8)
+for t in J['tiles']['list']:
+    tx,ty=int(t[1]),int(t[2]); Image.fromarray(out[ty*T*HD:(ty+1)*T*HD,tx*T*HD:(tx+1)*T*HD]).save(MAP+t+'.jpg',quality=72,optimize=True)
+Image.fromarray(out[::8,::8]).save(ROOT+'/art_src/build/preview_nature.png')
+del out,G
+# ---------- 物件 ----------
+CUT=ROOT+'/art_src/build/lotr_cut/'
+def add_sprite(k,src,th):
+    im=Image.open(CUT+src+'.png'); hh=th*HD; ww=round(im.width*hh/im.height)
+    ar=np.array(im.resize((ww,hh),Image.LANCZOS)); ar[...,3]=np.where(ar[...,3]>120,255,0)
+    Image.fromarray(ar).save(MAP+'sprites/'+k+'.png'); J['size'][k]=[ww/HD,hh/HD]
+add_sprite('willow','willow',64); J['coll_r']['willow']=6
+SZ=J['size']
+VEG=('broad','pine','bush','tuft','flow','dry','wcat','wreed','wlily','bridge','rmid','rsmall','wlog','st','wr','rf','willow')
+objs=[o for o in J0['objs'] if not o[0].startswith(VEG)]
+CS=40; grid={}
+def far(x,y,r):
+    for i in range(int(x//CS)-2,int(x//CS)+3):
+        for j in range(int(y//CS)-2,int(y//CS)+3):
+            for ox,oy,orr in grid.get((i,j),()):
+                if (x-ox)**2+(y-oy)**2<(r+orr)**2: return False
+    return True
+def put(k,x,y,r):
+    objs.append([k,int(x),int(y)]); grid.setdefault((int(x)//CS,int(y)//CS),[]).append((x,y,r))
+SPAWN=J['spawn']
+nowater=~dil(watw,6)&~dil(rockc,10)
+def okpos(x,y,cl=True):
+    xi,yi=int(x),int(y)
+    if not(8<x<W-8 and 8<y<H-4): return False
+    if not nowater[yi,xi]: return False
+    return not cl or (x-SPAWN[0])**2+(y-SPAWN[1])**2>150**2
+# 森林密度：沿用原来树的分布（北边林墙、迷雾森林、几片树林）
+dens=np.zeros((H,W),np.float32)
+for k_,x,y in J0['objs']:
+    if k_.startswith(('broad','pine')) and 0<=y<H: dens[y,x]+=1
+dens=blur(dens,28); dens=np.clip(dens/np.percentile(dens[dens>0.0005],60),0,1.2)
+reg=np.array(J['rmap']).reshape(J['rgrid'][1],J['rgrid'][0]); fr=cv2.resize((reg==1).astype(np.float32),(W,H))
+dens=np.clip(dens+0.25*blur(fr,60),0,1.2)
+def field(cell,seed):
+    r=np.random.default_rng(seed).random((H//cell+2,W//cell+2)); r=blur(r,1.0); r=cv2.resize(r,(W,H),interpolation=cv2.INTER_CUBIC); return (r-r.min())/(np.ptp(r)+1e-6)
+fC,fB,fO=field(110,1),field(70,2),field(110,3); clear=field(70,4)
+north=np.clip(1-np.arange(H)/500,0,1)[:,None]
+TREE={'con':(['pine1','pine1','pine2'],15),'bir':(['broad2','broad4'],17),'oak':(['broad1','broad3'],24)}
+nt=0
+for _ in range(260000):
+    x,y=rng.uniform(0,W),rng.uniform(0,H); xi,yi=int(x),int(y); d=dens[yi,xi]
+    if d<0.18 or rng.random()>min(1,(d-0.18)*0.6) or not okpos(x,y): continue
+    if d<0.9 and clear[yi,xi]<0.28: continue                 # 林中空地
+    sc={'con':fC[yi,xi]+0.45*north[yi,0]+0.2*d,'bir':fB[yi,xi]-0.12,'oak':fO[yi,xi]-0.15*d}
+    sp=max(sc,key=sc.get); ks,r=TREE[sp]; k=ks[rng.integers(len(ks))]
+    if far(x,y,r*(0.8 if d>0.8 else 1.0)): put(k,x,y,r*(0.8 if d>0.8 else 1.0)); nt+=1
+# 草地上的孤树：橡树 1~3 棵一组
+for _ in range(9000):
+    x,y=rng.uniform(0,W),rng.uniform(0,H)
+    if dens[int(y),int(x)]>0.12 or rng.random()>0.05 or not okpos(x,y) or not far(x,y,110): continue
+    for m in range(rng.integers(1,4)):
+        xx,yy=x+rng.normal(0,22)*(m>0),y+rng.normal(0,16)*(m>0)
+        if okpos(xx,yy) and far(xx,yy,18): put(['broad1','broad3'][rng.integers(2)],xx,yy,18); nt+=1
+# 水边柳树
+wl=np.nonzero((dout>7)&(dout<12)&~dil(rockc,10))
+for j in rng.permutation(len(wl[0]))[:3000]:
+    y,x=int(wl[0][j]),int(wl[1][j])
+    if rng.random()<0.3 and okpos(x,y) and far(x,y,95) and not watw[max(0,y-60):y,max(0,x-20):x+20].any(): put('willow',x,y,20)
+print('树',nt)
+# 灌木：一团一团，同一团同一种
+CL=[('heather',['bushM2','bushS2'],.28),('gorse',['bushL1'],.18),('bramble',['bushL2'],.14),('hawthorn',['bushM1'],.14),('fern',['tuft1','tuft4'],.26)]
+nb=0
+for _ in range(40000):
+    x,y=rng.uniform(0,W),rng.uniform(0,H); d=dens[int(y),int(x)]
+    if d>0.75 or rng.random()>0.2 or not okpos(x,y) or not far(x,y,45): continue
+    p=np.array([c[2] for c in CL]); p[4]+=0.3*d; p/=p.sum(); nm,ks,_=CL[rng.choice(len(CL),p=p)]
+    for _ in range(rng.integers(3,8)):
+        xx,yy=x+rng.normal(0,18),y+rng.normal(0,12); k=ks[rng.integers(len(ks))]; r=SZ[k][0]*0.38
+        if okpos(xx,yy) and far(xx,yy,r): put(k,xx,yy,r); nb+=1
+# 林下：蕨类、毛地黄
+for _ in range(30000):
+    x,y=rng.uniform(0,W),rng.uniform(0,H); d=dens[int(y),int(x)]
+    if not(0.35<d<1.0) or rng.random()>0.08 or not okpos(x,y): continue
+    k=['tuft1','tuft4','tuft3'][rng.choice(3,p=[.45,.4,.15])]
+    if far(x,y,8): put(k,x,y,8); nb+=1
+# 野花：草地上小片
+for _ in range(6000):
+    x,y=rng.uniform(0,W),rng.uniform(0,H)
+    if dens[int(y),int(x)]>0.3 or rng.random()>0.1 or not okpos(x,y,False) or not far(x,y,60): continue
+    for _ in range(rng.integers(2,6)):
+        xx,yy=x+rng.normal(0,14),y+rng.normal(0,9)
+        if okpos(xx,yy,False) and far(xx,yy,5): put(['tuft2','bushS1'][rng.integers(2)],xx,yy,5); nb+=1
+print('灌木草花',nb)
+# 水边：芦苇、香蒲成丛（避开过河点）
+bankz=(dout>0.5)&(dout<4)&~dil(ford,14)&~dil(rockc,8); by,bx=np.nonzero(bankz); nr=0; RC=[]
+for j in rng.permutation(len(bx))[:20000]:
+    x,y=int(bx[j]),int(by[j])
+    if y<50 or rng.random()>0.25 or any((x-a)**2+(y-b)**2<55**2 for a,b in RC): continue
+    RC.append((x,y))
+    ks=['wcat1','wcat2','wcat3'] if rng.random()<0.5 else ['wreed1','wreed2','wreed3']
+    for _ in range(rng.integers(2,5)):
+        xx,yy=x+rng.normal(0,9),y+rng.normal(0,5); xi,yi=int(xx),int(yy)
+        if 0<xi<W and 0<yi<H and dout[yi,xi]<6 and not ford[yi,xi] and far(xx,yy,2): put(ks[rng.integers(3)],xx,yy,6); nr+=1
+# 睡莲：只在大片水面靠边处
+n,lab,st,_=cv2.connectedComponentsWithStats(watw.astype(np.uint8)); big=np.isin(lab,[i for i in range(1,n) if st[i][4]>2500])
+ly,lx=np.nonzero(big&(din>4)&(din<9)&~dil(ford,20))
+for j in rng.permutation(len(lx))[:6000]:
+    x,y=int(lx[j]),int(ly[j])
+    if rng.random()<0.15 and far(x,y,70): put(['wlily1','wlily2'][rng.integers(2)],x,y,8)
+print('水边',nr)
+# 石头：过河点放踏脚石；大片水面靠岸处零星河中石；峡谷末端落石
+for x,y in fords: put('st%d'%rng.integers(1,5),x,y,10)
+WR=[]
+ry,rx=np.nonzero(big&(din>5)&(din<9)&~dil(ford,30)); nw=0
+for j in rng.permutation(len(rx))[:4000]:
+    x,y=int(rx[j]),int(ry[j])
+    if False and all((x-a)**2+(y-b)**2>300**2 for a,b in WR):
+        WR.append((x,y))
+        put('wr%d'%rng.integers(1,5),x,y,10); nw+=1
+for k,x,y in [('rf1',1232,1392),('rf3',1246,1360),('rf4',1214,1352)]: put(k,x,y,12)
+J['objs']=objs; J['size']={k:v for k,v in J['size'].items() if k in {o[0] for o in objs} or True}
+json.dump(J,open(ROOT+'/data/world.json','w'),separators=(',',':'))
+print('物件总数',len(objs),'河中石',nw)
