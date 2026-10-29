@@ -1,7 +1,7 @@
 import {createLeaderboard,submitScore,formatTime} from './leaderboard.js';
 
 export function createSurvival(game){
- let playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
+ let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
  const style=document.createElement('style');style.textContent=`
  .survival-hud{position:absolute;top:2%;left:2%;width:min(310px,65%);box-sizing:border-box;padding:10px 12px;background:#102138e8;color:#f6f8ff;border:1px solid #94baff;border-radius:7px;font:clamp(11px,1.6vw,16px) system-ui;pointer-events:none}
  .survival-hud[hidden]{display:none}.survival-hud .stats{display:flex;justify-content:space-between;gap:10px;margin-bottom:5px}.survival-hud progress{width:100%;height:14px;accent-color:#66dc94}
@@ -22,10 +22,10 @@ export function createSurvival(game){
  dialog.addEventListener('cancel',e=>e.preventDefault());
  const board=createLeaderboard(),boardButton=document.createElement('button');boardButton.type='button';boardButton.className='menu-board';boardButton.textContent='排行榜';boardButton.onclick=()=>void board.open();
  document.querySelector('.menu-start').after(boardButton);
- function render(){hud.querySelector('.time').textContent='存活 '+formatTime(elapsed);hud.querySelector('.kills').textContent='击杀 '+game.kills;hud.querySelector('.hp').textContent=hp+'/100';hud.querySelector('progress').value=hp}
+ function render(){hud.querySelector('.time').textContent='存活 '+formatTime(elapsed);hud.querySelector('.kills').textContent='击杀 '+game.kills;hud.querySelector('.hp').textContent=Math.ceil(hp)+'/'+maxHp;const pg=hud.querySelector('progress');pg.max=maxHp;pg.value=hp}
  function stop(){playing=false;finished=false;generation++;hud.hidden=true;document.body.classList.remove('survival-playing');if(dialog.open)dialog.close()}
  function start(){
-  stop();game.reset();playing=true;hp=100;elapsed=0;cooldown=0;
+  stop();game.reset();playing=true;maxHp=100;hp=100;elapsed=0;cooldown=0;
   name=(document.querySelector('.menu-name input').value.trim()||'无名氏').slice(0,20);
   hud.hidden=false;document.body.classList.add('survival-playing');render();
  }
@@ -40,12 +40,12 @@ export function createSurvival(game){
  }
  dialog.querySelector('.retry').onclick=start;
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};
- return {start,get finished(){return finished},damage(amount){
+ return {start,get finished(){return finished},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
   if(!playing||finished||cooldown>0)return;
-  hp=Math.max(0,hp-amount);cooldown=.75;render();if(hp===0)die();
+  hp=Math.max(0,hp-Math.round(amount));cooldown=.75;render();if(hp===0)die();
  },update(dt){
   if(!playing||finished)return;
-  elapsed+=dt;cooldown=Math.max(0,cooldown-dt);
+  elapsed+=dt;if(dt>0)cooldown=Math.max(0,cooldown-dt);
   render();
  }};
 }

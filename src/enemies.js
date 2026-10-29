@@ -7,11 +7,11 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   return bag.pop();
  }
  function make(x,y){const k=nextKind();return {k,x,y,face:1,hp:data[k].hp,state:'move',timer:0,cooldown:Math.random()*.8,ph:Math.random()*9,dead:false}}
- function hit(e){
+ function hit(e,dmg=1){
   if(e.dead)return false;
-  e.hp--;
+  e.hp-=dmg;
   if(e.hp<=0){e.dead=true;e.state='fall';e.timer=0;e.alpha=1}
-  else{e.state='hurt';e.timer=0;e.cooldown=.25}
+  else if(!e.boss){e.state='hurt';e.timer=0;e.cooldown=.25}else e.flash=.12
   return true;
  }
  function reset(){arrows.length=0}
@@ -31,7 +31,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      if(e.k==='archer'){
       const len=Math.hypot(ax,ay)||1;
       arrows.push({x:e.x,y:e.y-10,dx:ax/len,dy:ay/len,life:1.6});
-     }else if(d<=stats.reach+5){onHit(stats.damage)}
+     }else if(d<=(stats.reach+5)*(e.sc||1)){onHit(stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1))}
     }
    }else if(e.state==='strike'){
     // 搜打撤沿用原本按时间扣血的接口，仅在可命中的打击帧开启。
@@ -40,9 +40,9 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     if(e.timer>=.45){e.state='move';e.timer=0;e.cooldown=.55+Math.random()*.35}
    }else{
     e.cooldown=Math.max(0,e.cooldown-dt);
-    if(d<=stats.reach&&e.cooldown===0){e.state='windup';e.timer=0;continue}
-    if(d>stats.reach*.85){
-     const oldx=e.x,oldy=e.y,dist=stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ax/d*dist,my=ay/d*dist;
+    if(d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
+    if(d>stats.reach*(e.sc||1)*.85){
+     const oldx=e.x,oldy=e.y,dist=(e.boss?.8:1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ax/d*dist,my=ay/d*dist;
      if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}
      else if(ok(e.x-my*1.6,e.y+mx*1.6)){e.x-=my*1.6;e.y+=mx*1.6}
      e.moving=e.x!==oldx||e.y!==oldy;
@@ -66,8 +66,11 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  function getFrame(e,now){const f=frame(e,now),name=Object.keys(data[e.k].frames).find(key=>data[e.k].frames[key]===f);return {f,im:images['en_'+e.k+'_'+name]}}
  function draw(e,c,cx,cy,now){
   const {f,im}=getFrame(e,now);
-  c.save();c.translate(Math.round(e.x-cx),Math.round(e.y-cy));c.scale(e.face,1);c.globalAlpha=e.alpha??1;c.imageSmoothingEnabled=false;
+  const sc=e.sc||1;c.save();c.translate(Math.round(e.x-cx),Math.round(e.y-cy));c.scale(e.face*sc,sc);c.globalAlpha=e.alpha??1;c.imageSmoothingEnabled=false;
+  if(e.elite||e.boss)c.filter=e.boss?'saturate(1.6) hue-rotate(-25deg) brightness(.9)':'saturate(1.4) hue-rotate(250deg)';
+  if(e.flash>0){e.flash-=1/60;c.filter='brightness(2.2)'}
   c.drawImage(im,-f.anchor[0],-f.anchor[1],f.size[0],f.size[1]);c.restore();
+  if((e.elite||e.boss)&&!e.dead&&e.hpMax){const w=e.boss?40:20,x=Math.round(e.x-cx-w/2),y=Math.round(e.y-cy-f.anchor[1]*sc-4);c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x,y,w,2.5);c.fillStyle=e.boss?'#ff5a4a':'#c77dff';c.fillRect(x,y,w*Math.max(0,e.hp/e.hpMax),2.5)}
  }
  function drawArrows(c,cx,cy){
   const f=data.archer.frames.arrow,im=images.en_archer_arrow;
