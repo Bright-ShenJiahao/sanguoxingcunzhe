@@ -25,12 +25,29 @@ yy_,xx_=np.mgrid[0:H,0:W]
 mtr=rockc&(xx_<850)&(yy_<1100)&(yy_>300)
 mount=cv2.morphologyEx(dil(mtr,25).astype(np.uint8),cv2.MORPH_CLOSE,disk(60))
 inv=(1-mount).astype(np.uint8); cv2.floodFill(inv,None,(W-1,H-1),2); mount=(mount>0)|(inv==1)   # 西边的山（填满内部）
-back=np.zeros_like(rockc)                               # 山的背面：画面上没有崖壁的台地边 → 改成能走的缓坡
+back=np.zeros_like(rockc); ridge=np.zeros_like(rockc)                               # 山的背面：画面上没有崖壁的台地边 → 改成能走的缓坡
 n,lab,st,_=cv2.connectedComponentsWithStats(mtr.astype(np.uint8))
 for i in range(1,n):
     m=lab==i; px=g[m]
-    if (px[:,0]-px[:,1]).mean()<0: back|=m
-print('山背面台地边',back.sum())
+    if (px[:,0]-px[:,1]).mean()<0:
+        if st[i][2]>=150: ridge|=m            # 长的台地边：有高低差，挡路，画清楚
+        else: back|=m                         # 短的：删掉（可走，并抹掉地面上的线）
+print('删掉的短台地线',back.sum(),'保留的高低差',ridge.sum())
+# 抹掉短台地线：在高清底图上局部修补
+Gs=G.copy()
+n2,lab2,st2,_=cv2.connectedComponentsWithStats(back.astype(np.uint8))
+for i in range(1,n2):
+    x_,y_,w_,h_,_=st2[i]; pad=20; X0,Y0=max(0,x_-pad),max(0,y_-pad); X1,Y1=min(W,x_+w_+pad),min(H,y_+h_+pad)
+    mk=cv2.resize(dil(lab2[Y0:Y1,X0:X1]==i,7).astype(np.uint8),((X1-X0)*HD,(Y1-Y0)*HD),interpolation=cv2.INTER_NEAREST)
+    G[Y0*HD:Y1*HD,X0*HD:X1*HD]=cv2.inpaint(G[Y0*HD:Y1*HD,X0*HD:X1*HD],mk,9,cv2.INPAINT_TELEA)
+del Gs
+# 高低差：外侧（低处）一条阴影，内侧上沿亮边
+cx_,cy_=np.nonzero(mtr)[1].mean(),np.nonzero(mtr)[0].mean()
+rd=np.hypot(xx_-cx_,yy_-cy_).astype(np.float32)
+rdil=dil(ridge,8); rin=blur(ridge,1.5)
+rmean=cv2.blur((rd*ridge).astype(np.float32),(31,31))/np.maximum(cv2.blur(ridge.astype(np.float32),(31,31)),1e-3)
+ridge_lo=blur(rdil&~ridge&(rd>rmean),2.0); ridge_hi=blur(rdil&~ridge&(rd<rmean)&~dil(ridge,4),1.5)
+
 # ---------- 新水域 ----------
 watc=cv2.morphologyEx(wat0.astype(np.uint8),cv2.MORPH_CLOSE,disk(7)).astype(bool)   # 把桥面那条缝补上
 land_ok=(C0==0)&~dil(rockc,5)
@@ -63,6 +80,7 @@ print('过河点',len(fords))
 C=C0.copy(); C[watw]=1; C[ford]=2
 C[(C0==2)&~watw]=0
 C[back]=0
+C[ridge]=1
 Image.fromarray(np.dstack([C,np.zeros_like(C),np.zeros_like(C)])).save(MAP+'coll.png',optimize=True)
 # ---------- 画水 ----------
 S=900
@@ -100,7 +118,8 @@ for y0 in range(0,H*HD,BH):
     s=L(sd); k=L(nz)
     # 岸：湿泥一圈
     bank=np.clip(1+s/4,0,1)*(s<=0)*(1-L(seanear))
-    col=col*(1-0.35*L(backsh))+28*L(backrim)            # 背面台地：一条柔和阴影 + 上沿亮边
+    rf=L(rin); col=col*(1-rf)+(col*0.55+np.array([70,58,34],np.float32)*0.45)*rf     # 坡面：土色
+    col=col*(1-0.5*L(ridge_lo))+36*L(ridge_hi)
     gr_=np.random.default_rng(y0).random((h,Wd,1)).astype(np.float32)
     sc_=L(sand); wt_=L(wet)
     sandc=(np.array([222,204,158],np.float32)*(1-wt_)+np.array([168,148,108],np.float32)*wt_)*(0.93+0.12*gr_)
