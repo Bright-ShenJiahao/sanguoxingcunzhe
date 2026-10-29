@@ -51,7 +51,7 @@ function blocked(x,y){
  if(water(x,y)===1||water(x-3,y)===1||water(x+3,y)===1||water(x,y-2)===1)return true;
  for(const o of CO){const dx=x-o.x,dy=(y-o.y)*1.3;if(dx*dx+dy*dy<(o.r+3)*(o.r+3))return true}return false}
 const ok=(x,y)=>!blocked(x,y);
-const HK=.8;let nextAtk=0;
+const HK=+(new URLSearchParams(location.search).get('hk')||1);let nextAtk=0;
 function drawHero(px,py,moving,now){
  const ST=SETS[CS],f=moving?ST.walk[Math.floor(now/105)%ST.walk.length]:Math.floor(now/650)%2,im=IM[(hairG&&ST.gpre?ST.gpre:ST.pre)+f],[w,h]=ST.size;c.save();c.translate(px,py);c.scale(hero.face*HK,HK);c.imageSmoothingEnabled=false;
  const RH=ST.grip.front,FH=ST.grip.front,tl=p=>[(p[0]-ST.size[0])/2,(p[1]-ST.size[1]*2)/2];
