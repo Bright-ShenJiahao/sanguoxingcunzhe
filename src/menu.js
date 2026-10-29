@@ -39,11 +39,11 @@ export function createMenu(game){
  let visible=true;
  const root=document.createElement('main');root.id='main-menu';root.setAttribute('aria-label','游戏主界面');
  root.innerHTML=`<section class="menu-profile" aria-label="当前角色">
-  <div class="menu-eyebrow">无名之辈 · 外传</div><h1 class="menu-title">三国幸存者</h1>
+  <div class="menu-eyebrow">无名之辈 · 外传</div><h1 class="menu-title">异世界幸存者</h1>
   <div class="menu-card"><canvas width="200" height="160" aria-label="当前角色待机动画"></canvas></div>
   <div class="menu-character"></div><label class="menu-name">你的名字<input maxlength="20" placeholder="输入你的名字" autocomplete="nickname"></label>
  </section><nav class="menu-panel" aria-label="主菜单">
-  <button class="menu-start" type="button"><span>开始游戏<small>进入三国野地</small></span><span aria-hidden="true">→</span></button>
+  <button class="menu-start" type="button"><span>开始游戏<small>进入翠绿之地</small></span><span aria-hidden="true">→</span></button>
   <h2 class="menu-section">角色</h2><div class="menu-characters"></div>
   <div class="menu-note">WASD / 方向键移动 · 靠近敌人自动攻击<br>移动端在地图上拖动即可行走</div>
  </nav>`;
