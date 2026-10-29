@@ -12,7 +12,7 @@ const D={...W,...CH,gt:W.tiles.list||[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),col
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),WW=D.WW,WH=D.WH||D.WW,HD=D.HD;
 let VW=480,VH=300,SC=HD;
-function fit(){const dpr=Math.min(2,devicePixelRatio||1),k=Math.max(2,Math.min(4,Math.round(innerHeight/380)));const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;VW=W/SC;VH=H/SC}
+function fit(){const dpr=Math.min(1.5,devicePixelRatio||1),k=Math.max(2,Math.min(4,Math.round(innerHeight/380)));const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;VW=W/SC;VH=H/SC}
 addEventListener('resize',()=>{if(!menu?.visible)fit()});
 const $=id=>document.getElementById(id);
 const keys={};let joy=null;
@@ -92,7 +92,8 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
 function drawGround(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const T=D.tiles.T,z=dw/sw;for(const k of D.gt){const x0=+k[1]*T,y0=+k[2]*T,a=Math.max(sx,x0),b=Math.min(sx+sw,x0+T,WW),c0=Math.max(sy,y0),c1=Math.min(sy+sh,y0+T,WH);if(b<=a||c1<=c0)continue;const ex=b<sx+sw&&b<WW?.5:0,ey=c1<sy+sh&&c1<WH?.5:0;ctx.drawImage(IM[k],(a-x0)*HD,(c0-y0)*HD,(b-a+ex)*HD,(c1-c0+ey)*HD,dx+(a-sx)*z,dy+(c0-sy)*z,(b-a+ex)*z,(c1-c0+ey)*z)}}
 let menu,survival,run,dbg;const weather=createWeather();
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
-function loop(now){
+let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimationFrame(loop);return}flT=now;   // 锁帧：游戏 60、菜单 30
+
  const dt=Math.min(.05,(now-last)/1000||0);last=now;
  dbg?.show(!menu?.visible);
  if(menu?.visible){menu.draw(now);requestAnimationFrame(loop);return}
