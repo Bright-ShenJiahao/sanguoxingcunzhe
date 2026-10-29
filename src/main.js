@@ -3,7 +3,7 @@ import {createMenu} from './menu.js';
 import {createSurvival} from './survival.js';
 import {createEnemies} from './enemies.js';
 import {createPathing} from './pathing.js';
-let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);
+let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
 import {createWeather} from './weather.js';
 import {createRun} from './run.js';
 import {createDebug} from './debug.js';
