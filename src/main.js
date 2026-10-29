@@ -2,6 +2,8 @@
 import {createMenu} from './menu.js';
 import {createSurvival} from './survival.js';
 import {createEnemies} from './enemies.js';
+import {createPathing} from './pathing.js';
+let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);
 import {createWeather} from './weather.js';
 import {createRun} from './run.js';
 import {createDebug} from './debug.js';
@@ -108,6 +110,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  const dt=Math.min(.05,(now-last)/1000||0);last=now;
  dbg?.show(!menu?.visible);
  if(menu?.visible){menu.draw(now);requestAnimationFrame(loop);return}
+ if(CM){PATH??=createPathing(WW,WH,ok);PATH.update(hero.x,hero.y,now)}
  if(survival?.finished){requestAnimationFrame(loop);return}
  const pz=run?.paused,gdt=pz?0:dt;
  c.setTransform(SC,0,0,SC,0,0);

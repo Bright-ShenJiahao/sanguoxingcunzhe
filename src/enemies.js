@@ -41,7 +41,8 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     e.cooldown=Math.max(0,e.cooldown-dt);
     if(d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
     if(d>stats.reach*(e.sc||1)*.85){
-     const oldx=e.x,oldy=e.y,dist=(e.boss?.8:1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ax/d*dist,my=ay/d*dist;
+     const fd=d>28&&window.PATHDIR?.(e.x,e.y),ux=fd?fd[0]:ax/d,uy=fd?fd[1]:ay/d;   // 远处沿寻路图走（会绕到桥/浅滩）
+     const oldx=e.x,oldy=e.y,dist=(e.boss?.8:1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
      if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}
      else if(ok(e.x-my*1.6,e.y+mx*1.6)){e.x-=my*1.6;e.y+=mx*1.6}
      e.moving=e.x!==oldx||e.y!==oldy;
