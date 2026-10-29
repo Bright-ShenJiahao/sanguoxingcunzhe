@@ -238,7 +238,7 @@ TREE={'con':(['pine1','pine1','pine2'],15),'bir':(['broad2','broad4'],17),'oak':
 nt=0
 for _ in range(260000):
     x,y=rng.uniform(0,W),rng.uniform(0,H); xi,yi=int(x),int(y); d=dens[yi,xi]
-    if d<0.18 or rng.random()>min(1,(d-0.18)*0.6) or not okpos(x,y) or notree[yi,xi]: continue
+    if d<0.32 or rng.random()>min(1,(d-0.32)*0.6) or not okpos(x,y) or notree[yi,xi]: continue
     if d<0.9 and clear[yi,xi]<0.33: continue                 # 林中空地
     sc={'con':fC[yi,xi]+0.45*north[yi,0]+0.2*d,'bir':fB[yi,xi]-0.12,'oak':fO[yi,xi]-0.15*d}
     sp=max(sc,key=sc.get); ks,r=TREE[sp]; k=ks[rng.integers(len(ks))]
@@ -262,10 +262,10 @@ nb=0
 for _ in range(60000):
     x,y=rng.uniform(0,W),rng.uniform(0,H); xi,yi=int(x),int(y); d=dens[yi,xi]
     if mount[yi,xi]:
-        if rng.random()>0.04: continue
+        if rng.random()>0.02: continue
         ks=[['bushM2','bushS2'],['bushL1']][rng.integers(2)]
     else:
-        if not(0.1<d<0.55) or rng.random()>0.25*(1-abs(d-0.3)/0.3) or beach[yi,xi]: continue
+        if not(0.22<d<0.6) or rng.random()>0.12*(1-abs(d-0.4)/0.2) or beach[yi,xi]: continue
         ks=EDGE[rng.choice(len(EDGE),p=[e[1] for e in EDGE])][0]
     if not okpos(x,y) or not far(x,y,40): continue
     for _ in range(rng.integers(3,7)):
@@ -274,13 +274,13 @@ for _ in range(60000):
 # 林下：蕨类、毛地黄
 for _ in range(30000):
     x,y=rng.uniform(0,W),rng.uniform(0,H); d=dens[int(y),int(x)]
-    if not(0.35<d<1.0) or rng.random()>0.08 or not okpos(x,y) or mount[int(y),int(x)]: continue
+    if not(0.45<d<1.0) or rng.random()>0.03 or not okpos(x,y) or mount[int(y),int(x)]: continue
     k=['tuft1','tuft4','tuft3'][rng.choice(3,p=[.45,.4,.15])]
     if far(x,y,8): put(k,x,y,8); nb+=1
 # 野花：草地上小片
 for _ in range(6000):
     x,y=rng.uniform(0,W),rng.uniform(0,H)
-    if dens[int(y),int(x)]>0.1 or rng.random()>0.06 or not okpos(x,y,False) or beach[int(y),int(x)] or not far(x,y,80): continue
+    if dens[int(y),int(x)]>0.1 or rng.random()>0.025 or not okpos(x,y,False) or beach[int(y),int(x)] or not far(x,y,80): continue
     for _ in range(rng.integers(2,6)):
         xx,yy=x+rng.normal(0,14),y+rng.normal(0,9)
         if okpos(xx,yy,False) and far(xx,yy,5): put(['tuft2','bushS1'][rng.integers(2)],xx,yy,5); nb+=1

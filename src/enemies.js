@@ -49,7 +49,8 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      // 防卡：4 秒内离主角的路程没有变近，就从屏幕外换到主角附近能走到的地方
      const pd=window.PATHAT?.(e.x,e.y)??-1;e.stuckT=(e.stuckT||0)+dt;
      if(pd>=0&&(e.bestPd==null||pd<e.bestPd-1)){e.bestPd=pd;e.stuckT=0}
-     if(e.stuckT>4&&!e.boss){for(let k=0;k<12;k++){const a=Math.random()*6.283,r=240+Math.random()*60,nx=hero.x+Math.cos(a)*r,ny=hero.y+Math.sin(a)*r*.7,np=window.PATHAT?.(nx,ny)??-1;
+     const C_=window.CAM,far2=C_&&(Math.abs(e.x-hero.x)>C_.VW||Math.abs(e.y-hero.y)>C_.VH);   // 离主角超过两个半屏（屏幕外很远）才挪
+     if(e.stuckT>4&&!e.boss&&far2){for(let k=0;k<12;k++){const a=Math.random()*6.283,r=Math.hypot(C_.VW,C_.VH)*.55+Math.random()*40,nx=hero.x+Math.cos(a)*r,ny=hero.y+Math.sin(a)*r,np=window.PATHAT?.(nx,ny)??-1;
        if(np>=0&&np<60&&ok(nx,ny)){e.x=nx;e.y=ny;break}}e.stuckT=0;e.bestPd=null}
     }
    }
