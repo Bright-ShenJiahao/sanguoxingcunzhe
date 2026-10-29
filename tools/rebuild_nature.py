@@ -59,6 +59,8 @@ for k_,x,y in J0['objs']:                              # 原桥位：局部用�
     if k_.startswith('bridge'):
         y0_,y1_,x0_,x1_=max(0,y-70),y+50,max(0,x-60),x+60
         watw[y0_:y1_,x0_:x1_]|=cv2.morphologyEx(watw[y0_:y1_,x0_:x1_].astype(np.uint8),cv2.MORPH_CLOSE,disk(14)).astype(bool)
+# 用户标的：把池塘和下面的湖连起来
+cv2.line(watw.view(np.uint8),(1738,1088),(1738,1122),1,14)
 watw[:40]=False
 n,lab,st,_=cv2.connectedComponentsWithStats(watw.astype(np.uint8))
 for i in range(1,n):
@@ -81,6 +83,18 @@ ford=dil(ford,WID+3)&watw
 print('过河点',len(fords))
 C=C0.copy(); C[watw]=1; C[ford]=2
 C[(C0==2)&~watw]=0
+# ---------- 木桥（art_src/map/bridges.json：用户画的线；沿线延伸到两岸） ----------
+BRS=[]
+for L_ in json.load(open(ROOT+'/art_src/map/bridges.json')):
+    (x0,y0),(x1,y1)=L_['点'][0],L_['点'][-1]; mx,my=(x0+x1)/2,(y0+y1)/2; ux,uy=x1-x0,y1-y0; l=np.hypot(ux,uy); ux/=l; uy/=l
+    ext=[]
+    for sg in (-1,1):
+        t=0
+        while t<200 and (watw[int(my+sg*uy*t),int(mx+sg*ux*t)] or g[int(my+sg*uy*t),int(mx+sg*ux*t),2]>g[int(my+sg*uy*t),int(mx+sg*ux*t),0]+15 or t<l/2): t+=1
+        ext.append(t+18)
+    a_,b_=(mx-ux*ext[0],my-uy*ext[0]),(mx+ux*ext[1],my+uy*ext[1])
+    bd=np.zeros((H,W),np.uint8); cv2.line(bd,(int(a_[0]),int(a_[1])),(int(b_[0]),int(b_[1])),1,16); C[bd>0]=0
+    BRS.append((a_,b_))
 C[back]=0
 C[ridge]=1
 Image.fromarray(np.dstack([C,np.zeros_like(C),np.zeros_like(C)])).save(MAP+'coll.png',optimize=True)
@@ -138,6 +152,19 @@ for y0 in range(0,H*HD,BH):
     wc=wc*(1-foam)+np.array([238,246,248],np.float32)*foam
     a=np.clip(s+0.5,0,1)
     out[y0:y1]=np.clip(col*(1-a)+wc*a,0,255).astype(np.uint8)
+BW=np.array(Image.open(ROOT+'/art_src/map/bridge_wood.png').convert('RGBA')).astype(np.float32)
+for (ax,ay),(bx,by) in BRS:
+    L2=np.hypot(bx-ax,by-ay)*HD; sc=L2/BW.shape[1]; bh=BW.shape[0]*0.75
+    im=cv2.resize(BW,(int(L2),int(bh)),interpolation=cv2.INTER_AREA)
+    ang=np.degrees(np.arctan2(by-ay,bx-ax)); D=int(np.hypot(*im.shape[:2]))+4
+    can=np.zeros((D,D,4),np.float32); oy,ox=(D-im.shape[0])//2,(D-im.shape[1])//2; can[oy:oy+im.shape[0],ox:ox+im.shape[1]]=im
+    can=cv2.warpAffine(can,cv2.getRotationMatrix2D((D/2,D/2),-ang,1),(D,D))
+    cx,cy=int((ax+bx)/2*HD)-D//2,int((ay+by)/2*HD)-D//2
+    for k_,(dx,dy,al) in enumerate([(5,8,0.35),(0,0,1)]):          # 先画影子再画桥
+        X0,Y0=cx+dx,cy+dy; reg=out[Y0:Y0+D,X0:X0+D].astype(np.float32); a=can[:reg.shape[0],:reg.shape[1],3:4]/255*al
+        src=np.zeros_like(reg) if k_==0 else can[:reg.shape[0],:reg.shape[1],:3]
+        out[Y0:Y0+D,X0:X0+D]=np.clip(reg*(1-a)+src*a,0,255).astype(np.uint8)
+print('木桥',[(tuple(map(int,a)),tuple(map(int,b))) for a,b in BRS])
 for t in J['tiles']['list']:
     tx,ty=int(t[1]),int(t[2]); Image.fromarray(out[ty*T*HD:(ty+1)*T*HD,tx*T*HD:(tx+1)*T*HD]).save(MAP+t+'.jpg',quality=72,optimize=True)
 Image.fromarray(out[::8,::8]).save(ROOT+'/art_src/build/preview_nature.png')
