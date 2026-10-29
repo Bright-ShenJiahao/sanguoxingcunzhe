@@ -152,18 +152,31 @@ for y0 in range(0,H*HD,BH):
     wc=wc*(1-foam)+np.array([238,246,248],np.float32)*foam
     a=np.clip(s+0.5,0,1)
     out[y0:y1]=np.clip(col*(1-a)+wc*a,0,255).astype(np.uint8)
-BW=np.array(Image.open(ROOT+'/art_src/map/bridge_wood.png').convert('RGBA')).astype(np.float32)
+# 俯视木桥：木板纹理取自原木桥桥面，按桥的方向铺；两侧圆木栏杆；桥下影子（不画立柱，任何角度都不歪）
+BW=np.array(Image.open(ROOT+'/art_src/map/bridge_wood.png').convert('RGB')).astype(np.float32)
+PL=BW[36:60,40:340]; PL=cv2.resize(PL,(PL.shape[1],PL.shape[0]),interpolation=cv2.INTER_AREA)   # 木板（竖纹 = 垂直于行走方向）
+RAIL=np.array([92,66,40],np.float32)
 for (ax,ay),(bx,by) in BRS:
-    L2=np.hypot(bx-ax,by-ay)*HD; sc=L2/BW.shape[1]; bh=BW.shape[0]*0.75
-    im=cv2.resize(BW,(int(L2),int(bh)),interpolation=cv2.INTER_AREA)
-    ang=np.degrees(np.arctan2(by-ay,bx-ax)); D=int(np.hypot(*im.shape[:2]))+4
-    can=np.zeros((D,D,4),np.float32); oy,ox=(D-im.shape[0])//2,(D-im.shape[1])//2; can[oy:oy+im.shape[0],ox:ox+im.shape[1]]=im
-    can=cv2.warpAffine(can,cv2.getRotationMatrix2D((D/2,D/2),-ang,1),(D,D))
-    cx,cy=int((ax+bx)/2*HD)-D//2,int((ay+by)/2*HD)-D//2
-    for k_,(dx,dy,al) in enumerate([(5,8,0.35),(0,0,1)]):          # 先画影子再画桥
-        X0,Y0=cx+dx,cy+dy; reg=out[Y0:Y0+D,X0:X0+D].astype(np.float32); a=can[:reg.shape[0],:reg.shape[1],3:4]/255*al
-        src=np.zeros_like(reg) if k_==0 else can[:reg.shape[0],:reg.shape[1],:3]
-        out[Y0:Y0+D,X0:X0+D]=np.clip(reg*(1-a)+src*a,0,255).astype(np.uint8)
+    A=np.array([ax,ay])*HD; B=np.array([bx,by])*HD; u=(B-A); Ln=np.linalg.norm(u); u/=Ln; v=np.array([-u[1],u[0]])
+    HW=11*HD                                                    # 半宽
+    x0_,y0_=int(min(A[0],B[0])-HW-12),int(min(A[1],B[1])-HW-12); x1_,y1_=int(max(A[0],B[0])+HW+12),int(max(A[1],B[1])+HW+12)
+    yy,xx=np.mgrid[y0_:y1_,x0_:x1_].astype(np.float32); px,py=xx-A[0],yy-A[1]
+    s_=px*u[0]+py*u[1]; t_=px*v[0]+py*v[1]
+    reg=out[y0_:y1_,x0_:x1_].astype(np.float32)
+    # 影子
+    sh=((s_>0)&(s_<Ln)&(np.abs(t_-5)<HW+2)).astype(np.float32); sh=cv2.GaussianBlur(sh,(0,0),3)[...,None]
+    reg=reg*(1-0.4*sh)
+    inside=(s_>=0)&(s_<Ln)&(np.abs(t_)<HW)
+    tu=(s_*1.0).astype(int)%PL.shape[1]; tv=np.clip(((t_+HW)/(2*HW)*PL.shape[0]).astype(int),0,PL.shape[0]-1)
+    deck=PL[tv,tu]
+    edge=np.abs(np.abs(t_)-(HW-3))<3                           # 两侧圆木
+    lg=np.clip(1-np.abs(np.abs(t_)-(HW-3))/3,0,1)[...,None]
+    deck=deck*(1-lg*0.85)+(RAIL*(0.75+0.5*lg))*lg*0.85
+    endf=np.clip(np.minimum(s_,Ln-s_)/3,0,1)[...,None]          # 两头稍暗
+    deck*=0.8+0.2*endf
+    m=inside[...,None]
+    reg=np.where(m,deck,reg)
+    out[y0_:y1_,x0_:x1_]=np.clip(reg,0,255).astype(np.uint8)
 print('木桥',[(tuple(map(int,a)),tuple(map(int,b))) for a,b in BRS])
 for t in J['tiles']['list']:
     tx,ty=int(t[1]),int(t[2]); Image.fromarray(out[ty*T*HD:(ty+1)*T*HD,tx*T*HD:(tx+1)*T*HD]).save(MAP+t+'.jpg',quality=72,optimize=True)
@@ -281,6 +294,12 @@ by_,bx_=np.nonzero(beach&(dsea>5)&(dsea<14)); BB=[]
 for j in rng.permutation(len(bx_))[:3000]:
     x,y=int(bx_[j]),int(by_[j])
     if rng.random()<0.3 and all((x-a)**2+(y-b)**2>120**2 for a,b in BB) and far(x,y,10): BB.append((x,y)); put(['wlog','rsmall1','rsmall1'][rng.integers(3)],x,y,10)
+def nearbr(x,y):
+    for (ax,ay),(bx,by) in BRS:
+        u=np.array([bx-ax,by-ay]); l=np.linalg.norm(u); t=np.clip(((x-ax)*u[0]+(y-ay)*u[1])/l**2,0,1)
+        if np.hypot(x-ax-u[0]*t,y-ay-u[1]*t)<26: return True
+    return False
+objs=[o for o in objs if not nearbr(o[1],o[2])]
 for x,y in fords: put('st%d'%rng.integers(1,5),x,y,10)
 WR=[]
 ry,rx=np.nonzero(big&(din>5)&(din<9)&~dil(ford,30)); nw=0
