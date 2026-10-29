@@ -87,7 +87,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
  survival=createSurvival({hero,enemies:en,get kills(){return kills},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
   reset(){run.reset();hero.x=WW*AT[0];hero.y=WH*AT[1];hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm='short';joy=null;for(const k in keys)keys[k]=0}
- });run=createRun({hero,en,images:IM,survival,ok,hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});requestAnimationFrame(loop)}
+ });run=createRun({hero,en,images:IM,survival,ok,makeEnemy:(x,y,k)=>enemySystem.make(x,y,k),hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});requestAnimationFrame(loop)}
 function drawGround(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const T=D.tiles.T,z=dw/sw;for(const k of D.gt){const x0=+k[1]*T,y0=+k[2]*T,a=Math.max(sx,x0),b=Math.min(sx+sw,x0+T,WW),c0=Math.max(sy,y0),c1=Math.min(sy+sh,y0+T,WH);if(b<=a||c1<=c0)continue;const ex=b<sx+sw&&b<WW?.5:0,ey=c1<sy+sh&&c1<WH?.5:0;ctx.drawImage(IM[k],(a-x0)*HD,(c0-y0)*HD,(b-a+ex)*HD,(c1-c0+ey)*HD,dx+(a-sx)*z,dy+(c0-sy)*z,(b-a+ex)*z,(c1-c0+ey)*z)}}
 let menu,survival,run;const weather=createWeather();
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}

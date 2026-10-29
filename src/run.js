@@ -15,7 +15,7 @@ const PASSIVES={
  spd:{name:'移速',desc:'移动速度 +8%',max:5},
  mag:{name:'拾取',desc:'经验拾取范围 +25%',max:5}};
 const MAXW=6,MAXP=4;
-export function createRun({hero,en,images,hitEnemy,survival,ok}){
+export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  let S;
  const ui=document.createElement('div');ui.id='lvup';ui.hidden=true;
  const st=document.createElement('style');st.textContent=`
@@ -31,15 +31,16 @@ export function createRun({hero,en,images,hitEnemy,survival,ok}){
  document.head.append(st);document.body.append(ui);
  const wImg={};for(const k in WEAPONS){const im=new Image();im.src='assets/weapons/'+WEAPONS[k].img+'.png';wImg[k]=im}
  function reset(start='sword'){
-  S={t:0,lv:1,xp:0,need:5,queue:0,lastLv:-9,rerolls:0,w:{[start]:1},cd:{},p:{atk:0,hp:0,spd:0,mag:0},gems:[],shots:[],fx:[],texts:[],eliteT:75,bossDone:{},paused:false,maxHp:100};
+  S={t:+(new URLSearchParams(location.search).get('t')||0),lv:1,xp:0,need:5,queue:0,lastLv:-9,rerolls:0,w:{[start]:1},cd:{},p:{atk:0,hp:0,spd:0,mag:0},gems:[],shots:[],fx:[],texts:[],eliteT:+(new URLSearchParams(location.search).get('t')||0)+75,bossDone:{},paused:false,maxHp:100};
   survival?.setMax?.(100);ui.hidden=true;
  }
  // ---------- 节奏 ----------
  const want=()=>{const m=S.t/60;return Math.min(300,Math.round(m<=5?15+9*m:m<=10?60+18*(m-5):150+15*(m-10)))};
+ function onSpawnBase(e){const m=S.t/60;e.hp=e.hpMax=Math.ceil(e.hp*(1+S.t/150));e.dmgMul=Math.min(1.8,.45+m*.07);e.sc=1}
  function onSpawn(e){
-  const m=S.t/60;e.hp=e.hpMax=Math.ceil(e.hp*(1+S.t/150));e.dmgMul=Math.min(1.8,.45+m*.07);e.sc=1;
-  if(S.t>=600&&!S.bossDone[10]){S.bossDone[10]=1;e.boss=true;e.hp=e.hpMax=Math.round(80*(1+S.t/150));e.sc=2.1;e.name='黄巾力士';S.texts.push({x:e.x,y:e.y-40,v:'Boss 来袭！',t:2.5,c:'#ff8a6a',big:1})}
-  else if(S.t>=S.eliteT){S.eliteT=S.t+R(60,110);e.elite=true;e.hp=e.hpMax=e.hp*8;e.sc=1.45}
+  onSpawnBase(e);
+  if(S.t>=600&&!S.bossDone[10]){S.bossDone[10]=1;e.boss=true;e.k='gob_king';e.hp=e.hpMax=Math.round(80*(1+S.t/150));e.sc=1.25;e.name='哥布林大王';S.texts.push({x:e.x,y:e.y-40,v:'Boss 来袭！',t:2.5,c:'#ff8a6a',big:1})}
+  else if(S.t>=S.eliteT){S.eliteT=S.t+R(60,110);e.elite=true;e.k='gob_shaman';e.hp=e.hpMax=Math.ceil(10*(1+S.t/150));e.sc=1.1;e.summonT=4}
  }
  function dmg(base){return base*(1+0.1*S.p.atk)}
  function nearest(r,from=hero){let b=null,bd=r*r;for(const e of en){if(e.dead)continue;const d=(e.x-from.x)**2+(e.y-from.y)**2;if(d<bd){bd=d;b=e}}return b}
@@ -139,6 +140,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok}){
   if(S.gems.length>500){const a=S.gems.splice(0,100);S.gems[0].v+=a.reduce((s,g)=>s+g.v,0)}
   // 离太远的敌人重新放到屏幕边（像吸血鬼幸存者）
   for(const e of en){if(e.dead)continue;const dx=e.x-hero.x,dy=e.y-hero.y;if(dx*dx+dy*dy>520*520){const a=Math.atan2(hero.y-e.y,hero.x-e.x)+R(-.6,.6),r=300;const nx=hero.x+Math.cos(a)*r*-1,ny=hero.y+Math.sin(a)*r*-1;if(ok(nx,ny)){e.x=nx;e.y=ny}}}
+  for(const e of en){if(!e.elite||e.dead)continue;e.summonT-=dt;if(e.summonT<=0&&en.length<340){e.summonT=7;for(let i=0;i<3;i++){const a=R(0,6.28),x=e.x+Math.cos(a)*18,y=e.y+Math.sin(a)*12;if(ok(x,y)){const m=makeEnemy(x,y,'goblin');if(m){onSpawnBase(m);en.push(m)}}}S.fx.push({k:'ring',x:e.x,y:e.y,r:22,t:0,d:.4})}}
   tryLevel();
  }
  function onKill(e){const v=e.boss?60:e.elite?12:1;S.gems.push({x:e.x+R(-3,3),y:e.y-4+R(-3,3),v});if(e.boss)S.texts.push({x:e.x,y:e.y-50,v:'击败 '+e.name+'！',t:2.5,c:'#ffd166',big:1})}

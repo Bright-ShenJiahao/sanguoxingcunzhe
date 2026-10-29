@@ -41,7 +41,7 @@ body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
 <script>
 (function(){var b=document.getElementById('boot');if(!b)return;
 var P='assets/characters/',K=innerHeight>=900?3:2,W=innerWidth,H=innerHeight,hb=Math.round(H*.27),hx=Math.round(W*(W<700?.7:.62));
-var kinds=['grunt_club','blade','spear','shield','archer'],L=[],lane=[-26,18,-8,30,0,-30,14,24,-14,4];
+var kinds=['goblin','gob_blade','gob_shield','gob_archer','goblin'],L=[],lane=[-26,18,-8,30,0,-30,14,24,-14,4];
 function fr(dir,pre,from,to){var a=[];for(var j=from;j<=to;j++){var im=new Image();im.src=P+dir+'/'+pre+j+'.png';a.push(im.src)}return a}
 function mk(f,bot,z,x,v,ph,fps){var el=document.createElement('img');el.className='sd';el.style.bottom=bot+'px';el.style.zIndex=z;b.appendChild(el);return {el:el,f:f,x:x,v:v,ph:ph,fps:fps,bot:bot}}
 var hero=mk(fr('hero_b','w',2,7),hb,1000-hb,hx,0,0,85);

@@ -55,7 +55,7 @@ export function createMenu(game){
  // 阻断名字输入与菜单点击进入原来的全局移动按键处理。
  root.addEventListener('keydown',e=>e.stopPropagation());root.addEventListener('keyup',e=>e.stopPropagation());
  const preview=root.querySelector('canvas').getContext('2d');
- const KINDS=['grunt_club','blade','spear','archer','shield','blade','grunt_club','spear'];
+ const KINDS=['goblin','gob_blade','gob_archer','gob_shield','goblin','gob_blade','goblin','gob_shield'];
  const actors=KINDS.map((k,i)=>({k,sx:(i-3.5)*.2,sy:((i*5)%3-1)*.2,ph:i*1.7}));
  let starting=false;
  root.querySelector('.menu-start').onclick=async()=>{

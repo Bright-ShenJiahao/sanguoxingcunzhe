@@ -1,12 +1,12 @@
 // 黄巾兵：动作、受击、死亡与弓箭；玩家与搜打撤规则由调用方接收命中事件。
 export function createEnemies({data,images,hero,ok,water,onHit}){
- const kinds=Object.keys(data),arrows=[];
+ const kinds=Object.keys(data).filter(k=>(data[k].role||'normal')==='normal'),arrows=[];
  let bag=[];
  function nextKind(){
   if(!bag.length){bag=[...kinds];for(let i=bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]]}}
   return bag.pop();
  }
- function make(x,y){const k=nextKind();return {k,x,y,face:1,hp:data[k].hp,state:'move',timer:0,cooldown:Math.random()*.8,ph:Math.random()*9,dead:false}}
+ function make(x,y,k=nextKind()){return {k,x,y,face:1,hp:data[k].hp,state:'move',timer:0,cooldown:Math.random()*.8,ph:Math.random()*9,dead:false}}
  function hit(e,dmg=1){
   if(e.dead)return false;
   e.hp-=dmg;
@@ -28,9 +28,9 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    if(e.state==='windup'){
     if(e.timer>=.45){
      e.state='strike';e.timer=0;
-     if(e.k==='archer'){
+     if(stats.ranged){
       const len=Math.hypot(ax,ay)||1;
-      arrows.push({x:e.x,y:e.y-10,dx:ax/len,dy:ay/len,life:1.6});
+      arrows.push({k:e.k,x:e.x,y:e.y-10,dx:ax/len,dy:ay/len,life:1.6,dm:stats.damage*(e.dmgMul||1)*(e.elite?1.3:1)});
      }else if(d<=(stats.reach+5)*(e.sc||1)){onHit(stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1))}
     }
    }else if(e.state==='strike'){
@@ -53,28 +53,30 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    const p=arrows[i],oldx=p.x,oldy=p.y;p.x+=p.dx*145*dt;p.y+=p.dy*145*dt;p.life-=dt;
    const vx=p.x-oldx,vy=p.y-oldy,v2=vx*vx+vy*vy;
    const t=v2?Math.max(0,Math.min(1,((hero.x-oldx)*vx+(hero.y-10-oldy)*vy)/v2)):0;
-   if(Math.hypot(oldx+vx*t-hero.x,oldy+vy*t-(hero.y-10))<8){onHit(data.archer.damage);arrows.splice(i,1)}
+   if(Math.hypot(oldx+vx*t-hero.x,oldy+vy*t-(hero.y-10))<8){onHit(p.dm);arrows.splice(i,1)}
    else if(p.life<=0||!ok(p.x,p.y+10))arrows.splice(i,1);
   }
  }
  function frame(e,now){
   let name=e.state;
   if(name==='move')name=e.moving?'walk'+(Math.floor(now/110+e.ph)%6):'idle'+(Math.floor(now/650)%2);
-  if(name==='recover'&&e.k==='archer')name='idle0';
-  return data[e.k].frames[name];
+  if(name==='recover'&&!data[e.k].frames.recover)name='idle0';
+  if(name==='windup'&&data[e.k].frames.draw&&e.timer>.22)name='draw';
+  return data[e.k].frames[name]||data[e.k].frames.idle0;
  }
  function getFrame(e,now){const f=frame(e,now),name=Object.keys(data[e.k].frames).find(key=>data[e.k].frames[key]===f);return {f,im:images['en_'+e.k+'_'+name]}}
  function draw(e,c,cx,cy,now){
   const {f,im}=getFrame(e,now);
   const sc=e.sc||1;c.save();c.translate(Math.round(e.x-cx),Math.round(e.y-cy));c.scale(e.face*sc,sc);c.globalAlpha=e.alpha??1;c.imageSmoothingEnabled=false;
-  if(e.elite||e.boss)c.filter=e.boss?'saturate(1.6) hue-rotate(-25deg) brightness(.9)':'saturate(1.4) hue-rotate(250deg)';
   if(e.flash>0){e.flash-=1/60;c.filter='brightness(2.2)'}
   c.drawImage(im,-f.anchor[0],-f.anchor[1],f.size[0],f.size[1]);c.restore();
   if((e.elite||e.boss)&&!e.dead&&e.hpMax){const w=e.boss?40:20,x=Math.round(e.x-cx-w/2),y=Math.round(e.y-cy-f.anchor[1]*sc-4);c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x,y,w,2.5);c.fillStyle=e.boss?'#ff5a4a':'#c77dff';c.fillRect(x,y,w*Math.max(0,e.hp/e.hpMax),2.5)}
  }
  function drawArrows(c,cx,cy){
-  const f=data.archer.frames.arrow,im=images.en_archer_arrow;
-  for(const p of arrows){c.save();c.translate(p.x-cx,p.y-cy);c.rotate(Math.atan2(p.dy,p.dx));c.imageSmoothingEnabled=false;c.drawImage(im,-f.size[0]/2,-f.size[1]/2,f.size[0],f.size[1]);c.restore()}
+  for(const p of arrows){const f=data[p.k].frames.arrow,im=images['en_'+p.k+'_arrow'];c.save();c.translate(p.x-cx,p.y-cy);
+   if(f&&im){c.rotate(Math.atan2(p.dy,p.dx));c.imageSmoothingEnabled=false;c.drawImage(im,-f.size[0]/2,-f.size[1]/2,f.size[0],f.size[1])}
+   else{const g=c.createRadialGradient(0,0,0,0,0,5);g.addColorStop(0,'rgba(240,200,255,1)');g.addColorStop(.5,'rgba(170,80,240,.9)');g.addColorStop(1,'rgba(120,40,200,0)');c.fillStyle=g;c.beginPath();c.arc(0,0,5,0,6.3);c.fill()}
+   c.restore()}
  }
  return {make,hit,update,reset,draw,drawArrows,getFrame};
 }
