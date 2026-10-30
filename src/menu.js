@@ -86,7 +86,7 @@ export function createMenu(game){
  const prep=document.createElement('section');prep.id='prep';prep.hidden=true;prep.setAttribute('aria-label','备战');
  prep.innerHTML=`<div class="pp-box">
   <div class="pp-step" data-s="prep"><div class="pp-head"><h2>备战</h2><div class="pp-tabs" role="tablist"><button data-t="role" aria-selected="true">角色</button><button data-t="gear">装备</button><button data-t="shop">商店</button></div></div>
-   <div class="pp-body"><div class="pp-pane" data-t="role"><div class="pp-roles"></div><div class="pp-info"><canvas width="120" height="120"></canvas><h3></h3><p>专属武器：待定</p><p>特性：待定</p></div></div>
+   <div class="pp-body"><div class="pp-pane" data-t="role"><div class="pp-roles"></div><div class="pp-info"><canvas width="120" height="120"></canvas><h3></h3><p class="w"></p><p class="t"></p></div></div>
     <div class="pp-pane" data-t="gear" hidden><div class="pp-soon">武器卡组 · 即将开放</div></div>
     <div class="pp-pane" data-t="shop" hidden><div class="pp-soon">商店 · 即将开放</div></div></div>
    <div class="pp-foot"><button class="pp-back">返回</button><button class="pp-next">下一步 →</button></div></div>
@@ -100,7 +100,7 @@ export function createMenu(game){
  cs.querySelectorAll('button').forEach(b=>{const im=new Image();im.src=thumb(b);im.alt='';const t=document.createElement('span');const main=b.dataset.c==='m'||b.dataset.c==='f0';
   t.textContent=main?(b.dataset.c==='m'?'男 · 掌机':'女 · 耳机'):'🔒';b.textContent='';b.append(im,t);
   if(main)b.classList.add('big');else{b.disabled=true;b.classList.add('lock');b.title='后期解锁（商店 / 成就）'}});
- {const lk=document.createElement('div');lk.className='lockrow';lk.innerHTML='<span>更多造型 · 后期解锁</span>';[...cs.querySelectorAll('button.lock')].forEach(b=>lk.append(b));cs.after(lk)}
+
  const step=s=>prep.querySelectorAll('.pp-step').forEach(x=>x.hidden=x.dataset.s!==s);
  prep.querySelectorAll('.pp-tabs button').forEach(b=>b.onclick=()=>{prep.querySelectorAll('.pp-tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));prep.querySelectorAll('.pp-pane').forEach(p=>p.hidden=p.dataset.t!==b.dataset.t)});
  prep.querySelector('[data-s=prep] .pp-back').onclick=()=>{prep.hidden=true;root.hidden=false;root.querySelector('.menu-start').focus()};
@@ -138,6 +138,6 @@ export function createMenu(game){
   preview.clearRect(0,0,200,160);preview.imageSmoothingEnabled=false;
   const scale=2.6;if(image)preview.drawImage(image,100-size[0]*scale/2,145-size[1]*scale,size[0]*scale,size[1]*scale);
   caption.textContent=label;
-  if(!prep.hidden){info.querySelector('h3').textContent=label;ipv.clearRect(0,0,120,120);ipv.imageSmoothingEnabled=false;if(image){const s2=3.4;ipv.drawImage(image,60-size[0]*s2/2,112-size[1]*s2,size[0]*s2,size[1]*s2)}}
+  if(!prep.hidden){info.querySelector('h3').textContent=label;{const f=(document.querySelector('#cs button[aria-pressed=true]')?.dataset.c||'m')[0]==='f';info.querySelector('.w').textContent=f?'专属武器：耳机（声波圈）':'专属武器：掌机（像素光弹）';info.querySelector('.t').textContent=f?'特性：拾取范围 +25%':'特性：经验 +10%'}ipv.clearRect(0,0,120,120);ipv.imageSmoothingEnabled=false;if(image){const s2=3.4;ipv.drawImage(image,60-size[0]*s2/2,112-size[1]*s2,size[0]*s2,size[1]*s2)}}
  }};
 }

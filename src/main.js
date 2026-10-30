@@ -40,14 +40,14 @@ ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
 const rowP={};
 function loadSet(cs){
  if(rowP[cs])return rowP[cs];
- const f=cs[0]=='f',r=+cs[1]-(f?0:1),n=f?9:8,pre=f?'hh':'hm',dir=f?'heroine':'hero_m';
+ const f=cs[0]=='f',r=+cs[1]-(f?0:1),n=f?(HN.rows[r].n||9):8,pre=f?'hh':'hm',dir=f?'heroine':'hero_m';
  return rowP[cs]=Promise.all(Array.from({length:n},(_,i)=>new Promise(res=>{const m=new Image();m.onload=()=>{IM[pre+r+'_'+i]=m;res()};m.onerror=res;m.src='assets/characters/'+dir+'/r'+r+'_w'+i+'.png'})))}
 const needLoad=()=>CS!=='m';
 
 for(let i=0;i<8;i++)ld('hbg_'+i,'assets/characters/hero_b/g_w'+i+'.png');
 let CS=(()=>{try{return localStorage.getItem('sex')==='f'?'f0':'m'}catch(e){return 'm'}})();const SETS={m:{pre:'hb_',gpre:'hbg_',size:D.hbsize,grip:D.grip,walk:[2,3,4,5,6,7]}};
 for(let r=0;r<HM.rows.length;r++){const z=HM.rows[r].size||HM.size;SETS['m'+(r+1)]={pre:'hm'+r+'_',size:[z[0]/2,z[1]/2],grip:HM.rows[r],walk:[2,3,4,5,6,7]}};
-for(let r=0;r<HN.rows.length;r++)SETS['f'+r]={pre:'hh'+r+'_',size:(z=>[z[0]/2,z[1]/2])(HN.rows[r].size||HN.size),grip:HN.rows[r],walk:[2,3,4,5,6,7,8]};
+for(let r=0;r<HN.rows.length;r++)SETS['f'+r]={pre:'hh'+r+'_',size:(z=>[z[0]/2,z[1]/2])(HN.rows[r].size||HN.size),grip:HN.rows[r],walk:HN.rows[r].n===8?[2,3,4,5,6,7]:[2,3,4,5,6,7,8]};
 const GI={gb:new Image(),hp:new Image()};GI.gb.src='assets/weapons/gear/gb.png';GI.hp.src='assets/weapons/gear/hp_f.png';
 let hairG=false,weaponAttack=null,pj=[],CM,mmc,wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
@@ -72,8 +72,6 @@ function drawHero(px,py,moving,now){
  if(wpm=='bow'){const p=tl(FH[f]);c.save();c.translate(p[0]+.5+(weaponAttack?3:0),p[1]-.5);c.scale(-.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2);c.scale(-2,2);
   if(weaponAttack&&T<.62){const pull=Math.min(1,T/.5)*5;c.strokeStyle='#e8dcc0';c.lineWidth=.8;c.beginPath();c.moveTo(-pull,0);c.lineTo(8-pull,0);c.stroke();c.fillStyle='#bbb';c.fillRect(8-pull,-.6,1.6,1.2)}c.restore()}
  if(wpm=='xbow'){const p=tl(FH[f]),rc=weaponAttack?Math.max(0,.3-Math.abs(T-.5))*-6:0;c.save();c.translate(p[0]+2+rc,p[1]-1);c.rotate(1.57);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
- if(wpm=='gb'&&GI.gb.complete){const p=tl(RH[f]);c.drawImage(GI.gb,p[0]-2.5,p[1]-6,5.5,7.5)}
- if(wpm=='hp'&&GI.hp.complete){c.drawImage(GI.hp,-6.5,-27,13,11)}
  if(wpm=='magic'){const bob=Math.sin(now/380)*1.3;c.save();c.translate(-11,-19+bob);c.scale(.5,.5);c.globalAlpha=.97;c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
  c.restore()}
 const en=[];let kills=0,fx=[];

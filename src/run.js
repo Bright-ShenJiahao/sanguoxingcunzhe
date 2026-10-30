@@ -88,7 +88,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    S.hpN=(S.hpN||0)+1;if(L>=8&&S.hpN%5===0){S.fx.push({k:'bass',t:0,d:.6});for(const e of en)if(!e.dead&&(e.x-hero.x)**2+(e.y-hero.y)**2<260*260){strike(e,dm,Math.sign(e.x-hero.x)||1);e.state='hurt';e.timer=-.75}}
    return L>=4?1.1:1.4}};
  // ---------- 升级 ----------
- function gain(v){S.xp+=v}
+ function gain(v){S.xp+=v*(S.w.gb?1.1:1)}
  function tryLevel(){
   if(S.paused||S.t-S.lastLv<3)return;
   if(S.xp<S.need)return;
@@ -149,7 +149,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    s.dead=s.life<=0||!ok(s.x,s.y+10)}
   S.shots=S.shots.filter(s=>!s.dead);
   // 经验珠
-  const mr=30*(1+.25*S.p.mag);
+  const mr=30*(1+.25*S.p.mag)*(S.w.hp?1.25:1);
   for(const g of S.gems){const dx=hero.x-g.x,dy=hero.y-6-g.y,d=Math.hypot(dx,dy);
    if(g.fly||d<mr){g.fly=true;const v=Math.max(140,d*6);g.x+=dx/d*v*dt;g.y+=dy/d*v*dt;if(d<6){g.got=true;gain(g.v)}}}
   S.gems=S.gems.filter(g=>!g.got);
