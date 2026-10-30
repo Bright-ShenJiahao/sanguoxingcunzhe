@@ -29,7 +29,7 @@ def frames(f,row,n):
         m=F[:,x0:x1];ys=np.nonzero(m.any(1))[0];out.append((np.dstack([a[y0:y1,x0:x1],m*255]).astype(np.uint8),ys[0],ys[-1]))
     return out
 def save(fr,LH,name,common=None):
-    top=min(t for _,t,_ in fr);bot=max(b for _,_,b in fr);s=LH*2/(bot-top) if common is None else common
+    top=min(t for _,t,_ in fr);bot=max(b for _,_,b in fr);s=LH*4/(bot-top) if common is None else common   # 高清：每逻辑像素 4 个图像像素
     W=max(c.shape[1] for c,_,_ in fr);sz=None
     for i,(c,_,_) in enumerate(fr):
         c=c[top:bot+1];pad=np.zeros((c.shape[0],W,4),np.uint8);pad[:,:c.shape[1]]=c   # 左对齐、底对齐
@@ -40,6 +40,6 @@ s_m,szm=save(frames('male.png',0,8),25,A+'hero_b/w%d.png')
 save(frames('male.png',1,3),0,A+'riders/m_r%d.png',s_m)
 s_f,szf=save(frames('walk_ride.png',1,8),24,A+'heroine/r0_w%d.png')
 save(frames('ride_f.png',2,3),0,A+'riders/f_r%d.png',s_f)
-D=json.load(open(R+'/data/characters.json'));D['hbsize']=[szm[0]/2,szm[1]/2];D['grip']={k:v[:8] for k,v in D['grip'].items() if isinstance(v,list)};json.dump(D,open(R+'/data/characters.json','w'),ensure_ascii=False)
-H=json.load(open(R+'/data/heroine.json'));r0=H['rows'][0];r0['n']=8;r0['size']=szf;r0['front']=r0['front'][:8];r0['back']=r0['back'][:8];json.dump(H,open(R+'/data/heroine.json','w'),ensure_ascii=False)
+D=json.load(open(R+'/data/characters.json'));D['hbsize']=[szm[0]/4,szm[1]/4];D['grip']={k:v[:8] for k,v in D['grip'].items() if isinstance(v,list)};json.dump(D,open(R+'/data/characters.json','w'),ensure_ascii=False)
+H=json.load(open(R+'/data/heroine.json'));r0=H['rows'][0];r0['n']=8;r0['size']=[szf[0]/2,szf[1]/2];r0['front']=r0['front'][:8];r0['back']=r0['back'][:8];json.dump(H,open(R+'/data/heroine.json','w'),ensure_ascii=False)
 print('ok',szm,szf)
