@@ -41,7 +41,10 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     e.cooldown=Math.max(0,e.cooldown-dt);
     if(d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
     if(d>stats.reach*(e.sc||1)*.85){
-     const fd=d>28&&window.PATHDIR?.(e.x,e.y),ux=fd?fd[0]:ax/d,uy=fd?fd[1]:ay/d;   // 远处沿寻路图走（会绕到桥/浅滩）
+     e.losT=(e.losT||0)-dt;if(e.losT<=0){e.losT=.25+Math.random()*.1;e.los=true;const n=Math.ceil(d/6);for(let k=1;k<n;k++){if(water(e.x+ax*k/n,e.y+ay*k/n)===1){e.los=false;break}}}   // 中间没有河/崖就直线走
+     const fd=d>28&&!e.los&&window.PATHDIR?.(e.x,e.y),tx=fd?fd[0]:ax/d,ty=fd?fd[1]:ay/d;   // 隔着河/崖时沿寻路图走（会绕到桥/浅滩）
+     const k_=Math.min(1,dt*7);e.vx=(e.vx??tx)+(tx-(e.vx??tx))*k_;e.vy=(e.vy??ty)+(ty-(e.vy??ty))*k_;   // 转向限速：方向逐渐转过去
+     const vl=Math.hypot(e.vx,e.vy)||1,ux=e.vx/vl,uy=e.vy/vl;
      const oldx=e.x,oldy=e.y,dist=(e.boss?.8:1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
      if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}
      else if(ok(e.x-my*1.6,e.y+mx*1.6)){e.x-=my*1.6;e.y+=mx*1.6}
@@ -74,6 +77,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  function draw(e,c,cx,cy,now){
   const {f,im}=getFrame(e,now);
   const sc=e.sc||1;c.save();c.translate(Math.round(e.x-cx),Math.round(e.y-cy));c.scale(e.face*sc,sc);c.globalAlpha=e.alpha??1;c.imageSmoothingEnabled=false;
+  if(!e.dead){c.fillStyle='rgba(10,20,10,.32)';c.beginPath();c.ellipse(0,0,6,2.2,0,0,6.3);c.fill()}   // 脚下阴影：雨雾天也看得清
   if(e.flash>0){e.flash-=1/60;c.filter='brightness(2.2)'}
   c.drawImage(im,-f.anchor[0],-f.anchor[1],f.size[0],f.size[1]);c.restore();
   if((e.elite||e.boss)&&!e.dead&&e.hpMax){const w=e.boss?40:20,x=Math.round(e.x-cx-w/2),y=Math.round(e.y-cy-f.anchor[1]*sc-4);c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x,y,w,2.5);c.fillStyle=e.boss?'#ff5a4a':'#c77dff';c.fillRect(x,y,w*Math.max(0,e.hp/e.hpMax),2.5)}

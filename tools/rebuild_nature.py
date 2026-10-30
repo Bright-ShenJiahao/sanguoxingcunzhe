@@ -242,7 +242,7 @@ for _ in range(260000):
     if d<0.9 and clear[yi,xi]<0.33: continue                 # 林中空地
     sc={'con':fC[yi,xi]+0.45*north[yi,0]+0.2*d,'bir':fB[yi,xi]-0.12,'oak':fO[yi,xi]-0.15*d}
     sp=max(sc,key=sc.get); ks,r=TREE[sp]; k=ks[rng.integers(len(ks))]
-    if far(x,y,r): put(k,x,y,r); nt+=1                # 树间留出能走的空隙
+    if far(x,y,r*1.3): put(k,x,y,r*1.3); nt+=1   # 树间留宽一点的通道                # 树间留出能走的空隙
 # 草地上的孤树：橡树 1~3 棵一组
 for _ in range(9000):
     x,y=rng.uniform(0,W),rng.uniform(0,H)
