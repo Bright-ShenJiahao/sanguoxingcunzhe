@@ -25,7 +25,9 @@ export function createMeta(){
  #mbar{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:12;display:flex;gap:8px;font:600 14px "PingFang SC","Microsoft YaHei",sans-serif;color:#f4f7ff}
  #mbar .pill{display:flex;align-items:center;gap:6px;padding:6px 14px;border:2px solid #9cc3ff;border-radius:999px;background:#102446e8;box-shadow:0 2px 0 #0007}
  #mbar button{cursor:pointer;font:inherit;color:inherit}
- body:not(.menu-open) #mbar{display:none}
+ body:not(.prep-open) #mbar{display:none}
+ body.prep-open #prep .pp-step{margin-top:48px;max-height:calc(100vh - 70px)}
+ .upw .note{color:#c9d8f0;margin:0 0 10px;font-size:13px}
  .mpanel{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:#050c16b0;font:15px "PingFang SC","Microsoft YaHei",sans-serif;color:#f2f6ff}
  .mpanel[hidden]{display:none}
  .mpanel .box{width:min(900px,94vw);max-height:88vh;overflow:auto;padding:22px 24px;border:3px solid #cfe2ff;border-radius:16px;background:linear-gradient(160deg,#2a5aaef5,#173a7cf5);box-shadow:0 8px 0 #0006}
@@ -58,13 +60,16 @@ export function createMeta(){
  document.head.append(st);
  // ---------- 顶部状态栏 ----------
  const bar=document.createElement('div');bar.id='mbar';document.body.append(bar);
- function drawBar(){bar.innerHTML=`<span class="pill">🪙 ${M.gold}</span><span class="pill">🎟️ ${M.tickets}</span><button class="pill" data-p="up">⬆️ 永久强化</button><button class="pill" data-p="dex">📖 怪物图鉴</button><button class="pill" data-p="snd" title="静音（M 键）">${window.SFX?.muted?'🔇':'🔊'}</button>`;
-  bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.p==='up')openUp();else if(b.dataset.p==='dex')openDex();else{dispatchEvent(new KeyboardEvent('keydown',{key:'m'}));setTimeout(drawBar,50)}})}
+ function drawBar(){bar.innerHTML=`<span class="pill" title="金币">🪙 金币 ${M.gold}</span><span class="pill" title="抽奖券">🎫 抽奖券 ${M.tickets}</span><button class="pill" data-p="dex">📖 怪物图鉴</button><button class="pill" data-p="snd" title="静音（M 键）">${window.SFX?.muted?'🔇':'🔊'}</button>`;
+  bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.p==='dex')openDex();else{dispatchEvent(new KeyboardEvent('keydown',{key:'m'}));setTimeout(drawBar,50)}})}
  drawBar();
  // ---------- 面板 ----------
  const pan=document.createElement('div');pan.className='mpanel';pan.hidden=true;document.body.append(pan);
  pan.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape')pan.hidden=true});
  function shell(title,sub,body,note=''){pan.innerHTML=`<div class="box"><div class="hd"><h2>${title}<small>${sub}</small></h2><button class="back">返回</button></div>${note?`<div class="note">${note}</div>`:''}${body}</div>`;pan.hidden=false;pan.querySelector('.back').onclick=()=>pan.hidden=true;setTimeout(()=>pan.querySelector('button')?.focus(),30)}
+ function renderUp(el){const html=upHTML();el.innerHTML='<div class="note">所有角色通用，每次购买价格上涨。</div>'+html;bindUp(el,()=>renderUp(el))}
+ function upHTML(){return `<div class="ugrid">${UP.map(u=>{const l=L(u.k),full=l>=u.max,p=price(u,l);return `<div class="ucard"><div class="ic">${u.ic}</div><div class="t"><b>${u.nm}</b><span class="fx">${u.fx}</span><div class="pips">${Array.from({length:u.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join('')}</div></div><button class="buy" data-k="${u.k}" ${full||M.gold<p?'disabled':''}>${full?'已满级':'🪙 '+p}</button></div>`}).join('')}</div>`}
+ function bindUp(el,again){el.querySelectorAll('.buy').forEach(b=>b.onclick=()=>{const u=UP.find(x=>x.k===b.dataset.k),l=L(u.k),p=price(u,l);if(l>=u.max||M.gold<p)return;M.gold-=p;M.up[u.k]=l+1;save();again();el.querySelector(`[data-k=${u.k}]`)?.focus()})}
  function openUp(){
   const body=`<div class="ugrid">${UP.map(u=>{const l=L(u.k),full=l>=u.max,p=price(u,l);return `<div class="ucard"><div class="ic">${u.ic}</div><div class="t"><b>${u.nm}</b><span class="fx">${u.fx}</span><div class="pips">${Array.from({length:u.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join('')}</div></div><button class="buy" data-k="${u.k}" ${full||M.gold<p?'disabled':''}>${full?'已满级':'🪙 '+p}</button></div>`}).join('')}</div>`;
   shell('永久强化','🪙 '+M.gold,body,'所有角色通用，每次购买价格上涨。');
@@ -96,5 +101,5 @@ export function createMeta(){
   kill(k){M.kills[k]=(M.kills[k]||0)+1;if(!(M.kills[k]%20)||M.kills[k]===1)save()},
   runEnd(t,kills){const g=Math.round((kills/8+t/60*6)*(1+.08*L('gold'))),tk=Math.floor(t/180);M.gold+=g;M.tickets+=tk;M.runs++;save();return {g,tk}},
   bonus(){return {hp:8*L('hp'),atk:.04*L('atk'),spd:.03*L('spd'),cd:.03*L('cd'),arm:.02*L('arm'),reg:.2*L('reg'),mag:.12*L('mag'),wis:.05*L('wis'),crit:.03*L('crit'),rr:L('rr'),rev:L('rev')}},
-  slot,openUp,openDex,refresh:drawBar,save};
+  slot,openUp,openDex,renderUp,refresh:drawBar,save};
 }

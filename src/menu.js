@@ -89,10 +89,10 @@ export function createMenu(game){
  // ---------- 备战 → 选关卡 → 出发 ----------
  const prep=document.createElement('section');prep.id='prep';prep.hidden=true;prep.setAttribute('aria-label','备战');
  prep.innerHTML=`<div class="pp-box">
-  <div class="pp-step" data-s="prep"><div class="pp-head"><h2>备战</h2><div class="pp-tabs" role="tablist"><button data-t="role" aria-selected="true">角色</button><button data-t="gear">装备</button><button data-t="shop">商店</button></div></div>
+  <div class="pp-step" data-s="prep"><div class="pp-head"><h2>备战</h2><div class="pp-tabs" role="tablist"><button data-t="role" aria-selected="true">角色</button><button data-t="gear">装备</button><button data-t="spell">法术</button><button data-t="up">强化</button><button data-t="shop">商店</button></div></div>
    <div class="pp-body"><div class="pp-pane" data-t="role"><div class="pp-roles"></div><div class="pp-info"><canvas width="120" height="120"></canvas><h3></h3><p class="w"></p><p class="t"></p></div></div>
-    <div class="pp-pane" data-t="gear" hidden><div class="dk"></div></div>
-    <div class="pp-pane" data-t="shop" hidden><div class="pp-soon">商店 · 即将开放</div></div></div>
+    <div class="pp-pane" data-t="gear" hidden><div class="dk dkw"></div></div><div class="pp-pane" data-t="spell" hidden><div class="dk dks"></div></div><div class="pp-pane" data-t="up" hidden><div class="upw"></div></div>
+    <div class="pp-pane" data-t="shop" hidden><div class="pp-soon">商店（抽卡）· 等武器和法术定稿后开放</div></div></div>
    <div class="pp-foot"><button class="pp-back">返回</button><button class="pp-next">下一步 →</button></div></div>
   <div class="pp-step" data-s="stage" hidden><div class="pp-head"><h2>选择关卡</h2></div>
    <div class="pp-body pp-stages"><button class="pp-stage" aria-pressed="true"><b>翠绿之地</b><span>森林、平原、水乡 · 哥布林出没</span></button><button class="pp-stage" disabled><b>冰原</b><span>未解锁</span></button><button class="pp-stage" disabled><b>？？？</b><span>未解锁</span></button></div>
@@ -120,17 +120,19 @@ export function createMenu(game){
   if(main)b.classList.add('big');else{b.disabled=true;b.classList.add('lock');b.title='后期解锁（商店 / 成就）'}});
 
  const step=s=>{prep.querySelectorAll('.pp-step').forEach(x=>x.hidden=x.dataset.s!==s);setTimeout(()=>prep.querySelector(`.pp-step[data-s=${s}] .pp-next,.pp-step[data-s=${s}] .pp-go`)?.focus(),30)};
- prep.querySelectorAll('.pp-tabs button').forEach(b=>b.onclick=()=>{prep.querySelectorAll('.pp-tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));prep.querySelectorAll('.pp-pane').forEach(p=>p.hidden=p.dataset.t!==b.dataset.t)});
+ prep.querySelectorAll('.pp-tabs button').forEach(b=>b.onclick=()=>{prep.querySelectorAll('.pp-tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));prep.querySelectorAll('.pp-pane').forEach(p=>p.hidden=p.dataset.t!==b.dataset.t);if(b.dataset.t==='up')window.META?.renderUp(prep.querySelector('.upw'))});
  prep.querySelector('[data-s=prep] .pp-back').onclick=()=>{prep.hidden=true;root.hidden=false;root.querySelector('.menu-start').focus()};
  // ---------- 卡组：5 武器 + 5 法术（必须选满），锁定 2 个被动 ----------
- const dk=prep.querySelector('.dk');let deck;try{deck=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
+ const dk=prep.querySelector('.dkw'),dks=prep.querySelector('.dks');let deck;try{deck=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
  if(!deck||!Array.isArray(deck.w))deck={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};deck.lock=deck.lock||[];
  const LIM={w:5,s:5,lock:2};
  function drawDeck(){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${names(k)}</button>`).join('')}</div>`;
-  dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'武器','必须选满')+row('s',POOL.s,k=>WEAPONS[k].name,'法术','必须选满')+row('lock',PASS_KEYS,k=>PASSIVES[k].name,'锁定被动','这局一定会出现，其余随机 '+(10-deck.lock.length)+' 个')+'<div class="warn"></div>';
-  dk.querySelectorAll('button').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}drawDeck()})}
+  dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'武器','必须选满')+row('lock',PASS_KEYS,k=>PASSIVES[k].name,'锁定被动','这局一定会出现，其余随机 '+(10-deck.lock.length)+' 个')+'<div class="warn"></div>';
+  dks.innerHTML=row('s',POOL.s,k=>WEAPONS[k].name,'法术','必须选满')+'<div class="warn"></div>';
+  prep.querySelectorAll('.dk button').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}drawDeck()})}
  drawDeck();
- prep.querySelector('.pp-next').onclick=()=>{if(deck.w.length<5||deck.s.length<5){prep.querySelector('.pp-tabs [data-t=gear]').click();dk.querySelector('.warn').textContent='武器和法术都要选满 5 个才能出发';return}try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}step('stage')};
+ new MutationObserver(()=>document.body.classList.toggle('prep-open',!prep.hidden)).observe(prep,{attributes:true,attributeFilter:['hidden']});
+ prep.querySelector('.pp-next').onclick=()=>{if(deck.w.length<5||deck.s.length<5){prep.querySelector('.pp-tabs [data-t='+(deck.w.length<5?'gear':'spell')+']').click();prep.querySelectorAll('.dk .warn').forEach(w=>w.textContent='武器和法术都要选满 5 个才能出发');return}try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}step('stage')};
  prep.querySelector('[data-s=stage] .pp-back').onclick=()=>step('prep');
  const info=prep.querySelector('.pp-info'),ipv=info.querySelector('canvas').getContext('2d');
  root.querySelector('.menu-start').onclick=()=>{root.hidden=true;prep.hidden=false;step('prep');prep.querySelector('.pp-next').focus()};
