@@ -238,18 +238,32 @@ TREE={'con':(['pine1','pine1','pine2'],15),'bir':(['broad2','broad4'],17),'oak':
 nt=0
 for _ in range(260000):
     x,y=rng.uniform(0,W),rng.uniform(0,H); xi,yi=int(x),int(y); d=dens[yi,xi]
-    if d<0.32 or rng.random()>min(1,(d-0.32)*0.6) or not okpos(x,y) or notree[yi,xi]: continue
-    if d<0.9 and clear[yi,xi]<0.33: continue                 # 林中空地
+    if d<0.42 or rng.random()>min(1,(d-0.42)*0.8) or not okpos(x,y) or notree[yi,xi]: continue
+    if d<0.75 and clear[yi,xi]<0.2: continue                 # 林中空地
     sc={'con':fC[yi,xi]+0.45*north[yi,0]+0.2*d,'bir':fB[yi,xi]-0.12,'oak':fO[yi,xi]-0.15*d}
     sp=max(sc,key=sc.get); ks,r=TREE[sp]; k=ks[rng.integers(len(ks))]
     if far(x,y,r*1.3): put(k,x,y,r*1.3); nt+=1   # 树间留宽一点的通道                # 树间留出能走的空隙
 # 草地上的孤树：橡树 1~3 棵一组
-for _ in range(9000):
+for _ in range(0):                                     # 平原不放孤树
     x,y=rng.uniform(0,W),rng.uniform(0,H)
     if dens[int(y),int(x)]>0.12 or rng.random()>0.05 or not okpos(x,y) or notree[int(y),int(x)] or not far(x,y,110): continue
     for m in range(rng.integers(1,4)):
         xx,yy=x+rng.normal(0,22)*(m>0),y+rng.normal(0,16)*(m>0)
         if okpos(xx,yy) and not notree[int(yy),int(xx)] and far(xx,yy,18): put(['broad1','broad3'][rng.integers(2)],xx,yy,18); nt+=1
+# 平原上的小片树林（5~10 棵同种）和一小排树（5~7 棵成一线），旁边带几丛灌木
+GR=[]
+for _ in range(20000):
+    if len(GR)>=22: break
+    x,y=rng.uniform(80,W-80),rng.uniform(150,H-80)
+    if dens[int(y),int(x)]>0.15 or notree[int(y),int(x)] or not okpos(x,y) or any((x-a)**2+(y-b)**2<260**2 for a,b in GR): continue
+    GR.append((x,y)); ks,r=TREE[['con','bir','oak'][rng.integers(3)]]; row=rng.random()<0.35; ang=rng.uniform(0,3.14)
+    pts=[(x+np.cos(ang)*i*r*1.6,y+np.sin(ang)*i*r*1.1) for i in range(-3,4)] if row else [(x+rng.normal(0,r*1.6),y+rng.normal(0,r*1.1)) for _ in range(rng.integers(5,11))]
+    for xx,yy in pts:
+        if okpos(xx,yy) and not notree[int(yy),int(xx)] and far(xx,yy,r*0.9): put(ks[rng.integers(len(ks))],xx,yy,r*0.9); nt+=1
+    for _ in range(rng.integers(2,5)):
+        a2=rng.uniform(0,6.28); xx,yy=x+np.cos(a2)*r*3.2,y+np.sin(a2)*r*2.4; k2=['bushL2','bushM1','tuft1'][rng.integers(3)]
+        if okpos(xx,yy) and far(xx,yy,8): put(k2,xx,yy,8)
+print('小树林',len(GR))
 # 水边柳树
 wl=np.nonzero((dout>7)&(dout<12)&~dil(rockc,10))
 for j in rng.permutation(len(wl[0]))[:3000]:
@@ -265,7 +279,7 @@ for _ in range(60000):
         if rng.random()>0.02: continue
         ks=[['bushM2','bushS2'],['bushL1']][rng.integers(2)]
     else:
-        if not(0.22<d<0.6) or rng.random()>0.12*(1-abs(d-0.4)/0.2) or beach[yi,xi]: continue
+        if not(0.3<d<0.5) or rng.random()>0.14 or beach[yi,xi]: continue
         ks=EDGE[rng.choice(len(EDGE),p=[e[1] for e in EDGE])][0]
     if not okpos(x,y) or not far(x,y,40): continue
     for _ in range(rng.integers(3,7)):
@@ -278,7 +292,7 @@ for _ in range(30000):
     k=['tuft1','tuft4','tuft3'][rng.choice(3,p=[.45,.4,.15])]
     if far(x,y,8): put(k,x,y,8); nb+=1
 # 野花：草地上小片
-for _ in range(6000):
+for _ in range(0):                                     # 平原不放野花
     x,y=rng.uniform(0,W),rng.uniform(0,H)
     if dens[int(y),int(x)]>0.1 or rng.random()>0.025 or not okpos(x,y,False) or beach[int(y),int(x)] or not far(x,y,80): continue
     for _ in range(rng.integers(2,6)):
