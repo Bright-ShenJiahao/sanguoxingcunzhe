@@ -42,6 +42,6 @@ c[...,0][ms&(c[...,0]==1)]=0;Image.fromarray(c).save(M+'coll.png')
 # 物件：路上的移走
 n0=len(J['objs']);J['objs']=[o for o in J['objs'] if not (0<=o[2]<H and 0<=o[1]<W and ms[min(H-1,int(o[2])),min(W-1,int(o[1]))]) or 'bridge' in o[0]]
 J['ver']=J.get('ver',0)+1;json.dump(J,open(R+'/data/world.json','w'),ensure_ascii=False,separators=(',',':'))
-Image.fromarray(out[100*HD:700*HD,0:600*HD]).resize((600,600)).save(R+'/art_src/build/paths_preview.png')
-Image.fromarray(full[100*HD:700*HD,0:600*HD]).resize((600,600)).save(R+'/art_src/build/paths_before.png')
+Image.fromarray(out[100*HD:700*HD,0:600*HD]).resize((600,600)).save('/tmp/paths_preview.png')
+Image.fromarray(full[100*HD:700*HD,0:600*HD]).resize((600,600)).save('/tmp/paths_before.png')
 print('opened',int(ms.sum()),'cells; objs',n0,'->',len(J['objs']))
