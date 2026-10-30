@@ -72,7 +72,7 @@ function drawHero(px,py,moving,now){
 const en=[];let kills=0,fx=[];
 const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>survival?.damage(amount)});
 function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg))fx.push({x:e.x,y:e.y,t:now,dx})}
-function spawn(){for(let n=0;n<30;n++){const a=Math.random()*6.28,r=Math.hypot(VW,VH)/2+20+Math.random()*90,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
+function spawn(){if(window.DBG?.noMob)return;for(let n=0;n<30;n++){const a=Math.random()*6.28,r=Math.hypot(VW,VH)/2+20+Math.random()*90,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
  if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;const e=enemySystem.make(x,y);run?.onSpawn(e);en.push(e);return}}
 let fish=null;const deepAt=(x,y,r)=>x>2100&&y>WH-1000&&[[0,0],[r,0],[-r,0],[0,r*.6],[0,-r*.6]].every(([a,b])=>water(x+a,y+b)===1);
 let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;

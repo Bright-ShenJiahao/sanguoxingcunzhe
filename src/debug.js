@@ -12,7 +12,7 @@ export function createDebug(g){
  const W=g.world,places=[['出生点',W.spawn[0],W.spawn[1]],['迷雾森林',700,1200],['山顶',420,730],['峡谷',900,1140],['水乡',2300,900],['海边',2901,1303]];
  const WK=['auto','clear','lightrain','heavyrain','lightsnow','heavysnow','blizzard','fog','overcast'];
  el.innerHTML=`<h4>🔧 开发者（点标题收起）</h4>
- <b>主角</b><div class="r"><button data-a="god">无敌</button><button data-a="heal">回满血</button><button data-a="lv">升一级</button><button data-a="max">全武器满级</button></div>
+ <b>主角</b><div class="r"><button data-a="god">无敌</button><button data-a="nomob">没有怪物</button><button data-a="heal">回满血</button><button data-a="lv">升一级</button><button data-a="max">全武器满级</button></div>
  <b>时间（跳过）</b><div class="r"><button data-a="t60">+1 分</button><button data-a="t300">+5 分</button><button data-a="boss">到 Boss 前</button><button data-a="kill">清屏</button></div>
  <b>传送</b><div class="r">${places.map((p,i)=>`<button data-p="${i}">${p[0]}</button>`).join('')}</div>
  <b>天气</b><div class="r">${WK.map(k=>`<button data-w="${k}">${{auto:'随机',clear:'晴',lightrain:'小雨',heavyrain:'大雨',lightsnow:'小雪',heavysnow:'大雪',blizzard:'暴雪',fog:'雾',overcast:'阴'}[k]}</button>`).join('')}</div>
@@ -22,6 +22,7 @@ export function createDebug(g){
  el.querySelector('h4').onclick=()=>el.classList.toggle('min');
  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;const R=g.run.dbg,a=b.dataset.a;
   if(a==='god'){D.god=!D.god;b.classList.toggle('on',D.god)}
+  else if(a==='nomob'){D.noMob=!D.noMob;b.classList.toggle('on',D.noMob);if(D.noMob)for(const e of g.en)e.dead=e.expired=true}
   else if(a==='heal')g.survival.heal(9999);
   else if(a==='lv')R.levelUp();
   else if(a==='max')R.maxAll();
