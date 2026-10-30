@@ -53,14 +53,16 @@ export function createDebug(g){
   if(b.dataset.a==='full')openFull();
   if(b.dataset.a==='undo'){lines.pop();save()}
   if(b.dataset.a==='clr'){lines=[];save()}
-  if(b.dataset.a==='copy'){const t=JSON.stringify(lines.map(l=>({颜色:l.c,点:l.p})));navigator.clipboard?.writeText(t).then(()=>{b.textContent='已复制';setTimeout(()=>b.textContent='复制线条坐标',1200)},()=>prompt('复制：',t))}});
+  if(b.dataset.a==='copy'){const t=JSON.stringify(lines.map(l=>l.w?{颜色:l.c,涂抹宽:l.w,点:l.p}:{颜色:l.c,点:l.p}));navigator.clipboard?.writeText(t).then(()=>{b.textContent='已复制';setTimeout(()=>b.textContent='复制线条坐标',1200)},()=>prompt('复制：',t))}});
  el.querySelectorAll('[data-c]').forEach(b=>b.style.color=b.dataset.c);
 
  // ---------- 全图：整张地图缩小显示，带坐标网格，可以直接画线 ----------
  function openFull(){
   const ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;z-index:60;background:#111d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px';
   const bar=document.createElement('div');bar.style.cssText='display:flex;gap:6px;font:13px sans-serif;color:#fff';
-  bar.innerHTML='<span>全图：点一下起点、再点一下终点，画一条直线（颜色用面板里选的）</span>';
+  bar.innerHTML='<span>全图（颜色用面板里选的）：</span>';let tool='line',bw=60;
+  const tb=[['line','直线'],['pen','画笔'],['fill','涂抹']].map(([k,t])=>{const bt=document.createElement('button');bt.textContent=t;bt.style.cssText='cursor:pointer;padding:4px 10px';bt.onclick=()=>{tool=k;c2=null;tb.forEach(x=>x.style.background='');bt.style.background='#f0dc9c'};bar.append(bt);return bt});tb[0].style.background='#f0dc9c';
+  const sz=document.createElement('select');for(const v of [30,60,120,200])sz.add(new Option('涂抹宽 '+v,v));sz.value=60;sz.onchange=()=>bw=+sz.value;bar.append(sz);
   for(const [t,f] of [['撤销',()=>{lines.pop();save();draw()}],['复制线条坐标',()=>{const t=JSON.stringify(lines.map(l=>({颜色:l.c,点:l.p})));navigator.clipboard?.writeText(t).then(()=>{},()=>prompt('复制：',t))}],['关闭',()=>ov.remove()]]){const bt=document.createElement('button');bt.textContent=t;bt.style.cssText='cursor:pointer;padding:4px 10px';bt.onclick=f;bar.append(bt)}
   const cvs=document.createElement('canvas');const k=Math.min((innerWidth-20)/W.WW,(innerHeight-60)/W.WH);cvs.width=Math.round(W.WW*k);cvs.height=Math.round(W.WH*k);cvs.style.cursor='crosshair';
   ov.append(bar,cvs);document.body.append(ov);const x=cvs.getContext('2d');const T=W.tiles.T,ims=[];
@@ -70,11 +72,15 @@ export function createDebug(g){
    x.strokeStyle='#fff8';x.fillStyle='#ff0';x.font='11px sans-serif';x.lineWidth=1;
    for(let gx=0;gx<=W.WW;gx+=200){x.beginPath();x.moveTo(gx*k,0);x.lineTo(gx*k,cvs.height);x.stroke();if(gx%400==0)x.fillText(gx,gx*k+2,11)}
    for(let gy=0;gy<=W.WH;gy+=200){x.beginPath();x.moveTo(0,gy*k);x.lineTo(cvs.width,gy*k);x.stroke();if(gy%400==0)x.fillText(gy,2,gy*k+11)}
-   x.lineWidth=2;for(const l of lines){x.strokeStyle=l.c;x.beginPath();l.p.forEach((p,i)=>i?x.lineTo(p[0]*k,p[1]*k):x.moveTo(p[0]*k,p[1]*k));x.stroke()}}
+   x.lineCap=x.lineJoin='round';for(const l of lines){x.lineWidth=l.w?l.w*k:2;x.globalAlpha=l.w?.45:1;x.strokeStyle=l.c;x.beginPath();l.p.forEach((p,i)=>i?x.lineTo(p[0]*k,p[1]*k):x.moveTo(p[0]*k,p[1]*k));if(l.p.length===1)x.lineTo(l.p[0][0]*k+.1,l.p[0][1]*k);x.stroke()}x.globalAlpha=1}
   let c2=null;const wp=e=>{const r=cvs.getBoundingClientRect();return[Math.round((e.clientX-r.left)/k),Math.round((e.clientY-r.top)/k)]};
   // 直线：第一次点起点，移动时预览，第二次点终点
-  cvs.onpointerdown=e=>{const p=wp(e);if(!c2){c2={c:col,p:[p,p]};lines.push(c2)}else{c2.p[1]=p;c2=null;save()}draw()};
-  cvs.onpointermove=e=>{if(!c2)return;c2.p[1]=wp(e);draw()};
+  let drag=false;
+  cvs.onpointerdown=e=>{const p=wp(e);
+   if(tool==='line'){if(!c2){c2={c:col,p:[p,p]};lines.push(c2)}else{c2.p[1]=p;c2=null;save()}}
+   else{c2={c:col,p:[p]};if(tool==='fill')c2.w=bw;lines.push(c2);drag=true;cvs.setPointerCapture(e.pointerId)}draw()};
+  cvs.onpointermove=e=>{if(!c2)return;const p=wp(e);if(tool==='line'){c2.p[1]=p;draw();return}if(!drag)return;const q=c2.p[c2.p.length-1];if(Math.hypot(p[0]-q[0],p[1]-q[1])>=5){c2.p.push(p);draw()}};
+  cvs.onpointerup=()=>{if(drag){drag=false;c2=null;save();draw()}};
   ov.addEventListener('keydown',e=>e.stopPropagation());draw()}
  return {show(v){el.hidden=!v},draw(c,cx,cy){if(!lines.length)return;c.save();c.lineWidth=2;c.lineJoin=c.lineCap='round';for(const l of lines){c.strokeStyle=l.c;c.beginPath();l.p.forEach((p,i)=>i?c.lineTo(p[0]-cx,p[1]-cy):c.moveTo(p[0]-cx,p[1]-cy));c.stroke()}c.restore()}};
 }
