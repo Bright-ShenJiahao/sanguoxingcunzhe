@@ -59,16 +59,15 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup .scroll{width:min(560px,92vw);aspect-ratio:1414/264;background:url(assets/ui/buttons_0.png) center/100% 100%;display:grid;place-items:center;font-size:clamp(22px,6vw,32px);font-weight:900;color:#5a2e0e;image-rendering:pixelated}
  #lvup .b2 .sub{color:#ffe7a8;text-shadow:0 1px 3px #000;margin:0}
  #lvup .cards{display:flex;gap:min(10px,2vw);justify-content:center;width:100%}
- #lvup button.c2{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:min(170px,30vw);transition:transform .1s}
+ #lvup button.c2{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:min(200px,30vw);transition:transform .1s}
  #lvup button.c2:hover,#lvup button.c2:focus{background:none!important;border:0!important;outline:none;transform:translateY(-4px) scale(1.03);filter:drop-shadow(0 0 8px #ffd860)}
- #lvup .cn{color:#ffe7a8;font-weight:900;font-size:clamp(13px,3.6vw,17px);text-shadow:0 2px 2px #000}
- #lvup .cf{position:relative;width:100%;aspect-ratio:2/3.1;background:center/100% 100% no-repeat;image-rendering:pixelated}
- #lvup .nw{position:absolute;top:5%;z-index:1;left:50%;transform:translateX(-50%);padding:1px 8px;background:#f0d8a6;border:2px solid #8a5a1c;border-radius:4px;color:#b0200c;font-size:11px;font-weight:900}
- #lvup .ci{position:absolute;left:16%;right:16%;top:20%;height:36%;display:grid;place-items:center;font-size:30px;font-weight:900;color:#5a2e0e}
+ #lvup .cn{position:absolute;top:10.2%;height:5.6%;left:20%;right:20%;display:grid;place-items:center;line-height:1;color:#3a2a14;font-weight:900;font-size:clamp(10px,2.8vw,15px)}
+ #lvup .cf{position:relative;width:100%;aspect-ratio:405/620;background:center/100% 100% no-repeat;image-rendering:pixelated}
+ #lvup .nw{position:absolute;top:2.2%;right:6%;padding:0 5px;background:#c8323a;border-radius:3px;color:#fff;font-size:10px;font-weight:900}
+ #lvup .ci{position:absolute;left:14%;right:14%;top:21%;height:44%;display:grid;place-items:center;font-size:30px;font-weight:900;color:#3a2a14}
  #lvup .ci img{max-width:100%;max-height:100%;image-rendering:pixelated}
- #lvup .st{position:absolute;top:58.5%;left:0;right:0;display:flex;justify-content:center;gap:1px}
- #lvup .st i{width:9px;height:9px;background:url(assets/ui/buttons_16.png) center/contain no-repeat}#lvup .st i.on{background-image:url(assets/ui/buttons_17.png)}
- #lvup .cd{position:absolute;top:69%;left:13%;right:13%;bottom:9%;display:grid;place-items:center;text-align:center;font-size:clamp(9.5px,2.7vw,12.5px);line-height:1.25;color:#4a250c}
+ #lvup .st{position:absolute;top:65%;left:0;right:0;text-align:center;color:#6b5330;font-size:clamp(9px,2.6vw,12px);font-weight:700}
+ #lvup .cd{position:absolute;top:77%;left:10%;right:10%;bottom:7%;display:grid;place-items:center;text-align:center;font-size:clamp(10px,2.9vw,13px);line-height:1.25;color:#3a2a14}
  #lvup .btns{display:flex;gap:10px;margin-top:4px}
  #lvup .pb{all:unset;cursor:pointer;width:min(130px,30vw);aspect-ratio:360/135;background:center/100% 100%;display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px;text-shadow:0 2px #0008;image-rendering:pixelated}
  #lvup .pb.green{background-image:url(assets/ui/buttons_1.png)}#lvup .pb.gray{background-image:url(assets/ui/buttons_3.png)}#lvup .pb:disabled{filter:grayscale(1) brightness(.7);cursor:default}
@@ -192,11 +191,11 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   else if(o.t==='p'){const L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;tag=`<span class="tag p">${L?'祝福 · '+L+' → '+(L+1):'新祝福'}</span>`}
   else{nm='调息';d='回复 30 点生命';tag='<span class="tag p">回复</span>'}
   return `<button class="card" data-i="${i}"><span class="ic">${icon(o)}</span><span><span class="nm">${nm}</span>${tag}<span class="d">${d}</span></span></button>`}
- function card2(o,i){let nm,d,L=0,fr='frames_0',nw=false;
-  if(o.t==='w'){const W=WEAPONS[o.k];L=S.w[o.k]||0;nm=W.name;d=W.desc[L];nw=!L;fr=isOwn(o.k)?'frames_3':isSp(o.k)?'frames_2':'frames_1'}
+ function card2(o,i){let nm,d,L=0,fr='frames2_0',nw=false;
+  if(o.t==='w'){const W=WEAPONS[o.k];L=S.w[o.k]||0;nm=W.name;d=W.desc[L];nw=!L;fr=isOwn(o.k)?'frames2_3':isSp(o.k)?'frames2_2':'frames2_1'}
   else if(o.t==='p'){L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;nw=!L}else{nm='调息';d='回复 30 点生命'}
-  const mx=o.t==='w'?8:o.t==='p'?PASSIVES[o.k].max:1,st=o.t==='heal'?'':`<span class="st">${Array.from({length:Math.min(mx,8)},(_,j)=>`<i class="${j<=L?'on':''}"></i>`).join('')}</span>`;
-  return `<button class="card c2" data-i="${i}"><span class="cn">${nm}</span><span class="cf" style="background-image:url(assets/ui/${fr}.png)">${nw?'<span class="nw">NEW</span>':''}<span class="ci">${icon(o)}</span>${st}<span class="cd">${d}</span></span></button>`}
+  const st=o.t==='heal'?'':`<span class="st">${L?'Lv '+L+' → '+(L+1):'Lv 1'}</span>`;
+  return `<button class="card c2" data-i="${i}"><span class="cf" style="background-image:url(assets/ui/${fr}.png)"><span class="cn">${nm}</span>${nw?'<span class="nw">NEW</span>':''}<span class="ci">${icon(o)}</span>${st}<span class="cd">${d}</span></span></button>`}
  function owned(){return Object.keys(S.w).map(k=>({t:'w',k})).concat(Object.keys(S.p).filter(k=>S.p[k]>0).map(k=>({t:'p',k})))}
  let cur=[],sub=null;
  function render(){
