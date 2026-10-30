@@ -35,6 +35,8 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    const BD=stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1);
    // 碰撞伤害：同一只怪每 0.5 秒最多一次
    e.cc=(e.cc||0)-dt;if(!stats.ranged&&!stats.bomb&&e.cc<=0&&Math.hypot(ax,(ay+2)*1.2)<(7+3*(e.sc||1))){e.cc=.5;onHit(BD*.5)}
+   if(e.lifeT!=null){e.lifeT-=dt;if(e.lifeT<=0){e.expired=true;continue}}
+   if(e.sweep){const sp=stats.speed*(stats.charge?3:1.8)*dt*speed;e.x+=e.sweep[0]*sp;e.y+=e.sweep[1]*sp;e.face=e.sweep[0]>=0?1:-1;e.moving=true;e.state='move';continue}   // 过场：直线冲过去
    if(e.state==='aim'){if(e.timer>=(e.aimT||.5)){e.state='dash';e.timer=0;e.dashHit=0}continue}
    if(e.state==='dash'){const st=(e.dsp||320)*dt,nx=e.x+e.dx*st,ny=e.y+e.dy*st;if(ok(nx,ny)){e.x=nx;e.y=ny}e.moving=true;
     if(!e.dashHit&&Math.hypot(hero.x-e.x,hero.y-e.y)<12){e.dashHit=1;onHit(BD)}if(e.timer>=(e.dlen||.25)){e.state='recover';e.timer=0;e.dcd=e.dcdN||4;e.dsp=e.dlen=0}continue}

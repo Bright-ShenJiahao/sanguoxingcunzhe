@@ -28,6 +28,7 @@ export const POOL={w:Object.keys(WEAPONS).filter(k=>!['spell','own'].includes(WE
 // 角色专属武器（不进公共卡池）
 WEAPONS.gb={name:'掌机',cat:'own',img:'gear/gb',own:1,desc:['光弹射向最近的敌人，打中弹到下一只','一次 2 发，伤害提升','穿透 1 个、弹 2 次，射速提升','一次 3 发','【满级】穿透 2、弹 3 次；每 4 轮天降俄罗斯方块']};
 WEAPONS.hp={name:'耳机',cat:'own',img:'gear/hp',own:1,desc:['放出声波圈，推开敌人','声波圈变大','间隔缩短，附带追踪音符','伤害提升','【满级】音符更多；每 5 轮重低音冲击波扫全屏（3 倍伤害，击退）']};
+const WV=await fetch('data/waves.json').then(r=>r.json());   // 波次表（每分钟一张）
 const MAXW=3,MAXS=3,MAXP=6;   // 局内上限：公共武器 3、法术 3、被动 6（专属另算）
 const UIV=new URLSearchParams(location.search).get('ui')==='blue'?'blue':'card';
 const FRS='frames_';
@@ -89,31 +90,31 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   S.maxHp=100+S.B.hp;S.rerolls=S.B.rr;S.rev=S.B.rev;survival?.setMax?.(S.maxHp,S.B.hp);ui.hidden=true;
  }
  // ---------- 节奏 ----------
- const CAP=matchMedia('(pointer:coarse)').matches?250:330;   // 手机少一点，防卡
- const want=()=>{if(S.t<(S.calm||0))return 0;const m=S.t/60;return Math.min(CAP,(1+.1*S.p.curse)*Math.round(m<1?6+19*m:m<=5?25+18.75*(m-1):m<=15?100+20*(m-5):300))};
+  const want=()=>{if(S.t<(S.calm||0))return 0;const W=wave();let a=0;for(const e of en)if(!e.dead)a++;return Math.min(WV.cap,Math.max(Math.round(W.min*(1+.1*S.p.curse)),a+((S.pend||0)>0?1:0)))};
  // ---------- 波数：按时间逐步加入兵种 ----------
- const WAVES=[[0,{gob_kid:3,goblin:2}],[60,{gob_kid:2,goblin:3,gob_blade:1}],[180,{gob_kid:1,goblin:3,gob_blade:2,gob_shield:1}],[300,{goblin:3,gob_blade:2,gob_shield:1.5,gob_archer:1}],
-  [360,{goblin:2.5,gob_blade:2,gob_shield:1.5,gob_archer:1,gob_bomb:.8}],[420,{goblin:2.5,gob_blade:2,gob_shield:1.5,gob_archer:1,gob_bomb:.8,gob_boar:.6}],[540,{goblin:2,gob_blade:2,gob_shield:1.5,gob_archer:1,gob_bomb:.8,gob_boar:.6,gob_rock:.5}],
-  [600,{goblin:2,gob_blade:2,gob_shield:1.2,gob_archer:1,gob_bomb:.8,gob_boar:.6,gob_rock:.5,gob_mage:.8}],[660,{goblin:2,gob_blade:2,gob_shield:1.2,gob_archer:.8,gob_bomb:.8,gob_boar:.6,gob_rock:.5,gob_mage:.8,gob_ghost:1}],
-  [780,{goblin:1.5,gob_blade:1.5,gob_shield:1.2,gob_archer:.8,gob_bomb:.8,gob_boar:.6,gob_rock:.6,gob_mage:.8,gob_ghost:1,gob_wolf:1}],[1020,{goblin:1.5,gob_blade:1.5,gob_shield:1.2,gob_archer:.8,gob_bomb:.8,gob_boar:.7,gob_rock:.7,gob_mage:.9,gob_ghost:1,gob_wolf:1,gob_thrower:.9}]];
- const NEWK={gob_blade:'剑士出现！会冲刺斩',gob_shield:'盾卫出现！铁甲：物理伤害减半',gob_archer:'弓箭手出现！会放冷箭',gob_bomb:'炸弹哥布林！看到红圈快跑',gob_boar:'野猪骑兵！会直线冲锋',gob_rock:'岩甲哥布林！铁甲，用法术',gob_mage:'哥布林法师！魔抗，用物理',gob_ghost:'幽灵哥布林！灵体：法术伤害加倍',gob_wolf:'狼骑兵！会绕圈扑咬',gob_thrower:'投石哥布林！看地上阴影',gob_drum:'精英·鼓手！先打掉它',gob_necro:'精英·死灵师！会复活尸体'};
+ const NEWK={gob_kid:'哥布林崽群！',goblin:'哥布林棍兵',gob_blade:'剑士出现！会冲刺斩',gob_shield:'盾卫出现！铁甲：物理伤害减半',gob_archer:'弓箭手出现！会放冷箭',gob_bomb:'炸弹哥布林！看到红圈快跑',gob_boar:'野猪骑兵！会直线冲锋',gob_rock:'岩甲哥布林！铁甲，用法术',gob_mage:'哥布林法师！魔抗，用物理',gob_ghost:'幽灵哥布林！灵体：法术伤害加倍',gob_wolf:'狼骑兵！会绕圈扑咬',gob_thrower:'投石哥布林！看地上阴影',gob_drum:'精英·鼓手！先打掉它',gob_necro:'精英·死灵师！会复活尸体'};
  const RES={gob_shield:'iron',gob_rock:'iron',gob_ghost:'spirit',gob_mage:'magic'};
  window.SPAWN=(k,x,y)=>{if(!ok(x,y))return;const m=makeEnemy(x,y,k);if(m){onSpawnBase(m);en.push(m)}};
- function pickKind(){let w=WAVES[0][1];for(const [t,x] of WAVES)if(S.t>=t)w=x;let tot=0;for(const k in w)tot+=w[k];let r=Math.random()*tot;for(const k in w){r-=w[k];if(r<=0){if(NEWK[k]&&!S.seen[k]){S.seen[k]=1;S.banner={v:NEWK[k],t:3}}return k}}return 'goblin'}
- function ring(n,r,k){for(let i=0;i<n;i++){const a=i/n*6.283,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r*.8;if(ok(x,y)){const m=makeEnemy(x,y,k);if(m){onSpawnBase(m);en.push(m)}}}}
+ const wave=()=>WV.waves[Math.min(WV.waves.length-1,Math.max(0,Math.floor(S.t/60)))];
+ function introduced(){const m=Math.floor(S.t/60),o=new Set();for(const w of WV.waves)if(w.t<=m)for(const k of w.main)if(k!=='*')o.add(k);return [...o]}
+ function pickKind(){const W=wave(),pool=introduced();let k=(W.main[0]==='*'||Math.random()>.55)?pool[Math.floor(Math.random()*pool.length)]:W.main[Math.floor(Math.random()*W.main.length)];if(!k)k='goblin';
+  if(NEWK[k]&&!S.seen[k]){S.seen[k]=1;S.banner={v:NEWK[k],t:3}}return k}
+ function ring(n,r,k,life){for(let i=0;i<n;i++){const a=i/n*6.283,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r*.8;if(ok(x,y)){const m=makeEnemy(x,y,k);if(m){onSpawnBase(m);if(life)m.lifeT=life;en.push(m)}}}}
+ function swarm(k,n){const a=Math.random()*6.283,R0=290,dx=-Math.cos(a),dy=-Math.sin(a);for(let i=0;i<n;i++){const s_=(Math.random()-.5)*300,b=R0+Math.random()*60,x=hero.x+Math.cos(a)*b-dy*s_,y=hero.y+Math.sin(a)*b*.8+dx*s_;const m=makeEnemy(x,y,k);if(m){onSpawnBase(m);m.sweep=[dx,dy];m.lifeT=14;en.push(m)}}}
+ const EVN={kids:['哥布林崽群冲过来了！',()=>swarm('gob_kid',40)],ghosts:['幽灵群横穿！',()=>swarm('gob_ghost',25)],boars:['野猪冲锋潮！',()=>swarm('gob_boar',10)],
+  wall:['盾墙合拢！快突围',d=>ring(28,200,'gob_shield',d||30)],ring:['包围圈！从四面合拢',()=>ring(22,170,'goblin')],flank:['剑士包抄！',()=>ring(14,170,'gob_blade')],wolfring:['狼群包围！',()=>ring(10,150,'gob_wolf')]};
  function events(){
-  const E=S.ev;
-  if(S.t>=240&&!E.ring1){E.ring1=1;ring(22,170,'goblin');S.banner={v:'包围圈！从四面合拢',t:3}}
-  if(S.t>=360&&!E.elite1){E.elite1=1;S.eliteT=S.t}
-  if(S.t>=720&&!E.wall){E.wall=1;const sd=Math.random()<.5?-1:1;for(let i=-6;i<=6;i++){const x=hero.x+sd*220,y=hero.y+i*14;if(ok(x,y)){const m=makeEnemy(x,y,'gob_shield');if(m){onSpawnBase(m);en.push(m)}}}S.banner={v:'盾墙推进！',t:3}}
-  if(S.t>=1080&&!E.boar){E.boar=1;ring(10,190,'gob_boar');S.banner={v:'野猪冲锋潮！',t:3}}
-  if(S.t>=1380&&!E.ghost){E.ghost=1;ring(26,170,'gob_ghost');S.banner={v:'幽灵潮！',t:3}}
+  const E=S.ev,wi=Math.floor(S.t/60);
+  if(wi!==S.wi){S.wi=wi;S.evq=S.evq||[];for(const [k,p,n,gap,dur] of wave().ev||[])if(Math.random()<p)for(let i=0;i<n;i++)S.evq.push({t:S.t+3+i*(gap||0)+Math.random()*3,k,dur})}
+  for(const q of S.evq||[])if(!q.done&&S.t>=q.t&&EVN[q.k]){q.done=1;EVN[q.k][1](q.dur);S.banner={v:EVN[q.k][0],t:2.5}}
+  S.evq=(S.evq||[]).filter(q=>!q.done);
   if(S.t>=1320){E.gT=(E.gT??S.t)};if(S.t>=1320&&S.t>=E.gT){E.gT=S.t+90;const a=Math.random()*6.28,x=hero.x+Math.cos(a)*200,y=hero.y+Math.sin(a)*150;if(ok(x,y)){const m=makeEnemy(x,y,'gob_giant');if(m){onSpawnBase(m);m.elite=true;m.armor=0;m.hp=m.hpMax=Math.ceil(40*(1+S.t/120));m.sc=1;en.push(m);S.banner={v:'巨型哥布林！看红圈躲开',t:3}}}}
-  if(S.t>=840&&!E.ring2){E.ring2=1;ring(30,170,'gob_blade');S.banner={v:'剑士包围！',t:3}}
+  if(S.t>=1800&&!E.clear){E.clear=1;for(const e of en)if(!e.boss&&!e.dead)e.expired=true;S.evq=[]}
  }
+
  function onSpawnBase(e){const m=S.t/60;e.hp=e.hpMax=Math.ceil(e.hp*(m<10?1+m/2:6+(m-10)*.9)*(1+.1*S.p.curse));e.dmgMul=Math.min(2.5,.6+m*.1);e.sc=e.sc0||1;e.res=RES[e.k]||'';e.armor=e.res==='iron'?1:0}
  function onSpawn(e){
-  onSpawnBase(e);
+  onSpawnBase(e);S.pend=Math.max(0,(S.pend||0)-1);
   const BS=[[600,'哥布林大王',80,1.25,'gob_king'],[900,'萨满长老',60,1.3,'gob_shaman'],[1200,'哥布林酋长',200,1.3,'gob_chief'],[1500,'哥布林圣骑士',160,1,'gob_paladin'],[1800,'哥布林皇帝',600,1.8,'gob_king']];
   for(const [bt,nm,hp,sc,k] of BS)if(S.t>=bt&&!S.bossDone[bt]){S.bossDone[bt]=1;e.boss=true;e.armor=0;e.res='';e.k=k;e.hp=e.hpMax=Math.round(hp*(1+S.t/240));e.sc=sc;e.name=nm;if(k==='gob_shaman')e.summonT=3;S.calm=S.t+15;S.banner={v:'Boss：'+nm,t:3.5};S.texts.push({x:e.x,y:e.y-40,v:'Boss 来袭！',t:2.5,c:'#ff8a6a',big:1});return}
   else if(S.t>=S.eliteT){S.eliteT=S.t+R(40,70);e.elite=true;e.armor=0;e.res='';const ek=S.t>=1200?['gob_shaman','gob_drum','gob_necro']:S.t>=900?['gob_shaman','gob_drum']:['gob_shaman'];e.k=ek[Math.floor(Math.random()*ek.length)];e.hp=e.hpMax=Math.ceil((e.k==='gob_shaman'?10:12)*(1+S.t/150));e.sc=1.1;if(e.k==='gob_shaman')e.summonT=4;if(NEWK[e.k]&&!S.seen[e.k]){S.seen[e.k]=1;S.banner={v:NEWK[e.k],t:3}}}
@@ -248,7 +249,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  // ---------- 每帧 ----------
  function update(dt){
   if(!S||S.paused)return;
-  S.t+=dt;events();if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
+  S.t+=dt;S.spT=(S.spT||0)+dt;if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}events();if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
   for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0){S.src=k;S.cd[k]=FIRE[k](OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd)}}
   if(S.p.regen||S.B.reg){S.rg=(S.rg||0)+dt*(.3*S.p.regen+S.B.reg);if(S.rg>=1){survival?.heal?.(Math.floor(S.rg));S.rg%=1}}
   for(const z of S.zones||[]){z.t+=dt;z.tick-=dt;if(z.tick<=0){z.tick=z.every;const zx=z.follow?hero.x:z.x,zy=z.follow?hero.y:z.y;for(const e of en)if(!e.dead&&(e.x-zx)**2+((e.y-zy)*1.25)**2<z.r*z.r)strike(e,z.dm,Math.sign(e.x-zx)||1)}}
