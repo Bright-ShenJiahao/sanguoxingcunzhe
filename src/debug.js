@@ -60,7 +60,7 @@ export function createDebug(g){
  function openFull(){
   const ov=document.createElement('div');ov.style.cssText='position:fixed;inset:0;z-index:60;background:#111d;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px';
   const bar=document.createElement('div');bar.style.cssText='display:flex;gap:6px;font:13px sans-serif;color:#fff';
-  bar.innerHTML='<span>全图：按住拖动画线（用面板选的颜色）</span>';
+  bar.innerHTML='<span>全图：点一下起点、再点一下终点，画一条直线（颜色用面板里选的）</span>';
   for(const [t,f] of [['撤销',()=>{lines.pop();save();draw()}],['复制线条坐标',()=>{const t=JSON.stringify(lines.map(l=>({颜色:l.c,点:l.p})));navigator.clipboard?.writeText(t).then(()=>{},()=>prompt('复制：',t))}],['关闭',()=>ov.remove()]]){const bt=document.createElement('button');bt.textContent=t;bt.style.cssText='cursor:pointer;padding:4px 10px';bt.onclick=f;bar.append(bt)}
   const cvs=document.createElement('canvas');const k=Math.min((innerWidth-20)/W.WW,(innerHeight-60)/W.WH);cvs.width=Math.round(W.WW*k);cvs.height=Math.round(W.WH*k);cvs.style.cursor='crosshair';
   ov.append(bar,cvs);document.body.append(ov);const x=cvs.getContext('2d');const T=W.tiles.T,ims=[];
@@ -72,9 +72,9 @@ export function createDebug(g){
    for(let gy=0;gy<=W.WH;gy+=200){x.beginPath();x.moveTo(0,gy*k);x.lineTo(cvs.width,gy*k);x.stroke();if(gy%400==0)x.fillText(gy,2,gy*k+11)}
    x.lineWidth=2;for(const l of lines){x.strokeStyle=l.c;x.beginPath();l.p.forEach((p,i)=>i?x.lineTo(p[0]*k,p[1]*k):x.moveTo(p[0]*k,p[1]*k));x.stroke()}}
   let c2=null;const wp=e=>{const r=cvs.getBoundingClientRect();return[Math.round((e.clientX-r.left)/k),Math.round((e.clientY-r.top)/k)]};
-  cvs.onpointerdown=e=>{c2={c:col,p:[wp(e)]};lines.push(c2);cvs.setPointerCapture(e.pointerId)};
-  cvs.onpointermove=e=>{if(!c2)return;const p=wp(e),q=c2.p[c2.p.length-1];if(Math.hypot(p[0]-q[0],p[1]-q[1])>=6){c2.p.push(p);draw()}};
-  cvs.onpointerup=()=>{if(c2){c2=null;save();draw()}};
+  // 直线：第一次点起点，移动时预览，第二次点终点
+  cvs.onpointerdown=e=>{const p=wp(e);if(!c2){c2={c:col,p:[p,p]};lines.push(c2)}else{c2.p[1]=p;c2=null;save()}draw()};
+  cvs.onpointermove=e=>{if(!c2)return;c2.p[1]=wp(e);draw()};
   ov.addEventListener('keydown',e=>e.stopPropagation());draw()}
  return {show(v){el.hidden=!v},draw(c,cx,cy){if(!lines.length)return;c.save();c.lineWidth=2;c.lineJoin=c.lineCap='round';for(const l of lines){c.strokeStyle=l.c;c.beginPath();l.p.forEach((p,i)=>i?c.lineTo(p[0]-cx,p[1]-cy):c.moveTo(p[0]-cx,p[1]-cy));c.stroke()}c.restore()}};
 }
