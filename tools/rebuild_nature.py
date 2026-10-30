@@ -85,6 +85,23 @@ for k_,x,y in J0['objs']:                              # 原桥位：局部用�
 cv2.line(watw.view(np.uint8),(1738,1088),(1738,1122),1,14)
 _y0,_y1,_x0,_x1=BY0-40,BY1+40,BX0-20,BX1+20
 watw[_y0:_y1,_x0:_x1]|=cv2.morphologyEx(watw[_y0:_y1,_x0:_x1].astype(np.uint8),cv2.MORPH_CLOSE,disk(26)).astype(bool)
+# 用户涂抹（art_src/map/water_paint.json，裁前坐标）：变成水
+wp_=np.zeros((H,W),np.uint8)
+for P in json.load(open(ROOT+'/art_src/map/water_paint.json')):
+    P=np.array(P,np.int32)
+    if len(P)==1: cv2.circle(wp_,tuple(P[0]),45,1,-1)
+    else: cv2.polylines(wp_,[P],False,1,60)
+watw|=wp_>0; C0[wp_>0]=1
+yb_=1390; lnd=((~watw)&(wp_==0)).astype(np.uint8); lnd[yb_:]=0
+n_,lb_,st_,_=cv2.connectedComponentsWithStats(lnd,connectivity=4); mainc=1+np.argmax(st_[1:,4])
+isl_=np.isin(lb_,[i for i in range(1,n_) if i!=mainc and st_[i][0]>2780])
+for yy in range(H):                                         # 东边涂抹线以东整行都变水
+    xs_=np.nonzero(wp_[yy,2700:])[0]
+    if len(xs_):
+        x0_=2700+xs_.min(); isl_[yy,x0_:]|=True
+        wx=np.nonzero(watw[yy,2700:x0_])[0]                      # 河与涂抹线之间的窄陆地也填掉
+        if len(wx) and x0_-(2700+wx.max())<140: isl_[yy,2700+wx.max():x0_]|=True          # 东边被涂抹圈住的陆地也变成水
+watw|=isl_; C0[isl_]=1; print('补水',int(isl_.sum()))
 watw=(blur(watw,4.5)>0.5)                              # 河岸圆滑，去掉棱角和锯齿
 watw[:40]=False
 n,lab,st,_=cv2.connectedComponentsWithStats(watw.astype(np.uint8))
@@ -114,7 +131,7 @@ C=C0.copy(); C[watw]=1; C[ford]=2
 C[(C0==2)&~watw]=0
 # ---------- 木桥（art_src/map/bridges.json：用户画的线；沿线延伸到两岸） ----------
 BRS=[]
-for L_ in json.load(open(ROOT+'/art_src/map/bridges.json')):
+for L_ in [b for b in json.load(open(ROOT+'/art_src/map/bridges.json')) if b['点'][0][0]<2100 and b['点'][0][1]<1000]:   # 东边一圈的桥已删
     (x0,y0),(x1,y1)=L_['点'][0],L_['点'][-1]
     if x1<x0: x0,y0,x1,y1=x1,y1,x0,y0                 # 统一从左到右，木纹亮面朝上
     mx,my=(x0+x1)/2,(y0+y1)/2; ux,uy=x1-x0,y1-y0; l=np.hypot(ux,uy); ux/=l; uy/=l
@@ -363,13 +380,14 @@ CX,CY=100,100
 Gf=np.zeros((H*HD,W*HD,3),np.uint8)
 for t in J['tiles']['list']:
     tx,ty=int(t[1]),int(t[2]); im=np.array(Image.open(MAP+t+'.jpg').convert('RGB')); Gf[ty*T*HD:ty*T*HD+im.shape[0],tx*T*HD:tx*T*HD+im.shape[1]]=im
-Gf=Gf[CY*HD:,CX*HD:]; W2,H2=W-CX,H-CY
+CB=1390                                                # 下边：用户画线以下删除
+Gf=Gf[CY*HD:CB*HD,CX*HD:]; W2,H2=W-CX,CB-CY
 for t in J['tiles']['list']:
     tx,ty=int(t[1]),int(t[2]); Image.fromarray(Gf[ty*T*HD:(ty+1)*T*HD,tx*T*HD:(tx+1)*T*HD]).save(MAP+t+'.jpg',quality=72,optimize=True)
-Cc=np.array(Image.open(MAP+'coll.png'))[CY:,CX:]; Image.fromarray(Cc).save(MAP+'coll.png',optimize=True)
-J['objs']=[[k,x-CX,y-CY] for k,x,y in J['objs'] if x-CX>=4 and y-CY>=4]
+Cc=np.array(Image.open(MAP+'coll.png'))[CY:CB,CX:]; Image.fromarray(Cc).save(MAP+'coll.png',optimize=True)
+J['objs']=[[k,x-CX,y-CY] for k,x,y in J['objs'] if x-CX>=4 and y-CY>=4 and y<CB-2]
 J['spawn']=[J['spawn'][0]-CX,J['spawn'][1]-CY]; J['WW'],J['WH']=W2,H2; J['off']=[CX,CY]
-gw,gh=J['rgrid']; rm=np.array(J['rmap']).reshape(gh,gw)[CY//50:,CX//50:]; J['rmap']=rm.flatten().tolist(); J['rgrid']=[rm.shape[1],rm.shape[0]]
+gw,gh=J['rgrid']; rm=np.array(J['rmap']).reshape(gh,gw)[CY//50:CB//50,CX//50:]; J['rmap']=rm.flatten().tolist(); J['rgrid']=[rm.shape[1],rm.shape[0]]
 json.dump(J,open(ROOT+'/data/world.json','w'),separators=(',',':'))
 Image.fromarray(Gf[::8,::8]).save(ROOT+'/art_src/build/preview_nature.png')
 print('裁边后',W2,H2)

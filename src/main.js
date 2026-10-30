@@ -21,9 +21,13 @@ const keys={};let joy=null;
 addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=1;if(e.key.startsWith('Arrow'))e.preventDefault()});
 addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=0});
 const st=$('st');
-st.addEventListener('pointerdown',e=>{st.setPointerCapture(e.pointerId);joy={x:e.clientX,y:e.clientY,dx:0,dy:0}});
-st.addEventListener('pointermove',e=>{if(joy){joy.dx=e.clientX-joy.x;joy.dy=e.clientY-joy.y}});
-['pointerup','pointercancel'].forEach(n=>st.addEventListener(n,()=>joy=null));
+// 虚拟摇杆（王者荣耀式）：按下处出现圆盘，拖动小圆控制方向，松手消失
+const JR=56,jb=document.createElement('div'),jk=document.createElement('div');
+jb.style.cssText=`position:fixed;width:${JR*2}px;height:${JR*2}px;margin:-${JR}px 0 0 -${JR}px;border-radius:50%;background:rgba(20,30,40,.28);border:2px solid rgba(255,255,255,.45);pointer-events:none;z-index:40;display:none`;
+jk.style.cssText='position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(255,255,255,.7);box-shadow:0 2px 6px #0006';jb.append(jk);document.body.append(jb);
+st.addEventListener('pointerdown',e=>{if(window.DBG&&document.body.style.cursor)return;st.setPointerCapture(e.pointerId);joy={x:e.clientX,y:e.clientY,dx:0,dy:0};jb.style.left=e.clientX+'px';jb.style.top=e.clientY+'px';jk.style.transform='';jb.style.display='block'});
+st.addEventListener('pointermove',e=>{if(!joy)return;let dx=e.clientX-joy.x,dy=e.clientY-joy.y;const L=Math.hypot(dx,dy);if(L>JR){dx*=JR/L;dy*=JR/L}joy.dx=dx;joy.dy=dy;jk.style.transform=`translate(${dx}px,${dy}px)`});
+['pointerup','pointercancel'].forEach(n=>st.addEventListener(n,()=>{joy=null;jb.style.display='none'}));
 const ov={cld:true,fp:true};
 const IM={};let left=0;
 let tot=0;const BAD=[];function ld(k,s,tr=0){if(!tr){left++;tot++}const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};
