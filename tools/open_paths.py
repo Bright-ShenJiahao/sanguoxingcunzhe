@@ -11,7 +11,7 @@ for t in J['tiles']['list']:
     tx,ty=int(t[1]),int(t[2]);im=np.array(Image.open(M+t+'.jpg').convert('RGB'));full[ty*T*HD:ty*T*HD+im.shape[0],tx*T*HD:tx*T*HD+im.shape[1]]=im
 mask=np.zeros(full.shape[:2],np.uint8)
 for s in L:
-    if s['颜色']!='#20d060':continue
+    if s['颜色'] not in ('#20d060','#ff3040'):continue   # 绿=开路，红=清掉残留峭壁（同样变草地）
     pts=np.array([[x*HD,y*HD] for x,y in s['点']],np.int32)
     if len(pts)==1:cv2.circle(mask,tuple(pts[0]),int(WID*HD/2),255,-1)
     else:cv2.polylines(mask,[pts],False,255,int(WID*HD),lineType=cv2.LINE_AA)
