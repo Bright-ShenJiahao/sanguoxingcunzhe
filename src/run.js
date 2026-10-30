@@ -165,15 +165,15 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  function card(o,i){
   let nm,tag,d;
   if(o.t==='w'){const L=S.w[o.k]||0,W=WEAPONS[o.k],sp=isSp(o.k);nm=W.name;d=W.desc[L];
-   tag=!L?`<span class="tag ${sp?'sp':'new'}">${sp?'新法术':'新武器'} · ${CATS[W.cat].name}</span>`:L+1===8||/【/.test(d)?`<span class="tag q">★ ${L} → ${L+1} 级</span>`:`<span class="tag">升级 · ${L} → ${L+1} 级</span>`}
-  else if(o.t==='p'){const L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;tag=`<span class="tag p">${L?'符文 · '+L+' → '+(L+1):'新符文'}</span>`}
+   tag=!L?`<span class="tag ${sp?'sp':'new'}">${sp?'新法术卡':'新装备卡'} · ${CATS[W.cat].name}</span>`:L+1===8||/【/.test(d)?`<span class="tag q">★ ${L} → ${L+1} 级</span>`:`<span class="tag">升级 · ${L} → ${L+1} 级</span>`}
+  else if(o.t==='p'){const L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;tag=`<span class="tag p">${L?'祝福 · '+L+' → '+(L+1):'新祝福'}</span>`}
   else{nm='调息';d='回复 30 点生命';tag='<span class="tag p">回复</span>'}
   return `<button class="card" data-i="${i}"><span class="ic">${icon(o)}</span><span><span class="nm">${nm}</span>${tag}<span class="d">${d}</span></span></button>`}
  let cur=[],sub=null;
  function render(){
   const list=sub?CATS[sub].ws.filter(k=>!S.w[k]).map(k=>({t:'w',k})):cur;
   ui.innerHTML=`<div class="box"><h2>等级 ${S.lv}！</h2><div class="sub">选择奖励 · 按 1 / 2 / 3</div>${list.map(card).join('')}
-   <div class="row">${sub?'<button data-a="back">返回</button>':(S.rerolls>0?`<button data-a="rr">重抽（${S.rerolls}）· R</button>`:'')}</div><div class="slots">武器 ${Object.keys(S.w).filter(k=>!isOwn(k)&&!isSp(k)).length}/${MAXW} · 法术 ${Object.keys(S.w).filter(isSp).length}/${MAXS} · 被动 ${Object.keys(S.p).filter(k=>S.p[k]>0).length}/${MAXP}</div></div>`;
+   <div class="row">${sub?'<button data-a="back">返回</button>':(S.rerolls>0?`<button data-a="rr">重抽（${S.rerolls}）· R</button>`:'')}</div><div class="slots">装备 ${Object.keys(S.w).filter(k=>!isOwn(k)&&!isSp(k)).length}/${MAXW} · 法术 ${Object.keys(S.w).filter(isSp).length}/${MAXS} · 祝福 ${Object.keys(S.p).filter(k=>S.p[k]>0).length}/${MAXP}</div></div>`;
   ui.querySelectorAll('button.card').forEach(b=>b.onclick=()=>choose(list[+b.dataset.i]));
   const bk=ui.querySelector('[data-a=back]');if(bk)bk.onclick=()=>{sub=null;render()};
   const rr=ui.querySelector('[data-a=rr]');if(rr)rr.onclick=reroll;

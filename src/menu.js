@@ -90,7 +90,7 @@ export function createMenu(game){
  // ---------- 备战 → 选关卡 → 出发 ----------
  const prep=document.createElement('section');prep.id='prep';prep.hidden=true;prep.setAttribute('aria-label','备战');
  prep.innerHTML=`<div class="pp-box">
-  <div class="pp-step" data-s="prep"><div class="pp-head"><h2>备战</h2><div class="pp-tabs" role="tablist"><button data-t="role" aria-selected="true">角色</button><button data-t="gear">装备</button><button data-t="spell">法术</button><button data-t="rune">符文</button><button data-t="up">强化</button><button data-t="shop">商店</button></div></div>
+  <div class="pp-step" data-s="prep"><div class="pp-head"><h2>备战</h2><div class="pp-tabs" role="tablist"><button data-t="role" aria-selected="true">角色</button><button data-t="gear">装备卡</button><button data-t="spell">法术卡</button><button data-t="rune">祝福卡</button><button data-t="up">强化</button><button data-t="shop">商店</button></div></div>
    <div class="pp-body"><div class="pp-pane" data-t="role"><div class="pp-roles"></div><div class="pp-info"><canvas width="120" height="120"></canvas><h3></h3><p class="w"></p><p class="t"></p></div></div>
     <div class="pp-pane" data-t="gear" hidden><div class="dk dkw"></div></div><div class="pp-pane" data-t="spell" hidden><div class="dk dks"></div></div><div class="pp-pane" data-t="rune" hidden><div class="dk dkr"></div></div><div class="pp-pane" data-t="up" hidden><div class="upw"></div></div>
     <div class="pp-pane" data-t="shop" hidden><div class="pp-soon">商店（抽卡）· 等武器和法术定稿后开放</div></div></div>
@@ -128,13 +128,13 @@ export function createMenu(game){
  if(!deck||!Array.isArray(deck.w))deck={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};deck.lock=deck.lock||[];
  const LIM={w:5,s:5,lock:2};
  function drawDeck(){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${names(k)}</button>`).join('')}</div>`;
-  dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'武器','必须选满')+'<div class="warn"></div>';
-  dkr.innerHTML=`<h4>镶嵌符文<small>${deck.lock.length}/2 · 镶嵌的符文本局一定会出现，其余 ${10-deck.lock.length} 枚随机</small></h4><div class="rg">${PASS_KEYS.map(k=>`<button class="rc" data-k="lock" data-v="${k}" aria-pressed="${deck.lock.includes(k)}"><b>ᚱ ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></button>`).join('')}</div>`;
-  dks.innerHTML=row('s',POOL.s,k=>WEAPONS[k].name,'法术','必须选满')+'<div class="warn"></div>';
+  dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'装备卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
+  dkr.innerHTML=`<h4>祝福卡<small>已锁定 ${deck.lock.length}/2 · 锁定的祝福本局一定会出现，其余 ${10-deck.lock.length} 张随机</small></h4><div class="rg">${PASS_KEYS.map(k=>`<button class="rc" data-k="lock" data-v="${k}" aria-pressed="${deck.lock.includes(k)}"><b>✦ ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></button>`).join('')}</div>`;
+  dks.innerHTML=row('s',POOL.s,k=>WEAPONS[k].name,'法术卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
   prep.querySelectorAll('.dk button').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}drawDeck()})}
  drawDeck();
  new MutationObserver(()=>document.body.classList.toggle('prep-open',!prep.hidden)).observe(prep,{attributes:true,attributeFilter:['hidden']});
- prep.querySelector('.pp-next').onclick=()=>{if(deck.w.length<5||deck.s.length<5){prep.querySelector('.pp-tabs [data-t='+(deck.w.length<5?'gear':'spell')+']').click();prep.querySelectorAll('.dk .warn').forEach(w=>w.textContent='武器和法术都要选满 5 个才能出发');return}try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}step('stage')};
+ prep.querySelector('.pp-next').onclick=()=>{if(deck.w.length<5||deck.s.length<5){prep.querySelector('.pp-tabs [data-t='+(deck.w.length<5?'gear':'spell')+']').click();prep.querySelectorAll('.dk .warn').forEach(w=>w.textContent='装备卡和法术卡都要选满 5 张才能出发');return}try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}step('stage')};
  prep.querySelector('[data-s=stage] .pp-back').onclick=()=>step('prep');
  const info=prep.querySelector('.pp-info'),ipv=info.querySelector('canvas').getContext('2d');
  root.querySelector('.menu-start').onclick=()=>{root.hidden=true;prep.hidden=false;step('prep');prep.querySelector('.pp-next').focus()};
