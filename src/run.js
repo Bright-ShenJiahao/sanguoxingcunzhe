@@ -34,7 +34,7 @@ WEAPONS.gb={name:'掌机',cat:'own',img:'gear/gb',own:1,desc:['按 A 键射出�
 WEAPONS.hp={name:'耳机',cat:'own',img:'gear/hp',own:1,desc:['放出声波圈，向外扩散并推开敌人','伤害提升','声波圈变大','间隔缩短','附带音符追踪敌人','伤害提升','音符变多','重低音：全屏震停敌人 1 秒']};
 const MAXW=3,MAXS=3,MAXP=6;   // 局内上限：公共武器 3、法术 3、被动 6（专属另算）
 const UIV=new URLSearchParams(location.search).get('ui')==='card'?'card':'blue';
-const FRS=({'1':'frames_','3':'frames3_'})[new URLSearchParams(location.search).get('fr')]||'frames2_';
+const FRS=({'1':'frames_','3':'frames3_','4':'framesC_'})[new URLSearchParams(location.search).get('fr')]||'frames2_';
 const WIC={gb:'icons_0',hp:'icons_1',missile:'icons_2',axe:'icons_3',fireball:'icons_4',frost:'icons_5',chain:'icons_6',holy:'icons_7'};
 const PIC={spd:'icons_9',hp:'icons_10',mag:'icons_11',wis:'icons_12'};
 const isSp=k=>WEAPONS[k].cat==='spell',isOwn=k=>!!WEAPONS[k].own;
@@ -75,7 +75,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup .own{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
  #lvup .sl{width:40px;height:40px;background:url(assets/ui/buttons_9.png) center/100% 100%;display:grid;place-items:center;color:#f6db94;font-weight:900;image-rendering:pixelated}#lvup .sl img{max-width:24px;max-height:24px;image-rendering:pixelated}`;
  st.textContent+=`
- #lvup .frames_ .cn{top:4%}#lvup .frames_ .ci{top:18%;height:34%}#lvup .frames_ .st{top:55%}#lvup .frames_ .cd{top:66%;bottom:10%}
+ #lvup :is(.frames_,.framesC_) .cn{top:4%}#lvup :is(.frames_,.framesC_) .ci{top:18%;height:34%}#lvup :is(.frames_,.framesC_) .st{top:55%}#lvup :is(.frames_,.framesC_) .cd{top:66%;bottom:10%}
  #lvup .frames3_ .cn{top:8%}#lvup .frames3_ .ci{top:23%;height:36%}#lvup .frames3_ .st{top:61%}#lvup .frames3_ .cd{top:71%;bottom:8%}`;
  document.head.append(st);document.body.append(ui);
  const wImg={};for(const k in WEAPONS){if(!WEAPONS[k].img)continue;const im=new Image();im.src='assets/weapons/'+WEAPONS[k].img+'.png';wImg[k]=im}
