@@ -1,3 +1,4 @@
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS} from './run.js';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -42,6 +43,9 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 #prep #cs button{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid #83abe354;border-radius:8px;background:#0c225a66;color:#ecf5ff;font:12px inherit}
 #prep #cs button img{height:44px;image-rendering:auto}
 #prep #cs{grid-template-columns:1fr 1fr}#prep #cs button.big img{height:84px}#prep #cs button.big{padding:14px 6px;font-size:15px}
+#prep .dk h4{margin:6px 0 6px;color:#f6db94;font-size:14px}#prep .dk h4 small{color:#9fb6d8;font-weight:400;margin-left:6px}#prep .dk .g{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+#prep .dk button{cursor:pointer;padding:6px 10px;border:1px solid #83abe354;border-radius:6px;background:#0c225a66;color:#ecf5ff;font:inherit;font-size:13px}#prep .dk button[aria-pressed=true]{background:#77a9f055;border-color:#f0dc9c;box-shadow:0 0 0 1px #e2cb87}
+#prep .dk .warn{color:#ff9a8a;font-size:12px;min-height:16px}
 #prep .lockrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;color:#9fb6d8;font-size:12px}#prep .lockrow span{width:100%}
 #prep .lockrow button{width:46px;padding:4px;border:1px solid #83abe333;border-radius:6px;background:#0c225a44;opacity:.45;cursor:not-allowed;color:#ccd}#prep .lockrow img{height:30px;filter:grayscale(1) brightness(.6);image-rendering:pixelated}#prep .lockrow button span{font-size:10px}
 #prep #cs button[aria-pressed=true]{background:#77a9f044;border-color:#f0dc9c;box-shadow:0 0 0 2px #e2cb8788}
@@ -87,7 +91,7 @@ export function createMenu(game){
  prep.innerHTML=`<div class="pp-box">
   <div class="pp-step" data-s="prep"><div class="pp-head"><h2>备战</h2><div class="pp-tabs" role="tablist"><button data-t="role" aria-selected="true">角色</button><button data-t="gear">装备</button><button data-t="shop">商店</button></div></div>
    <div class="pp-body"><div class="pp-pane" data-t="role"><div class="pp-roles"></div><div class="pp-info"><canvas width="120" height="120"></canvas><h3></h3><p class="w"></p><p class="t"></p></div></div>
-    <div class="pp-pane" data-t="gear" hidden><div class="pp-soon">武器卡组 · 即将开放</div></div>
+    <div class="pp-pane" data-t="gear" hidden><div class="dk"></div></div>
     <div class="pp-pane" data-t="shop" hidden><div class="pp-soon">商店 · 即将开放</div></div></div>
    <div class="pp-foot"><button class="pp-back">返回</button><button class="pp-next">下一步 →</button></div></div>
   <div class="pp-step" data-s="stage" hidden><div class="pp-head"><h2>选择关卡</h2></div>
@@ -104,7 +108,15 @@ export function createMenu(game){
  const step=s=>prep.querySelectorAll('.pp-step').forEach(x=>x.hidden=x.dataset.s!==s);
  prep.querySelectorAll('.pp-tabs button').forEach(b=>b.onclick=()=>{prep.querySelectorAll('.pp-tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));prep.querySelectorAll('.pp-pane').forEach(p=>p.hidden=p.dataset.t!==b.dataset.t)});
  prep.querySelector('[data-s=prep] .pp-back').onclick=()=>{prep.hidden=true;root.hidden=false;root.querySelector('.menu-start').focus()};
- prep.querySelector('.pp-next').onclick=()=>step('stage');
+ // ---------- 卡组：5 武器 + 5 法术（必须选满），锁定 2 个被动 ----------
+ const dk=prep.querySelector('.dk');let deck;try{deck=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
+ if(!deck||!Array.isArray(deck.w))deck={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};deck.lock=deck.lock||[];
+ const LIM={w:5,s:5,lock:2};
+ function drawDeck(){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${names(k)}</button>`).join('')}</div>`;
+  dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'武器','必须选满')+row('s',POOL.s,k=>WEAPONS[k].name,'法术','必须选满')+row('lock',PASS_KEYS,k=>PASSIVES[k].name,'锁定被动','这局一定会出现，其余随机 '+(10-deck.lock.length)+' 个')+'<div class="warn"></div>';
+  dk.querySelectorAll('button').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}drawDeck()})}
+ drawDeck();
+ prep.querySelector('.pp-next').onclick=()=>{if(deck.w.length<5||deck.s.length<5){prep.querySelector('.pp-tabs [data-t=gear]').click();dk.querySelector('.warn').textContent='武器和法术都要选满 5 个才能出发';return}try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}step('stage')};
  prep.querySelector('[data-s=stage] .pp-back').onclick=()=>step('prep');
  const info=prep.querySelector('.pp-info'),ipv=info.querySelector('canvas').getContext('2d');
  root.querySelector('.menu-start').onclick=()=>{root.hidden=true;prep.hidden=false;step('prep');prep.querySelector('.pp-next').focus()};

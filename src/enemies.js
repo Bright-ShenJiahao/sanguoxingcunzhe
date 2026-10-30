@@ -45,7 +45,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      const fd=d>28&&!e.los&&window.PATHDIR?.(e.x,e.y),tx=fd?fd[0]:ax/d,ty=fd?fd[1]:ay/d;   // 隔着河/崖时沿寻路图走（会绕到桥/浅滩）
      const k_=Math.min(1,dt*7);e.vx=(e.vx??tx)+(tx-(e.vx??tx))*k_;e.vy=(e.vy??ty)+(ty-(e.vy??ty))*k_;   // 转向限速：方向逐渐转过去
      const vl=Math.hypot(e.vx,e.vy)||1,ux=e.vx/vl,uy=e.vy/vl;
-     const oldx=e.x,oldy=e.y,dist=(e.boss?.8:1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
+     if(e.slowT>0)e.slowT-=dt;const oldx=e.x,oldy=e.y,dist=(e.slowT>0?.5:1)*(e.boss?.8:1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
      if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}
      else if(ok(e.x-my*1.6,e.y+mx*1.6)){e.x-=my*1.6;e.y+=mx*1.6}
      e.moving=e.x!==oldx||e.y!==oldy;
