@@ -41,7 +41,7 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 .pp-roles{flex:1 1 380px;min-width:0}
 #prep #cs{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px}
 #prep #cs button{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid #83abe354;border-radius:8px;background:#0c225a66;color:#ecf5ff;font:12px inherit}
-#prep #cs button img{height:44px;image-rendering:auto}
+#prep #cs button img{height:44px;image-rendering:pixelated}
 #prep #cs{grid-template-columns:1fr 1fr}#prep #cs button.big img{height:84px}#prep #cs button.big{padding:14px 6px;font-size:15px}
 #prep .dk h4{margin:6px 0 6px;color:#f6db94;font-size:14px}#prep .dk h4 small{color:#9fb6d8;font-weight:400;margin-left:6px}#prep .dk .g{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 #prep .dk button{cursor:pointer;padding:6px 10px;border:1px solid #83abe354;border-radius:6px;background:#0c225a66;color:#ecf5ff;font:inherit;font-size:13px}#prep .dk button[aria-pressed=true]{background:#77a9f055;border-color:#f0dc9c;box-shadow:0 0 0 1px #e2cb87}
@@ -162,8 +162,8 @@ export function createMenu(game){
   items.sort((a,b)=>a.y-b.y).forEach(item=>item.draw());
   const {image,size,label}=game.character(Math.floor(now/650)%2);
   preview.clearRect(0,0,200,160);preview.imageSmoothingEnabled=false;
-  const scale=2.6;preview.imageSmoothingEnabled=true;preview.imageSmoothingQuality='high';if(image)preview.drawImage(image,100-size[0]*scale/2,145-size[1]*scale,size[0]*scale,size[1]*scale);
+  const scale=2.6;preview.imageSmoothingEnabled=false;if(image)preview.drawImage(image,100-size[0]*scale/2,145-size[1]*scale,size[0]*scale,size[1]*scale);
   caption.textContent=label;
-  if(!prep.hidden){info.querySelector('h3').textContent=label;{const f=(document.querySelector('#cs button[aria-pressed=true]')?.dataset.c||'m')[0]==='f';info.querySelector('.w').textContent=f?'专属武器：耳机（声波圈）':'专属武器：掌机（像素光弹）';info.querySelector('.t').textContent=f?'特性：拾取范围 +25%':'特性：经验 +10%'}ipv.clearRect(0,0,120,120);ipv.imageSmoothingEnabled=true;if(image){const s2=3.4;ipv.drawImage(image,60-size[0]*s2/2,112-size[1]*s2,size[0]*s2,size[1]*s2)}}
+  if(!prep.hidden){info.querySelector('h3').textContent=label;{const f=(document.querySelector('#cs button[aria-pressed=true]')?.dataset.c||'m')[0]==='f';info.querySelector('.w').textContent=f?'专属武器：耳机（声波圈）':'专属武器：掌机（像素光弹）';info.querySelector('.t').textContent=f?'特性：拾取范围 +25%':'特性：经验 +10%'}ipv.clearRect(0,0,120,120);ipv.imageSmoothingEnabled=false;if(image){const s2=3.4;ipv.drawImage(image,60-size[0]*s2/2,112-size[1]*s2,size[0]*s2,size[1]*s2)}}
  }};
 }

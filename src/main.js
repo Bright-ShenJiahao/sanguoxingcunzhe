@@ -169,7 +169,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  for(const p of pj){const sx=p.x-cx,sy=p.y-cy;items.push({y:p.y+1,f:()=>{c.strokeStyle='#eadfc2';c.lineWidth=1;c.beginPath();c.moveTo(sx-p.dx*7,sy-9-p.dy*7);c.lineTo(sx,sy-9);c.stroke();c.fillStyle='#9aa0a6';c.fillRect(sx-.7,sy-9.7,1.6,1.4);c.fillStyle='rgba(18,40,20,.25)';c.fillRect(sx-1,sy-1,2,1)}})}
  for(const e of en){const sx=e.x-cx,sy=e.y-cy;if(sx<-60||sx>VW+60||sy<-30||sy>VH+60)continue;items.push({y:e.y,f:()=>{if(!e.dead)contact(sx,sy,16);enemySystem.draw(e,c,cx,cy,now)}})}
  items.push({y:hero.y+1,f:()=>enemySystem.drawArrows(c,cx,cy)});
- items.push({y:hero.y,f:()=>{c.imageSmoothingEnabled=true;c.imageSmoothingQuality='high';drawHero(px,py,moving,now);if(inSh){c.fillStyle='rgba(200,228,232,.6)';c.fillRect(px-7,py-4,14,4)}}});
+ items.push({y:hero.y,f:()=>{c.imageSmoothingEnabled=false;drawHero(px,py,moving,now);if(inSh){c.fillStyle='rgba(200,228,232,.6)';c.fillRect(px-7,py-4,14,4)}}});
  items.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
  run.drawWorld(c,cx,cy,now);
  if(portal){const t=Math.max(0,(now-portal.t)/1000);if(t>4.2)portal=null;else{   // 开局传送门：3 秒后缩小淡出
