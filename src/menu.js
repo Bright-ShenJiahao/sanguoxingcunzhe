@@ -98,14 +98,28 @@ export function createMenu(game){
    <div class="pp-body pp-stages"><button class="pp-stage" aria-pressed="true"><b>翠绿之地</b><span>森林、平原、水乡 · 哥布林出没</span></button><button class="pp-stage" disabled><b>冰原</b><span>未解锁</span></button><button class="pp-stage" disabled><b>？？？</b><span>未解锁</span></button></div>
    <div class="pp-foot"><button class="pp-back">返回</button><button class="pp-go">出发 →</button></div></div></div>`;
  document.body.append(prep);
- prep.addEventListener('keydown',e=>e.stopPropagation());prep.addEventListener('keyup',e=>e.stopPropagation());
+ prep.addEventListener('keydown',e=>e.stopPropagation());
+ // ---------- 键盘操作：方向键在按钮间移动，回车/空格确认，Esc 返回 ----------
+ function navKeys(e){const box=!prep.hidden?prep:!root.hidden?root:document.getElementById('lvup')?.hidden===false?document.getElementById('lvup'):null;if(!box)return;
+  const K={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],w:[0,-1],s:[0,1],a:[-1,0],d:[1,0]}[e.key];
+  if(e.key==='Escape'&&box===prep){const b=[...prep.querySelectorAll('.pp-back')].find(x=>x.offsetParent);if(b){b.click();e.preventDefault()}return}
+  const bsAll=[...box.querySelectorAll('button:not([disabled])')].filter(b=>b.offsetParent);
+  if((e.key==='Enter'||e.key===' ')&&!bsAll.includes(document.activeElement)&&document.activeElement?.tagName!=='INPUT'){const pr=[...box.querySelectorAll('.menu-start,.pp-go,.pp-next,button.card')].find(b=>b.offsetParent);if(pr){e.preventDefault();pr.click();setTimeout(()=>{const nb=[...document.querySelectorAll('#prep .pp-step:not([hidden]) .pp-next,#prep .pp-step:not([hidden]) .pp-go')].find(b=>b.offsetParent);nb?.focus()},50)}return}
+  if(!K)return;if(document.activeElement?.tagName==='INPUT'&&K[0])return;
+  const bs=[...box.querySelectorAll('button:not([disabled])')].filter(b=>b.offsetParent);if(!bs.length)return;e.preventDefault();
+  const cur=bs.includes(document.activeElement)?document.activeElement:null;if(!cur){bs[0].focus();return}
+  const r=cur.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let best=null,bd=1e9;
+  for(const b of bs){if(b===cur)continue;const q=b.getBoundingClientRect(),dx=q.left+q.width/2-cx,dy=q.top+q.height/2-cy,along=dx*K[0]+dy*K[1];if(along<=4)continue;const side=Math.abs(dx*K[1]-dy*K[0]);const d=along+side*2.5;if(d<bd){bd=d;best=b}}
+  if(best)best.focus()}
+ addEventListener('keydown',navKeys,true);
+ const fs=document.createElement('style');fs.textContent='#prep button:focus-visible,#main-menu button:focus-visible,#lvup button:focus-visible{outline:2px solid #f6db94;outline-offset:2px}';document.head.append(fs);prep.addEventListener('keyup',e=>e.stopPropagation());
  const roles=prep.querySelector('.pp-roles');roles.append(cs);
  const thumb=b=>{const c=b.dataset.c;return c==='m'?'assets/characters/hero_b/w0.png':c[0]==='m'?`assets/characters/hero_m/r${+c[1]-1}_w0.png`:`assets/characters/heroine/r${c[1]}_w0.png`};
  cs.querySelectorAll('button').forEach(b=>{const im=new Image();im.src=thumb(b);im.alt='';const t=document.createElement('span');const main=b.dataset.c==='m'||b.dataset.c==='f0';
   t.textContent=main?(b.dataset.c==='m'?'男 · 掌机':'女 · 耳机'):'🔒';b.textContent='';b.append(im,t);
   if(main)b.classList.add('big');else{b.disabled=true;b.classList.add('lock');b.title='后期解锁（商店 / 成就）'}});
 
- const step=s=>prep.querySelectorAll('.pp-step').forEach(x=>x.hidden=x.dataset.s!==s);
+ const step=s=>{prep.querySelectorAll('.pp-step').forEach(x=>x.hidden=x.dataset.s!==s);setTimeout(()=>prep.querySelector(`.pp-step[data-s=${s}] .pp-next,.pp-step[data-s=${s}] .pp-go`)?.focus(),30)};
  prep.querySelectorAll('.pp-tabs button').forEach(b=>b.onclick=()=>{prep.querySelectorAll('.pp-tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));prep.querySelectorAll('.pp-pane').forEach(p=>p.hidden=p.dataset.t!==b.dataset.t)});
  prep.querySelector('[data-s=prep] .pp-back').onclick=()=>{prep.hidden=true;root.hidden=false;root.querySelector('.menu-start').focus()};
  // ---------- 卡组：5 武器 + 5 法术（必须选满），锁定 2 个被动 ----------
