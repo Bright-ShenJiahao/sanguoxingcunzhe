@@ -69,6 +69,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup .ci img{max-width:55%;max-height:55%;image-rendering:pixelated}#lvup .ci img.u{width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;image-rendering:auto}
  #lvup .st{position:absolute;top:54%;left:0;right:0;text-align:center;color:#7a5a2a;font-size:clamp(9px,2.5vw,12px);font-weight:700}
  #lvup .cd{position:absolute;top:69%;left:14%;right:14%;bottom:9%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(9.5px,2.6vw,13px);line-height:1.22;color:#3a2410;overflow:hidden}
+ @media (max-width:640px){#lvup .cf{aspect-ratio:350/700}#lvup .cd{top:67%;bottom:6.5%;left:10%;right:10%;font-size:10.5px;line-height:1.2}}
  #lvup .btns{display:flex;gap:10px;margin-top:4px}
  #lvup .pb{all:unset;cursor:pointer;width:min(130px,30vw);aspect-ratio:360/135;background:center/100% 100%;display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px;text-shadow:0 2px #0008;image-rendering:pixelated}
  #lvup .pb.green{background-image:url(assets/ui/buttons_1.png)}#lvup .pb.gray{background-image:url(assets/ui/buttons_3.png)}#lvup .pb:disabled{filter:grayscale(1) brightness(.7);cursor:default}
