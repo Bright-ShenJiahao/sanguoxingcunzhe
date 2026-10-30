@@ -169,8 +169,8 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  items.push({y:hero.y,f:()=>{c.imageSmoothingEnabled=false;drawHero(px,py,moving,now);if(inSh){c.fillStyle='rgba(200,228,232,.6)';c.fillRect(px-7,py-4,14,4)}}});
  items.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
  run.drawWorld(c,cx,cy,now);
- if(portal){const t=(now-portal.t)/1000;if(t>4.2)portal=null;else{   // 开局传送门：3 秒后缩小淡出
-  const k=t<.4?t/.4:t>3?Math.max(0,1-(t-3)/1.2):1,px=portal.x-cx,py=portal.y-cy-12;c.save();c.globalAlpha=k;c.translate(px,py);
+ if(portal){const t=Math.max(0,(now-portal.t)/1000);if(t>4.2)portal=null;else{   // 开局传送门：3 秒后缩小淡出
+  const k=Math.max(.01,t<.4?t/.4:t>3?1-(t-3)/1.2:1),px=portal.x-cx,py=portal.y-cy-12;c.save();c.globalAlpha=k;c.translate(px,py);
   const g=c.createRadialGradient(0,0,0,0,0,Math.max(1,16*k));g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.35,'rgba(150,120,255,.85)');g.addColorStop(.8,'rgba(70,40,200,.5)');g.addColorStop(1,'rgba(40,20,120,0)');
   c.scale(.7,1);c.fillStyle=g;c.beginPath();c.arc(0,0,16*k,0,6.3);c.fill();
   c.lineWidth=1.2;for(let i=0;i<3;i++){c.strokeStyle=`rgba(${200-i*40},${180-i*30},255,.8)`;c.beginPath();c.arc(0,0,(6+i*4)*k,now/300*(i%2?-1:1)+i,now/300*(i%2?-1:1)+i+4);c.stroke()}
