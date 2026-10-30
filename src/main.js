@@ -81,8 +81,10 @@ function drawHero(px,py,moving,now){
 const en=[];let kills=0,fx=[];
 const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{SFX.hurt();const v=Math.max(1,(amount-(run?.armor||0))*(1-(run?.armPct||0)));if(survival&&survival.hp-v<=0&&run?.useRevive()){survival.heal(survival.max*.5);return}survival?.damage(v)}});
 function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg))fx.push({x:e.x,y:e.y,t:now,dx})}
-function spawn(){if(window.DBG?.noMob)return;for(let n=0;n<30;n++){const a=Math.random()*6.28,r=(Math.hypot(VW,VH)/2+20+Math.random()*90)*(run?.spawnR||1),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
- if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;const e=enemySystem.make(x,y,run?.pickKind());run?.onSpawn(e);en.push(e);return}}
+function spawn(){if(window.DBG?.noMob)return;let fb=null;for(let n=0;n<40;n++){const a=Math.random()*6.28,r=(n<28?(Math.hypot(VW,VH)/2+20+Math.random()*90):(140+Math.random()*160))*(run?.spawnR||1),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
+ if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;
+ {const pd=window.PATHAT?.(x,y)??0;if(pd<0)continue;if(pd*8>r*1.5+40&&n<39){fb=fb||[x,y];continue}}   // 只在不用绕远路就能走到主角的地方刷，避免怪全挤在山口排队
+ const e=enemySystem.make(x,y,run?.pickKind());run?.onSpawn(e);en.push(e);return}}
 let fish=null;const deepAt=(x,y,r)=>x>2100*(D.scale||1)&&y>WH-1000*(D.scale||1)&&[[0,0],[r,0],[-r,0],[0,r*.6],[0,-r*.6]].every(([a,b])=>water(x+a,y+b)===1);
 let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;
 function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());const v=(x,y)=>{const fx=x/n*8,fy=y/n*8,x0=Math.floor(fx),y0=Math.floor(fy),tx=fx-x0,ty=fy-y0,s=t=>t*t*(3-2*t),q=(a,b)=>g[((b%8+8)%8)*8+((a%8+8)%8)];const a=q(x0,y0)*(1-s(tx))+q(x0+1,y0)*s(tx),b=q(x0,y0+1)*(1-s(tx))+q(x0+1,y0+1)*s(tx);return a*(1-s(ty))+b*s(ty)};
