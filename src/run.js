@@ -19,7 +19,7 @@ const PASSIVES={
 export {WEAPONS,PASSIVES};
 export const PASS_KEYS=Object.keys(PASSIVES);
 WEAPONS.fireball={name:'火球术',cat:'spell',img:null,desc:['朝怪最密处丢火球，落地爆炸','爆炸范围变大','一次 2 颗，间隔缩短','伤害提升','【满级】一次 3 颗，爆炸范围大增']};
-WEAPONS.chain={name:'闪电链',cat:'spell',img:null,desc:['随机劈中画面里的敌人，弹跳 2 次；弹到减速的敌人伤害翻倍','弹跳 3 次，伤害提升','弹跳 5 次，间隔缩短','伤害提升','【满级】同时 2 道，弹跳 8 次']};
+WEAPONS.chain={name:'闪电链',cat:'spell',img:null,desc:['随机劈中敌人，弹跳 2 次；减速的敌人受伤翻倍','弹跳 3 次，伤害提升','弹跳 5 次，间隔缩短','伤害提升','【满级】同时 2 道，弹跳 8 次']};
 WEAPONS.frost={name:'冰霜新星',cat:'spell',img:null,desc:['朝随机敌人射出 2 根冰锥，命中处减速 50%','3 根冰锥，伤害提升','减速更久，间隔缩短','4 根冰锥','【满级】5 根冰锥，命中时碎裂溅射']};
 WEAPONS.missile={name:'魔法飞弹',cat:'spell',img:null,desc:['发射 2 颗追踪飞弹','一次 3 颗','一次 4 颗，间隔缩短','伤害提升','【满级】一次 7 颗']};
 WEAPONS.thunder={name:'雷霆',cat:'spell',img:null,desc:['随机落下 2 道雷，小范围伤害','3 道雷，伤害提升','4 道雷，间隔缩短','6 道雷','【满级】8 道雷，每 4 轮落下一道天罚巨雷']};
@@ -54,28 +54,29 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup .d{display:block;color:#d6e2f6;font-size:15px;margin-top:5px}#lvup .slots{text-align:center;color:#9fb6d8;font-size:12px;margin-top:6px}
  #lvup .row{display:flex;gap:8px;justify-content:center;margin-top:8px}#lvup .row button{padding:9px 22px;border-radius:12px;border:2px solid #cfe2ff;background:#123063;color:#fff;font:inherit;cursor:pointer}`;
  st.textContent+=`
- #lvup .b2{width:min(600px,96vw);display:flex;flex-direction:column;align-items:center;gap:10px;font-family:"Noto Serif CJK SC","Songti SC",serif}
+ #lvup .b2{position:relative;width:min(600px,96vw);display:flex;flex-direction:column;align-items:center;gap:10px;font-family:"Noto Serif CJK SC","Songti SC",serif}
  #lvup .scroll{width:min(560px,92vw);aspect-ratio:1414/264;background:url(assets/ui/buttons_0.png) center/100% 100%;display:grid;place-items:center;font-size:clamp(22px,6vw,32px);font-weight:900;color:#5a2e0e;image-rendering:pixelated}
- #lvup .b2 .sub{color:#ffe7a8;text-shadow:0 1px 3px #000;margin:0}
+ #lvup .b2 .sub{color:#ffe7a8;text-shadow:0 1px 3px #000;margin:0 0 14px}
  #lvup .cards{display:flex;gap:min(10px,2vw);justify-content:center;width:100%}
  #lvup button.c2{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:min(200px,30vw);transition:transform .1s}
  #lvup button.c2:hover,#lvup button.c2:focus{background:none!important;border:0!important;outline:none;transform:translateY(-4px) scale(1.03);filter:drop-shadow(0 0 8px #ffd860)}
- #lvup .cn{position:absolute;top:-11%;height:9%;left:0;right:0;display:grid;place-items:center;line-height:1;color:#ffe7a8;text-shadow:0 2px 2px #000;font-weight:900;font-size:clamp(13px,3.6vw,18px);white-space:nowrap}
- #lvup .cf{position:relative;margin-top:13%;width:100%;aspect-ratio:350/571;background:center/100% 100% no-repeat}
- #lvup .nw{position:absolute;top:1.5%;left:50%;transform:translateX(-50%);z-index:1;padding:0 5px;background:#c8323a;border-radius:3px;color:#fff;font-size:10px;font-weight:900;line-height:15px}
- #lvup .ci{position:absolute;left:22%;right:22%;top:21%;height:30%;display:grid;place-items:center;font-size:clamp(22px,7vw,34px);font-weight:900;color:#5a3a14}
- #lvup .ci img{max-width:55%;max-height:55%;image-rendering:pixelated}#lvup .ci img.u{width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;image-rendering:auto}
- #lvup .st{position:absolute;top:54%;left:0;right:0;text-align:center;color:#7a5a2a;font-size:clamp(9px,2.5vw,12px);font-weight:700}
- #lvup .cd{position:absolute;top:69%;left:14%;right:14%;bottom:9%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(9.5px,2.6vw,13px);line-height:1.22;color:#3a2410;overflow:hidden}
- @media (max-width:640px){#lvup .cf{aspect-ratio:350/700}#lvup .cd{top:67%;bottom:6.5%;left:10%;right:10%;font-size:10.5px;line-height:1.2}}
+ #lvup .cn{position:absolute;top:-9%;height:8%;left:0;right:0;display:grid;place-items:center;line-height:1;color:#ffe7a8;text-shadow:0 2px 2px #000;font-weight:900;font-size:clamp(13px,3.6vw,18px);white-space:nowrap}
+ #lvup .cf{position:relative;margin-top:12%;width:100%;aspect-ratio:180/290;background:center/100% 100% no-repeat}
+ #lvup .nw{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:1;padding:0 5px;background:#c8323a;border-radius:3px;color:#fff;font-size:10px;font-weight:900;line-height:15px}
+ #lvup .ci{position:absolute;left:26%;right:26%;top:22.5%;height:29%;display:grid;place-items:center;font-size:clamp(22px,7vw,34px);font-weight:900;color:#5a3a14}
+ #lvup .ci img{max-width:55%;max-height:55%;image-rendering:pixelated}#lvup .ci img.u{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;image-rendering:auto}
+ #lvup .st{position:absolute;top:55%;left:0;right:0;text-align:center;color:#7a5a2a;font-size:clamp(9px,2.5vw,12px);font-weight:700}
+ #lvup .cd{position:absolute;top:67%;left:22%;right:22%;bottom:15.5%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(9.5px,2.6vw,13px);line-height:1.22;color:#3a2410;overflow:hidden}
+ @media (max-width:640px){#lvup .cards{gap:4px}#lvup button.c2{width:32vw}#lvup .cf{aspect-ratio:180/360}#lvup .cd{left:20%;right:20%;top:66.5%;bottom:14.5%;font-size:10px;line-height:1.18}}
  #lvup .btns{display:flex;gap:10px;margin-top:4px}
  #lvup .pb{all:unset;cursor:pointer;width:min(130px,30vw);aspect-ratio:360/135;background:center/100% 100%;display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px;text-shadow:0 2px #0008;image-rendering:pixelated}
  #lvup .pb.green{background-image:url(assets/ui/buttons_1.png)}#lvup .pb.gray{background-image:url(assets/ui/buttons_3.png)}#lvup .pb:disabled{filter:grayscale(1) brightness(.7);cursor:default}
  #lvup .own{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
- #lvup .sl{width:40px;height:40px;background:url(assets/ui/buttons_9.png) center/100% 100%;display:grid;place-items:center;color:#f6db94;font-weight:900;image-rendering:pixelated}#lvup .sl img{max-width:24px;max-height:24px;image-rendering:pixelated}`;
+ #lvup .sl{position:relative;cursor:help;width:40px;height:40px;background:url(assets/ui/buttons_9.png) center/100% 100%;display:grid;place-items:center;color:#f6db94;font-weight:900;image-rendering:pixelated}#lvup .sl img{max-width:24px;max-height:24px;image-rendering:pixelated}#lvup .sl b{position:absolute;right:2px;bottom:0;font:700 10px sans-serif;color:#ffd166;text-shadow:0 1px 2px #000}
+ #lvup .tip{position:absolute;left:50%;bottom:58px;transform:translateX(-50%);z-index:5;pointer-events:none;box-shadow:0 4px 10px #0008;max-width:min(420px,92vw);padding:8px 12px;border:2px solid #8a5a1c;border-radius:6px;background:#f0d8a6;color:#3a2410;font-size:13px;line-height:1.45}#lvup .tip b{font-size:15px}#lvup .tip i{font-style:normal;color:#8a5a1c;font-weight:700}`;
  st.textContent+=``;
  document.head.append(st);document.body.append(ui);
- for(const f of ['buttons_0','buttons_1','buttons_3','buttons_9',...[0,1,2,3].map(i=>'frames_'+i),...Object.values(WIC),...Object.values(PIC)])new Image().src='assets/ui/'+f+'.png';   // 预加载，升级时不再现等图片
+ for(const f of ['buttons_0','buttons_1','buttons_3','buttons_9',...[0,1,2,3].map(i=>'card_'+i),...Object.values(WIC),...Object.values(PIC)])new Image().src='assets/ui/'+f+'.png';   // 预加载，升级时不再现等图片
  const wImg={};for(const k in WEAPONS){if(!WEAPONS[k].img)continue;const im=new Image(),g=WEAPONS[k].img;im.src=g.startsWith('ui:')?'assets/ui/'+g.slice(3)+'.png':'assets/weapons/'+g+'.png';wImg[k]=im}
  const UI={};for(const k of ['w_arrow','w_bolt','w_ice','i_magnet',...[0,1,2,3].flatMap(j=>['fx_fire_'+j,'fx_thunder_'+j,'fx_ice_'+j])]){const im=new Image();im.src='assets/ui/'+k+'.png';UI[k]=im}
  const HI={};for(const k in WIC){const im=new Image();im.src='assets/ui/'+WIC[k]+'.png';HI[k]=im}
@@ -204,14 +205,15 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(o.t==='w'){const W=WEAPONS[o.k];L=S.w[o.k]||0;nm=W.name;d=W.desc[L];nw=!L;fr=FRS+(isOwn(o.k)?3:isSp(o.k)?2:1)}
   else if(o.t==='p'){L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;nw=!L}else{nm='调息';d='回复 30 点生命'}
   const st=o.t==='heal'?'':`<span class="st">${L?'Lv '+L+' → '+(L+1):'Lv 1'}</span>`;
-  return `<button class="card c2" data-i="${i}"><span class="cf" style="background-image:url(assets/ui/${fr}.png)"><span class="cn">${nm}</span>${nw?'<span class="nw">NEW</span>':''}<span class="ci">${icon(o)}</span>${st}<span class="cd">${d}</span></span></button>`}
+  return `<button class="card c2" data-i="${i}"><span class="cf" style="background-image:url(assets/ui/${fr.replace('frames_','card_')}.png)"><span class="cn">${nm}</span>${nw?'<span class="nw">NEW</span>':''}<span class="ci">${icon(o)}</span>${st}<span class="cd">${d}</span></span></button>`}
  function owned(){return Object.keys(S.w).map(k=>({t:'w',k})).concat(Object.keys(S.p).filter(k=>S.p[k]>0).map(k=>({t:'p',k})))}
  let cur=[],sub=null;
  function render(){
   const list=sub?CATS[sub].ws.filter(k=>!S.w[k]).map(k=>({t:'w',k})):cur;
   if(UIV==='card'){const ow=owned();ui.innerHTML=`<div class="b2"><div class="scroll">等级 ${S.lv}！</div><div class="sub">选择一张卡 · 按 1 / 2 / 3</div><div class="cards">${list.map(card).join('')}</div>
    <div class="btns">${sub?'<button class="pb gray" data-a="back">返回</button>':`<button class="pb green" data-a="rr" ${S.rerolls>0?'':'disabled'}>刷新 ${S.rerolls}</button><button class="pb gray" data-a="skip">跳过</button>`}</div>
-   <div class="own">${Array.from({length:Math.max(6,ow.length)},(_,j)=>`<span class="sl">${ow[j]?icon(ow[j]):''}</span>`).join('')}</div></div>`}
+   <div class="own">${Array.from({length:Math.max(6,ow.length)},(_,j)=>`<span class="sl" data-j="${j}">${ow[j]?icon(ow[j])+`<b>${ow[j].t==='w'?S.w[ow[j].k]:S.p[ow[j].k]}</b>`:''}</span>`).join('')}</div><div class="tip" hidden></div></div>`;
+   const tip=ui.querySelector('.tip');ui.querySelectorAll('.sl').forEach(el=>{const o=ow[+el.dataset.j];if(!o)return;const show=()=>{const W=o.t==='w'?WEAPONS[o.k]:PASSIVES[o.k],L=o.t==='w'?S.w[o.k]:S.p[o.k],d=o.t==='w'?W.desc.slice(0,L).map((x,i)=>`<i>Lv${i+1}</i> ${x}`).join('<br>'):W.desc;tip.innerHTML=`<b>${W.name}</b> Lv ${L}<br>${d}`;tip.hidden=false};el.onmouseenter=show;el.onclick=e=>{e.stopPropagation();tip.hidden?show():tip.hidden=true};el.onmouseleave=()=>tip.hidden=true})}
   else ui.innerHTML=`<div class="box"><h2>等级 ${S.lv}！</h2><div class="sub">选择奖励 · 按 1 / 2 / 3</div>${list.map(card).join('')}
    <div class="row">${sub?'<button data-a="back">返回</button>':(S.rerolls>0?`<button data-a="rr">重抽（${S.rerolls}）· R</button>`:'')}</div><div class="slots">装备 ${Object.keys(S.w).filter(k=>!isOwn(k)&&!isSp(k)).length}/${MAXW} · 法术 ${Object.keys(S.w).filter(isSp).length}/${MAXS} · 祝福 ${Object.keys(S.p).filter(k=>S.p[k]>0).length}/${MAXP}</div></div>`;
   ui.querySelectorAll('button.card').forEach(b=>b.onclick=()=>choose(list[+b.dataset.i]));
