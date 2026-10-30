@@ -82,3 +82,8 @@ sk=[it[6],it[7],it[6],it[7],it[7],it[6],it[7],it[6]]
 save('skeleton',sk,S,N8,dict(hp=2,speed=30,reach=18,damage=8,role='summon',nw=2))
 json.dump(J,open(R+'/data/enemies.json','w'),ensure_ascii=False)
 print('ok',S)
+# ---- 哥布林圣骑士 · 白狼骑士（第 1 行 8 帧，第 2 行 4 个技能帧）
+a,fg=load('gob_paladin');GP=grid(a,fg,2,8);SP=94/max(c[0].shape[0] for c in GP[0][:4])
+J=json.load(open(R+'/data/enemies.json'))
+save('gob_paladin',GP[0]+GP[1][:4],SP,N8+['charge','howl','judge','aegis'],dict(hp=12,speed=30,reach=40,damage=26,role='boss',nw=4))
+json.dump(J,open(R+'/data/enemies.json','w'),ensure_ascii=False)

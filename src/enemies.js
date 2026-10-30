@@ -13,6 +13,8 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  function hit(e,dmg=1){
   if(e.dead)return false;
   if(data[e.k].ghost&&e.phT>0)dmg*=.5;
+  if(e.aegT>0){e.flash=.08;return true}
+  if(e.k==='gob_paladin'&&e.hpMax){for(const th of [.5,.25])if(!e['ag'+th]&&e.hp-dmg<e.hpMax*th){e['ag'+th]=1;e.state='aegis';e.timer=0;e.aegT=4;for(const o of near(e.x,e.y,120,EN))if(o!==e&&o.hpMax)o.hp=Math.min(o.hpMax,o.hp+o.hpMax*.3)}}
   e.hp-=dmg;
   if(e.hp<=0&&data[e.k].bomb&&!e.boomed){e.boomed=1;explode(e.x,e.y,40,data[e.k].damage*(e.dmgMul||1)*3,true)}
   if(e.hp<=0){e.dead=true;e.state='fall';e.timer=0;e.alpha=1}
@@ -36,6 +38,10 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    if(e.state==='aim'){if(e.timer>=(e.aimT||.5)){e.state='dash';e.timer=0;e.dashHit=0}continue}
    if(e.state==='dash'){const st=(e.dsp||320)*dt,nx=e.x+e.dx*st,ny=e.y+e.dy*st;if(ok(nx,ny)){e.x=nx;e.y=ny}e.moving=true;
     if(!e.dashHit&&Math.hypot(hero.x-e.x,hero.y-e.y)<12){e.dashHit=1;onHit(BD)}if(e.timer>=(e.dlen||.25)){e.state='recover';e.timer=0;e.dcd=e.dcdN||4;e.dsp=e.dlen=0}continue}
+   if(e.aegT>0)e.aegT-=dt;
+   if(e.state==='aegis'){if(e.timer>=1){e.state='move';e.timer=0}continue}
+   if(e.state==='judge'){if(e.timer>=1.5){e.state='recover';e.timer=0;explode(e.jx,e.jy,40,BD*4,false)}continue}
+   if(e.state==='howl'){if(e.timer>=1){e.state='recover';e.timer=0;if(d<80)window.HSLOW=performance.now()+2000;e.hwFx=.6}continue}
    if(e.state==='fuse'){if(e.timer>=1.5){e.boomed=1;explode(e.x,e.y,40,BD*3,true);e.hp=0;e.dead=true;e.state='fall';e.timer=0;e.alpha=1}continue}
    if(e.state==='smash'){const R_=e.sr||35;if(e.timer>=(e.st||1.2)){e.state='strike';e.timer=0;explode(e.x+(e.bx>0?8:-8),e.y,R_,BD*3,false);e.bcd=e.boss?3:6}continue}
    if(e.state==='leap'){if(e.timer<1){continue}const k=Math.min(1,(e.timer-1)/.45);e.x=e.lx0+(e.lx1-e.lx0)*k;e.y=e.ly0+(e.ly1-e.ly0)*k;e.hop=Math.sin(k*Math.PI)*40;if(k>=1){e.hop=0;e.state='strike';e.timer=0;explode(e.x,e.y,50,BD*3,false);e.bcd=4}continue}
@@ -66,6 +72,11 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     if(stats.orbit&&reg){if(d<100&&(e.orT??-1)<0&&e.dcd<=0)e.orT=2+Math.random();if(e.orT>0){e.orT-=dt;if(e.orT<=0){e.orT=-1;e.state='aim';e.timer=0;e.aimT=.4;e.dx=ax/d;e.dy=ay/d;e.dsp=300;e.dlen=(d+20)/300;e.dcdN=4;e.alen=d+20;continue}}}
     if(stats.drum){e.drT=(e.drT??3)-dt;if(e.drT<=0){e.drT=8;e.drFx=.6;for(const o of near(e.x,e.y,100,en))o.buffT=5}}
     if(stats.necro){e.nkT=(e.nkT??3)-dt;if(e.nkT<=0){e.nkT=6;let n=0;for(const o of en){if(n>=4)break;if(o.dead&&!o.raised&&!o.boss&&o.k!=='skeleton'&&(o.x-e.x)**2+(o.y-e.y)**2<130*130){o.raised=1;o.expired=true;window.SPAWN?.('skeleton',o.x,o.y);n++}}}}
+    if(e.boss&&e.k==='gob_paladin'){e.skT=(e.skT??2.5)-dt;if(e.skT<=0){e.skT=3.5;const r=Math.random();
+      if(d<60&&r<.4){e.state='smash';e.timer=0;e.sr=55;e.st=.8;e.bx=ax;continue}
+      else if(r<.65&&d>40){e.state='aim';e.timer=0;e.aimT=1;e.dx=ax/d;e.dy=ay/d;e.dsp=300;e.dlen=(d+100)/300;e.dcdN=0;e.alen=d+100;continue}
+      else if(r<.85){e.state='judge';e.timer=0;e.jx=hero.x;e.jy=hero.y;continue}
+      else{e.state='howl';e.timer=0;continue}}}
     if(e.boss&&e.k==='gob_chief'){e.skT=(e.skT??3)-dt;if(e.skT<=0){e.skT=4;const r=Math.random();if(r<.45&&d<60){e.state='smash';e.timer=0;e.sr=55;e.st=1.2;e.bx=ax;continue}else if(r<.75){e.wwT=3}else{for(const o of en)if(!o.dead)o.buffT=10;e.cryFx=1}}}
     if(e.k==='gob_blade'&&!e.elite&&!e.boss&&d<70&&d>22&&e.dcd<=0){e.state='aim';e.timer=0;e.dx=ax/d;e.dy=ay/d;continue}   // 剑士：冲刺斩
     if(e.k==='gob_shield'&&!e.elite&&!e.boss&&d<26&&e.bcd<=0){e.state='bash';e.timer=0;e.bx=ax;continue}   // 盾卫：盾击
@@ -102,6 +113,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   }
  }
  function frame(e,now){
+  if(e.k==='gob_paladin'){const F=data[e.k].frames,m={aim:'charge',dash:'charge',judge:'judge',howl:'howl',aegis:'aegis',smash:e.timer<(e.st||1)?'windup':'strike'};if(m[e.state]&&F[m[e.state]])return F[m[e.state]]}
   let name=e.state==='aim'||e.state==='bash'||e.state==='fuse'||e.state==='smash'||e.state==='cast'||(e.state==='leap'&&e.timer<1)?'windup':e.state==='dash'||e.state==='leap'?'strike':e.state;
   if(name==='move')name=e.moving?'walk'+(Math.floor(now/110+e.ph)%(data[e.k].nw||6)):'idle'+(Math.floor(now/650)%2);
   if(name==='recover'&&!data[e.k].frames.recover)name='idle0';
@@ -113,9 +125,12 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   const {f,im}=getFrame(e,now);
   if(e.state==='fuse'||e.state==='smash'){const T=e.state==='fuse'?1.5:(e.st||1.2),R_=e.state==='fuse'?40:(e.sr||35),k=Math.min(1,e.timer/T);c.save();c.globalAlpha=.15+.45*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(e.x-cx,e.y-cy,R_,R_*.8,0,0,6.3);c.fill();c.globalAlpha=.8;c.strokeStyle='#ff3a2a';c.lineWidth=1;c.beginPath();c.ellipse(e.x-cx,e.y-cy,R_*k,R_*.8*k,0,0,6.3);c.stroke();c.restore()}
   if(e.state==='leap'){const k=Math.min(1,e.timer/1);c.save();c.globalAlpha=.2+.4*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(e.lx1-cx,e.ly1-cy,50,40,0,0,6.3);c.fill();c.restore()}
+  if(e.state==='judge'){const k=Math.min(1,e.timer/1.5),x=e.jx-cx,y=e.jy-cy;c.save();c.globalAlpha=.3+.6*k;c.strokeStyle='#ffd23f';c.lineWidth=3;c.beginPath();c.moveTo(x-18,y);c.lineTo(x+18,y);c.moveTo(x,y-14);c.lineTo(x,y+14);c.stroke();c.globalAlpha=.15+.25*k;c.fillStyle='#ffd23f';c.beginPath();c.ellipse(x,y,40,32,0,0,6.3);c.fill();c.restore()}
+  if(e.state==='howl'||e.hwFx>0){if(e.hwFx>0)e.hwFx-=1/60;const k=e.state==='howl'?e.timer:1-e.hwFx/.6;c.save();c.globalAlpha=.5*(1-k*.5);c.strokeStyle='#cfefff';c.lineWidth=2;c.beginPath();c.ellipse(e.x-cx,e.y-cy,80*k,64*k,0,0,6.3);c.stroke();c.restore()}
+  if(e.aegT>0&&!e.dead){c.save();c.globalAlpha=.25+.1*Math.sin(now/120);c.fillStyle='#ffe27a';c.beginPath();c.ellipse(e.x-cx,e.y-cy-18*(e.sc||1),30,30,0,0,6.3);c.fill();c.restore()}
   if(e.drFx>0){e.drFx-=1/60;c.save();c.globalAlpha=e.drFx;c.strokeStyle='#ff6a3a';c.lineWidth=2;c.beginPath();c.ellipse(e.x-cx,e.y-cy,100*(1-e.drFx),80*(1-e.drFx),0,0,6.3);c.stroke();c.restore()}
   if(e.buffT>0&&!e.dead){c.save();c.globalAlpha=.5;c.strokeStyle='#ff5a3a';c.lineWidth=1;c.beginPath();c.ellipse(e.x-cx,e.y-cy,7,2.6,0,0,6.3);c.stroke();c.restore()}
-  if(e.state==='aim'){const k=e.timer/(e.aimT||.5),L_=e.alen||80;c.save();c.globalAlpha=.25+.5*k;c.strokeStyle='#ff3a2a';c.lineWidth=2;c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.lineTo(e.x-cx+e.dx*L_,e.y-cy+e.dy*L_);c.stroke();c.restore()}
+  if(e.state==='aim'){const k=e.timer/(e.aimT||.5),L_=e.alen||80;c.save();c.globalAlpha=.25+.5*k;c.strokeStyle=e.k==='gob_paladin'?'#ffd23f':'#ff3a2a';c.lineWidth=2;c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.lineTo(e.x-cx+e.dx*L_,e.y-cy+e.dy*L_);c.stroke();c.restore()}
   if(e.state==='bash'){const k=Math.min(1,e.timer),a0=(e.bx||1)>0?-Math.PI/2:Math.PI/2;c.save();c.globalAlpha=.2+.45*k;c.fillStyle='#ff3a2a';c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.ellipse(e.x-cx,e.y-cy,32*k,22*k,0,a0,a0+Math.PI);c.closePath();c.fill();c.restore()}
   const sc=e.sc||1;c.save();c.translate(Math.round(e.x-cx),Math.round(e.y-cy));c.scale(e.face*sc,sc);c.globalAlpha=e.alpha??1;c.imageSmoothingEnabled=false;
   if(!e.dead){c.fillStyle='rgba(10,20,10,.32)';c.beginPath();c.ellipse(0,0,6,2.2,0,0,6.3);c.fill()}   // 脚下阴影：雨雾天也看得清
