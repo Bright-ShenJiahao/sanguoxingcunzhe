@@ -125,7 +125,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
  if(joy){const L=Math.hypot(joy.dx,joy.dy);if(L>8){dx=joy.dx/L;dy=joy.dy/L}}
  if(pz){dx=0;dy=0}
- const L=Math.hypot(dx,dy),moving=L>0;if(moving){dx/=L;dy/=L;if(dx)hero.face=dx>0?1:-1}
+ const L=Math.hypot(dx,dy),moving=L>0;if(moving){dx/=L;dy/=L;if(dx)hero.face=dx>0?1:-1;hero.mx=dx;hero.my=dy}
  const wg=water(hero.x,hero.y),inSh=wg===2;
  const sp=72*gdt*(run?.moveMul||1)*(inSh?.55:wg===3?.6:1);let nx=Math.min(WW-14,Math.max(14,hero.x+dx*sp)),ny=Math.min(WH-10,Math.max(14,hero.y+dy*sp));
  if(ok(nx,hero.y))hero.x=nx;if(ok(hero.x,ny))hero.y=ny;
