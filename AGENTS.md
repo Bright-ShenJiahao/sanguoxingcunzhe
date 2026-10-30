@@ -6,7 +6,7 @@
 - 旧画风（水墨、粗像素地图）已移除。
 
 ## 尺寸与坐标
-- 逻辑画布 480×300，渲染 960×600（HD=2）；当前关卡「翠绿之地」3200×1600（由 tools/build_stage.py 从完整大地图 art_src/build/full/ 切出南半边：迷雾森林/翠绿平原/水乡湿地，北边密林封边）；完整三国大地图存档在分支 archive/map-sanguo-3200。原大地图：世界 3200×3200 逻辑像素，分区：西凉(西北)、幽州·塞外(东北雪原)、北方草原、中原(出生点 1500,1750)、蜀(西南)、江南(东南，河口入海)。地面是 2×2 分块 assets/map/g{x}{y}.jpg（每块 1600 逻辑像素），区域名查 world.json 的 rmap/rnames。
+- 逻辑画布 480×300，渲染 960×600（HD=2）；当前关卡「翠绿之地」3100×1290（tools/rebuild_nature.py 在 3200×1600 底稿上重画河/植被/桥后，裁掉上 100、左 100、y≥1390 的部分；world.json 的 off=[100,100] 记录偏移。art_src/map/*.json 里的用户标注都是裁前坐标；之后在调试全图里画的线是裁后坐标，用时要加 off。底稿由 tools/build_stage.py 从完整大地图 art_src/build/full/ 切出南半边：迷雾森林/翠绿平原/水乡湿地，北边密林封边）；完整三国大地图存档在分支 archive/map-sanguo-3200。原大地图：世界 3200×3200 逻辑像素，分区：西凉(西北)、幽州·塞外(东北雪原)、北方草原、中原(出生点 1500,1750)、蜀(西南)、江南(东南，河口入海)。地面是 2×2 分块 assets/map/g{x}{y}.jpg（每块 1600 逻辑像素），区域名查 world.json 的 rmap/rnames。
 - 主角高约 25 逻辑像素；精灵脚底为锚点，按 y 排序绘制。
 - coll.png：R=1 深水/阻挡，R=2 浅滩/水洼（减速 ×0.55）。树、石底部有圆形碰撞（coll_r）。
 
@@ -33,6 +33,11 @@
 （当前设定：异世界幸存者；敌人为哥布林，`tools/slice_goblins.py` 切图；黄巾兵素材保留不用。）
 
 ## 重新生成地图
+- 当前第一关：`python3 tools/rebuild_nature.py`（读 art_src/build/stage_old/ 底稿 + art_src/map/ 下的标注：shallows/bridges/edits/water_paint/mountain_paths.json），输出 assets/map 与 data/world.json。
+- 寻路：src/pathing.js（全图流场，能直视主角就直线追，隔河绕桥/浅滩，离主角两屏外卡住会挪位）。
+- 调试面板：没有怪物、点地图/小地图瞬移、画笔、全图（直线/画笔/涂抹、复制坐标）。移动端虚拟摇杆在 src/main.js。
+
+### 旧流程（三国大地图，已不用）
 `tools/build_world.sh` → `tools/build_map.py`：旧的西凉/雪原/江南块从 art_src/build/legacy_*（扩图前成品）整块平移保留，其余区域按规则生成；主河在新区域接上；物件统一摆放（按素材实际宽度算间距、禁放水边/出生点），最后打印重叠数和未使用素材，并输出 art_src/build/preview_map.png、preview_objs.png。
 
 ## 协作规则（第一次接手先读这里）
