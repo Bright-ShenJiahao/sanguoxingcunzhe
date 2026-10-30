@@ -127,7 +127,8 @@ export function createMenu(game){
  prep.querySelector('[data-s=prep] .pp-back').onclick=()=>{prep.hidden=true;root.hidden=false;root.querySelector('.menu-start').focus()};
  // ---------- 卡组：5 武器 + 5 法术（必须选满），锁定 2 个被动 ----------
  const dk=prep.querySelector('.dkw'),dks=prep.querySelector('.dks'),dkr=prep.querySelector('.dkr');let deck;try{deck=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
- if(!deck||!Array.isArray(deck.w))deck={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};deck.lock=deck.lock||[];
+ if(!deck||!Array.isArray(deck.w))deck={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};deck.lock=(deck.lock||[]).filter(k=>PASS_KEYS.includes(k));
+ for(const [k,P] of [['w',POOL.w],['s',POOL.s]]){deck[k]=(deck[k]||[]).filter(x=>P.includes(x));for(const x of P)if(deck[k].length<5&&!deck[k].includes(x))deck[k].push(x)}
  const LIM={w:5,s:5,lock:2};
  function drawDeck(){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${names(k)}</button>`).join('')}</div>`;
   dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'装备卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
