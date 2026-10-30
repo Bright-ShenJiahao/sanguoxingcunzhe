@@ -56,7 +56,7 @@ const GI={gb:new Image(),hp:new Image()};GI.gb.src='assets/weapons/gear/gb.png';
 let hairG=false,weaponAttack=null,pj=[],CM,mmc,wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
 const QP=new URLSearchParams(location.search);const AT=QP.get('x')?[+QP.get('x')/D.WW,+QP.get('y')/D.WH]:({n:[.8,.15],s:[.85,.85],w:[.15,.2],e:[.95,.6],sw:[.15,.85]})[QP.get('at')]||[D.spawn[0]/D.WW,D.spawn[1]/D.WH];
-const region=(x,y)=>{const [gw,gh]=D.rgrid||[64,64],i=D.rmap[Math.min(gh-1,Math.max(0,Math.floor(y/D.WH*gh)))*gw+Math.min(gw-1,Math.max(0,Math.floor(x/D.WW*gw)))];return D.rnames[i]};
+const region=()=>'翠绿平原',region0=(x,y)=>{const [gw,gh]=D.rgrid||[64,64],i=D.rmap[Math.min(gh-1,Math.max(0,Math.floor(y/D.WH*gh)))*gw+Math.min(gw-1,Math.max(0,Math.floor(x/D.WW*gw)))];return D.rnames[i]};
 const hero={x:WW*AT[0],y:WH*AT[1],face:1};const CO=objs.filter(o=>o.r);
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WH)return 1;return CM[(y*WW+x)*4]}
 function blocked(x,y){
@@ -161,7 +161,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
   const sx=f.x-cx,sy=f.y-cy;if(sx<-60||sx>VW+60||sy<-40||sy>VH+40)continue;const dir=Math.cos(f.a)>=0?1:-1,L=22*f.s,tw=Math.sin(f.p)*3*f.s;
   c.save();c.translate(sx,sy);c.scale(dir,1);c.fillStyle='rgba(8,32,66,.34)';c.beginPath();c.ellipse(0,0,L,L*.28,0,0,6.3);c.fill();c.beginPath();c.moveTo(-L*.8,0);c.lineTo(-L*1.5,-L*.34+tw);c.lineTo(-L*1.5,L*.34+tw);c.closePath();c.fill();c.restore()}
  contact(px,py,16);
- c.save();c.font='7px monospace';c.textBaseline='bottom';c.fillStyle='rgba(0,0,0,.45)';c.fillRect(3,VH-13,124,10);c.fillStyle='#fff';c.fillText(region(hero.x,hero.y)+' · '+weather.shichen(now)+'  x '+Math.round(hero.x)+'  y '+Math.round(hero.y),6,VH-5);c.restore();
+ c.save();c.font='7px monospace';c.textBaseline='bottom';c.fillStyle='rgba(0,0,0,.45)';c.fillRect(3,VH-13,96,10);c.fillStyle='#fff';c.fillText(weather.shichen(now)+'  x '+Math.round(hero.x)+'  y '+Math.round(hero.y),6,VH-5);c.restore();
  const items=[];
  for(const o of objs){const sx=o.x-cx,sy=o.y-cy;if(sx<-60||sx>VW+60||sy<-10||sy>VH+100)continue;
   const inx=Math.abs(hero.x-o.x)<o.w*.4,iny=hero.y<o.y-2&&hero.y>o.y-o.h*.9;const fade=/^(broad|pine|spire|bushL|nfir|nbare|nspire|nbush|fhouse|fshed|fgran|fbamb1|fwillow|fpeach|willow)/.test(o.k);const ta=(fade&&inx&&iny)?.42:1;
