@@ -9,7 +9,7 @@ export function createDebug(g){
  #dbg button{cursor:pointer;font:inherit;color:#eaf2ff;background:#1e3a72;border:1px solid #5d86c9;border-radius:4px;padding:3px 7px}
  #dbg button.on{background:#7a5a10;border-color:#f0dc9c}`;document.head.append(st);
  const el=document.createElement('div');el.id='dbg';document.body.append(el);
- const W=g.world,O=W.off||[0,0],places=[['出生点',W.spawn[0],W.spawn[1]],['迷雾森林',700,1200],['山顶',420,730],['峡谷',900,1140],['水乡',2300,900],['海边',2901,1303]];
+ const W=g.world,O=W.off||[0,0],places=[['出生点',W.spawn[0],W.spawn[1]],...[['迷雾森林',700,1200],['山顶',420,730],['峡谷',900,1140],['水乡',2300,900],['海边',2901,1303]].map(([n,x,y])=>[n,(x-O[0])*(W.scale||1)+O[0],(y-O[1])*(W.scale||1)+O[1]])];
  const WK=['auto','clear','lightrain','heavyrain','lightsnow','heavysnow','blizzard','fog','overcast'];
  el.innerHTML=`<h4>🔧 开发者（点标题收起）</h4>
  <b>主角</b><div class="r"><button data-a="god">无敌</button><button data-a="nomob">没有怪物</button><button data-a="heal">回满血</button><button data-a="lv">升一级</button><button data-a="max">全武器满级</button></div>

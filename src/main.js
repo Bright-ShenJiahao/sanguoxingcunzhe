@@ -83,7 +83,7 @@ const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{
 function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg))fx.push({x:e.x,y:e.y,t:now,dx})}
 function spawn(){if(window.DBG?.noMob)return;for(let n=0;n<30;n++){const a=Math.random()*6.28,r=(Math.hypot(VW,VH)/2+20+Math.random()*90)*(run?.spawnR||1),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
  if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;const e=enemySystem.make(x,y,run?.pickKind());run?.onSpawn(e);en.push(e);return}}
-let fish=null;const deepAt=(x,y,r)=>x>2100&&y>WH-1000&&[[0,0],[r,0],[-r,0],[0,r*.6],[0,-r*.6]].every(([a,b])=>water(x+a,y+b)===1);
+let fish=null;const deepAt=(x,y,r)=>x>2100*(D.scale||1)&&y>WH-1000*(D.scale||1)&&[[0,0],[r,0],[-r,0],[0,r*.6],[0,-r*.6]].every(([a,b])=>water(x+a,y+b)===1);
 let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;
 function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());const v=(x,y)=>{const fx=x/n*8,fy=y/n*8,x0=Math.floor(fx),y0=Math.floor(fy),tx=fx-x0,ty=fy-y0,s=t=>t*t*(3-2*t),q=(a,b)=>g[((b%8+8)%8)*8+((a%8+8)%8)];const a=q(x0,y0)*(1-s(tx))+q(x0+1,y0)*s(tx),b=q(x0,y0+1)*(1-s(tx))+q(x0+1,y0+1)*s(tx);return a*(1-s(ty))+b*s(ty)};
  cloud=document.createElement('canvas');cloud.width=n;cloud.height=n;const x=cloud.getContext('2d'),im=x.createImageData(n,n);for(let j=0;j<n;j++)for(let i=0;i<n;i++){const val=v(i,j)*.7+v(i*2,j*2)*.3,a=Math.max(0,Math.min(1,(val-.5)/.22))*.26;const k=(j*n+i)*4;im.data[k]=18;im.data[k+1]=40;im.data[k+2]=28;im.data[k+3]=a*255}x.putImageData(im,0,0)}
