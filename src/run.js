@@ -1,7 +1,7 @@
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
-const CATS={blade:{name:'刀剑',ws:['sword','dao','hammer','axe']},bow:{name:'弓弩',ws:['bow','xbow']}};
+const CATS={own:{name:'专属',ws:[]},blade:{name:'刀剑',ws:['sword','dao','hammer','axe']},bow:{name:'弓弩',ws:['bow','xbow']}};
 const WEAPONS={
  sword:{name:'直剑',cat:'blade',img:'直剑',desc:['朝最近的敌人快速连斩','伤害提升','每次斩两下','范围变大','攻速提升','伤害提升','每次斩三下','范围、伤害大增']},
  dao:{name:'砍刀',cat:'blade',img:'砍刀',desc:['朝前方 120° 扇形横扫','伤害提升','扇面变大','间隔缩短','伤害提升','扇面变成半圆','间隔缩短','前后各扫一刀']},
@@ -14,6 +14,9 @@ const PASSIVES={
  hp:{name:'生命',desc:'生命上限 +20，并回复 20',max:5},
  spd:{name:'移速',desc:'移动速度 +8%',max:5},
  mag:{name:'拾取',desc:'经验拾取范围 +25%',max:5}};
+// 角色专属武器（不进公共卡池）
+WEAPONS.gb={name:'掌机',cat:'own',img:'gear/gb',own:1,desc:['按 A 键射出像素光弹，追最近的敌人','伤害提升','一次 2 发','光弹穿透 1 个敌人','射速提升','一次 3 发','穿透 +1','每 4 轮从天上砸下俄罗斯方块']};
+WEAPONS.hp={name:'耳机',cat:'own',img:'gear/hp',own:1,desc:['放出声波圈，向外扩散并推开敌人','伤害提升','声波圈变大','间隔缩短','附带音符追踪敌人','伤害提升','音符变多','重低音：全屏震停敌人 1 秒']};
 const MAXW=6,MAXP=4;
 export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  let S;
@@ -30,6 +33,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup .row{display:flex;gap:8px;justify-content:center;margin-top:6px}#lvup .row button{padding:8px 16px;border-radius:6px;border:1px solid #8fbbef;background:#436da66b;color:#fff;font:inherit;cursor:pointer}`;
  document.head.append(st);document.body.append(ui);
  const wImg={};for(const k in WEAPONS){const im=new Image();im.src='assets/weapons/'+WEAPONS[k].img+'.png';wImg[k]=im}
+ const GX={};for(const k of ['b0','b1','b2','b3','x0','x1','x2','x3','tet','w0','w1','w2','w3','n0','n1','n2','bass']){const im=new Image();im.src='assets/weapons/gear/'+k+'.png';GX[k]=im}
  function reset(start='sword'){
   S={t:+(new URLSearchParams(location.search).get('t')||0),lv:1,xp:0,need:5,queue:0,lastLv:-9,rerolls:0,w:{[start]:1},cd:{},p:{atk:0,hp:0,spd:0,mag:0},gems:[],shots:[],fx:[],texts:[],eliteT:+(new URLSearchParams(location.search).get('t')||0)+75,bossDone:{},paused:false,maxHp:100};
   survival?.setMax?.(100);ui.hidden=true;
@@ -73,7 +77,16 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   xbow(L){const n=L>=8?9:L>=6?7:L>=3?5:3,dm=dmg(.9+(L>=2?.3:0)+(L>=5?.4:0)+(L>=8?.5:0)),pierce=L>=7?1:0;
    const t=nearest(180),base=t?Math.atan2(t.y-hero.y,t.x-hero.x):(hero.face>0?0:Math.PI);
    for(let i=0;i<n;i++){const a=base+(i-(n-1)/2)*.16;S.shots.push({k:'bolt',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:260,life:.75,dm,pierce,hit:new Set()})}
-   return L>=4?1.15:1.5}};
+   return L>=4?1.15:1.5},
+  gb(L){const n=L>=6?3:L>=3?2:1,dm=dmg(1.2+.35*(L-1)),pierce=(L>=4?1:0)+(L>=7?1:0);
+   const ts=en.filter(e=>!e.dead).map(e=>[e,(e.x-hero.x)**2+(e.y-hero.y)**2]).filter(a=>a[1]<190*190).sort((a,b)=>a[1]-b[1]);if(!ts.length)return .2;
+   for(let i=0;i<n;i++){const t=ts[i%ts.length][0],a=Math.atan2(t.y-10-(hero.y-10),t.x-hero.x)+(i>=ts.length?R(-.2,.2):0);S.shots.push({k:'pix',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:210,life:1,dm,pierce,hit:new Set()})}
+   S.gbN=(S.gbN||0)+1;if(L>=8&&S.gbN%4===0){const t=ts[0][0];S.shots.push({k:'tet',x:t.x,y:t.y,t:0,d:.45,r:34,dm:dmg(5)})}
+   return L>=5?.6:.85},
+  hp(L){const r=L>=3?62:48,dm=dmg(1+.35*(L-1)+(L>=6?.6:0));S.shots.push({k:'wave',t:0,d:.6,r,dm,hit:new Set()});
+   if(L>=5){const n=L>=7?3:2;for(let i=0;i<n;i++){const a=R(0,6.28);S.shots.push({k:'note',x:hero.x,y:hero.y-12,dx:Math.cos(a),dy:Math.sin(a),v:120,life:1.8,dm:dmg(1.2),pierce:0,hit:new Set(),img:'n'+(i%3)})}}
+   S.hpN=(S.hpN||0)+1;if(L>=8&&S.hpN%5===0){S.fx.push({k:'bass',t:0,d:.6});for(const e of en)if(!e.dead&&(e.x-hero.x)**2+(e.y-hero.y)**2<260*260){strike(e,dm,Math.sign(e.x-hero.x)||1);e.state='hurt';e.timer=-.75}}
+   return L>=4?1.1:1.4}};
  // ---------- 升级 ----------
  function gain(v){S.xp+=v}
  function tryLevel(){
@@ -86,7 +99,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  function options(){
   const pool=[],nw=Object.keys(S.w).length,np=Object.keys(S.p).filter(k=>S.p[k]>0).length;
   for(const k in S.w)if(S.w[k]<8)pool.push({t:'w',k,wt:1.2});
-  if(nw<MAXW)for(const c in CATS)if(CATS[c].ws.some(k=>!S.w[k]))pool.push({t:'cat',k:c,wt:1});
+  if(nw<MAXW)for(const c in CATS)if(CATS[c].ws.length&&CATS[c].ws.some(k=>!S.w[k]))pool.push({t:'cat',k:c,wt:1});
   for(const k in PASSIVES){const L=S.p[k];if(L>=PASSIVES[k].max)continue;if(!L&&np>=MAXP)continue;pool.push({t:'p',k,wt:.8})}
   const out=[];while(out.length<3&&pool.length){const tot=pool.reduce((a,o)=>a+o.wt,0);let r=Math.random()*tot,i=0;while(i<pool.length-1&&r>pool[i].wt)r-=pool[i++].wt;out.push(pool.splice(i,1)[0])}
   if(!out.length)out.push({t:'heal'});return out}
@@ -125,6 +138,9 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   S.t+=dt;
   for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0)S.cd[k]=FIRE[k](S.w[k])}
   for(const s of S.shots){
+   if(s.k==='wave'){s.t+=dt;const rr=s.r*Math.min(1,s.t/s.d);for(const e of en){if(e.dead||s.hit.has(e))continue;const d=Math.hypot(e.x-hero.x,(e.y-hero.y)*1.2);if(d<rr+4){s.hit.add(e);strike(e,s.dm,Math.sign(e.x-hero.x)||1);if(!e.boss)knock(e,8)}}s.dead=s.t>=s.d;continue}
+   if(s.k==='tet'){s.t+=dt;if(!s.done&&s.t>=s.d){s.done=true;S.fx.push({k:'ring',x:s.x,y:s.y,r:s.r,t:0,d:.3});for(const e of en)if(!e.dead&&(e.x-s.x)**2+((e.y-s.y)*1.3)**2<s.r*s.r)strike(e,s.dm,1)}s.dead=s.t>s.d+.05;continue}
+   if(s.k==='note'){const t=nearest(160,s);if(t){const a=Math.atan2(t.y-10-s.y,t.x-s.x),b=Math.atan2(s.dy,s.dx),d=Math.atan2(Math.sin(a-b),Math.cos(a-b));const nb=b+Math.max(-4*dt,Math.min(4*dt,d));s.dx=Math.cos(nb);s.dy=Math.sin(nb)}}
    if(s.k==='hammer'){s.t+=dt;if(!s.done&&s.t>=s.d){s.done=true;S.fx.push({k:'ring',x:s.x,y:s.y,r:s.r,t:0,d:.3});
      for(const e of en){if(e.dead)continue;if((e.x-s.x)**2+((e.y-s.y)*1.3)**2<(s.r+4*(e.sc||1))**2){strike(e,s.dm,Math.sign(e.x-s.x)||1);if(!e.dead){const dx=e.x-s.x,dy=e.y-s.y,l=Math.hypot(dx,dy)||1,k=e.boss?2:12;if(ok(e.x+dx/l*k,e.y+dy/l*k)){e.x+=dx/l*k;e.y+=dy/l*k}}}}}
      s.dead=s.t>s.d+.05;continue}
@@ -151,6 +167,10 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(const s of S.shots){
    if(s.k==='hammer'){const k=Math.min(1,s.t/s.d),x=s.x-cx,y=s.y-cy-60*(1-k)-6;c.save();c.globalAlpha=.35*k;c.fillStyle='#000';c.beginPath();c.ellipse(s.x-cx,s.y-cy,s.r*.5*k,s.r*.2*k,0,0,6.3);c.fill();c.restore();
     const im=wImg.hammer;if(im.complete){c.save();c.translate(x,y);c.rotate(Math.PI*(.2+k*.8));c.drawImage(im,-im.width/2,-im.height/2);c.restore()}continue}
+   if(s.k==='wave'){const k=Math.min(1,s.t/s.d),im=GX['w'+Math.min(3,Math.floor(k*4))],rr=s.r*k;if(im.complete){c.save();c.globalAlpha=1-k*.5;c.drawImage(im,hero.x-cx-rr,hero.y-cy-8-rr*.8,rr*2,rr*1.6);c.restore()}continue}
+   if(s.k==='tet'){const k=Math.min(1,s.t/s.d),im=GX.tet;if(im.complete){const h=22,w=im.width*h/im.height;c.drawImage(im,s.x-cx-w/2,s.y-cy-h-70*(1-k),w,h)}continue}
+   if(s.k==='note'){const im=GX[s.img];if(im.complete){const h=9,w=im.width*h/im.height;c.drawImage(im,s.x-cx-w/2,s.y-cy-h/2,w,h)}continue}
+   if(s.k==='pix'){const im=GX['b'+(Math.floor(performance.now()/80)%4)];if(im.complete){c.save();c.translate(s.x-cx,s.y-cy);c.rotate(Math.atan2(s.dy,s.dx));const h=6,w=im.width*h/im.height;c.drawImage(im,-w+3,-h/2,w,h);c.restore()}continue}
    const x=s.x-cx,y=s.y-cy;c.save();c.translate(x,y);c.rotate(Math.atan2(s.dy,s.dx));
    if(s.k==='arrow'){c.strokeStyle='#e9dcc0';c.lineWidth=1;c.beginPath();c.moveTo(-8,0);c.lineTo(3,0);c.stroke();c.fillStyle='#c8ccd2';c.fillRect(3,-1,2.5,2);c.fillStyle='#c0402e';c.fillRect(-8,-1.2,2,2.4)}
    else{c.strokeStyle='#d8c39a';c.lineWidth=1.3;c.beginPath();c.moveTo(-5,0);c.lineTo(2,0);c.stroke();c.fillStyle='#aab0b8';c.fillRect(2,-1,2,2)}
@@ -159,6 +179,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(const f of S.fx){f.t+=1/60;const k=f.t/f.d;if(k>=1)continue;
    if(f.k==='arc'){c.save();c.translate(px,py);c.strokeStyle=`rgba(${f.c},${.85*(1-k)})`;c.lineWidth=3*(1-k)+1;c.beginPath();c.arc(0,0,f.r*.82,f.a-f.w/2,f.a-f.w/2+f.w*Math.min(1,k*2));c.stroke();
     const im=wImg[f.img];if(im&&im.complete){const aa=f.a-f.w/2+f.w*Math.min(1,k*2);c.rotate(aa);c.translate(f.r*.55,0);c.rotate(Math.PI/2);c.globalAlpha=1-k*.6;c.drawImage(im,-im.width/2,-im.height/2)}c.restore()}
+   else if(f.k==='bass'){const im=GX.bass;if(im.complete){const r=40+200*k;c.save();c.globalAlpha=1-k;c.drawImage(im,px-r,py-r*.8,r*2,r*1.6);c.restore()}}
    else if(f.k==='ring'){c.strokeStyle=`rgba(255,226,170,${1-k})`;c.lineWidth=2.5*(1-k)+.5;c.beginPath();c.ellipse(f.x-cx,f.y-cy,f.r*(.4+.6*k),f.r*(.4+.6*k)*.6,0,0,6.3);c.stroke()}}
   S.fx=S.fx.filter(f=>f.t<f.d);
   c.save();c.textAlign='center';
@@ -170,5 +191,5 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   let x=VW/2-((Object.keys(S.w).length)*15)/2;c.font='bold 8px "PingFang SC","Microsoft YaHei",sans-serif';c.textAlign='right';c.lineWidth=2;c.strokeStyle='rgba(0,0,0,.7)';c.strokeText('Lv '+S.lv,x-4,18);c.fillStyle='#fff';c.fillText('Lv '+S.lv,x-4,18);c.textAlign='left';
   for(const k in S.w){c.fillStyle='rgba(8,14,30,.6)';c.fillRect(x,8,13,15);const im=wImg[k];if(im.complete){const s=Math.min(11/im.width,13/im.height);c.drawImage(im,x+6.5-im.width*s/2,9,im.width*s,im.height*s)}c.fillStyle='#ffd166';c.font='6px monospace';c.fillText(S.w[k],x+9,22);x+=15}
   c.textAlign='start'}
- return {dbg:{get S(){return S},WEAPONS,PASSIVES,levelUp(){S.xp=S.need;S.lastLv=-9},maxAll(){for(const k in WEAPONS)S.w[k]=8;for(const k in PASSIVES)S.p[k]=PASSIVES[k].max},skip(sec){S.t+=sec}},reset,update,onSpawn,onKill,drawWorld,drawUI,want:()=>S?want():16,get paused(){return !!S&&S.paused},get moveMul(){return S?1+.08*S.p.spd:1}};
+ return {dbg:{get S(){return S},WEAPONS,PASSIVES,levelUp(){S.xp=S.need;S.lastLv=-9},maxAll(){for(const k in WEAPONS)if(!WEAPONS[k].own||S.w[k])S.w[k]=8;for(const k in PASSIVES)S.p[k]=PASSIVES[k].max},skip(sec){S.t+=sec}},reset,update,onSpawn,onKill,drawWorld,drawUI,want:()=>S?want():16,get paused(){return !!S&&S.paused},get moveMul(){return S?1+.08*S.p.spd:1}};
 }

@@ -166,7 +166,10 @@ sea=cv2.morphologyEx(sea.astype(np.uint8),cv2.MORPH_OPEN,disk(10)).astype(bool)
 dsea=cv2.distanceTransform((~sea).astype(np.uint8),cv2.DIST_L2,5)
 bw=18+12*nz                                              # 沙滩宽度带点起伏
 beach=land&(dsea<bw)
-sand=np.clip((bw-dsea)/4,0,1)*land                       # 沙滩（边缘柔和过渡到草地）
+bp_=np.zeros((H,W),np.uint8)                              # 用户涂抹的沙滩（art_src/map/beach_paint.json，裁前坐标）
+for P in json.load(open(ROOT+'/art_src/map/beach_paint.json')): cv2.polylines(bp_,[np.array(P,np.int32)],False,1,46)
+bpd=(cv2.dilate(bp_,disk(4))>0)&land; beach|=bpd
+sand=np.clip((bw-dsea)/4,0,1)*land; sand=np.maximum(sand,np.clip((blur(bpd,9)-0.5)*2.4+0.5+(nz-0.5)*0.9,0,1)*land)                       # 沙滩（边缘柔和过渡到草地）
 wet=np.clip(1-dsea/7,0,1)*land
 seanear=np.clip(1-dsea/30,0,1)
 print('沙滩',beach.sum())

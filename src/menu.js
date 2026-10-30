@@ -41,6 +41,9 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 #prep #cs{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px}
 #prep #cs button{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid #83abe354;border-radius:8px;background:#0c225a66;color:#ecf5ff;font:12px inherit}
 #prep #cs button img{height:44px;image-rendering:pixelated}
+#prep #cs{grid-template-columns:1fr 1fr}#prep #cs button.big img{height:84px}#prep #cs button.big{padding:14px 6px;font-size:15px}
+#prep .lockrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;color:#9fb6d8;font-size:12px}#prep .lockrow span{width:100%}
+#prep .lockrow button{width:46px;padding:4px;border:1px solid #83abe333;border-radius:6px;background:#0c225a44;opacity:.45;cursor:not-allowed;color:#ccd}#prep .lockrow img{height:30px;filter:grayscale(1) brightness(.6);image-rendering:pixelated}#prep .lockrow button span{font-size:10px}
 #prep #cs button[aria-pressed=true]{background:#77a9f044;border-color:#f0dc9c;box-shadow:0 0 0 2px #e2cb8788}
 .pp-info{flex:0 0 200px;text-align:center;border:1px solid #9ebfe444;border-radius:10px;padding:14px;background:#0a183a66}
 .pp-info canvas{width:120px;height:120px;image-rendering:pixelated}.pp-info h3{margin:6px 0 10px;color:#f7d987}.pp-info p{margin:6px 0;color:#c9d8f0;font-size:13px}
@@ -94,7 +97,10 @@ export function createMenu(game){
  prep.addEventListener('keydown',e=>e.stopPropagation());prep.addEventListener('keyup',e=>e.stopPropagation());
  const roles=prep.querySelector('.pp-roles');roles.append(cs);
  const thumb=b=>{const c=b.dataset.c;return c==='m'?'assets/characters/hero_b/w0.png':c[0]==='m'?`assets/characters/hero_m/r${+c[1]-1}_w0.png`:`assets/characters/heroine/r${c[1]}_w0.png`};
- cs.querySelectorAll('button').forEach(b=>{const im=new Image();im.src=thumb(b);im.alt='';const t=document.createElement('span');t.textContent=b.textContent;b.textContent='';b.append(im,t)});
+ cs.querySelectorAll('button').forEach(b=>{const im=new Image();im.src=thumb(b);im.alt='';const t=document.createElement('span');const main=b.dataset.c==='m'||b.dataset.c==='f0';
+  t.textContent=main?(b.dataset.c==='m'?'男 · 掌机':'女 · 耳机'):'🔒';b.textContent='';b.append(im,t);
+  if(main)b.classList.add('big');else{b.disabled=true;b.classList.add('lock');b.title='后期解锁（商店 / 成就）'}});
+ {const lk=document.createElement('div');lk.className='lockrow';lk.innerHTML='<span>更多造型 · 后期解锁</span>';[...cs.querySelectorAll('button.lock')].forEach(b=>lk.append(b));cs.after(lk)}
  const step=s=>prep.querySelectorAll('.pp-step').forEach(x=>x.hidden=x.dataset.s!==s);
  prep.querySelectorAll('.pp-tabs button').forEach(b=>b.onclick=()=>{prep.querySelectorAll('.pp-tabs button').forEach(x=>x.setAttribute('aria-selected',x===b));prep.querySelectorAll('.pp-pane').forEach(p=>p.hidden=p.dataset.t!==b.dataset.t)});
  prep.querySelector('[data-s=prep] .pp-back').onclick=()=>{prep.hidden=true;root.hidden=false;root.querySelector('.menu-start').focus()};
