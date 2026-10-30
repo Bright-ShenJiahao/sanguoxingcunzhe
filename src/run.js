@@ -33,8 +33,8 @@ export const POOL={w:Object.keys(WEAPONS).filter(k=>!['spell','own'].includes(WE
 WEAPONS.gb={name:'掌机',cat:'own',img:'gear/gb',own:1,desc:['按 A 键射出像素光弹，追最近的敌人','伤害提升','一次 2 发','光弹穿透 1 个敌人','射速提升','一次 3 发','穿透 +1','每 4 轮从天上砸下俄罗斯方块']};
 WEAPONS.hp={name:'耳机',cat:'own',img:'gear/hp',own:1,desc:['放出声波圈，向外扩散并推开敌人','伤害提升','声波圈变大','间隔缩短','附带音符追踪敌人','伤害提升','音符变多','重低音：全屏震停敌人 1 秒']};
 const MAXW=3,MAXS=3,MAXP=6;   // 局内上限：公共武器 3、法术 3、被动 6（专属另算）
-const UIV=new URLSearchParams(location.search).get('ui')==='card'?'card':'blue';
-const FRS=({'1':'frames_','3':'frames3_','4':'framesC_'})[new URLSearchParams(location.search).get('fr')]||'frames2_';
+const UIV=new URLSearchParams(location.search).get('ui')==='blue'?'blue':'card';
+const FRS='frames_';
 const WIC={gb:'icons_0',hp:'icons_1',missile:'icons_2',axe:'icons_3',fireball:'icons_4',frost:'icons_5',chain:'icons_6',holy:'icons_7'};
 const PIC={spd:'icons_9',hp:'icons_10',mag:'icons_11',wis:'icons_12'};
 const isSp=k=>WEAPONS[k].cat==='spell',isOwn=k=>!!WEAPONS[k].own;
@@ -62,22 +62,21 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup .cards{display:flex;gap:min(10px,2vw);justify-content:center;width:100%}
  #lvup button.c2{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:min(200px,30vw);transition:transform .1s}
  #lvup button.c2:hover,#lvup button.c2:focus{background:none!important;border:0!important;outline:none;transform:translateY(-4px) scale(1.03);filter:drop-shadow(0 0 8px #ffd860)}
- #lvup .cn{position:absolute;top:10.2%;height:5.6%;left:20%;right:20%;display:grid;place-items:center;line-height:1;color:#3a2a14;font-weight:900;font-size:clamp(10px,2.8vw,15px)}
- #lvup .cf{position:relative;width:100%;aspect-ratio:405/620;background:center/100% 100% no-repeat;image-rendering:pixelated}
- #lvup .nw{position:absolute;top:2.2%;right:6%;padding:0 5px;background:#c8323a;border-radius:3px;color:#fff;font-size:10px;font-weight:900}
- #lvup .ci{position:absolute;left:14%;right:14%;top:21%;height:44%;display:grid;place-items:center;font-size:30px;font-weight:900;color:#3a2a14}
- #lvup .ci img{max-width:100%;max-height:100%;image-rendering:pixelated}
- #lvup .st{position:absolute;top:65%;left:0;right:0;text-align:center;color:#6b5330;font-size:clamp(9px,2.6vw,12px);font-weight:700}
- #lvup .cd{position:absolute;top:77%;left:10%;right:10%;bottom:7%;display:grid;place-items:center;text-align:center;font-size:clamp(10px,2.9vw,13px);line-height:1.25;color:#3a2a14}
+ #lvup .cn{position:absolute;top:-11%;height:9%;left:0;right:0;display:grid;place-items:center;line-height:1;color:#ffe7a8;text-shadow:0 2px 2px #000;font-weight:900;font-size:clamp(13px,3.6vw,18px);white-space:nowrap}
+ #lvup .cf{position:relative;margin-top:13%;width:100%;aspect-ratio:350/571;background:center/100% 100% no-repeat}
+ #lvup .nw{position:absolute;top:1.5%;left:50%;transform:translateX(-50%);z-index:1;padding:0 5px;background:#c8323a;border-radius:3px;color:#fff;font-size:10px;font-weight:900;line-height:15px}
+ #lvup .ci{position:absolute;left:22%;right:22%;top:21%;height:30%;display:grid;place-items:center;font-size:clamp(22px,7vw,34px);font-weight:900;color:#5a3a14}
+ #lvup .ci img{max-width:55%;max-height:55%;image-rendering:pixelated}#lvup .ci img.u{width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;image-rendering:auto}
+ #lvup .st{position:absolute;top:54%;left:0;right:0;text-align:center;color:#7a5a2a;font-size:clamp(9px,2.5vw,12px);font-weight:700}
+ #lvup .cd{position:absolute;top:69%;left:14%;right:14%;bottom:9%;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(9.5px,2.6vw,13px);line-height:1.22;color:#3a2410;overflow:hidden}
  #lvup .btns{display:flex;gap:10px;margin-top:4px}
  #lvup .pb{all:unset;cursor:pointer;width:min(130px,30vw);aspect-ratio:360/135;background:center/100% 100%;display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px;text-shadow:0 2px #0008;image-rendering:pixelated}
  #lvup .pb.green{background-image:url(assets/ui/buttons_1.png)}#lvup .pb.gray{background-image:url(assets/ui/buttons_3.png)}#lvup .pb:disabled{filter:grayscale(1) brightness(.7);cursor:default}
  #lvup .own{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
  #lvup .sl{width:40px;height:40px;background:url(assets/ui/buttons_9.png) center/100% 100%;display:grid;place-items:center;color:#f6db94;font-weight:900;image-rendering:pixelated}#lvup .sl img{max-width:24px;max-height:24px;image-rendering:pixelated}`;
- st.textContent+=`
- #lvup :is(.frames_,.framesC_) .cn{top:-10%;height:8%;color:#ffe7a8;text-shadow:0 2px 2px #000;font-size:clamp(12px,3.4vw,17px)}#lvup :is(.frames_,.framesC_) .cf{margin-top:12%}#lvup :is(.frames_,.framesC_) .ci{top:18%;height:34%}#lvup :is(.frames_,.framesC_) .st{top:55%}#lvup :is(.frames_,.framesC_) .cd{top:66%;bottom:10%}
- #lvup .frames3_ .cn{top:8%}#lvup .frames3_ .ci{top:23%;height:36%}#lvup .frames3_ .st{top:61%}#lvup .frames3_ .cd{top:71%;bottom:8%}`;
+ st.textContent+=``;
  document.head.append(st);document.body.append(ui);
+ for(const f of ['buttons_0','buttons_1','buttons_3','buttons_9',...[0,1,2,3].map(i=>'frames_'+i),...Object.values(WIC),...Object.values(PIC)])new Image().src='assets/ui/'+f+'.png';   // 预加载，升级时不再现等图片
  const wImg={};for(const k in WEAPONS){if(!WEAPONS[k].img)continue;const im=new Image();im.src='assets/weapons/'+WEAPONS[k].img+'.png';wImg[k]=im}
  const GX={};for(const k of ['b0','b1','b2','b3','x0','x1','x2','x3','tet','w0','w1','w2','w3','n0','n1','n2','bass']){const im=new Image();im.src='assets/weapons/gear/'+k+'.png';GX[k]=im}
  function reset(start='sword'){
@@ -187,7 +186,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(const k of S.pp){const L=S.p[k];if(L>=PASSIVES[k].max)continue;if(!L&&np>=MAXP)continue;pool.push({t:'p',k,wt:.8})}
   const out=[];while(out.length<3&&pool.length){const tot=pool.reduce((a,o)=>a+o.wt,0);let r=Math.random()*tot,i=0;while(i<pool.length-1&&r>pool[i].wt)r-=pool[i++].wt;out.push(pool.splice(i,1)[0])}
   if(!out.length)out.push({t:'heal'});return out}
- function icon(o){const f=o.t==='w'?WIC[o.k]:o.t==='p'?PIC[o.k]:null;if(f)return `<img src="assets/ui/${f}.png" alt="">`;if(o.t==='w')return wImg[o.k]?`<img src="${wImg[o.k].src}" alt="">`:WEAPONS[o.k].name[0];if(o.t==='cat')return CATS[o.k].name[0];if(o.t==='p')return PASSIVES[o.k].name[0];return '息'}
+ function icon(o){const f=o.t==='w'?WIC[o.k]:o.t==='p'?PIC[o.k]:null;if(f)return `<img class="u" src="assets/ui/${f}.png" alt="">`;if(o.t==='w')return wImg[o.k]?`<img src="${wImg[o.k].src}" alt="">`:WEAPONS[o.k].name[0];if(o.t==='cat')return CATS[o.k].name[0];if(o.t==='p')return PASSIVES[o.k].name[0];return '息'}
  function card(o,i){if(UIV==='card')return card2(o,i);
   let nm,tag,d;
   if(o.t==='w'){const L=S.w[o.k]||0,W=WEAPONS[o.k],sp=isSp(o.k);nm=W.name;d=W.desc[L];
@@ -199,7 +198,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(o.t==='w'){const W=WEAPONS[o.k];L=S.w[o.k]||0;nm=W.name;d=W.desc[L];nw=!L;fr=FRS+(isOwn(o.k)?3:isSp(o.k)?2:1)}
   else if(o.t==='p'){L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;nw=!L}else{nm='调息';d='回复 30 点生命'}
   const st=o.t==='heal'?'':`<span class="st">${L?'Lv '+L+' → '+(L+1):'Lv 1'}</span>`;
-  return `<button class="card c2 ${FRS}" data-i="${i}"><span class="cf" style="background-image:url(assets/ui/${fr}.png)"><span class="cn">${nm}</span>${nw?'<span class="nw">NEW</span>':''}<span class="ci">${icon(o)}</span>${st}<span class="cd">${d}</span></span></button>`}
+  return `<button class="card c2" data-i="${i}"><span class="cf" style="background-image:url(assets/ui/${fr}.png)"><span class="cn">${nm}</span>${nw?'<span class="nw">NEW</span>':''}<span class="ci">${icon(o)}</span>${st}<span class="cd">${d}</span></span></button>`}
  function owned(){return Object.keys(S.w).map(k=>({t:'w',k})).concat(Object.keys(S.p).filter(k=>S.p[k]>0).map(k=>({t:'p',k})))}
  let cur=[],sub=null;
  function render(){

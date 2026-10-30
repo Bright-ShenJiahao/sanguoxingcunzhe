@@ -36,6 +36,8 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 .pp-step{display:flex;flex-direction:column;min-height:0;padding:20px 22px}
 .pp-head{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:16px}.pp-head h2{margin:0;font-size:22px;color:#f7d987;letter-spacing:.1em}
 .pp-tabs{display:flex;gap:6px}.pp-tabs button,.pp-foot button{cursor:pointer;font:inherit;color:#eaf2ff;border:1px solid #8fbbef88;border-radius:6px;background:#0c225a66;padding:8px 18px}
+.pp-tabs button{white-space:nowrap;flex:none}
+@media (max-width:640px){.pp-head{gap:8px}.pp-tabs{width:100%;overflow-x:auto;scrollbar-width:none}.pp-tabs button{padding:7px 12px}#prep{padding:10px}}
 .pp-tabs button[aria-selected=true]{background:#77a9f055;border-color:#d8e8ff;color:#fff;box-shadow:inset 0 -3px #e2cb87}
 .pp-body{min-height:300px;overflow:auto}.pp-pane[data-t=role]{display:flex;gap:18px;flex-wrap:wrap}
 .pp-roles{flex:1 1 380px;min-width:0}

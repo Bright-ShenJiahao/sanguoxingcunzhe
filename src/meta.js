@@ -25,6 +25,8 @@ export function createMeta(){
  #mbar{position:fixed;top:10px;left:50%;transform:translateX(-50%);z-index:12;display:flex;gap:8px;font:600 14px "PingFang SC","Microsoft YaHei",sans-serif;color:#f4f7ff}
  #mbar .pill{display:flex;align-items:center;gap:6px;padding:6px 14px;border:2px solid #9cc3ff;border-radius:999px;background:#102446e8;box-shadow:0 2px 0 #0007}
  #mbar button{cursor:pointer;font:inherit;color:inherit}
+ #mbar .pill{white-space:nowrap}#mbar img{height:20px;width:auto}
+ @media (max-width:640px){#mbar{top:6px;gap:5px;font-size:13px}#mbar .pill{padding:3px 9px;gap:4px}#mbar img{height:17px}#mbar .lb{display:none}}
  body:not(.prep-open) #mbar{display:none}
  body.prep-open #prep .pp-step{margin-top:48px;max-height:calc(100vh - 70px)}
  .upw .note{color:#c9d8f0;margin:0 0 10px;font-size:13px}
@@ -60,7 +62,7 @@ export function createMeta(){
  document.head.append(st);
  // ---------- 顶部状态栏 ----------
  const bar=document.createElement('div');bar.id='mbar';document.body.append(bar);
- function drawBar(){bar.innerHTML=`<span class="pill" title="金币">🪙 金币 ${M.gold}</span><span class="pill" title="抽奖券">🎫 抽奖券 ${M.tickets}</span><button class="pill" data-p="dex">📖 怪物图鉴</button><button class="pill" data-p="snd" title="静音（M 键）">${window.SFX?.muted?'🔇':'🔊'}</button>`;
+ function drawBar(){bar.innerHTML=`<span class="pill" title="金币"><img src="assets/ui/misc_0.png" alt="">${M.gold}</span><span class="pill" title="抽奖券"><img src="assets/ui/misc_1.png" alt="">${M.tickets}</span><button class="pill" data-p="dex" title="怪物图鉴"><img src="assets/ui/misc_2.png" alt=""><span class="lb">图鉴</span></button><button class="pill" data-p="snd" title="静音（M 键）"><img src="assets/ui/misc_${window.SFX?.muted?9:8}.png" alt=""></button>`;
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.p==='dex')openDex();else{dispatchEvent(new KeyboardEvent('keydown',{key:'m'}));setTimeout(drawBar,50)}})}
  drawBar();
  // ---------- 面板 ----------
