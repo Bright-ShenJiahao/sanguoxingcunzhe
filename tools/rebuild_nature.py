@@ -39,8 +39,8 @@ def polym(c):
     return m>0
 REDM=polym('#ff3040'); fixm=polym('#9040ff')|polym('#20d060'); dryM=polym('#20d060')
 if fixm.any():
-    sm=cv2.resize(G,(W,H),interpolation=cv2.INTER_AREA); mk=dil(fixm,4).astype(np.uint8)
-    rep_=cv2.inpaint(sm,mk,12,cv2.INPAINT_TELEA); big_=cv2.resize(rep_,(W*HD,H*HD),interpolation=cv2.INTER_LINEAR)
+    sm=cv2.resize(G,(W,H),interpolation=cv2.INTER_AREA); mk=dil(fixm,14).astype(np.uint8)
+    rep_=cv2.inpaint(sm,mk,12,cv2.INPAINT_TELEA); rep_=np.where(mk[...,None]>0,cv2.blur(rep_,(61,61)),rep_); big_=cv2.resize(rep_,(W*HD,H*HD),interpolation=cv2.INTER_LINEAR)
     gr_=np.array(Image.open(ROOT+'/art_src/map/grass.png').convert('RGB')).astype(np.float32); gt=cv2.resize(gr_,(900,900))
     tex_=gt[np.arange(H*HD)[:,None]%900,np.arange(W*HD)[None,:]%900]; tl=tex_-tex_.mean((0,1))
     M2=cv2.GaussianBlur(cv2.resize(mk,(W*HD,H*HD),interpolation=cv2.INTER_NEAREST).astype(np.float32),(0,0),4)[...,None]
@@ -344,7 +344,7 @@ def nearbr(x,y):
         if np.hypot(x-ax-u[0]*t,y-ay-u[1]*t)<26: return True
     return False
 objs=[o for o in objs if not nearbr(o[1],o[2])]
-for x,y in fords: put('st%d'%rng.integers(1,5),x,y,10)
+pass   # 踏脚石已删除
 WR=[]
 ry,rx=np.nonzero(big&(din>5)&(din<9)&~dil(ford,30)); nw=0
 for j in rng.permutation(len(rx))[:4000]:
