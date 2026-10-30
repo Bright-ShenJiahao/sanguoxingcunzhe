@@ -25,7 +25,7 @@ export function createSurvival(game){
  function render(){hud.querySelector('.time').textContent='存活 '+formatTime(elapsed);hud.querySelector('.kills').textContent='击杀 '+game.kills;hud.querySelector('.hp').textContent=Math.ceil(hp)+'/'+maxHp;const pg=hud.querySelector('progress');pg.max=maxHp;pg.value=hp}
  function stop(){playing=false;finished=false;generation++;hud.hidden=true;document.body.classList.remove('survival-playing');if(dialog.open)dialog.close()}
  function start(){
-  stop();game.reset();playing=true;maxHp=100;hp=100;elapsed=0;cooldown=0;
+  stop();playing=true;maxHp=100;hp=100;game.reset();elapsed=0;cooldown=0;
   name=(document.querySelector('.menu-name input').value.trim()||'无名氏').slice(0,20);
   hud.hidden=false;document.body.classList.add('survival-playing');render();
  }
@@ -34,13 +34,14 @@ export function createSurvival(game){
   const rec={name,t:Math.floor(elapsed),kills:game.kills},token=generation;
   dialog.querySelector('.result-name').textContent='名字：'+name;
   dialog.querySelector('.result-stats').textContent='存活时间：'+formatTime(rec.t)+' · 击杀数：'+rec.kills;
+  {const r=window.META?.runEnd(rec.t,rec.kills);if(r)dialog.querySelector('.result-stats').textContent+=` · 获得 🪙${r.g}`+(r.tk?` · 🎟️${r.tk}`:'')}
   const upload=dialog.querySelector('.upload');upload.textContent='正在提交成绩……';dialog.showModal();
   // 每局仅在首次死亡时提交一次；晚到的网络响应不写入下一局界面。
   void submitScore(rec).then(ok=>{if(generation===token)upload.textContent=ok?'成绩已提交':'暂时无法连接'});
  }
  dialog.querySelector('.retry').onclick=start;
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};
- return {start,get finished(){return finished},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
+ return {start,get hp(){return hp},get max(){return maxHp},get finished(){return finished},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
   if(!playing||finished||cooldown>0||window.DBG?.god)return;
   hp=Math.max(0,hp-Math.round(amount));cooldown=.75;render();if(hp===0)die();
  },update(dt){

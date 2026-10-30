@@ -3,6 +3,8 @@ import {createMenu} from './menu.js';
 import {createSurvival} from './survival.js';
 import {createEnemies} from './enemies.js';
 import {createAudio} from './audio.js';
+import {createMeta} from './meta.js';
+window.META=createMeta();
 const SFX=window.SFX=createAudio();
 import {createPathing} from './pathing.js';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
@@ -77,7 +79,7 @@ function drawHero(px,py,moving,now){
  if(wpm=='magic'){const bob=Math.sin(now/380)*1.3;c.save();c.translate(-11,-19+bob);c.scale(.5,.5);c.globalAlpha=.97;c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
  c.restore()}
 const en=[];let kills=0,fx=[];
-const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{SFX.hurt();survival?.damage(Math.max(1,amount-(run?.armor||0)))}});
+const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{SFX.hurt();const v=Math.max(1,(amount-(run?.armor||0))*(1-(run?.armPct||0)));if(survival&&survival.hp-v<=0&&run?.useRevive()){survival.heal(survival.max*.5);return}survival?.damage(v)}});
 function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg))fx.push({x:e.x,y:e.y,t:now,dx})}
 function spawn(){if(window.DBG?.noMob)return;for(let n=0;n<30;n++){const a=Math.random()*6.28,r=(Math.hypot(VW,VH)/2+20+Math.random()*90)*(run?.spawnR||1),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
  if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;const e=enemySystem.make(x,y,run?.pickKind());run?.onSpawn(e);en.push(e);return}}
