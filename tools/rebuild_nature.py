@@ -8,6 +8,7 @@ Image.MAX_IMAGE_PIXELS=None
 ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OLD=ROOT+'/art_src/build/stage_old/'; MAP=ROOT+'/assets/map/'
 J=json.load(open(ROOT+'/data/world.json')); J0=json.load(open(OLD+'world.json'))
+if 'off' in J: J['WW'],J['WH'],J['rmap'],J['rgrid']=J0['WW'],J0['WH'],J0['rmap'],J0['rgrid']; J.pop('off')   # 重跑：先回到裁边前
 HD=J['HD']; T=J['tiles']['T']; W,H=J['WW'],J['WH']; rng=np.random.default_rng(21)
 blur=lambda a,s:cv2.GaussianBlur(a.astype(np.float32),(0,0),s)
 disk=lambda r:cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*r+1,2*r+1))
@@ -357,3 +358,18 @@ objs=[o for o in objs if not (REDM[min(H-1,o[2]),min(W-1,o[1])] and o[0][:2] in 
 J['objs']=objs; J['size']={k:v for k,v in J['size'].items() if k in {o[0] for o in objs} or True}
 json.dump(J,open(ROOT+'/data/world.json','w'),separators=(',',':'))
 print('物件总数',len(objs),'河中石',nw)
+# ---------- 裁边（用户画线：上边 y≈100 以上、左边 x≈100 以左删除）。之前的标注文件都用裁前坐标 ----------
+CX,CY=100,100
+Gf=np.zeros((H*HD,W*HD,3),np.uint8)
+for t in J['tiles']['list']:
+    tx,ty=int(t[1]),int(t[2]); im=np.array(Image.open(MAP+t+'.jpg').convert('RGB')); Gf[ty*T*HD:ty*T*HD+im.shape[0],tx*T*HD:tx*T*HD+im.shape[1]]=im
+Gf=Gf[CY*HD:,CX*HD:]; W2,H2=W-CX,H-CY
+for t in J['tiles']['list']:
+    tx,ty=int(t[1]),int(t[2]); Image.fromarray(Gf[ty*T*HD:(ty+1)*T*HD,tx*T*HD:(tx+1)*T*HD]).save(MAP+t+'.jpg',quality=72,optimize=True)
+Cc=np.array(Image.open(MAP+'coll.png'))[CY:,CX:]; Image.fromarray(Cc).save(MAP+'coll.png',optimize=True)
+J['objs']=[[k,x-CX,y-CY] for k,x,y in J['objs'] if x-CX>=4 and y-CY>=4]
+J['spawn']=[J['spawn'][0]-CX,J['spawn'][1]-CY]; J['WW'],J['WH']=W2,H2; J['off']=[CX,CY]
+gw,gh=J['rgrid']; rm=np.array(J['rmap']).reshape(gh,gw)[CY//50:,CX//50:]; J['rmap']=rm.flatten().tolist(); J['rgrid']=[rm.shape[1],rm.shape[0]]
+json.dump(J,open(ROOT+'/data/world.json','w'),separators=(',',':'))
+Image.fromarray(Gf[::8,::8]).save(ROOT+'/art_src/build/preview_nature.png')
+print('裁边后',W2,H2)

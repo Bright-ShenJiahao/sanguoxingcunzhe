@@ -9,7 +9,7 @@ export function createDebug(g){
  #dbg button{cursor:pointer;font:inherit;color:#eaf2ff;background:#1e3a72;border:1px solid #5d86c9;border-radius:4px;padding:3px 7px}
  #dbg button.on{background:#7a5a10;border-color:#f0dc9c}`;document.head.append(st);
  const el=document.createElement('div');el.id='dbg';document.body.append(el);
- const W=g.world,places=[['出生点',W.spawn[0],W.spawn[1]],['迷雾森林',700,1200],['山顶',420,730],['峡谷',900,1140],['水乡',2300,900],['海边',2901,1303]];
+ const W=g.world,O=W.off||[0,0],places=[['出生点',W.spawn[0],W.spawn[1]],['迷雾森林',700,1200],['山顶',420,730],['峡谷',900,1140],['水乡',2300,900],['海边',2901,1303]];
  const WK=['auto','clear','lightrain','heavyrain','lightsnow','heavysnow','blizzard','fog','overcast'];
  el.innerHTML=`<h4>🔧 开发者（点标题收起）</h4>
  <b>主角</b><div class="r"><button data-a="god">无敌</button><button data-a="nomob">没有怪物</button><button data-a="heal">回满血</button><button data-a="lv">升一级</button><button data-a="max">全武器满级</button></div>
@@ -29,7 +29,7 @@ export function createDebug(g){
   else if(a==='t60')R.skip(60);else if(a==='t300')R.skip(300);
   else if(a==='boss'){const s=R.S;if(s.t<595)s.t=595}
   else if(a==='kill'){for(const e of g.en)if(!e.dead)g.hit(e,9999)}
-  if(b.dataset.p){const p=places[+b.dataset.p];g.hero.x=p[1];g.hero.y=p[2]}
+  if(b.dataset.p){const p=places[+b.dataset.p],sp=p[0]==='出生点';g.hero.x=p[1]-(sp?0:O[0]);g.hero.y=p[2]-(sp?0:O[1])}
   if(b.dataset.w){g.weather.force(b.dataset.w);el.querySelectorAll('[data-w]').forEach(x=>x.classList.toggle('on',x===b))}
   if(b.dataset.h){g.weather.setHour(b.dataset.h);el.querySelectorAll('[data-h]').forEach(x=>x.classList.toggle('on',x===b))}
   b.blur()};
