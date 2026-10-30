@@ -75,7 +75,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup .own{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
  #lvup .sl{width:40px;height:40px;background:url(assets/ui/buttons_9.png) center/100% 100%;display:grid;place-items:center;color:#f6db94;font-weight:900;image-rendering:pixelated}#lvup .sl img{max-width:24px;max-height:24px;image-rendering:pixelated}`;
  st.textContent+=`
- #lvup :is(.frames_,.framesC_) .cn{top:4%}#lvup :is(.frames_,.framesC_) .ci{top:18%;height:34%}#lvup :is(.frames_,.framesC_) .st{top:55%}#lvup :is(.frames_,.framesC_) .cd{top:66%;bottom:10%}
+ #lvup :is(.frames_,.framesC_) .cn{top:-10%;height:8%;color:#ffe7a8;text-shadow:0 2px 2px #000;font-size:clamp(12px,3.4vw,17px)}#lvup :is(.frames_,.framesC_) .cf{margin-top:12%}#lvup :is(.frames_,.framesC_) .ci{top:18%;height:34%}#lvup :is(.frames_,.framesC_) .st{top:55%}#lvup :is(.frames_,.framesC_) .cd{top:66%;bottom:10%}
  #lvup .frames3_ .cn{top:8%}#lvup .frames3_ .ci{top:23%;height:36%}#lvup .frames3_ .st{top:61%}#lvup .frames3_ .cd{top:71%;bottom:8%}`;
  document.head.append(st);document.body.append(ui);
  const wImg={};for(const k in WEAPONS){if(!WEAPONS[k].img)continue;const im=new Image();im.src='assets/weapons/'+WEAPONS[k].img+'.png';wImg[k]=im}
