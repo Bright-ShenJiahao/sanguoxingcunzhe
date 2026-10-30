@@ -265,7 +265,6 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   S.gems=S.gems.filter(g=>!g.got);
   for(const c of S.coins){const dx=hero.x-c.x,dy=hero.y-6-c.y,d=Math.hypot(dx,dy);if(c.fly||d<mr){c.fly=true;const v=Math.max(140,d*6);c.x+=dx/d*v*dt;c.y+=dy/d*v*dt;if(d<6){c.got=true;window.META?.addGold(c.v*(1+.1*S.p.greed)+(Math.random()<.5?0:0)|0||1);window.SFX?.gem()}}}
   S.coins=S.coins.filter(c=>!c.got);
-  for(const m of S.mags||[])DA(c,UI.i_magnet,m.x-cx,m.y-cy-2+Math.sin(now/200),11);
   for(const ch of S.chests){if((hero.x-ch.x)**2+(hero.y-ch.y)**2<14*14){ch.got=true;openChest(ch.big)}}
   S.chests=S.chests.filter(c=>!c.got);
   for(const m of S.mags||[])if((hero.x-m.x)**2+(hero.y-m.y)**2<12*12){m.got=true;for(const g of S.gems)g.fly=true;window.SFX?.level()}
@@ -288,6 +287,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(const g of S.gems){const x=g.x-cx,y=g.y-cy;if(x<-10||y<-10||x>2000||y>2000)continue;const big=g.v>=12,col=g.v>=60?'#ffd166':big?'#c77dff':g.v>1?'#5ab0ff':'#5fe0b8';
    c.fillStyle='rgba(0,0,0,.25)';c.fillRect(x-1.5,y+2,3,1);c.fillStyle=col;c.beginPath();c.moveTo(x,y-(big?4:2.6));c.lineTo(x+(big?3:2),y);c.lineTo(x,y+(big?4:2.6));c.lineTo(x-(big?3:2),y);c.closePath();c.fill();c.fillStyle='rgba(255,255,255,.8)';c.fillRect(x-.6,y-1.4,1,1)}
   for(const co of S.coins){const x=co.x-cx,y=co.y-cy;c.fillStyle='#7a5208';c.beginPath();c.arc(x,y+.5,2.6,0,6.3);c.fill();c.fillStyle='#ffd23f';c.beginPath();c.arc(x,y,2.4,0,6.3);c.fill();c.fillStyle='#fff6c0';c.fillRect(x-1,y-1.4,1,1)}
+  for(const m of S.mags||[])DA(c,UI.i_magnet,m.x-cx,m.y-cy-2+Math.sin(now/200),11);
   for(const ch of S.chests){const x=ch.x-cx,y=ch.y-cy,b=Math.sin(performance.now()/250)*1.2,w=ch.big?14:10,h=ch.big?10:8;c.fillStyle='rgba(0,0,0,.3)';c.fillRect(x-w/2,y,w,2);
    c.fillStyle='#7a4a1c';c.fillRect(x-w/2,y-h+b,w,h);c.fillStyle='#e8b23a';c.fillRect(x-w/2,y-h+b,w,2);c.fillRect(x-1,y-h+b,2,h);c.fillStyle='#fff3b0';c.fillRect(x-1,y-h/2+b-1,2,2);
    c.save();c.globalAlpha=.35+.25*Math.sin(performance.now()/180);c.fillStyle='#ffe27a';c.beginPath();c.arc(x,y-h/2+b,w*.9,0,6.3);c.fill();c.restore()}
