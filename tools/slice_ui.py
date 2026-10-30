@@ -2,7 +2,7 @@
 import numpy as np,cv2,os,sys
 from PIL import Image
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-for nm in ['frames','buttons','icons','misc','frames2']:
+for nm in ['frames','buttons','icons','misc','frames2','frames3']:
     a=np.array(Image.open(f'{R}/art_src/ui/{nm}.png').convert('RGB')).astype(int)
     bg=(a[...,0]>150)&(a[...,2]>150)&(a[...,1]<110)
     fg=(~bg).astype(np.uint8)
