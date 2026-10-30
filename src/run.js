@@ -84,14 +84,16 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  const GX={};for(const k of ['b0','b1','b2','b3','x0','x1','x2','x3','tet','w0','w1','w2','w3','n0','n1','n2','bass']){const im=new Image();im.src='assets/weapons/gear/'+k+'.png';GX[k]=im}
  function reset(start='sword'){
   S={B:window.META?.bonus()||{hp:0,atk:0,spd:0,cd:0,arm:0,reg:0,mag:0,wis:0,crit:0,rr:0,rev:0},coins:[],chests:[],seen:{},ev:{},calm:0,t:+(new URLSearchParams(location.search).get('t')||0),lv:1,xp:0,need:5,queue:0,lastLv:-9,rerolls:0,w:{[start]:1},cd:{},p:Object.fromEntries(PASS_KEYS.map(k=>[k,0])),gems:[],shots:[],fx:[],texts:[],eliteT:Math.max(360,+(new URLSearchParams(location.search).get('t')||0)+60),bossDone:{},paused:false,maxHp:100};
+  {const P=Array.prototype.push;S.shots.push=function(...a){for(const x of a)if(!x.src)x.src=S.src;return P.apply(this,a)}}
   {const d=loadDeck();S.deck=[...d.w,...d.s];const rest=PASS_KEYS.filter(k=>!d.lock.includes(k)).sort(()=>Math.random()-.5);S.pp=[...d.lock,...rest.slice(0,10-d.lock.length)]}
   S.maxHp=100+S.B.hp;S.rerolls=S.B.rr;S.rev=S.B.rev;survival?.setMax?.(S.maxHp,S.B.hp);ui.hidden=true;
  }
  // ---------- 节奏 ----------
- const want=()=>{if(S.t<(S.calm||0))return 0;const m=S.t/60;return Math.min(330,(1+.1*S.p.curse)*Math.round(m<1?6+10*m:m<=5?16+9*(m-1):m<=10?52+18*(m-5):142+15*(m-10)))};
+ const CAP=matchMedia('(pointer:coarse)').matches?250:330;   // 手机少一点，防卡
+ const want=()=>{if(S.t<(S.calm||0))return 0;const m=S.t/60;return Math.min(CAP,(1+.1*S.p.curse)*Math.round(m<1?6+19*m:m<=5?25+18.75*(m-1):m<=15?100+20*(m-5):300))};
  // ---------- 波数：按时间逐步加入兵种 ----------
  const WAVES=[[0,{goblin:1}],[60,{goblin:3,gob_blade:1}],[180,{goblin:3,gob_blade:2,gob_shield:1}],[300,{goblin:3,gob_blade:2,gob_shield:1.5,gob_archer:1}],[480,{goblin:2.5,gob_blade:2,gob_shield:2,gob_archer:1.5}]];
- const NEWK={gob_blade:'剑士出现！速度很快',gob_shield:'盾卫出现！血很厚',gob_archer:'弓箭手出现！会放冷箭'};
+ const NEWK={gob_blade:'剑士出现！速度很快',gob_shield:'盾卫出现！铁甲：物理伤害减半',gob_archer:'弓箭手出现！会放冷箭'};
  function pickKind(){let w=WAVES[0][1];for(const [t,x] of WAVES)if(S.t>=t)w=x;let tot=0;for(const k in w)tot+=w[k];let r=Math.random()*tot;for(const k in w){r-=w[k];if(r<=0){if(NEWK[k]&&!S.seen[k]){S.seen[k]=1;S.banner={v:NEWK[k],t:3}}return k}}return 'goblin'}
  function ring(n,r,k){for(let i=0;i<n;i++){const a=i/n*6.283,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r*.8;if(ok(x,y)){const m=makeEnemy(x,y,k);if(m){onSpawnBase(m);en.push(m)}}}}
  function events(){
@@ -101,13 +103,14 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(S.t>=720&&!E.wall){E.wall=1;const sd=Math.random()<.5?-1:1;for(let i=-6;i<=6;i++){const x=hero.x+sd*220,y=hero.y+i*14;if(ok(x,y)){const m=makeEnemy(x,y,'gob_shield');if(m){onSpawnBase(m);en.push(m)}}}S.banner={v:'盾墙推进！',t:3}}
   if(S.t>=840&&!E.ring2){E.ring2=1;ring(30,170,'gob_blade');S.banner={v:'剑士包围！',t:3}}
  }
- function onSpawnBase(e){const m=S.t/60;e.hp=e.hpMax=Math.ceil(e.hp*(1+S.t/240)*(1+.1*S.p.curse));e.dmgMul=Math.min(1.8,.45+m*.07);e.sc=1}
+ function onSpawnBase(e){const m=S.t/60;e.hp=e.hpMax=Math.ceil(e.hp*(m<10?1+m/2:6+(m-10)*.9)*(1+.1*S.p.curse));e.dmgMul=Math.min(2.5,.6+m*.1);e.sc=1;e.armor=e.k==='gob_shield'?1:0}
  function onSpawn(e){
   onSpawnBase(e);
   const BS=[[600,'哥布林大王',80,1.25,'gob_king'],[900,'萨满长老',60,1.3,'gob_shaman'],[1200,'哥布林大王 · 怒',140,1.4,'gob_king'],[1500,'萨满长老 · 暗',120,1.45,'gob_shaman'],[1800,'哥布林皇帝',600,1.8,'gob_king']];
-  for(const [bt,nm,hp,sc,k] of BS)if(S.t>=bt&&!S.bossDone[bt]){S.bossDone[bt]=1;e.boss=true;e.k=k;e.hp=e.hpMax=Math.round(hp*(1+S.t/240));e.sc=sc;e.name=nm;if(k==='gob_shaman')e.summonT=3;S.calm=S.t+15;S.banner={v:'Boss：'+nm,t:3.5};S.texts.push({x:e.x,y:e.y-40,v:'Boss 来袭！',t:2.5,c:'#ff8a6a',big:1});return}
-  else if(S.t>=S.eliteT){S.eliteT=S.t+R(60,110);e.elite=true;e.k='gob_shaman';e.hp=e.hpMax=Math.ceil(10*(1+S.t/150));e.sc=1.1;e.summonT=4}
+  for(const [bt,nm,hp,sc,k] of BS)if(S.t>=bt&&!S.bossDone[bt]){S.bossDone[bt]=1;e.boss=true;e.armor=0;e.k=k;e.hp=e.hpMax=Math.round(hp*(1+S.t/240));e.sc=sc;e.name=nm;if(k==='gob_shaman')e.summonT=3;S.calm=S.t+15;S.banner={v:'Boss：'+nm,t:3.5};S.texts.push({x:e.x,y:e.y-40,v:'Boss 来袭！',t:2.5,c:'#ff8a6a',big:1});return}
+  else if(S.t>=S.eliteT){S.eliteT=S.t+R(60,110);e.elite=true;e.armor=0;e.k='gob_shaman';e.hp=e.hpMax=Math.ceil(10*(1+S.t/150));e.sc=1.1;e.summonT=4}
  }
+ const ST=(f,t)=>{const k=S.src;return setTimeout(()=>{const o=S.src;S.src=k;f();S.src=o},t)};
  function dmg(base){return base*(1+0.1*S.p.atk+S.B.atk)}
  const AR=()=>1+.1*S.p.area,AMT=()=>S.p.amt,FA=()=>hero.face>0?0:Math.PI,MA=()=>Math.atan2(hero.my||0,hero.mx||hero.face),FN=()=>{const t=nearest(260);return t?(t.x>=hero.x?0:Math.PI):FA()},AIM=(r=260)=>{const t=nearest(r);return t?Math.atan2(t.y-10-hero.y+10,t.x-hero.x):MA()},PS=()=>1+.15*S.p.pspd,DUR=()=>1+.15*S.p.dur;
  function cluster(){let b=null,bn=-1;const v=en.filter(e=>!e.dead&&Math.abs(e.x-hero.x)<230&&Math.abs(e.y-hero.y)<160);for(let i=0;i<Math.min(24,v.length);i++){const e=v[Math.floor(Math.random()*v.length)];let n=0;for(const o of v)if((o.x-e.x)**2+(o.y-e.y)**2<40*40)n++;if(n>bn){bn=n;b=e}}return b}
@@ -117,12 +120,13 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    let a=Math.atan2(dy,dx)-ang;a=Math.atan2(Math.sin(a),Math.cos(a));if(Math.abs(a)>half&&d>10)continue;
    let v=amount,crit=false;if(opts.crit&&Math.random()<opts.crit){v*=opts.cm;crit=true}
    strike(e,v,Math.sign(dx)||1,crit,true);if(opts.kb)knock(e,opts.kb);n++}return n}
- function strike(e,v,dir,crit,mel){if(mel&&S.p.vamp){S.vh=(S.vh||0)+v*.02*S.p.vamp;if(S.vh>=1){survival?.heal?.(Math.floor(S.vh));S.vh%=1}}window.SFX?.hit();if(!crit&&Math.random()<.05*S.p.luck+S.B.crit){v*=2;crit=true}hitEnemy(e,v,dir);S.texts.push({x:e.x+R(-3,3),y:e.y-18*(e.sc||1),v:(Math.round(v*10)/10)+'',t:.55,c:crit?'#ffd166':'#ffffff',big:crit})}
- function knock(e,k){if(e.boss)k*=.15;const dx=e.x-hero.x,dy=e.y-hero.y,l=Math.hypot(dx,dy)||1,nx=e.x+dx/l*k,ny=e.y+dy/l*k;if(ok(nx,ny)){e.x=nx;e.y=ny}}
+ const PHYS=new Set(['gb','sword','hammer','axe','bow','xbow']);
+ function strike(e,v,dir,crit,mel){const arm=e.armor&&PHYS.has(S.src);if(arm)v*=.5;if(mel&&S.p.vamp){S.vh=(S.vh||0)+v*.02*S.p.vamp;if(S.vh>=1){survival?.heal?.(Math.floor(S.vh));S.vh%=1}}window.SFX?.hit();if(!crit&&Math.random()<.05*S.p.luck+S.B.crit){v*=2;crit=true}hitEnemy(e,v,dir);S.texts.push({x:e.x+R(-3,3),y:e.y-18*(e.sc||1),v:(Math.round(v*10)/10)+'',t:.55,c:arm?'#8f98a3':crit?'#ffd166':'#ffffff',big:crit&&!arm})}
+ function knock(e,k){if(e.boss)k*=.15;if(e.armor)k*=.2;const dx=e.x-hero.x,dy=e.y-hero.y,l=Math.hypot(dx,dy)||1,nx=e.x+dx/l*k,ny=e.y+dy/l*k;if(ok(nx,ny)){e.x=nx;e.y=ny}}
  // ---------- 武器 ----------
  const FIRE={
   sword(L){const a=FN(),n=L>=7?3:L>=3?2:1,rg=(L>=8?56:L>=4?48:40),dm=1.3*dmg(1+.35*(L-1)+(L>=6?.6:0)+(L>=8?1:0));if(nearest(rg+10))window.SFX?.slash();
-   for(let i=0;i<n;i++)setTimeout(()=>{if(!S||S.paused)return;const aa=i===1?a+Math.PI:a;hitArc(aa,rg,.9,dm);S.fx.push({k:'arc',a:aa+(i%2?-.3:.3),r:rg*AR(),w:1.8,t:0,d:.18,c:'255,255,255',img:'sword',flip:i%2})},i*110);
+   for(let i=0;i<n;i++)ST(()=>{if(!S||S.paused)return;const aa=i===1?a+Math.PI:a;hitArc(aa,rg,.9,dm);S.fx.push({k:'arc',a:aa+(i%2?-.3:.3),r:rg*AR(),w:1.8,t:0,d:.18,c:'255,255,255',img:'sword',flip:i%2})},i*110);
    return L>=5?.65:.85},
   dao(L){const ang=FA(),half=L>=6?1.57:L>=3?1.25:1.05,dm=dmg(1.6+.45*(L-1)+(L>=5?.6:0));if(nearest(60))window.SFX?.slash();
    hitArc(ang,46,half,dm);S.fx.push({k:'arc',a:ang,r:46*AR(),w:half*2,t:0,d:.22,c:'255,236,200',img:'dao'});
@@ -138,13 +142,13 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    for(let i=0;i<n;i++){const a=b+(i-(n-1)/2)*.12;S.shots.push({k:'arrow',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:240,life:1,dm,pierce,hit:new Set()})}
    return L>=8?.7:.95},
   xbow(L){const n=(L>=8?9:L>=6?7:L>=3?5:3)+AMT(),dm=dmg(.9+(L>=2?.3:0)+(L>=5?.4:0)+(L>=8?.5:0)),pierce=L>=7?1:0,t=nearest(240);if(!t)return .3;
-   for(let i=0;i<n;i++)setTimeout(()=>{if(!S||S.paused)return;const tx=t.dead?null:t,a=tx?Math.atan2(tx.y-10-(hero.y-10),tx.x-hero.x)+R(-.04,.04):AIM(240);S.shots.push({k:'bolt',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:300,life:.8,dm,pierce,hit:new Set()})},i*70);
+   for(let i=0;i<n;i++)ST(()=>{if(!S||S.paused)return;const tx=t.dead?null:t,a=tx?Math.atan2(tx.y-10-(hero.y-10),tx.x-hero.x)+R(-.04,.04):AIM(240);S.shots.push({k:'bolt',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:300,life:.8,dm,pierce,hit:new Set()})},i*70);
    return L>=4?1.15:1.5},
   spear(L){const a=MA(),len=(L>=7?95:L>=3?80:65)*AR(),dm=dmg(1.6+.4*(L-1)+(L>=8?1.5:0)),n=L>=8?3:L>=5?2:1;if(nearest(len))window.SFX?.slash();
-   for(let i=0;i<n;i++)setTimeout(()=>{if(!S||S.paused)return;for(const e of en){if(e.dead)continue;const dx=e.x-hero.x,dy=e.y-6-hero.y,along=dx*Math.cos(a)+dy*Math.sin(a),side=Math.abs(-dx*Math.sin(a)+dy*Math.cos(a));if(along>0&&along<len&&side<8)strike(e,dm,Math.sign(dx)||1)}S.fx.push({k:'thrust',a,len,t:0,d:.16})},i*140);
+   for(let i=0;i<n;i++)ST(()=>{if(!S||S.paused)return;for(const e of en){if(e.dead)continue;const dx=e.x-hero.x,dy=e.y-6-hero.y,along=dx*Math.cos(a)+dy*Math.sin(a),side=Math.abs(-dx*Math.sin(a)+dy*Math.cos(a));if(along>0&&along<len&&side<8)strike(e,dm,Math.sign(dx)||1)}S.fx.push({k:'thrust',a,len,t:0,d:.16})},i*140);
    return L>=4?.95:1.2},
   knife(L){const n=(L>=8?5:L>=5?3:L>=2?2:1)+AMT(),dm=dmg(.9+(L>=3?.4:0)+(L>=7?.5:0)),pierce=L>=6?1:0,base=MA();window.SFX?.slash();
-   for(let i=0;i<n;i++)setTimeout(()=>{if(!S||S.paused)return;const a=base+R(-.1,.1);S.shots.push({k:'knife',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:300,life:.7,dm,pierce,hit:new Set()})},i*60);
+   for(let i=0;i<n;i++)ST(()=>{if(!S||S.paused)return;const a=base+R(-.1,.1);S.shots.push({k:'knife',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:300,life:.7,dm,pierce,hit:new Set()})},i*60);
    return L>=4?.55:.75},
   fireball(L){const n=(L>=7?3:L>=4?2:1),r=(L>=8?40:L>=3?32:26)*AR(),dm=dmg(2+.5*(L-1)),tg=cluster();if(!tg)return .4;const b=Math.atan2(tg.y-hero.y,tg.x-hero.x),dist=Math.min(200,Math.hypot(tg.x-hero.x,tg.y-hero.y));
    for(let i=0;i<n;i++){const a=b+(i-(n-1)/2)*.25;S.shots.push({k:'fire',x:hero.x,y:hero.y-10,tx:hero.x+Math.cos(a)*dist,ty:hero.y+Math.sin(a)*dist,dx:Math.cos(a),dy:Math.sin(a),v:170,life:1.1,r,dm,hit:new Set()})}
@@ -158,7 +162,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    for(let i=0;i<n;i++){const t=vis[Math.floor(Math.random()*vis.length)],a=Math.atan2(t.y-10-(hero.y-10),t.x-hero.x);S.shots.push({k:'ice',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:230,life:1.1,dm,pierce:0,slow,shat:L>=8,hit:new Set()})}
    return L>=5?1.5:1.9},
   thunder(L){const n=L>=8?8:L>=6?6:L>=5?4:L>=3?3:2,dm=dmg(2+.4*(L-1)),vis=en.filter(e=>!e.dead&&Math.abs(e.x-hero.x)<230&&Math.abs(e.y-hero.y)<160);if(!vis.length)return .4;window.SFX?.zap();S.thN=(S.thN||0)+1;
-   for(let i=0;i<n;i++)setTimeout(()=>{if(!S||S.paused)return;const t=vis[Math.floor(Math.random()*vis.length)];if(!t)return;const big=L>=8&&S.thN%4===0&&i===0,r=(big?44:16)*AR();S.fx.push({k:'anim',a:'fx_thunder_',x:t.x,y:t.y-14,w:big?70:34,t:0,d:.4});for(const e of en)if(!e.dead&&(e.x-t.x)**2+((e.y-t.y)*1.25)**2<r*r)strike(e,big?dm*3:dm,Math.sign(e.x-t.x)||1)},i*90);
+   for(let i=0;i<n;i++)ST(()=>{if(!S||S.paused)return;const t=vis[Math.floor(Math.random()*vis.length)];if(!t)return;const big=L>=8&&S.thN%4===0&&i===0,r=(big?44:16)*AR();S.fx.push({k:'anim',a:'fx_thunder_',x:t.x,y:t.y-14,w:big?70:34,t:0,d:.4});for(const e of en)if(!e.dead&&(e.x-t.x)**2+((e.y-t.y)*1.25)**2<r*r)strike(e,big?dm*3:dm,Math.sign(e.x-t.x)||1)},i*90);
    return L>=5?1.3:1.6},
   holy(L){if(!S.zones?.some(z=>z.k==='holy'))S.zones=(S.zones||[]).concat([{k:'holy',follow:1,t:0,d:1e9,tick:.5,every:.5,r:30,dm:1}]);const z=S.zones.find(z=>z.k==='holy');
    z.r=(L>=8?52:L>=6?44:L>=3?38:30)*AR();z.dm=dmg(.6+.25*(L-1)+(L>=8?.6:0));z.every=L>=7?.3:L>=4?.4:.5;return 1},
@@ -237,11 +241,11 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  function update(dt){
   if(!S||S.paused)return;
   S.t+=dt;events();if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
-  for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0)S.cd[k]=FIRE[k](OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd)}
+  for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0){S.src=k;S.cd[k]=FIRE[k](OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd)}}
   if(S.p.regen||S.B.reg){S.rg=(S.rg||0)+dt*(.3*S.p.regen+S.B.reg);if(S.rg>=1){survival?.heal?.(Math.floor(S.rg));S.rg%=1}}
   for(const z of S.zones||[]){z.t+=dt;z.tick-=dt;if(z.tick<=0){z.tick=z.every;const zx=z.follow?hero.x:z.x,zy=z.follow?hero.y:z.y;for(const e of en)if(!e.dead&&(e.x-zx)**2+((e.y-zy)*1.25)**2<z.r*z.r)strike(e,z.dm,Math.sign(e.x-zx)||1)}}
   S.zones=(S.zones||[]).filter(z=>z.t<z.d);
-  for(const s of S.shots){
+  for(const s of S.shots){S.src=s.src;
    if(s.k==='axe'){s.x+=s.vx*dt;s.y+=s.vy*dt;s.vy+=380*dt;s.life-=dt;for(const e of en){if(e.dead||s.hit.has(e))continue;if(Math.abs(e.x-s.x)<8&&Math.abs(e.y-10-s.y)<10){s.hit.add(e);let v=s.dm,c=false;if(Math.random()<s.cr){v*=s.cm;c=true}strike(e,v,Math.sign(s.vx)||1,c,true)}}s.dead=s.life<=0;continue}
    if(s.k==='fire'){s.x+=s.dx*s.v*dt;s.y+=s.dy*s.v*dt;s.life-=dt;for(const e of en)if(!e.dead&&Math.abs(e.x-s.x)<7&&Math.abs(e.y-10-s.y)<9){s.tx=s.x;s.ty=s.y+10;s.life=0;break}if((s.x-s.tx)**2+(s.y-10-s.ty+10)**2<36||s.life<=0||(s.x-s.tx)*s.dx+(s.y+10-s.ty)*s.dy>0){window.SFX?.boom();S.fx.push({k:'boom',x:s.tx,y:s.ty,r:s.r,t:0,d:.3});for(const e of en)if(!e.dead&&(e.x-s.tx)**2+((e.y-s.ty)*1.25)**2<s.r*s.r)strike(e,s.dm,Math.sign(e.x-s.tx)||1);s.dead=true}continue}
    if(s.k==='wave'){s.t+=dt;const rr=s.r*AR()*Math.min(1,s.t/s.d);for(const e of en){if(e.dead||s.hit.has(e))continue;const d=Math.hypot(e.x-hero.x,(e.y-hero.y)*1.2);if(d<rr+4){s.hit.add(e);strike(e,s.dm,Math.sign(e.x-hero.x)||1);if(!e.boss)knock(e,8)}}s.dead=s.t>=s.d;continue}
@@ -253,7 +257,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    s.x+=s.dx*s.v*PS()*dt;s.y+=s.dy*s.v*PS()*dt;s.life-=dt;
    for(const e of en){if(e.dead||s.hit.has(e))continue;const r=6*(e.sc||1);if(Math.abs(e.x-s.x)<r&&Math.abs(e.y-10*(e.sc||1)-s.y)<r+4){s.hit.add(e);strike(e,s.dm,s.dx>0?1:-1);if(s.slow){e.slowT=e.boss?Math.min(1,s.slow):s.slow;if(s.shat){S.fx.push({k:'anim',a:'fx_ice_',x:s.x,y:s.y,w:30,t:0,d:.3});for(const o of en)if(o!==e&&!o.dead&&(o.x-s.x)**2+(o.y-s.y)**2<20*20)strike(o,s.dm*.5,1)}}if(s.bounce>0){s.bounce--;let b=null,bd=90*90;for(const o of en){if(o.dead||s.hit.has(o))continue;const d=(o.x-s.x)**2+(o.y-10-s.y)**2;if(d<bd){bd=d;b=o}}if(b){const l=Math.hypot(b.x-s.x,b.y-10-s.y)||1;s.dx=(b.x-s.x)/l;s.dy=(b.y-10-s.y)/l;s.life=Math.max(s.life,.5);break}}if(s.pierce--<=0){s.life=0;break}}}
    s.dead=s.life<=0||!ok(s.x,s.y+10)}
-  S.shots=S.shots.filter(s=>!s.dead);
+  {let j=0;for(const s of S.shots)if(!s.dead)S.shots[j++]=s;S.shots.length=j}
   // 经验珠
   const mr=30*(1+S.B.mag)*(S.w.hp?1.25:1);
   for(const g of S.gems){const dx=hero.x-g.x,dy=hero.y-6-g.y,d=Math.hypot(dx,dy);

@@ -11,7 +11,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.dead)return false;
   e.hp-=dmg;
   if(e.hp<=0){e.dead=true;e.state='fall';e.timer=0;e.alpha=1}
-  else if(!e.boss){e.state='hurt';e.timer=0;e.cooldown=.25}else e.flash=.12
+  else if(!e.boss&&!e.elite&&e.state!=='dash'){e.state='hurt';e.timer=0;e.cooldown=.25}else e.flash=.12
   return true;
  }
  function reset(){arrows.length=0}
@@ -23,7 +23,14 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     else if(e.state==='down'){e.alpha=Math.max(0,1-Math.max(0,e.timer-.55)/.8);if(e.timer>=1.35)e.expired=true}
     continue;
    }
-   const ax=hero.x-e.x,ay=hero.y-e.y,d=Math.hypot(ax,ay)||1;e.face=ax>=0?1:-1;
+   const ax=hero.x-e.x,ay=hero.y-e.y,d=Math.hypot(ax,ay)||1;if(e.state!=='dash')e.face=ax>=0?1:-1;
+   const BD=stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1);
+   // 碰撞伤害：同一只怪每 0.5 秒最多一次
+   e.cc=(e.cc||0)-dt;if(!stats.ranged&&e.cc<=0&&Math.hypot(ax,(ay+2)*1.2)<(7+3*(e.sc||1))){e.cc=.5;onHit(BD*.5)}
+   if(e.state==='aim'){if(e.timer>=.5){e.state='dash';e.timer=0;e.dashHit=0}continue}
+   if(e.state==='dash'){const st=320*dt,nx=e.x+e.dx*st,ny=e.y+e.dy*st;if(ok(nx,ny)){e.x=nx;e.y=ny}e.moving=true;
+    if(!e.dashHit&&Math.hypot(hero.x-e.x,hero.y-e.y)<12){e.dashHit=1;onHit(BD)}if(e.timer>=.25){e.state='recover';e.timer=0;e.dcd=4}continue}
+   if(e.state==='bash'){if(e.timer>=1){e.state='strike';e.timer=0;const fr=Math.sign(ax)===Math.sign(e.bx||1);if(d<32&&fr){onHit(BD);const nx=hero.x+ax/d*22,ny=hero.y+ay/d*22;if(ok(nx,ny)){hero.x=nx;hero.y=ny}}e.bcd=5}continue}
    if(e.state==='hurt'){if(e.timer>=.25){e.state='move';e.timer=0}continue}
    if(e.state==='windup'){
     if(e.timer>=.45){
@@ -31,14 +38,16 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      if(stats.ranged){
       const len=Math.hypot(ax,ay)||1;
       arrows.push({k:e.k,x:e.x,y:e.y-10,dx:ax/len,dy:ay/len,life:1.6,dm:stats.damage*(e.dmgMul||1)*(e.elite?1.3:1)});
-     }else if(d<=(stats.reach+5)*(e.sc||1)){onHit(stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1))}
+     }else if((e.elite||e.boss)&&d<=(stats.reach+5)*(e.sc||1)){onHit(BD)}   // 普通怪挥砍只是动画，伤害靠碰撞
     }
    }else if(e.state==='strike'){
     if(e.timer>=.2){e.state='recover';e.timer=0}
    }else if(e.state==='recover'){
     if(e.timer>=.45){e.state='move';e.timer=0;e.cooldown=.55+Math.random()*.35}
    }else{
-    e.cooldown=Math.max(0,e.cooldown-dt);
+    e.cooldown=Math.max(0,e.cooldown-dt);e.dcd=(e.dcd||0)-dt;e.bcd=(e.bcd||0)-dt;
+    if(e.k==='gob_blade'&&!e.elite&&!e.boss&&d<70&&d>22&&e.dcd<=0){e.state='aim';e.timer=0;e.dx=ax/d;e.dy=ay/d;continue}   // 剑士：冲刺斩
+    if(e.k==='gob_shield'&&!e.elite&&!e.boss&&d<26&&e.bcd<=0){e.state='bash';e.timer=0;e.bx=ax;continue}   // 盾卫：盾击
     if(d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
     if(d>stats.reach*(e.sc||1)*.85){
      e.losT=(e.losT||0)-dt;if(e.losT<=0){e.losT=.25+Math.random()*.1;e.los=true;const n=Math.ceil(d/6);for(let k=1;k<n;k++){if(water(e.x+ax*k/n,e.y+ay*k/n)===1){e.los=false;break}}}   // 中间没有河/崖就直线走
@@ -67,7 +76,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   }
  }
  function frame(e,now){
-  let name=e.state;
+  let name=e.state==='aim'||e.state==='bash'?'windup':e.state==='dash'?'strike':e.state;
   if(name==='move')name=e.moving?'walk'+(Math.floor(now/110+e.ph)%6):'idle'+(Math.floor(now/650)%2);
   if(name==='recover'&&!data[e.k].frames.recover)name='idle0';
   if(name==='windup'&&data[e.k].frames.draw&&e.timer>.22)name='draw';
@@ -76,6 +85,8 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  function getFrame(e,now){const f=frame(e,now),name=Object.keys(data[e.k].frames).find(key=>data[e.k].frames[key]===f);return {f,im:images['en_'+e.k+'_'+name]}}
  function draw(e,c,cx,cy,now){
   const {f,im}=getFrame(e,now);
+  if(e.state==='aim'){const k=e.timer/.5;c.save();c.globalAlpha=.25+.5*k;c.strokeStyle='#ff3a2a';c.lineWidth=2;c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.lineTo(e.x-cx+e.dx*80,e.y-cy+e.dy*80);c.stroke();c.restore()}
+  if(e.state==='bash'){const k=Math.min(1,e.timer),a0=(e.bx||1)>0?-Math.PI/2:Math.PI/2;c.save();c.globalAlpha=.2+.45*k;c.fillStyle='#ff3a2a';c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.ellipse(e.x-cx,e.y-cy,32*k,22*k,0,a0,a0+Math.PI);c.closePath();c.fill();c.restore()}
   const sc=e.sc||1;c.save();c.translate(Math.round(e.x-cx),Math.round(e.y-cy));c.scale(e.face*sc,sc);c.globalAlpha=e.alpha??1;c.imageSmoothingEnabled=false;
   if(!e.dead){c.fillStyle='rgba(10,20,10,.32)';c.beginPath();c.ellipse(0,0,6,2.2,0,0,6.3);c.fill()}   // 脚下阴影：雨雾天也看得清
   if(e.flash>0){e.flash-=1/60;c.filter='brightness(2.2)'}
