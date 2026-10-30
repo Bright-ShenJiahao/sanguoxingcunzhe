@@ -30,6 +30,22 @@ BX0,BY0,BX1,BY1=2706,924,2892,974
 bmk=(np.array(Image.open(ROOT+'/art_src/map/bridge_wood.png'))[...,3]>0).astype(np.uint8)
 bmk=cv2.dilate(bmk,np.ones((7,7),np.uint8)); bm2=np.zeros((H*HD,W*HD),np.uint8); bm2[BY0*HD:BY1*HD,BX0*HD:BX1*HD]=bmk
 G=cv2.inpaint(G,bm2,9,cv2.INPAINT_TELEA)
+# 用户圈的编辑（art_src/map/edits.json）：紫=抹掉地面花纹，绿=删掉水，红=删掉圈内植物（后面处理）
+ED_=json.load(open(ROOT+'/art_src/map/edits.json'))
+def polym(c):
+    m=np.zeros((H,W),np.uint8)
+    for L_ in ED_:
+        if L_['颜色']==c and len(L_['点'])>=3: cv2.fillPoly(m,[np.array(L_['点'],np.int32)],1)
+    return m>0
+REDM=polym('#ff3040'); fixm=polym('#9040ff')|polym('#20d060'); dryM=polym('#20d060')
+if fixm.any():
+    sm=cv2.resize(G,(W,H),interpolation=cv2.INTER_AREA); mk=dil(fixm,4).astype(np.uint8)
+    rep_=cv2.inpaint(sm,mk,12,cv2.INPAINT_TELEA); big_=cv2.resize(rep_,(W*HD,H*HD),interpolation=cv2.INTER_LINEAR)
+    gr_=np.array(Image.open(ROOT+'/art_src/map/grass.png').convert('RGB')).astype(np.float32); gt=cv2.resize(gr_,(900,900))
+    tex_=gt[np.arange(H*HD)[:,None]%900,np.arange(W*HD)[None,:]%900]; tl=tex_-tex_.mean((0,1))
+    M2=cv2.GaussianBlur(cv2.resize(mk,(W*HD,H*HD),interpolation=cv2.INTER_NEAREST).astype(np.float32),(0,0),4)[...,None]
+    G=np.clip(G*(1-M2)+(big_+tl*0.6)*M2,0,255).astype(np.uint8)
+    C0[dil(dryM,4)]=0
 g=cv2.resize(G,(W,H),interpolation=cv2.INTER_AREA).astype(int)
 blue=g[...,2]>g[...,1]+5
 wat0=((C0>=1)&blue)|(C0==2)
@@ -337,6 +353,7 @@ for j in rng.permutation(len(rx))[:4000]:
         WR.append((x,y))
         put('wr%d'%rng.integers(1,5),x,y,10); nw+=1
 for k,x,y in [('rf1',1232,1392),('rf3',1246,1360),('rf4',1214,1352)]: put(k,x,y,12)
+objs=[o for o in objs if not (REDM[min(H-1,o[2]),min(W-1,o[1])] and o[0][:2] in ('br','pi','bu','tu','fl','wc','wr','wl','dr'))]
 J['objs']=objs; J['size']={k:v for k,v in J['size'].items() if k in {o[0] for o in objs} or True}
 json.dump(J,open(ROOT+'/data/world.json','w'),separators=(',',':'))
 print('物件总数',len(objs),'河中石',nw)
