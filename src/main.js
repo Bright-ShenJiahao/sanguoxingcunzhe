@@ -2,6 +2,8 @@
 import {createMenu} from './menu.js';
 import {createSurvival} from './survival.js';
 import {createEnemies} from './enemies.js';
+import {createAudio} from './audio.js';
+const SFX=window.SFX=createAudio();
 import {createPathing} from './pathing.js';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
 import {createWeather} from './weather.js';
@@ -75,10 +77,10 @@ function drawHero(px,py,moving,now){
  if(wpm=='magic'){const bob=Math.sin(now/380)*1.3;c.save();c.translate(-11,-19+bob);c.scale(.5,.5);c.globalAlpha=.97;c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
  c.restore()}
 const en=[];let kills=0,fx=[];
-const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>survival?.damage(Math.max(1,amount-(run?.armor||0)))});
+const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{SFX.hurt();survival?.damage(Math.max(1,amount-(run?.armor||0)))}});
 function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg))fx.push({x:e.x,y:e.y,t:now,dx})}
-function spawn(){if(window.DBG?.noMob)return;for(let n=0;n<30;n++){const a=Math.random()*6.28,r=Math.hypot(VW,VH)/2+20+Math.random()*90,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
- if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;const e=enemySystem.make(x,y);run?.onSpawn(e);en.push(e);return}}
+function spawn(){if(window.DBG?.noMob)return;for(let n=0;n<30;n++){const a=Math.random()*6.28,r=(Math.hypot(VW,VH)/2+20+Math.random()*90)*(run?.spawnR||1),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
+ if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;const e=enemySystem.make(x,y,run?.pickKind());run?.onSpawn(e);en.push(e);return}}
 let fish=null;const deepAt=(x,y,r)=>x>2100&&y>WH-1000&&[[0,0],[r,0],[-r,0],[0,r*.6],[0,-r*.6]].every(([a,b])=>water(x+a,y+b)===1);
 let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;
 function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());const v=(x,y)=>{const fx=x/n*8,fy=y/n*8,x0=Math.floor(fx),y0=Math.floor(fy),tx=fx-x0,ty=fy-y0,s=t=>t*t*(3-2*t),q=(a,b)=>g[((b%8+8)%8)*8+((a%8+8)%8)];const a=q(x0,y0)*(1-s(tx))+q(x0+1,y0)*s(tx),b=q(x0,y0+1)*(1-s(tx))+q(x0+1,y0+1)*s(tx);return a*(1-s(ty))+b*s(ty)};
@@ -114,6 +116,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
 
  const dt=Math.min(.05,(now-last)/1000||0);last=now;
  dbg?.show(!menu?.visible);
+ SFX.setMode(menu?.visible?'menu':en.some(e=>e.boss&&!e.dead)?'boss':'game');SFX.setIntensity(en.length/180);
  if(menu?.visible){menu.draw(now);requestAnimationFrame(loop);return}
  if(CM){PATH??=createPathing(WW,WH,ok);PATH.update(hero.x,hero.y,now)}
  if(survival?.finished){requestAnimationFrame(loop);return}
