@@ -4,7 +4,7 @@ import json,sys,os,numpy as np,cv2
 from PIL import Image
 Image.MAX_IMAGE_PIXELS=None
 R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)));M=R+'/assets/map/'
-L=json.load(open(sys.argv[1]));WID=float(sys.argv[2]) if len(sys.argv)>2 else 40;FILL='fill' in sys.argv   # fill：浅滩也填成草地
+L=json.load(open(sys.argv[1]));WID=float(sys.argv[2]) if len(sys.argv)>2 else 40;FILL='fill' in sys.argv;ALL='all' in sys.argv   # fill：浅滩也填成草地；all：深水也填（圈起来的整块变草原）
 J=json.load(open(R+'/data/world.json'));HD=J['HD'];T=J['tiles']['T'];W,H=J['WW'],J['WH']
 full=np.zeros((H*HD,W*HD,3),np.uint8)
 for t in J['tiles']['list']:
@@ -14,11 +14,13 @@ for s in L:
     if s['颜色'] not in ('#20d060','#ff3040'):continue   # 绿=开路，红=清掉残留峭壁（同样变草地）
     pts=np.array([[x*HD,y*HD] for x,y in s['点']],np.int32)
     if len(pts)==1:cv2.circle(mask,tuple(pts[0]),int(WID*HD/2),255,-1)
-    else:cv2.polylines(mask,[pts],False,255,int(WID*HD),lineType=cv2.LINE_AA)
+    else:
+        cv2.polylines(mask,[pts],False,255,int(WID*HD),lineType=cv2.LINE_AA)
+        if np.hypot(*(pts[0]-pts[-1]))<40*HD:cv2.fillPoly(mask,[pts],255)   # 圈起来的区域整块处理
 f=full.astype(int);water=(f[...,2]>f[...,1]+10)&(f[...,2]>90)   # 水面不动
 water=cv2.dilate(water.astype(np.uint8),np.ones((9,9),np.uint8))>0
 cc=np.array(Image.open(M+'coll.png').convert('RGB'))[...,0];deep=cv2.resize((cc==1).astype(np.uint8),(W*HD,H*HD),interpolation=cv2.INTER_NEAREST)>0
-m=(mask>0)&(~(water&deep) if FILL else ~water)
+m=(mask>0)&(np.ones_like(water) if ALL else (~(water&deep) if FILL else ~water))
 # 草地纹理：取地图中部一块平坦草地（同一画风），做成无缝后平铺，再按周围颜色校正
 S=int(200*HD);best=None
 for py in range(100*HD,(H-260)*HD,60*HD):   # 自动找一块最纯的草地（不含水、崖、路）
@@ -39,7 +41,7 @@ for t in J['tiles']['list']:
     tx,ty=int(t[1]),int(t[2]);Image.fromarray(out[ty*T*HD:(ty+1)*T*HD,tx*T*HD:(tx+1)*T*HD]).save(M+t+'.jpg',quality=80,optimize=True)
 # 碰撞：涂到的地方（非水）改成可走
 c=np.array(Image.open(M+'coll.png').convert('RGB'));ms=cv2.resize(m.astype(np.uint8),(W,H),interpolation=cv2.INTER_AREA)>0
-c[...,0][ms&((c[...,0]==1)|((c[...,0]==2) if FILL else False))]=0;Image.fromarray(c).save(M+'coll.png')
+c[...,0][ms&((c[...,0]==1)|((c[...,0]==2) if (FILL or ALL) else False))]=0;Image.fromarray(c).save(M+'coll.png')
 # 物件：路上的移走
 n0=len(J['objs']);J['objs']=[o for o in J['objs'] if not (0<=o[2]<H and 0<=o[1]<W and ms[min(H-1,int(o[2])),min(W-1,int(o[1]))]) or 'bridge' in o[0]]
 J['ver']=J.get('ver',0)+1;json.dump(J,open(R+'/data/world.json','w'),ensure_ascii=False,separators=(',',':'))
