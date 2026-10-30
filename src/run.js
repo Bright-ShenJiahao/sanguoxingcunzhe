@@ -166,7 +166,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   let nm,tag,d;
   if(o.t==='w'){const L=S.w[o.k]||0,W=WEAPONS[o.k],sp=isSp(o.k);nm=W.name;d=W.desc[L];
    tag=!L?`<span class="tag ${sp?'sp':'new'}">${sp?'新法术':'新武器'} · ${CATS[W.cat].name}</span>`:L+1===8||/【/.test(d)?`<span class="tag q">★ ${L} → ${L+1} 级</span>`:`<span class="tag">升级 · ${L} → ${L+1} 级</span>`}
-  else if(o.t==='p'){const L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;tag=`<span class="tag p">${L?'强化 · '+L+' → '+(L+1):'被动'}</span>`}
+  else if(o.t==='p'){const L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;tag=`<span class="tag p">${L?'符文 · '+L+' → '+(L+1):'新符文'}</span>`}
   else{nm='调息';d='回复 30 点生命';tag='<span class="tag p">回复</span>'}
   return `<button class="card" data-i="${i}"><span class="ic">${icon(o)}</span><span><span class="nm">${nm}</span>${tag}<span class="d">${d}</span></span></button>`}
  let cur=[],sub=null;
