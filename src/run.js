@@ -33,6 +33,9 @@ export const POOL={w:Object.keys(WEAPONS).filter(k=>!['spell','own'].includes(WE
 WEAPONS.gb={name:'掌机',cat:'own',img:'gear/gb',own:1,desc:['按 A 键射出像素光弹，追最近的敌人','伤害提升','一次 2 发','光弹穿透 1 个敌人','射速提升','一次 3 发','穿透 +1','每 4 轮从天上砸下俄罗斯方块']};
 WEAPONS.hp={name:'耳机',cat:'own',img:'gear/hp',own:1,desc:['放出声波圈，向外扩散并推开敌人','伤害提升','声波圈变大','间隔缩短','附带音符追踪敌人','伤害提升','音符变多','重低音：全屏震停敌人 1 秒']};
 const MAXW=3,MAXS=3,MAXP=6;   // 局内上限：公共武器 3、法术 3、被动 6（专属另算）
+const UIV=new URLSearchParams(location.search).get('ui')==='card'?'card':'blue';
+const WIC={gb:'icons_0',hp:'icons_1',missile:'icons_2',axe:'icons_3',fireball:'icons_4',frost:'icons_5',chain:'icons_6',holy:'icons_7'};
+const PIC={spd:'icons_9',hp:'icons_10',mag:'icons_11',wis:'icons_12'};
 const isSp=k=>WEAPONS[k].cat==='spell',isOwn=k=>!!WEAPONS[k].own;
 function loadDeck(){let d=null;try{d=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
  if(!d||!Array.isArray(d.w)||d.w.length!==5||!Array.isArray(d.s)||d.s.length!==5)d={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};d.lock=(d.lock||[]).slice(0,2);return d}
@@ -40,17 +43,37 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  let S;
  const ui=document.createElement('div');ui.id='lvup';ui.hidden=true;
  const st=document.createElement('style');st.textContent=`
- #lvup{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:#050c16aa;font:15px "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:#f2f6ff}
- #lvup[hidden]{display:none}#lvup .box{width:min(560px,94vw);padding:20px 22px 16px;border:3px solid #cfe2ff;border-radius:18px;background:linear-gradient(160deg,#2a5aaef5,#173a7cf5);box-shadow:0 8px 0 #0006}
+ #lvup{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:#050c1655;font:15px "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;color:#f2f6ff}
+ #lvup[hidden]{display:none}#lvup .box{width:min(560px,94vw);padding:20px 22px 16px;border:3px solid #cfe2ff;border-radius:18px;background:linear-gradient(160deg,#2a5aae99,#173a7ca6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);box-shadow:0 8px 24px #0006}
  #lvup h2{margin:0 0 2px;text-align:center;color:#fff;font-size:30px;letter-spacing:2px;text-shadow:0 2px 0 #0008}#lvup .sub{text-align:center;color:#c9d8f0;margin-bottom:14px;font-size:15px}
- #lvup button.card{display:flex;gap:16px;align-items:center;width:100%;text-align:left;margin:10px 0;padding:14px 16px;border:2px solid #8fbbef66;border-radius:16px;background:#0d2a63aa;color:#f2f6ff;font:inherit;cursor:pointer;transition:transform .08s}
+ #lvup button.card{display:flex;gap:16px;align-items:center;width:100%;text-align:left;margin:10px 0;padding:14px 16px;border:2px solid #8fbbef66;border-radius:16px;background:#0d2a6388;color:#f2f6ff;font:inherit;text-shadow:0 1px 3px #000a;cursor:pointer;transition:transform .08s}
  #lvup button.card:hover,#lvup button.card:focus{border-color:#ffe08a;background:#1d4590dd;outline:none;transform:translateY(-1px)}
  #lvup .ic{flex:none;width:64px;height:64px;border-radius:12px;background:#0a1838;display:grid;place-items:center;font-weight:700;color:#f6db94;font-size:26px}
- #lvup .ic img{max-width:56px;max-height:56px;image-rendering:pixelated}
+ #lvup .ic img{max-width:54px;max-height:54px;image-rendering:pixelated}
  #lvup .nm{font-weight:800;font-size:21px}#lvup .tag{display:inline-block;margin-left:10px;padding:3px 10px;border-radius:8px;font-size:13px;font-weight:700;vertical-align:3px;background:#c9d4e8;color:#1b2a48}
  #lvup .tag.new{background:#ffd23f;color:#4a2c00}#lvup .tag.sp{background:#c9a8ff;color:#2a1050}#lvup .tag.p{background:#9fe0a8;color:#0f3a1a}#lvup .tag.q{background:linear-gradient(#ffe27a,#f0a91c);color:#4a2c00}
  #lvup .d{display:block;color:#d6e2f6;font-size:15px;margin-top:5px}#lvup .slots{text-align:center;color:#9fb6d8;font-size:12px;margin-top:6px}
  #lvup .row{display:flex;gap:8px;justify-content:center;margin-top:8px}#lvup .row button{padding:9px 22px;border-radius:12px;border:2px solid #cfe2ff;background:#123063;color:#fff;font:inherit;cursor:pointer}`;
+ st.textContent+=`
+ #lvup .b2{width:min(600px,96vw);display:flex;flex-direction:column;align-items:center;gap:10px;font-family:"Noto Serif CJK SC","Songti SC",serif}
+ #lvup .scroll{width:min(560px,92vw);aspect-ratio:1414/264;background:url(assets/ui/buttons_0.png) center/100% 100%;display:grid;place-items:center;font-size:clamp(22px,6vw,32px);font-weight:900;color:#5a2e0e;image-rendering:pixelated}
+ #lvup .b2 .sub{color:#ffe7a8;text-shadow:0 1px 3px #000;margin:0}
+ #lvup .cards{display:flex;gap:min(10px,2vw);justify-content:center;width:100%}
+ #lvup button.c2{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:min(170px,30vw);transition:transform .1s}
+ #lvup button.c2:hover,#lvup button.c2:focus{background:none!important;border:0!important;outline:none;transform:translateY(-4px) scale(1.03);filter:drop-shadow(0 0 8px #ffd860)}
+ #lvup .cn{color:#ffe7a8;font-weight:900;font-size:clamp(13px,3.6vw,17px);text-shadow:0 2px 2px #000}
+ #lvup .cf{position:relative;width:100%;aspect-ratio:2/3.1;background:center/100% 100% no-repeat;image-rendering:pixelated}
+ #lvup .nw{position:absolute;top:5%;z-index:1;left:50%;transform:translateX(-50%);padding:1px 8px;background:#f0d8a6;border:2px solid #8a5a1c;border-radius:4px;color:#b0200c;font-size:11px;font-weight:900}
+ #lvup .ci{position:absolute;left:16%;right:16%;top:20%;height:36%;display:grid;place-items:center;font-size:30px;font-weight:900;color:#5a2e0e}
+ #lvup .ci img{max-width:100%;max-height:100%;image-rendering:pixelated}
+ #lvup .st{position:absolute;top:58.5%;left:0;right:0;display:flex;justify-content:center;gap:1px}
+ #lvup .st i{width:9px;height:9px;background:url(assets/ui/buttons_16.png) center/contain no-repeat}#lvup .st i.on{background-image:url(assets/ui/buttons_17.png)}
+ #lvup .cd{position:absolute;top:69%;left:13%;right:13%;bottom:9%;display:grid;place-items:center;text-align:center;font-size:clamp(9.5px,2.7vw,12.5px);line-height:1.25;color:#4a250c}
+ #lvup .btns{display:flex;gap:10px;margin-top:4px}
+ #lvup .pb{all:unset;cursor:pointer;width:min(130px,30vw);aspect-ratio:360/135;background:center/100% 100%;display:grid;place-items:center;color:#fff;font-weight:900;font-size:16px;text-shadow:0 2px #0008;image-rendering:pixelated}
+ #lvup .pb.green{background-image:url(assets/ui/buttons_1.png)}#lvup .pb.gray{background-image:url(assets/ui/buttons_3.png)}#lvup .pb:disabled{filter:grayscale(1) brightness(.7);cursor:default}
+ #lvup .own{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+ #lvup .sl{width:40px;height:40px;background:url(assets/ui/buttons_9.png) center/100% 100%;display:grid;place-items:center;color:#f6db94;font-weight:900;image-rendering:pixelated}#lvup .sl img{max-width:24px;max-height:24px;image-rendering:pixelated}`;
  document.head.append(st);document.body.append(ui);
  const wImg={};for(const k in WEAPONS){if(!WEAPONS[k].img)continue;const im=new Image();im.src='assets/weapons/'+WEAPONS[k].img+'.png';wImg[k]=im}
  const GX={};for(const k of ['b0','b1','b2','b3','x0','x1','x2','x3','tet','w0','w1','w2','w3','n0','n1','n2','bass']){const im=new Image();im.src='assets/weapons/gear/'+k+'.png';GX[k]=im}
@@ -161,22 +184,32 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(const k of S.pp){const L=S.p[k];if(L>=PASSIVES[k].max)continue;if(!L&&np>=MAXP)continue;pool.push({t:'p',k,wt:.8})}
   const out=[];while(out.length<3&&pool.length){const tot=pool.reduce((a,o)=>a+o.wt,0);let r=Math.random()*tot,i=0;while(i<pool.length-1&&r>pool[i].wt)r-=pool[i++].wt;out.push(pool.splice(i,1)[0])}
   if(!out.length)out.push({t:'heal'});return out}
- function icon(o){if(o.t==='w')return wImg[o.k]?`<img src="${wImg[o.k].src}" alt="">`:WEAPONS[o.k].name[0];if(o.t==='cat')return CATS[o.k].name[0];if(o.t==='p')return PASSIVES[o.k].name[0];return '息'}
- function card(o,i){
+ function icon(o){const f=o.t==='w'?WIC[o.k]:o.t==='p'?PIC[o.k]:null;if(f)return `<img src="assets/ui/${f}.png" alt="">`;if(o.t==='w')return wImg[o.k]?`<img src="${wImg[o.k].src}" alt="">`:WEAPONS[o.k].name[0];if(o.t==='cat')return CATS[o.k].name[0];if(o.t==='p')return PASSIVES[o.k].name[0];return '息'}
+ function card(o,i){if(UIV==='card')return card2(o,i);
   let nm,tag,d;
   if(o.t==='w'){const L=S.w[o.k]||0,W=WEAPONS[o.k],sp=isSp(o.k);nm=W.name;d=W.desc[L];
    tag=!L?`<span class="tag ${sp?'sp':'new'}">${sp?'新法术卡':'新装备卡'} · ${CATS[W.cat].name}</span>`:L+1===8||/【/.test(d)?`<span class="tag q">★ ${L} → ${L+1} 级</span>`:`<span class="tag">升级 · ${L} → ${L+1} 级</span>`}
   else if(o.t==='p'){const L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;tag=`<span class="tag p">${L?'祝福 · '+L+' → '+(L+1):'新祝福'}</span>`}
   else{nm='调息';d='回复 30 点生命';tag='<span class="tag p">回复</span>'}
   return `<button class="card" data-i="${i}"><span class="ic">${icon(o)}</span><span><span class="nm">${nm}</span>${tag}<span class="d">${d}</span></span></button>`}
+ function card2(o,i){let nm,d,L=0,fr='frames_0',nw=false;
+  if(o.t==='w'){const W=WEAPONS[o.k];L=S.w[o.k]||0;nm=W.name;d=W.desc[L];nw=!L;fr=isOwn(o.k)?'frames_3':isSp(o.k)?'frames_2':'frames_1'}
+  else if(o.t==='p'){L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;nw=!L}else{nm='调息';d='回复 30 点生命'}
+  const mx=o.t==='w'?8:o.t==='p'?PASSIVES[o.k].max:1,st=o.t==='heal'?'':`<span class="st">${Array.from({length:Math.min(mx,8)},(_,j)=>`<i class="${j<=L?'on':''}"></i>`).join('')}</span>`;
+  return `<button class="card c2" data-i="${i}"><span class="cn">${nm}</span><span class="cf" style="background-image:url(assets/ui/${fr}.png)">${nw?'<span class="nw">NEW</span>':''}<span class="ci">${icon(o)}</span>${st}<span class="cd">${d}</span></span></button>`}
+ function owned(){return Object.keys(S.w).map(k=>({t:'w',k})).concat(Object.keys(S.p).filter(k=>S.p[k]>0).map(k=>({t:'p',k})))}
  let cur=[],sub=null;
  function render(){
   const list=sub?CATS[sub].ws.filter(k=>!S.w[k]).map(k=>({t:'w',k})):cur;
-  ui.innerHTML=`<div class="box"><h2>等级 ${S.lv}！</h2><div class="sub">选择奖励 · 按 1 / 2 / 3</div>${list.map(card).join('')}
+  if(UIV==='card'){const ow=owned();ui.innerHTML=`<div class="b2"><div class="scroll">等级 ${S.lv}！</div><div class="sub">选择一张卡 · 按 1 / 2 / 3</div><div class="cards">${list.map(card).join('')}</div>
+   <div class="btns">${sub?'<button class="pb gray" data-a="back">返回</button>':`<button class="pb green" data-a="rr" ${S.rerolls>0?'':'disabled'}>刷新 ${S.rerolls}</button><button class="pb gray" data-a="skip">跳过</button>`}</div>
+   <div class="own">${Array.from({length:Math.max(6,ow.length)},(_,j)=>`<span class="sl">${ow[j]?icon(ow[j]):''}</span>`).join('')}</div></div>`}
+  else ui.innerHTML=`<div class="box"><h2>等级 ${S.lv}！</h2><div class="sub">选择奖励 · 按 1 / 2 / 3</div>${list.map(card).join('')}
    <div class="row">${sub?'<button data-a="back">返回</button>':(S.rerolls>0?`<button data-a="rr">重抽（${S.rerolls}）· R</button>`:'')}</div><div class="slots">装备 ${Object.keys(S.w).filter(k=>!isOwn(k)&&!isSp(k)).length}/${MAXW} · 法术 ${Object.keys(S.w).filter(isSp).length}/${MAXS} · 祝福 ${Object.keys(S.p).filter(k=>S.p[k]>0).length}/${MAXP}</div></div>`;
   ui.querySelectorAll('button.card').forEach(b=>b.onclick=()=>choose(list[+b.dataset.i]));
   const bk=ui.querySelector('[data-a=back]');if(bk)bk.onclick=()=>{sub=null;render()};
   const rr=ui.querySelector('[data-a=rr]');if(rr)rr.onclick=reroll;
+  const sk=ui.querySelector('[data-a=skip]');if(sk)sk.onclick=()=>{ui.hidden=true;S.paused=false;sub=null};
   setTimeout(()=>ui.querySelector('button.card')?.focus(),30)}
  function openLevel(){S.paused=true;sub=null;cur=options();ui.hidden=false;render()}
  function reroll(){if(sub||S.rerolls<=0)return;S.rerolls--;cur=options();render()}
