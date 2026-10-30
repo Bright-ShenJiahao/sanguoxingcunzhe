@@ -14,7 +14,7 @@ const D={...W,...CH,gt:W.tiles.list||[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),col
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),WW=D.WW,WH=D.WH||D.WW,HD=D.HD;
 let VW=480,VH=300,SC=HD;
-function fit(){const dpr=Math.min(1.5,devicePixelRatio||1),k=Math.max(2,Math.min(4,Math.round(innerHeight/380)));const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;VW=W/SC;VH=H/SC}
+function fit(){const dpr=Math.min(1.5,devicePixelRatio||1),k=Math.max(1,Math.min(4,Math.round(innerHeight/380),Math.min(innerWidth,innerHeight)/320));/* 短边至少看到约 320 逻辑像素 */const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;VW=W/SC;VH=H/SC}
 addEventListener('resize',()=>{if(!menu?.visible)fit()});
 const $=id=>document.getElementById(id);
 const keys={};let joy=null;
@@ -89,7 +89,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
  mkCloud();
  menu=createMenu({c,images:IM,data:D,drawGround,objects:objs,enemies:ED,
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
-  clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>needLoad()?loadSet(CS):Promise.resolve(),fit,onStart(){survival.start()}
+  clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>needLoad()?loadSet(CS):Promise.resolve(),fit,onStart(){survival.start();portal={x:hero.x+14,y:hero.y-2,t:performance.now()}}
  });
  survival=createSurvival({hero,enemies:en,get kills(){return kills},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
@@ -107,7 +107,7 @@ function drawGround(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const m=ctx.getTransform(),s=+(
  for(let j=Math.max(0,Math.floor(sy/GCH));j*GCH<Math.min(WH,sy+sh);j++)for(let i=Math.max(0,Math.floor(sx/GCH));i*GCH<Math.min(WW,sx+sw);i++)
   ctx.drawImage(gChunk(i,j,s),Math.round(ox+(i*GCH-sx)*s),Math.round(oy+(j*GCH-sy)*s));
  ctx.restore()}
-let menu,survival,run,dbg;const weather=createWeather();
+let menu,survival,run,dbg,portal=null;const weather=createWeather();
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
 let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimationFrame(loop);return}flT=now;   // 锁帧：游戏 60、菜单 30
 
@@ -138,7 +138,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
   for(const p of pj){p.x+=p.dx*p.v*dt;p.y+=p.dy*p.v*dt;p.life-=dt;for(const e of en){if(!e.dead&&Math.abs(e.x-p.x)<7&&Math.abs(e.y-p.y)<9){hitEnemy(e,now,p.dx>0?1:-1);p.life=0;break}}}
   pj=pj.filter(p=>p.life>0&&ok(p.x,p.y))}
  for(let i=en.length-1;i>=0;i--){const e=en[i];if(e.dead&&!e.counted){e.counted=true;kills++;run.onKill(e)}if(e.expired)en.splice(i,1)}
- if(!pz){const w=run.want();for(let n=0;n<4&&en.filter(e=>!e.dead).length<w;n++)spawn()}
+ if(!pz&&!(portal&&now-portal.t<3500)){const w=run.want();for(let n=0;n<4&&en.filter(e=>!e.dead).length<w;n++)spawn()}
  survival?.update(gdt);
  $('kc').textContent='斩敌 '+kills;
  const cx=Math.round(Math.min(WW-VW,Math.max(0,hero.x-VW/2))),cy=Math.round(Math.min(WH-VH,Math.max(0,hero.y-VH/2)));
@@ -166,6 +166,13 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  items.push({y:hero.y,f:()=>{c.imageSmoothingEnabled=false;drawHero(px,py,moving,now);if(inSh){c.fillStyle='rgba(200,228,232,.6)';c.fillRect(px-7,py-4,14,4)}}});
  items.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
  run.drawWorld(c,cx,cy,now);
+ if(portal){const t=(now-portal.t)/1000;if(t>4.2)portal=null;else{   // 开局传送门：3 秒后缩小淡出
+  const k=t<.4?t/.4:t>3?Math.max(0,1-(t-3)/1.2):1,px=portal.x-cx,py=portal.y-cy-12;c.save();c.globalAlpha=k;c.translate(px,py);
+  const g=c.createRadialGradient(0,0,0,0,0,Math.max(1,16*k));g.addColorStop(0,'rgba(255,255,255,.95)');g.addColorStop(.35,'rgba(150,120,255,.85)');g.addColorStop(.8,'rgba(70,40,200,.5)');g.addColorStop(1,'rgba(40,20,120,0)');
+  c.scale(.7,1);c.fillStyle=g;c.beginPath();c.arc(0,0,16*k,0,6.3);c.fill();
+  c.lineWidth=1.2;for(let i=0;i<3;i++){c.strokeStyle=`rgba(${200-i*40},${180-i*30},255,.8)`;c.beginPath();c.arc(0,0,(6+i*4)*k,now/300*(i%2?-1:1)+i,now/300*(i%2?-1:1)+i+4);c.stroke()}
+  c.restore();c.save();c.globalAlpha=k;for(let i=0;i<10;i++){const a=now/500+i*.63,r=(10+((now/40+i*13)%14))*k;c.fillStyle='rgba(200,180,255,.8)';c.fillRect(px+Math.cos(a)*r*.7,py+Math.sin(a)*r,1.2,1.2)}
+  c.fillStyle='rgba(40,20,90,.25)';c.beginPath();c.ellipse(px,py+16*k,10*k,2.5*k,0,0,6.3);c.fill();c.restore()}}
  c.imageSmoothingEnabled=true;
  if(ov.cld){c.save();const T=640,dr=now*.011;const ox0=(((-cx+dr)%T)+T)%T,oy0=(((-cy+dr*.45)%T)+T)%T;for(let x=ox0-T;x<VW;x+=T)for(let y=oy0-T;y<VH;y+=T)c.drawImage(cloud,x,y,T,T);c.restore()}
  weather.draw(c,now,dt,VW,VH,hero.x,hero.y,WW,WH,region(hero.x,hero.y));

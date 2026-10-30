@@ -9,6 +9,7 @@ ROOT=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OLD=ROOT+'/art_src/build/stage_old/'; MAP=ROOT+'/assets/map/'
 J=json.load(open(ROOT+'/data/world.json')); J0=json.load(open(OLD+'world.json'))
 if 'off' in J: J['WW'],J['WH'],J['rmap'],J['rgrid']=J0['WW'],J0['WH'],J0['rmap'],J0['rgrid']; J.pop('off')   # 重跑：先回到裁边前
+J['spawn']=[1279,474]                                  # 出生点：中间大平原正中（裁前坐标）
 HD=J['HD']; T=J['tiles']['T']; W,H=J['WW'],J['WH']; rng=np.random.default_rng(21)
 blur=lambda a,s:cv2.GaussianBlur(a.astype(np.float32),(0,0),s)
 disk=lambda r:cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(2*r+1,2*r+1))
