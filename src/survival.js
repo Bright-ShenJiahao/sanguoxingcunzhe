@@ -43,7 +43,7 @@ export function createSurvival(game){
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};
  return {start,get hp(){return hp},get max(){return maxHp},get finished(){return finished},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
   if(!playing||finished||cooldown>0||window.DBG?.god)return;
-  hp=Math.max(0,hp-Math.round(amount));cooldown=.75;render();if(hp===0)die();
+  hp=Math.max(0,hp-Math.round(amount));cooldown=game.iframe?.()??.75;render();if(hp===0)die();
  },update(dt){
   if(!playing||finished)return;
   elapsed+=dt;if(dt>0)cooldown=Math.max(0,cooldown-dt);

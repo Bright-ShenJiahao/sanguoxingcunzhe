@@ -136,7 +136,7 @@ export function createMenu(game){
  const LIM={w:5,s:5,lock:2};
  function drawDeck(){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button class="ic" data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${WIC[k]?`<img src="assets/ui/${WIC[k]}.png" alt="">`:''}<span>${names(k)}</span></button>`).join('')}</div>`;
   dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'装备卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
-  dkr.innerHTML=`<h4>祝福卡<small>已锁定 ${deck.lock.length}/2 · 锁定的祝福本局一定会出现，其余 ${10-deck.lock.length} 张随机</small></h4><div class="rg">${PASS_KEYS.map(k=>`<button class="rc" data-k="lock" data-v="${k}" aria-pressed="${deck.lock.includes(k)}"><b>${PIC[k]?`<img src="assets/ui/${PIC[k]}.png" alt="">`:'✦'} ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></button>`).join('')}</div>`;
+  dkr.innerHTML=`<h4>祝福卡<small>已锁定 ${deck.lock.length}/2 · 锁定的祝福本局一定会出现，其余 ${12-deck.lock.length} 张随机</small></h4><div class="rg">${PASS_KEYS.map(k=>`<button class="rc" data-k="lock" data-v="${k}" aria-pressed="${deck.lock.includes(k)}"><b>${PIC[k]?`<img src="assets/ui/${PIC[k]}.png" alt="">`:'✦'} ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></button>`).join('')}</div>`;
   dks.innerHTML=row('s',POOL.s,k=>WEAPONS[k].name,'法术卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
   prep.querySelectorAll('.dk button').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}drawDeck()})}
  drawDeck();

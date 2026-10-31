@@ -79,8 +79,8 @@ function drawHero(px,py,moving,now){
  if(wpm=='magic'){const bob=Math.sin(now/380)*1.3;c.save();c.translate(-11,-19+bob);c.scale(.5,.5);c.globalAlpha=.97;c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
  c.restore()}
 const en=[];let kills=0,fx=[];
-const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{SFX.hurt();const v=Math.max(1,(amount-(run?.armor||0))*(1-(run?.armPct||0)));if(survival&&survival.hp-v<=0&&run?.useRevive()){survival.heal(survival.max*.5);return}survival?.damage(v)}});
-function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg))fx.push({x:e.x,y:e.y,t:now,dx})}
+const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{if(run?.dodge?.())return;SFX.hurt();const v=Math.max(1,(amount-(run?.armor||0))*(1-(run?.armPct||0)));if(survival&&survival.hp-v<=0&&run?.useRevive()){survival.heal(survival.max*.5);return}survival?.damage(v)}});
+function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg)){fx.push({x:e.x,y:e.y,t:now,dx});const kb=(window.KB||1)-1;if(kb>0&&!e.boss&&!e.drum&&!e.dead){const ax=e.x-hero.x,ay=e.y-hero.y,d=Math.hypot(ax,ay)||1,nx=e.x+ax/d*kb*8,ny=e.y+ay/d*kb*8;if(ok(nx,ny)){e.x=nx;e.y=ny}}}}
 function spawn(){if(window.DBG?.noMob)return;let fb=null;for(let n=0;n<40;n++){const a=Math.random()*6.28,r=(n<28?(Math.hypot(VW,VH)/2+20+Math.random()*90):(140+Math.random()*160))*(run?.spawnR||1),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
  if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;
  {const pd=window.PATHAT?.(x,y)??0;if(pd<0)continue;if(pd*8>r*1.5+40&&n<39){fb=fb||[x,y];continue}}   // 只在不用绕远路就能走到主角的地方刷，避免怪全挤在山口排队
@@ -98,7 +98,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>needLoad()?loadSet(CS):Promise.resolve(),fit,onStart(){survival.start();weather.reset?.();portal={x:hero.x+14,y:hero.y-2,t:performance.now()}}
  });
- survival=createSurvival({hero,enemies:en,get kills(){return kills},
+ survival=createSurvival({hero,enemies:en,get kills(){return kills},iframe:()=>run?.iframe,
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
   reset(){run.reset(CS[0]==='f'?'hp':'gb');hero.x=WW*AT[0];hero.y=WH*AT[1];hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm=CS[0]==='f'?'hp':'gb';joy=null;for(const k in keys)keys[k]=0}
  });run=createRun({hero,en,images:IM,survival,ok,makeEnemy:(x,y,k)=>enemySystem.make(x,y,k),hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});window.__G={hero,en};dbg=createDebug({world:D,hero,en,run,survival,weather,hit:(e,v)=>hitEnemy(e,performance.now(),1,v)});dbg?.show(false);requestAnimationFrame(loop)}
