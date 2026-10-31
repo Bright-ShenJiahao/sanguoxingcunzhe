@@ -15,6 +15,7 @@ const UP=[
  {k:'rev',ic:'✨',nm:'复活',fx:'每局复活 1 次（50% 生命）',max:1,base:1500}];
 const price=(u,L)=>Math.round(u.base*Math.pow(1.35,L)/5)*5;
 export const ENEMY_NAMES={goblin:'哥布林',gob_blade:'哥布林剑士',gob_archer:'哥布林弓箭手',gob_shield:'哥布林盾卫',gob_shaman:'哥布林萨满',gob_kid:'哥布林崽',gob_bomb:'炸弹哥布林',gob_boar:'野猪骑兵',gob_rock:'岩甲哥布林',gob_mage:'哥布林法师',gob_ghost:'幽灵哥布林',gob_wolf:'狼骑兵',gob_thrower:'投石哥布林',gob_drum:'哥布林鼓手',gob_necro:'哥布林死灵师',gob_giant:'巨型哥布林',skeleton:'骷髅兵',gob_king:'哥布林大王',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士'};
+const RD={gob_shield:'远程被盾挡 ×0.3，靠近砍',gob_rock:'物理都只吃一半，用法术',gob_wolf:'怕远程 ×1.5',gob_boar:'皮厚，近战 ×0.7',gob_ghost:'物理打不实，怕神圣 ×2、元素 ×1.5',gob_mage:'元素只吃一半',gob_shaman:'耐黑暗',skeleton:'怕神圣 ×1.5，耐黑暗',gob_necro:'怕神圣 ×1.5，耐黑暗',gob_giant:'物理 ×0.8',gob_paladin:'耐神圣，怕黑暗 ×1.5'};
 export function createMeta(){
  let M;try{M=JSON.parse(localStorage.getItem('meta')||'null')}catch(e){}
  M=Object.assign({gold:0,tickets:0,up:{},kills:{},runs:0},M||{});
@@ -81,7 +82,7 @@ export function createMeta(){
   pan.querySelectorAll('.buy').forEach(b=>b.onclick=()=>{const u=UP.find(x=>x.k===b.dataset.k),l=L(u.k),p=price(u,l);if(l>=u.max||M.gold<p)return;M.gold-=p;M.up[u.k]=l+1;save();openUp();pan.querySelector(`[data-k=${u.k}]`)?.focus()})}
  function openDex(){
   const ks=Object.keys(ENEMY_NAMES),found=ks.filter(k=>M.kills[k]).length,tot=Object.values(M.kills).reduce((a,b)=>a+b,0);
-  const body=`<div class="bgrid">${ks.map((k,i)=>{const n=M.kills[k]||0;return `<div class="bcard ${n?'':'unk'}"><span class="no">${String(i+1).padStart(3,'0')}</span><div class="im"><img src="assets/characters/enemies/${k}/idle0.png" alt=""></div><div class="nm">${n?ENEMY_NAMES[k]:'？？？'}</div><div class="k">${n?'击杀 '+n:'未发现'}</div></div>`}).join('')}</div>`;
+  const body=`<div class="bgrid">${ks.map((k,i)=>{const n=M.kills[k]||0;return `<div class="bcard ${n?'':'unk'}"><span class="no">${String(i+1).padStart(3,'0')}</span><div class="im"><img src="assets/characters/enemies/${k}/idle0.png" alt=""></div><div class="nm">${n?ENEMY_NAMES[k]:'？？？'}</div><div class="k">${n?'击杀 '+n:'未发现'}</div>${n&&RD[k]?`<div class="k" style="color:#ffcf8a">${RD[k]}</div>`:''}</div>`}).join('')}</div>`;
   shell('怪物图鉴',`已发现 ${found} / ${ks.length} · 累计击杀 ${tot}`,body)}
  // ---------- 老虎机 ----------
  const sl=document.createElement('div');sl.id='slot';sl.hidden=true;document.body.append(sl);

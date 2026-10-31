@@ -117,7 +117,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  // ---------- 部落：活太久的变老兵；首领附近的小怪受鼓舞；首领死了周围四散 ----------
  window.onGrow=e=>{if(!S.grownMsg){S.grownMsg=1;S.banner={v:'没杀掉的崽子长大了！',t:2.5}}};
  function tribe(dt){const L=[];
-  for(const e of en){if(e.dead||e.drum||e.totem)continue;if(e.boss||e.elite){L.push(e);continue}
+  for(const e of en){if(e.rtT>0)e.rtT-=dt;if(e.dead||e.drum||e.totem)continue;if(e.boss||e.elite){L.push(e);continue}
    e.age=(e.age||0)+dt;if(!e.vet&&!e.sweep&&!e.guard&&e.age>60&&e.k!=='gob_kid'&&e.k!=='skeleton'){e.vet=1;e.hp*=2;e.hpMax*=2;e.sc=(e.sc||1)*1.2;e.dmgMul=(e.dmgMul||1)*1.3}}
   if(L.length)for(const e of en){if(e.dead||e.boss||e.elite||e.sweep)continue;for(const l of L){if((e.x-l.x)**2+(e.y-l.y)**2<90*90){e.buffT=Math.max(e.buffT||0,.3);break}}}}
  function leaderDown(l){for(const e of en)if(!e.dead&&!e.boss&&!e.elite&&!e.drum&&(e.x-l.x)**2+(e.y-l.y)**2<130*130)e.fearT=2}
@@ -156,8 +156,13 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    let a=Math.atan2(dy,dx)-ang;a=Math.atan2(Math.sin(a),Math.cos(a));if(Math.abs(a)>half&&d>10)continue;
    let v=amount,crit=false;if(opts.crit&&Math.random()<opts.crit){v*=opts.cm;crit=true}
    strike(e,v,Math.sign(dx)||1,crit,true);if(opts.kb)knock(e,opts.kb);n++}return n}
- const PHYS=new Set(['gb','sword','hammer','axe','bow','xbow']);
- function strike(e,v,dir,crit,mel){const ph=PHYS.has(S.src),rm=e.res==='iron'?(ph?.5:1):e.res==='spirit'?(ph?.5:1.5):e.res==='magic'?(ph?1:.5):1,arm=rm<1;v*=rm;if(mel&&S.p.vamp){S.vh=(S.vh||0)+v*.02*S.p.vamp;if(S.vh>=1){survival?.heal?.(Math.floor(S.vh));S.vh%=1}}window.SFX?.hit();if(!crit&&Math.random()<.05*S.p.luck+S.B.crit){v*=2;crit=true}hitEnemy(e,v,dir);S.texts.push({x:e.x+R(-3,3),y:e.y-18*(e.sc||1),v:(Math.round(v*10)/10)+'',t:.55,c:arm?'#8f98a3':crit?'#ffd166':'#ffffff',big:crit&&!arm})}
+ const PHYS=new Set(['gb','sword','hammer','axe','bow','xbow']),
+ // 伤害五类：近战物理 mel、远程物理 rng、元素 ele、神圣 holy、黑暗 dark
+ DT={sword:'mel',hammer:'mel',axe:'rng',bow:'rng',xbow:'rng',gb:'rng',fireball:'ele',frost:'ele',chain:'ele',thunder:'ele',missile:'ele',hp:'ele',holy:'holy'},
+ // 抗性表（没写 = ×1）；同步 docs/ENEMIES.md
+ RT={gob_shield:{rng:.3},gob_rock:{mel:.5,rng:.5},gob_wolf:{rng:1.5},gob_boar:{mel:.7},gob_ghost:{mel:.5,rng:.5,ele:1.5,holy:2,dark:.5},gob_mage:{ele:.5},gob_shaman:{dark:.5},
+  skeleton:{rng:.7,holy:1.5,dark:.5},gob_necro:{rng:.7,holy:1.5,dark:.5},gob_giant:{mel:.8,rng:.8},gob_paladin:{holy:.5,dark:1.5}};
+ function strike(e,v,dir,crit,mel){const dt_=DT[S.src]||'rng',rt=e.drum?null:RT[e.k],rm=rt?.[dt_]??1,arm=rm<1;v*=rm;if(S.src==='fireball')e.noRegT=4;if(dt_==='holy'&&e.bshield){e.bshield=0;e.brkT=6}if(rm!==1&&!(e.rtT>0)){e.rtT=1.2;S.texts.push({x:e.x,y:e.y-28*(e.sc||1),v:rm<1?'抵抗':'克制！',t:.8,c:rm<1?'#9aa3ad':'#ff9a3c',big:rm>1})}if(mel&&S.p.vamp){S.vh=(S.vh||0)+v*.02*S.p.vamp;if(S.vh>=1){survival?.heal?.(Math.floor(S.vh));S.vh%=1}}window.SFX?.hit();if(!crit&&Math.random()<.05*S.p.luck+S.B.crit){v*=2;crit=true}hitEnemy(e,v,dir);S.texts.push({x:e.x+R(-3,3),y:e.y-18*(e.sc||1),v:(Math.round(v*10)/10)+'',t:.55,c:arm?'#8f98a3':crit?'#ffd166':'#ffffff',big:crit&&!arm})}
  function knock(e,k){if(e.boss)k*=.15;if(e.armor)k*=.2;const dx=e.x-hero.x,dy=e.y-hero.y,l=Math.hypot(dx,dy)||1,nx=e.x+dx/l*k,ny=e.y+dy/l*k;if(ok(nx,ny)){e.x=nx;e.y=ny}}
  // ---------- 武器 ----------
  const FIRE={
