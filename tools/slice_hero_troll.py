@@ -20,6 +20,14 @@ SPEC={'gob_hero':(H[0],{'idle0':(16,96),'idle1':(98,178),'walk0':(180,254),'walk
        dict(hp=70,speed=24,reach=30,damage=24,role='elite',nw=4),46),
       'gob_troll':(H[1],{'idle0':(8,108),'idle1':(112,206),'walk0':(206,306),'walk1':(306,390),'windup':(486,610),'strike':(610,706),'recover':(706,789),'hurt':(789,880),'fall':(789,880),'down':(880,1020)},
        dict(hp=200,speed=14,reach=36,damage=30,role='elite',nw=4),70)}
+def bright(arr,k):   # 后期：往 GPT 那种明亮黄绿、硬描边靠
+    rgb=arr[...,:3].copy();hsv=cv2.cvtColor(rgb,cv2.COLOR_RGB2HSV).astype(float)
+    if k=='gob_troll':
+        skin=(hsv[...,0]>8)&(hsv[...,0]<35)&(hsv[...,1]<140);hsv[...,0][skin]=hsv[...,0][skin]*.2+40*.8;hsv[...,1][skin]=np.minimum(255,hsv[...,1][skin]*1.8+30)
+    green=(hsv[...,0]>28)&(hsv[...,0]<55);hsv[...,2][green]=np.minimum(255,hsv[...,2][green]*1.15+15)
+    hsv[...,1]=np.minimum(255,hsv[...,1]*1.3);hsv[...,2]=np.clip((hsv[...,2]-128)*1.2+140,0,255)
+    arr[...,:3]=cv2.cvtColor(hsv.astype(np.uint8),cv2.COLOR_HSV2RGB)
+    m=(arr[...,3]>0).astype(np.uint8);edge=(cv2.dilate(m,np.ones((3,3),np.uint8))>0)&(m==0);arr[edge]=[28,22,18,255];return arr
 ED=json.load(open(R+'/data/enemies.json'))
 for k,((ya,yb),fr,stats,tall) in SPEC.items():
     O=R+'/assets/characters/enemies/'+k+'/';os.makedirs(O,exist_ok=True);frames={}
@@ -31,7 +39,7 @@ for k,((ya,yb),fr,stats,tall) in SPEC.items():
         ys,xs=np.nonzero(m);y0,y1,xa,xb=ys.min(),ys.max()+1,xs.min(),xs.max()+1
         sub=a[y0:y1,xa:xb];mm=m[y0:y1,xa:xb]&~((sub[...,2]>sub[...,1]+45)&(sub[...,0]>sub[...,1]+45)&(sub[...,2]>90));rgba=np.dstack([sub,mm*255]).astype(np.uint8)
         w,h=max(1,round((xb-xa)*SC)),max(1,round((y1-y0)*SC))
-        im=Image.fromarray(rgba,'RGBA').resize((w,h),Image.LANCZOS);arr=np.array(im);arr[...,3]=np.where(arr[...,3]>100,255,0);Image.fromarray(arr).save(O+nm+'.png')
+        im=Image.fromarray(rgba,'RGBA').resize((w,h),Image.NEAREST);arr=np.array(im);arr[...,3]=np.where(arr[...,3]>100,255,0);arr=bright(arr,k);Image.fromarray(arr).save(O+nm+'.png')
         low=ys>y1-1-(y1-y0)*.18;fx=np.median(xs[low])
         frames[nm]={'src':f'assets/characters/enemies/{k}/{nm}.png','size':[w/2,h/2],'anchor':[round((fx-xa)*SC/2,2),round(h/2-1,2)]}
     ED[k]={**stats,'frames':frames};print(k,frames['idle0']['size'])
