@@ -49,16 +49,19 @@ export function createMeta(){
  .bcard img{max-height:56px;image-rendering:pixelated}.bcard.unk img{filter:brightness(0) opacity(.55)}.bcard .nm{margin-top:4px;font-weight:700}.bcard .k{color:#ffd23f;font-size:13px}
  #slot{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:#04081099;font:600 15px "PingFang SC","Microsoft YaHei",sans-serif}
  #slot[hidden]{display:none}
- #slot .m{position:relative;width:340px;padding:16px 16px 18px;border:4px solid #2a0d10;border-radius:10px;background:linear-gradient(90deg,#e8505a,#c9303c 40%,#b02633);box-shadow:0 8px 0 #0008}
- #slot .sign{margin:-6px 6px 12px;padding:10px;border:4px dotted #ffd23f;background:#2a0d10;color:#ffd23f;text-align:center;font-size:20px;letter-spacing:3px}
- #slot .reels{display:flex;gap:6px;padding:8px;border:4px solid #c08a1a;background:#16203a}
- #slot .reel{flex:1;height:90px;overflow:hidden;background:#f3eedf;border-radius:4px;position:relative}
- #slot .strip{position:absolute;left:0;right:0;top:0}
- #slot .cell{height:90px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#2a1a10;font-size:13px}
- #slot .cell .g{font-size:34px;line-height:40px}#slot .cell img{max-height:40px;image-rendering:pixelated}
- #slot .scr{margin:12px 20px 0;padding:8px;background:#2a0d10;color:#7dff9a;text-align:center;font-size:14px;min-height:20px}
- #slot .lever{position:absolute;right:-26px;top:40px;width:10px;height:110px;background:#c9ced8;border-radius:4px}#slot .lever:before{content:'';position:absolute;left:-7px;top:-14px;width:24px;height:24px;border-radius:50%;background:#e33}
- #slot .tip{margin-top:10px;color:#ffe9b0;text-align:center;font-size:12px}`;
+ #slot .m{position:relative;width:min(380px,74vw);aspect-ratio:760/544;margin-top:40px;background:url(assets/ui/slot_body.png) center/100% 100% no-repeat;image-rendering:pixelated}
+#slot .sign{position:absolute;left:-2%;right:-2%;top:-15%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_sign.png) center/100% 100% no-repeat;color:#ffd96a;font-size:18px;letter-spacing:3px;text-shadow:0 2px 0 #000}
+#slot .reels{position:absolute;left:15.5%;width:69%;top:40%;height:34%;display:flex;gap:4px;padding:4px}
+#slot .reel{flex:1;overflow:hidden;background:url(assets/ui/slot_cell.png) center/100% 100% no-repeat;position:relative}
+#slot .strip{position:absolute;left:0;right:0;top:0}
+#slot .cell{height:var(--h);display:flex;flex-direction:column;align-items:center;justify-content:center;color:#3a2410;font-size:12px;font-weight:700;text-align:center;line-height:1.2}
+#slot .cell .g{font-size:30px;line-height:36px}#slot .cell img{max-height:44%;image-rendering:pixelated}
+#slot .scr{position:absolute;left:0;right:0;bottom:-24%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_bar.png) center/100% 100% no-repeat;color:#ffe9a8;font-size:15px;text-shadow:0 2px 0 #000;padding:0 8%}
+#slot .lever{position:absolute;right:-15%;top:12%;width:13%;height:62%;background:url(assets/ui/slot_lever_up.png) center/contain no-repeat}
+#slot .lever.dn{background-image:url(assets/ui/slot_lever_dn.png);top:30%}
+#slot .fx{position:absolute;pointer-events:none;width:32%;aspect-ratio:1;background:center/contain no-repeat;animation:sfx 1s ease-out forwards}
+@keyframes sfx{0%{opacity:0;transform:scale(.4) translateY(20px)}30%{opacity:1}100%{opacity:0;transform:scale(1.2) translateY(-30px)}}
+#slot .tip{position:absolute;left:0;right:0;bottom:-36%;color:#ffe9b0;text-align:center;font-size:12px}`;
  document.head.append(st);
  // ---------- 顶部状态栏 ----------
  const bar=document.createElement('div');bar.id='mbar';document.body.append(bar);
@@ -83,15 +86,15 @@ export function createMeta(){
  // ---------- 老虎机 ----------
  const sl=document.createElement('div');sl.id='slot';sl.hidden=true;document.body.append(sl);
  function slot(title,results,pool,done){
-  sl.innerHTML=`<div class="m"><div class="sign">${title}</div><div class="reels">${[0,1,2].map(()=>'<div class="reel"><div class="strip"></div></div>').join('')}</div><div class="scr">转动中……</div><div class="lever"></div><div class="tip">按空格 / 点击跳过</div></div>`;sl.hidden=false;
+  sl.innerHTML=`<div class="m"><div class="sign">${title}</div><div class="reels">${[0,1,2].map(()=>'<div class="reel"><div class="strip"></div></div>').join('')}</div><div class="scr">转动中……</div><div class="lever dn"></div><div class="tip">按空格 / 点击跳过</div></div>`;sl.hidden=false;
   const cell=o=>`<div class="cell">${o.img?`<img src="${o.img}" alt="">`:`<span class="g">${o.g||'★'}</span>`}<span>${o.t||''}</span></div>`;
   const reels=[...sl.querySelectorAll('.strip')],show=results.length===1?[{g:''},results[0],{g:''}]:[results[0],results[1]||{g:''},results[2]||{g:''}];
-  const N=18,durs=[900,1300,1700];let finished=false;
+  const N=18,durs=[900,1300,1700];let finished=false;const H=reels[0].parentNode.clientHeight||80;sl.style.setProperty('--h',H+'px');const lv=sl.querySelector('.lever');setTimeout(()=>lv.classList.remove('dn'),300);
   reels.forEach((s,i)=>{const items=Array.from({length:N},()=>pool[Math.floor(Math.random()*pool.length)]);items.push(show[i]);s.innerHTML=items.map(cell).join('');
-   s.animate([{transform:'translateY(0)'},{transform:`translateY(${-N*90}px)`}],{duration:durs[i],easing:'cubic-bezier(.2,.6,.3,1)',fill:'forwards'})});
+   s.animate([{transform:'translateY(0)'},{transform:`translateY(${-N*H}px)`}],{duration:durs[i],easing:'cubic-bezier(.2,.6,.3,1)',fill:'forwards'})});
   let t2=setTimeout(fin,1900);
   function fin(){if(finished)return;finished=true;clearTimeout(t2);reels.forEach(s=>{s.getAnimations().forEach(a=>a.finish())});
-   sl.querySelector('.scr').textContent=results.map(r=>r.t).join('　');window.SFX?.level();setTimeout(()=>{sl.onclick=close;addEventListener('keydown',kd,true)},250)}
+   sl.querySelector('.scr').textContent=results.map(r=>r.t).join('　');window.SFX?.level();const M2=sl.querySelector('.m');[['coins',30,10],['spark',-5,5],['spark',65,0]].forEach(([n,l,t])=>{const d=document.createElement('div');d.className='fx';d.style.cssText=`left:${l}%;top:${t}%;background-image:url(assets/ui/slot_${n}.png)`;M2.append(d)});setTimeout(()=>{sl.onclick=close;addEventListener('keydown',kd,true)},250)}
   function close(){sl.hidden=true;sl.onclick=null;removeEventListener('keydown',kd,true);done&&done()}
   function kd(e){if(e.key===' '||e.key==='Enter'||e.key==='Escape'){e.preventDefault();e.stopPropagation();close()}}
   const skip=e=>{if(!finished&&(e.type==='click'||e.key===' '||e.key==='Enter')){e.preventDefault();e.stopPropagation();fin()}};
