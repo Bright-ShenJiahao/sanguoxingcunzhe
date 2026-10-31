@@ -94,6 +94,10 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  // ---------- 波数：按时间逐步加入兵种 ----------
  const NEWK={gob_kid:'哥布林崽群！',goblin:'哥布林棍兵',gob_blade:'剑士出现！会冲刺斩',gob_shield:'盾卫出现！举盾挡箭：远程只吃三成，靠近砍',gob_archer:'弓箭手出现！会放冷箭',gob_bomb:'炸弹哥布林！看到红圈快跑',gob_boar:'野猪骑兵！会直线冲锋',gob_rock:'岩甲哥布林！石皮：物理减半，用法术',gob_mage:'哥布林法师！护符：元素减半',gob_ghost:'幽灵哥布林！物理打不实，怕神圣和元素',gob_wolf:'狼骑兵！会绕圈扑咬',gob_thrower:'投石哥布林！看地上阴影',gob_drum:'精英·鼓手！先打掉它',gob_necro:'精英·死灵师！会复活尸体'};
  const RES={gob_shield:'iron',gob_rock:'iron',gob_ghost:'spirit',gob_mage:'magic'};
+ window.SUMMON=k=>{for(let i=0;i<12;i++){const a=Math.random()*6.28,x=hero.x+Math.cos(a)*120,y=hero.y+Math.sin(a)*90;if(!ok(x,y))continue;const m=makeEnemy(x,y,k);if(!m)return;onSpawnBase(m);m.armor=0;m.res='';m.sc=1;
+  const B={gob_king:['哥布林大王',80,1.25],gob_chief:['哥布林酋长',200,1.3],gob_paladin:['哥布林圣骑士',160,1],gob_hero:['哥布林英雄',150,1]}[k];
+  if(B){m.boss=true;m.name=B[0];m.hp=m.hpMax=Math.round(B[1]*(1+S.t/160));m.sc=B[2]}else{m.elite=true;if(k==='gob_troll')m.bshield=1;m.hp=m.hpMax=Math.ceil((k==='gob_troll'?60:k==='gob_giant'?40:12)*(1+S.t/80));if(k==='gob_shaman')m.summonT=4}
+  en.push(m);S.banner={v:'召唤：'+(m.name||k),t:1.5};return}};
  window.SPAWN=(k,x,y)=>{if(!ok(x,y))return;const m=makeEnemy(x,y,k);if(m){onSpawnBase(m);en.push(m)}};
  const wave=()=>WV.waves[Math.min(WV.waves.length-1,Math.max(0,Math.floor(S.t/60)))];
  function introduced(){const m=Math.floor(S.t/60),o=new Set();for(const w of WV.waves)if(w.t<=m)for(const k of w.main)if(k!=='*')o.add(k);return [...o]}

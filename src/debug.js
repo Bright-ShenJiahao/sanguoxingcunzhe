@@ -12,6 +12,7 @@ export function createDebug(g){
  const W=g.world,O=W.off||[0,0],places=[['出生点',W.spawn[0],W.spawn[1]],['北部营地',900,300],['河桥',1200,615],['东海岸',1600,700],['西南悬崖',330,830],['南湖',1050,975]];
  const WK=['auto','clear','lightrain','heavyrain','lightsnow','heavysnow','blizzard','fog','overcast'];
  el.innerHTML=`<h4>🔧 开发者（点标题收起）</h4>
+ <b>召唤（出现在身边）</b><div class="r">${[['gob_hero','哥布林英雄'],['gob_troll','血咒巨魔'],['gob_king','哥布林大王'],['gob_chief','哥布林酋长'],['gob_paladin','哥布林圣骑士'],['gob_giant','巨型哥布林'],['gob_shaman','萨满精英']].map(([k,n])=>`<button data-sum="${k}">${n}</button>`).join('')}</div>
  <b>主角</b><div class="r"><button data-a="god">无敌</button><button data-a="nomob">没有怪物</button><button data-a="heal">回满血</button><button data-a="lv">升一级</button><button data-a="max">全武器满级</button></div>
  <b>时间（跳过）</b><div class="r"><button data-a="t60">+1 分</button><button data-a="t300">+5 分</button><button data-a="boss">到 Boss 前</button><button data-a="kill">清屏</button></div>
  <b>传送</b><div class="r">${places.map((p,i)=>`<button data-p="${i}">${p[0]}</button>`).join('')}</div>
@@ -20,7 +21,7 @@ export function createDebug(g){
  <b>时间</b><div class="r">${g.weather.SC.map(s=>`<button data-h="${s}">${s}</button>`).join('')}</div>`;
  el.addEventListener('keydown',e=>e.stopPropagation());
  el.querySelector('h4').onclick=()=>el.classList.toggle('min');
- el.onclick=e=>{const b=e.target.closest('button');if(!b)return;const R=g.run.dbg,a=b.dataset.a;
+ el.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.sum){window.SUMMON?.(b.dataset.sum);return}const R=g.run.dbg,a=b.dataset.a;
   if(a==='god'){D.god=!D.god;b.classList.toggle('on',D.god)}
   else if(a==='nomob'){D.noMob=!D.noMob;b.classList.toggle('on',D.noMob);if(D.noMob)for(const e of g.en)e.dead=e.expired=true}
   else if(a==='heal')g.survival.heal(9999);
