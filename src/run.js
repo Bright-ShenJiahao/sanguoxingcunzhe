@@ -90,7 +90,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   S.maxHp=100+S.B.hp;S.rerolls=S.B.rr;S.rev=S.B.rev;survival?.setMax?.(S.maxHp,S.B.hp);ui.hidden=true;
  }
  // ---------- 节奏 ----------
-  const want=()=>{if(S.t<(S.calm||0))return 0;const W=wave();let a=0;for(const e of en)if(!e.dead)a++;return Math.min(WV.cap,Math.max(Math.round(W.min*(1+.1*S.p.curse)),a+((S.pend||0)>0?1:0)))};
+  const want=()=>{if(S.t<(S.calm||0))return 0;const W=wave();let a=0;for(const e of en)if(!e.dead)a++;return Math.min(WV.cap,Math.max(Math.round(W.min*(1+.1*S.p.curse)*(window.NIGHT?1.3:1)),a+((S.pend||0)>0?1:0)))};
  // ---------- 波数：按时间逐步加入兵种 ----------
  const NEWK={gob_kid:'哥布林崽群！',goblin:'哥布林棍兵',gob_blade:'剑士出现！会冲刺斩',gob_shield:'盾卫出现！铁甲：物理伤害减半',gob_archer:'弓箭手出现！会放冷箭',gob_bomb:'炸弹哥布林！看到红圈快跑',gob_boar:'野猪骑兵！会直线冲锋',gob_rock:'岩甲哥布林！铁甲，用法术',gob_mage:'哥布林法师！魔抗，用物理',gob_ghost:'幽灵哥布林！灵体：法术伤害加倍',gob_wolf:'狼骑兵！会绕圈扑咬',gob_thrower:'投石哥布林！看地上阴影',gob_drum:'精英·鼓手！先打掉它',gob_necro:'精英·死灵师！会复活尸体'};
  const RES={gob_shield:'iron',gob_rock:'iron',gob_ghost:'spirit',gob_mage:'magic'};
@@ -113,12 +113,24 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  }
 
 
+
+ // ---------- 部落：活太久的变老兵；首领附近的小怪受鼓舞；首领死了周围四散 ----------
+ window.onGrow=e=>{if(!S.grownMsg){S.grownMsg=1;S.banner={v:'没杀掉的崽子长大了！',t:2.5}}};
+ function tribe(dt){const L=[];
+  for(const e of en){if(e.dead||e.drum||e.totem)continue;if(e.boss||e.elite){L.push(e);continue}
+   e.age=(e.age||0)+dt;if(!e.vet&&!e.sweep&&!e.guard&&e.age>60&&e.k!=='gob_kid'&&e.k!=='skeleton'){e.vet=1;e.hp*=2;e.hpMax*=2;e.sc=(e.sc||1)*1.2;e.dmgMul=(e.dmgMul||1)*1.3}}
+  if(L.length)for(const e of en){if(e.dead||e.boss||e.elite||e.sweep)continue;for(const l of L){if((e.x-l.x)**2+(e.y-l.y)**2<90*90){e.buffT=Math.max(e.buffT||0,.3);break}}}}
+ function leaderDown(l){for(const e of en)if(!e.dead&&!e.boss&&!e.elite&&!e.drum&&(e.x-l.x)**2+(e.y-l.y)**2<130*130)e.fearT=2}
  // ---------- 北部哥布林营地：部落战鼓 ----------
  function camp(dt){const C=window.CAMP;if(!C)return;const K=S.camp=S.camp||{cd:0,gt:0};const d=Math.hypot(hero.x-C.x,(hero.y-C.y)*1.2);
   if(K.e&&K.e.dead&&!K.done){K.done=1;K.cd=S.t+240;campWave(C)}
-  if(d<520&&S.t>=K.cd&&(!K.e||K.e.dead)){if(K.e)K.e.expired=true;const m=makeEnemy(C.x,C.y,'gob_shield');if(m){onSpawnBase(m);Object.assign(m,{drum:true,elite:true,armor:0,res:'',name:'部落战鼓',summonT:1e9,sc:1});m.hp=m.hpMax=Math.round(600+S.t*6);en.push(m);K.e=m;K.done=0;K.lh=m.hp}}
+  if(d<520&&S.t>=K.cd&&(!K.e||K.e.dead)){if(K.e)K.e.expired=true;if(K.t)K.t.expired=true;const m=makeEnemy(C.x,C.y,'gob_shield');if(m){onSpawnBase(m);Object.assign(m,{drum:true,elite:true,armor:0,res:'',name:'部落战鼓',summonT:1e9,sc:1});m.hp=m.hpMax=Math.round(600+S.t*6);en.push(m);K.e=m;K.done=0;K.lh=m.hp}
+   const tx=C.x-60,ty=C.y-14,t=makeEnemy(tx,ty,'gob_shield');if(t){onSpawnBase(t);Object.assign(t,{totem:true,drum:true,elite:true,armor:0,res:'',name:'萨满图腾',summonT:1e9,sc:1});t.hp=t.hpMax=Math.round((600+S.t*6)*.4);en.push(t);K.t=t}}
+  if(K.t&&K.t.dead&&!K.tdone){K.tdone=1;S.banner={v:'图腾倒了！守卫失去护佑',t:2.5}}
+  if(K.t&&!K.t.dead)K.tdone=0;
+  {const w=K.t&&!K.t.dead;for(const o of en)if(o.guard)o.ward=w&&!o.dead}
   const e=K.e;if(!e||e.dead)return;
-  if(d>420){e.hp=e.hpMax;K.lh=e.hp;return}   // 离开营地就回满，不能磨
+  if(d>420){e.hp=e.hpMax;K.lh=e.hp;if(K.t&&!K.t.dead)K.t.hp=K.t.hpMax;return}   // 离开营地就回满，不能磨
   const guard=()=>{const a=R(0,6.28),x=C.x+Math.cos(a)*R(30,110),y=C.y+Math.sin(a)*R(20,70);if(!ok(x,y))return;const ks=S.t<300?['gob_shield','goblin','gob_archer']:['gob_shield','gob_archer','gob_rock','gob_blade'];const m=makeEnemy(x,y,ks[Math.floor(Math.random()*ks.length)]);if(m){onSpawnBase(m);m.guard=1;en.push(m)}};
   if(d<330&&S.t>=K.gt){K.gt=S.t+5;let n=0;for(const o of en)if(o.guard&&!o.dead)n++;for(let i=n;i<5;i++)guard()}
   if(K.lh-e.hp>e.hpMax*.08){K.lh=e.hp;guard();guard()}}   // 挨打就叫人
@@ -264,7 +276,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  // ---------- 每帧 ----------
  function update(dt){
   if(!S||S.paused)return;
-  S.t+=dt;S.spT=(S.spT||0)+dt;if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}events();camp(dt);if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
+  S.t+=dt;S.spT=(S.spT||0)+dt;if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}events();camp(dt);tribe(dt);if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
   for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0){S.src=k;S.cd[k]=FIRE[k](OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd)}}
   if(S.p.regen||S.B.reg){S.rg=(S.rg||0)+dt*(.3*S.p.regen+S.B.reg);if(S.rg>=1){survival?.heal?.(Math.floor(S.rg));S.rg%=1}}
   for(const z of S.zones||[]){z.t+=dt;z.tick-=dt;if(z.tick<=0){z.tick=z.every;const zx=z.follow?hero.x:z.x,zy=z.follow?hero.y:z.y;for(const e of en)if(!e.dead&&(e.x-zx)**2+((e.y-zy)*1.25)**2<z.r*z.r)strike(e,z.dm,Math.sign(e.x-zx)||1)}}
@@ -311,9 +323,10 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   const pool=GOT.length?GOT:[{g:'❤️'}];   // 转轮只转这次真的会给的东西
   if(window.META){S.paused=true;window.META.slot(big?'Boss 宝箱 ×'+n:'宝箱 ×'+n,GOT,pool,()=>{S.paused=false})}else S.banner={v:'宝箱：'+GOT.map(o=>o.t).join('、'),t:4,snd:1}}
  const HARD=new Set(['gob_shield','gob_rock','gob_boar','gob_wolf','gob_mage']);
- function onKill(e){window.SFX?.kill();window.META?.kill(e.k);{const c=e.boss?25:e.elite?5:Math.random()<.12*(1+.2*S.p.luck)?1:0;if(c)S.coins.push({x:e.x+R(-4,4),y:e.y-3,v:c});if(e.boss)window.META?.addTickets(1)}if(!e.boss&&Math.random()<.004)(S.mags=S.mags||[]).push({x:e.x,y:e.y-3});if(e.boss||e.elite)S.chests.push({x:e.x,y:e.y,big:!!e.boss});const v=e.boss?60:e.elite?12:(e.sweep||e.k==='gob_kid'||e.k==='skeleton')?0:HARD.has(e.k)?3:1;if(v)S.gems.push({x:e.x+R(-3,3),y:e.y-4+R(-3,3),v});if(e.boss)S.texts.push({x:e.x,y:e.y-50,v:'击败 '+e.name+'！',t:2.5,c:'#ffd166',big:1})}
+ function onKill(e){if((e.elite||e.boss)&&!e.drum&&!e.totem)leaderDown(e);window.SFX?.kill();window.META?.kill(e.k);{const c=e.boss?25:e.elite?5:Math.random()<.12*(1+.2*S.p.luck)?1:0;if(c)S.coins.push({x:e.x+R(-4,4),y:e.y-3,v:c});if(e.boss)window.META?.addTickets(1)}if(!e.boss&&Math.random()<.004)(S.mags=S.mags||[]).push({x:e.x,y:e.y-3});if((e.boss||e.elite)&&!e.totem)S.chests.push({x:e.x,y:e.y,big:!!e.boss});const v=e.boss?60:e.elite?12:(e.sweep||e.k==='gob_kid'||e.k==='skeleton')?0:HARD.has(e.k)?3:1;if(v)S.gems.push({x:e.x+R(-3,3),y:e.y-4+R(-3,3),v:v+(window.NIGHT&&Math.random()<.3?Math.max(1,Math.round(v*.3)):0)});if(e.boss)S.texts.push({x:e.x,y:e.y-50,v:'击败 '+e.name+'！',t:2.5,c:'#ffd166',big:1})}
  // ---------- 绘制 ----------
  function drawWorld(c,cx,cy,now){
+  for(const e of en){if(e.dead||e.drum)continue;const x=e.x-cx,y=e.y-cy-26*(e.sc||1);if(e.vet){c.fillStyle='#ff4a3a';c.beginPath();c.moveTo(x-3,y);c.lineTo(x+3,y);c.lineTo(x,y+4);c.fill()}else if((e.elite||e.boss)){c.fillStyle='#ffd23f';c.beginPath();c.moveTo(x-4,y+3);c.lineTo(x-4,y-1);c.lineTo(x-2,y+1);c.lineTo(x,y-2);c.lineTo(x+2,y+1);c.lineTo(x+4,y-1);c.lineTo(x+4,y+3);c.fill()}}
   for(const g of S.gems){const x=g.x-cx,y=g.y-cy;if(x<-10||y<-10||x>2000||y>2000)continue;const big=g.v>=12,col=g.v>=60?'#ffd166':big?'#c77dff':g.v>1?'#5ab0ff':'#5fe0b8';
    c.fillStyle='rgba(0,0,0,.25)';c.fillRect(x-1.5,y+2,3,1);c.fillStyle=col;c.beginPath();c.moveTo(x,y-(big?4:2.6));c.lineTo(x+(big?3:2),y);c.lineTo(x,y+(big?4:2.6));c.lineTo(x-(big?3:2),y);c.closePath();c.fill();c.fillStyle='rgba(255,255,255,.8)';c.fillRect(x-.6,y-1.4,1,1)}
   for(const co of S.coins){const x=co.x-cx,y=co.y-cy;c.fillStyle='#7a5208';c.beginPath();c.arc(x,y+.5,2.6,0,6.3);c.fill();c.fillStyle='#ffd23f';c.beginPath();c.arc(x,y,2.4,0,6.3);c.fill();c.fillStyle='#fff6c0';c.fillRect(x-1,y-1.4,1,1)}
@@ -359,6 +372,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   c.restore();S.texts=S.texts.filter(t=>t.t>0);
  }
  function drawUI(c,VW,VH){
+  if(window.HOUR!=null){const h=window.HOUR,t=String(Math.floor(h)).padStart(2,'0')+':00',ic=window.NIGHT?'☾':h<8?'◒':h<17?'☀':'◓';c.save();c.font='bold 8px "PingFang SC",sans-serif';c.textAlign='left';c.lineWidth=2;c.strokeStyle='rgba(0,0,0,.7)';c.fillStyle=window.NIGHT?'#a9c4ff':'#ffe08a';const s_=ic+' '+t+(window.NIGHT?'  夜晚 敌人+30%':'');c.strokeText(s_,6,VH-8);c.fillText(s_,6,VH-8);c.restore()}
   c.fillStyle='rgba(8,14,30,.75)';c.fillRect(0,0,VW,5);c.fillStyle='#5ab0ff';c.fillRect(0,0,VW*Math.min(1,S.xp/S.need),5);
   let x=VW/2-((Object.keys(S.w).length)*15)/2;c.font='bold 8px "PingFang SC","Microsoft YaHei",sans-serif';c.textAlign='right';c.lineWidth=2;c.strokeStyle='rgba(0,0,0,.7)';c.strokeText('Lv '+S.lv,x-4,18);c.fillStyle='#fff';c.fillText('Lv '+S.lv,x-4,18);c.textAlign='left';
   for(const k in S.w){c.fillStyle='rgba(8,14,30,.6)';c.fillRect(x,8,13,15);const im=HI[k]||wImg[k];if(!im){c.fillStyle='#ffd166';c.font='bold 8px "PingFang SC",sans-serif';c.fillText(WEAPONS[k].name[0],x+2.5,19)}else if(im.complete){const s=Math.min(11/im.width,13/im.height);c.drawImage(im,x+6.5-im.width*s/2,9,im.width*s,im.height*s)}c.fillStyle='#ffd166';c.font='6px monospace';c.fillText(S.w[k],x+9,22);x+=15}

@@ -37,7 +37,7 @@ const IM={};let left=0;
 let tot=0;const BAD=[];function ld(k,s,tr=0){if(!tr){left++;tot++}const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};
  i.onerror=()=>{if(tr<2){setTimeout(()=>ld(k,s,tr+1),600*(tr+1));return}BAD.push(s);console.warn('加载失败',s);const t=document.querySelector('#boot,.boot,#loading');if(t)t.setAttribute('data-err',BAD.join(' '));if(--left==0)start()};i.src=s}
 D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);for(const k of D.gt)ld(k,'assets/map/'+k+'.jpg?v='+W.ver);left++;tot++;fetch(D.coll).then(r=>r.blob()).then(b=>{const i=new Image();i.onload=()=>{IM.coll=i;if(--left==0)start()};i.src=URL.createObjectURL(b)});   // 碰撞图走 blob，避免跨域污染画布（试玩网址）
-for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');
+for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
 // 发型按需下载：选中哪一套才加载哪一套（女主 5 套×9 帧，男主 4 套×8 帧）
@@ -96,7 +96,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
  mkCloud();
  menu=createMenu({c,images:IM,data:D,drawGround,objects:objs,enemies:ED,
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
-  clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>needLoad()?loadSet(CS):Promise.resolve(),fit,onStart(){survival.start();portal={x:hero.x+14,y:hero.y-2,t:performance.now()}}
+  clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>needLoad()?loadSet(CS):Promise.resolve(),fit,onStart(){survival.start();weather.reset?.();portal={x:hero.x+14,y:hero.y-2,t:performance.now()}}
  });
  survival=createSurvival({hero,enemies:en,get kills(){return kills},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},

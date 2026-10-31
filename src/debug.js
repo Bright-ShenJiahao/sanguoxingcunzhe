@@ -17,7 +17,7 @@ export function createDebug(g){
  <b>传送</b><div class="r">${places.map((p,i)=>`<button data-p="${i}">${p[0]}</button>`).join('')}</div>
  <b>天气</b><div class="r">${WK.map(k=>`<button data-w="${k}">${{auto:'随机',clear:'晴',lightrain:'小雨',heavyrain:'大雨',lightsnow:'小雪',heavysnow:'大雪',blizzard:'暴雪',fog:'雾',overcast:'阴'}[k]}</button>`).join('')}</div>
  <b>地图（点小地图也能瞬移）</b><div class="r"><button data-t="tp">点地图瞬移</button><button data-t="pen">画笔</button><button data-c="#ff3040" class="on">红</button><button data-c="#20d060">绿</button><button data-c="#9040ff">紫</button><button data-a="undo">撤销</button><button data-a="clr">清除</button><button data-a="copy">复制线条坐标</button><button data-a="full">全图（可画线）</button></div>
- <b>时辰</b><div class="r">${g.weather.SC.map(s=>`<button data-h="${s}">${s}</button>`).join('')}</div>`;
+ <b>时间</b><div class="r">${g.weather.SC.map(s=>`<button data-h="${s}">${s}</button>`).join('')}</div>`;
  el.addEventListener('keydown',e=>e.stopPropagation());
  el.querySelector('h4').onclick=()=>el.classList.toggle('min');
  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;const R=g.run.dbg,a=b.dataset.a;

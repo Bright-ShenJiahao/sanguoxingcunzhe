@@ -30,10 +30,11 @@ export function createWeather(){
    else if(now>=next){target=0;if(inten<=.01){kind='clear';inten=0;evReg=null;next=now+R(...L.gap)}}
   }
   const d=target-inten;inten+=Math.sign(d)*Math.min(Math.abs(d),dt*.4)}
- // 十二时辰：游戏里一天 = 现实 12 分钟（一个时辰 1 分钟），开局在辰时
- const SC=['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'],T0=performance.now();
- let H0=Math.max(0,SC.indexOf(new URLSearchParams(location.search).get('hour')||'辰'));   // 测试：?hour=子
- let T0b=T0;function clock(now){return ((now-T0b)/60000+H0)%12}
+ // 欧美时间：一局 20 分钟 = 一整天，每 50 秒过 1 小时，06:00 黎明开局。内部仍用 p = 小时/2（0 = 午夜，6 = 正午）
+ const SC=['黎明','正午','黄昏','午夜'],SCH={'黎明':5,'正午':12,'黄昏':18,'午夜':0},T0=performance.now();
+ let H0=6/2;{const q=new URLSearchParams(location.search).get('hour');if(q!=null)H0=(SCH[q]??+q)/2}   // 测试：?hour=午夜 或 ?hour=21
+ let T0b=T0;function clock(now){return ((now-T0b)/100000+H0)%12}
+ const hourOf=now=>clock(now)*2,isNight=now=>{const h=hourOf(now);return h>=20||h<4};
  function drawTime(c,VW,VH,p){
   const nf=Math.max(0,Math.min(1,(Math.cos(p/12*Math.PI*2)-0.25)/0.75));
   if(nf>0){c.fillStyle=`rgba(12,20,46,${.36*nf})`;c.fillRect(0,0,VW,VH)}
@@ -100,10 +101,10 @@ export function createWeather(){
   else if(gi>.3&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
   else if(ys>.01)drawSnow(c,now,dt,VW,VH,ys,SNOW.heavysnow);          // 幽州平时一直下雪（原来的大雪），暴雪更大
   else if(gi>.01&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
-  drawTime(c,VW,VH,clock(now));
+  drawTime(c,VW,VH,clock(now));window.NIGHT=isNight(now);window.HOUR=hourOf(now);
   // 进入新地区时的名字提示
   const a=now-ztime;if(a<3000){const al=a<300?a/300:a>2300?(3000-a)/700:1;c.globalAlpha=al;c.font='bold 11px "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(8,14,24,.85)';c.strokeText(zname,VW/2,30);c.fillStyle='#f7e3a6';c.fillText(zname,VW/2,30)}
   c.restore()}
- return {draw,get kind(){return kind},get intensity(){return inten},shichen(now){return SC[Math.floor(clock(now))]+'时'},
+ return {draw,get kind(){return kind},get intensity(){return inten},shichen(now){const h=hourOf(now);return String(Math.floor(h)).padStart(2,'0')+':00'},reset(){H0=3;T0b=performance.now()},
   force(k){if(k==='auto'){forced=null;kind='clear';inten=0;target=0;next=null}else{forced=k;kind=k;target=1;inten=1}},
-  setHour(name){H0=Math.max(0,SC.indexOf(name));T0b=performance.now()},SC}}
+  setHour(name){H0=(SCH[name]??0)/2;T0b=performance.now()},SC}}

@@ -26,7 +26,7 @@ for X in (X0,X1):
         while y<=yb:new.append(['camp_post'+str(rnd.choice([0,1,1,2])),X+rnd.uniform(-1,1),round(y,1)]);y+=6
         wall(X,ya,X,yb)
 for p_ in [(X0,Y0),(X1,Y0),(X0,Y1),(X1,Y1),(CX-G,Y1+2),(CX+G,Y1+2),(X0,CY-G),(X0,CY+G+4),(X1,CY-G),(X1,CY+G+4)]:new.append(['camp_cpost',p_[0],p_[1]+2])
-deco=[('tent_a',-120,-55,26,10),('tent_b',-10,-95,40,9),('tent_a',110,-60,26,10),('tent_b',-140,40,40,9),('rack',125,45,20,5),('totem',-60,-22,8,5),('fire',0,30,0,0),('bones',-60,85,0,0),('crates',70,85,16,5)]
+deco=[('tent_a',-120,-55,26,10),('tent_b',-10,-95,40,9),('tent_a',110,-60,26,10),('tent_b',-140,40,40,9),('rack',125,45,20,5),('fire',0,30,0,0),('bones',-60,85,0,0),('crates',70,85,16,5)]
 for k,dx,dy,rw,rh in deco:
     x,y=CX+dx,CY+dy;new.append(['camp_'+k,x,y])
     if rw:cv2.ellipse(blk,(x,y-rh//2),(rw,rh),0,0,360,1,-1)
