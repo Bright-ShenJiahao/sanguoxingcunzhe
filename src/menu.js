@@ -32,14 +32,14 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 .menu-note{color:#c3d3ef;font-size:12px;line-height:1.8;margin-top:20px;border-top:1px solid #9ebfe432;padding-top:16px}
 #prep{position:fixed;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;padding:58px 20px 16px;box-sizing:border-box;background:#050c1688;color:#f2f6ff;font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif}
 #prep[hidden],#prep [hidden]{display:none!important}
-.pp-box{width:min(760px,100%);max-height:100%;display:flex;flex-direction:column;border:2px solid #b6d5ff;border-radius:12px;background:linear-gradient(145deg,#254f9cee,#142858ee);box-shadow:0 0 0 3px #101c35aa,0 18px 60px #0007}
-.pp-step{display:flex;flex-direction:column;min-height:0;padding:20px 22px}
+.pp-box{width:min(760px,100%);height:min(600px,100%);max-height:100%;display:flex;flex-direction:column;border:2px solid #b6d5ff;border-radius:12px;background:linear-gradient(145deg,#254f9cee,#142858ee);box-shadow:0 0 0 3px #101c35aa,0 18px 60px #0007}
+.pp-step{display:flex;flex-direction:column;flex:1;min-height:0;padding:20px 22px}
 .pp-head{display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:16px}.pp-head h2{margin:0;font-size:22px;color:#f7d987;letter-spacing:.1em}
 .pp-tabs{display:flex;gap:6px}.pp-tabs button,.pp-foot button{cursor:pointer;font:inherit;color:#eaf2ff;border:1px solid #8fbbef88;border-radius:6px;background:#0c225a66;padding:8px 18px}
 .pp-tabs button{white-space:nowrap;flex:none}
 @media (max-width:640px){.pp-head{gap:8px}.pp-tabs{width:100%;overflow-x:auto;scrollbar-width:none}.pp-tabs button{padding:7px 12px}#prep{padding:58px 10px 10px}}
 .pp-tabs button[aria-selected=true]{background:#77a9f055;border-color:#d8e8ff;color:#fff;box-shadow:inset 0 -3px #e2cb87}
-.pp-body{min-height:300px;overflow:auto}.pp-pane[data-t=role]{display:flex;gap:18px;flex-wrap:wrap}
+.pp-body{flex:1;min-height:0;overflow:auto}.pp-pane[data-t=role]{display:flex;gap:18px;flex-wrap:wrap}
 .pp-roles{flex:1 1 380px;min-width:0}
 #prep #cs{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:8px}
 #prep #cs button{cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid #83abe354;border-radius:8px;background:#0c225a66;color:#ecf5ff;font:12px inherit}
