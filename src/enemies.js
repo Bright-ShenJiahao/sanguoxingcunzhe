@@ -88,7 +88,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     if(e.k==='gob_shield'&&!e.elite&&!e.boss&&d<26&&e.bcd<=0){e.state='bash';e.timer=0;e.bx=ax;continue}   // 盾卫：盾击
     const plain=!e.elite&&!e.boss&&!stats.ranged&&!stats.lob&&!stats.bomb;   // 普通近战小怪：边走边砍（动作只是表现，伤害靠碰撞）
     if(e.swT>0)e.swT-=dt;
-    if(plain){if(d<=stats.reach*(e.sc||1)*1.2&&e.cooldown===0){e.swT=.9;e.cooldown=.9+Math.random()*.5}}
+    if(plain){if(d<=stats.reach*(e.sc||1)*1.2&&e.cooldown===0){e.swT=.9;e.cooldown=.9+Math.random()*.15}}
     else if(d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
     if(d>(plain?6:stats.reach*(e.sc||1)*.85)){
      e.losT=(e.losT||0)-dt;if(e.losT<=0){e.losT=.25+Math.random()*.1;e.los=true;const n=Math.ceil(d/6);for(let k=1;k<n;k++){if(water(e.x+ax*k/n,e.y+ay*k/n)===1){e.los=false;break}}}   // 中间没有河/崖就直线走
