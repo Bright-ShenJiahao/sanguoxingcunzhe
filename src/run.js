@@ -3,11 +3,11 @@
 const R=(a,b)=>a+Math.random()*(b-a);
 const CATS={own:{name:'专属',ws:[]},blade:{name:'近战',ws:[]},pole:{name:'长柄',ws:[]},bow:{name:'远程',ws:[]},throw:{name:'投掷',ws:[]},spell:{name:'法术',ws:[]}};
 const WEAPONS={
- sword:{name:'长剑',cat:'blade',img:'ui:w_sword',desc:['朝最近敌人那侧挥砍','伤害提升，前后各砍一刀','范围变大，攻速提升','伤害提升','【满级】三连斩，范围、伤害大增']},
- hammer:{name:'战锤',cat:'blade',img:'ui:w_hammer',desc:['朝最近敌人那侧落锤，震圈击退','震圈变大','间隔缩短','一次砸两锤','【满级】伤害大增，余震再震一次']},
- axe:{name:'飞斧',cat:'blade',img:'ui:w_axe',desc:['朝最近敌人那侧抛出飞斧，20% 暴击（双倍）','暴击率 30%，伤害提升','暴击伤害 ×2.5，间隔缩短','一次 2 把，暴击率 40%','【满级】飞得更远，暴击伤害 ×3']},
- bow:{name:'长弓',cat:'bow',img:null,desc:['朝最近的敌人射箭，射程远','一次 2 支，伤害提升','一次 3 支，穿透 1 个','伤害提升','【满级】一次 4 支，箭贯穿所有敌人']},
- xbow:{name:'连发弩',cat:'bow',img:null,desc:['对最近的敌人连射 3 支弩箭','连射 5 支','伤害提升，间隔缩短','连射 7 支','【满级】连射 9 支，弩箭穿透 1 个']}};
+ sword:{name:'长剑',cat:'blade',img:'ui:w_sword',desc:['朝最近敌人那侧挥砍','伤害提升，前后各砍一刀','范围变大，攻速提升','伤害提升','【进阶】三连斩，范围、伤害大增']},
+ hammer:{name:'战锤',cat:'blade',img:'ui:w_hammer',desc:['朝最近敌人那侧落锤，震圈击退','震圈变大','间隔缩短','一次砸两锤','【进阶】伤害大增，余震再震一次']},
+ axe:{name:'飞斧',cat:'blade',img:'ui:w_axe',desc:['朝最近敌人那侧抛出飞斧，20% 暴击（双倍）','暴击率 30%，伤害提升','暴击伤害 ×2.5，间隔缩短','一次 2 把，暴击率 40%','【进阶】飞得更远，暴击伤害 ×3']},
+ bow:{name:'长弓',cat:'bow',img:null,desc:['朝最近的敌人射箭，射程远','一次 2 支，伤害提升','一次 3 支，穿透 1 个','伤害提升','【进阶】一次 4 支，箭贯穿所有敌人']},
+ xbow:{name:'连发弩',cat:'bow',img:null,desc:['对最近的敌人连射 3 支弩箭','连射 5 支','伤害提升，间隔缩短','连射 7 支','【进阶】连射 9 支，弩箭穿透 1 个']}};
 const PASSIVES={
  atk:{name:'力量',desc:'所有伤害 +10%',max:5},
  hp:{name:'活力',desc:'生命上限 +20，并回复 20',max:5},
@@ -18,16 +18,16 @@ const PASSIVES={
  vamp:{name:'吸血',desc:'近战伤害的 2% 转为生命',max:5},greed:{name:'贪婪',desc:'金币 +10%',max:5},curse:{name:'诅咒',desc:'敌人数量、血量 +10%，经验 +10%',max:5}};
 export {WEAPONS,PASSIVES};
 export const PASS_KEYS=Object.keys(PASSIVES);
-WEAPONS.fireball={name:'火球术',cat:'spell',img:null,desc:['朝怪最密处丢火球，落地爆炸','爆炸范围变大','一次 2 颗，间隔缩短','伤害提升','【满级】一次 3 颗，爆炸范围大增']};
-WEAPONS.chain={name:'闪电链',cat:'spell',img:null,desc:['随机劈中敌人，弹跳 2 次；减速的敌人受伤翻倍','弹跳 3 次，伤害提升','弹跳 5 次，间隔缩短','伤害提升','【满级】同时 2 道，弹跳 8 次']};
-WEAPONS.frost={name:'冰霜新星',cat:'spell',img:null,desc:['朝随机敌人射出 2 根冰锥，命中处减速 50%','3 根冰锥，伤害提升','减速更久，间隔缩短','4 根冰锥','【满级】5 根冰锥，命中时碎裂溅射']};
-WEAPONS.missile={name:'魔法飞弹',cat:'spell',img:null,desc:['发射 2 颗追踪飞弹','一次 3 颗','一次 4 颗，间隔缩短','伤害提升','【满级】一次 7 颗']};
-WEAPONS.thunder={name:'雷霆',cat:'spell',img:null,desc:['随机落下 2 道雷，小范围伤害','3 道雷，伤害提升','4 道雷，间隔缩短','6 道雷','【满级】8 道雷，每 4 轮落下一道天罚巨雷']};
+WEAPONS.fireball={name:'火球术',cat:'spell',img:null,desc:['朝怪最密处丢火球，落地爆炸','爆炸范围变大','一次 2 颗，间隔缩短','伤害提升','【进阶】一次 3 颗，爆炸范围大增']};
+WEAPONS.chain={name:'闪电链',cat:'spell',img:null,desc:['随机劈中敌人，弹跳 2 次；减速的敌人受伤翻倍','弹跳 3 次，伤害提升','弹跳 5 次，间隔缩短','伤害提升','【进阶】同时 2 道，弹跳 8 次']};
+WEAPONS.frost={name:'冰霜新星',cat:'spell',img:null,desc:['朝随机敌人射出 2 根冰锥，命中处减速 50%','3 根冰锥，伤害提升','减速更久，间隔缩短','4 根冰锥','【进阶】5 根冰锥，命中时碎裂溅射']};
+WEAPONS.missile={name:'魔法飞弹',cat:'spell',img:null,desc:['发射 2 颗追踪飞弹','一次 3 颗','一次 4 颗，间隔缩短','伤害提升','【进阶】一次 7 颗']};
+WEAPONS.thunder={name:'雷霆',cat:'spell',img:null,desc:['随机落下 2 道雷，小范围伤害','3 道雷，伤害提升','4 道雷，间隔缩短','6 道雷','【进阶】8 道雷，每 4 轮落下一道天罚巨雷']};
 for(const k in WEAPONS){const c=WEAPONS[k].cat;if(CATS[c])CATS[c].ws.push(k)}
 export const POOL={w:Object.keys(WEAPONS).filter(k=>!['spell','own'].includes(WEAPONS[k].cat)),s:Object.keys(WEAPONS).filter(k=>WEAPONS[k].cat==='spell')};
 // 角色专属武器（不进公共卡池）
-WEAPONS.gb={name:'掌机',cat:'own',img:'gear/gb',own:1,desc:['光弹射向最近的敌人，打中弹到下一只','一次 2 发，伤害提升','穿透 1 个、弹 2 次，射速提升','一次 3 发','【满级】穿透 2、弹 3 次；每 4 轮天降俄罗斯方块']};
-WEAPONS.hp={name:'耳机',cat:'own',img:'gear/hp',own:1,desc:['放出声波圈，推开敌人','声波圈变大','间隔缩短，附带追踪音符','伤害提升','【满级】音符更多；每 5 轮重低音冲击波扫全屏（3 倍伤害，击退）']};
+WEAPONS.gb={name:'掌机',cat:'own',img:'gear/gb',own:1,desc:['光弹射向最近的敌人，打中弹到下一只','一次 2 发，伤害提升','穿透 1 个、弹 2 次，射速提升','一次 3 发','【进阶】穿透 2、弹 3 次；每 4 轮天降俄罗斯方块']};
+WEAPONS.hp={name:'耳机',cat:'own',img:'gear/hp',own:1,desc:['放出声波圈，推开敌人','声波圈变大','间隔缩短，附带追踪音符','伤害提升','【进阶】音符更多；每 5 轮重低音冲击波扫全屏（3 倍伤害，击退）']};
 const WV=await fetch('data/waves.json').then(r=>r.json());   // 波次表（每分钟一张）
 const MAXW=3,MAXS=3,MAXP=6;   // 局内上限：公共武器 3、法术 3、被动 6（专属另算）
 const UIV=new URLSearchParams(location.search).get('ui')==='blue'?'blue':'card';
@@ -304,9 +304,9 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(let i=0;i<n;i++){
    const ready=Object.keys(S.w).filter(k=>S.w[k]===MAXL-1);   // 先给等着满级的卡
    const ops=ready.length?ready.map(k=>['w',k]):[...Object.keys(S.w).filter(k=>S.w[k]<MAXL-1).map(k=>['w',k]),...Object.keys(S.p).filter(k=>S.p[k]>0&&S.p[k]<PASSIVES[k].max).map(k=>['p',k])];
-   if(!ops.length){survival?.heal?.(30);GOT.push({g:'❤️',t:'回复 30'});continue}
+   if(!ops.length){survival?.heal?.(30);GOT.push({img:'assets/ui/b_regen.png',t:'回复 30'});continue}
    const [t,k]=ops[Math.floor(Math.random()*ops.length)];
-   if(t==='w'){S.w[k]++;const W=WEAPONS[k],L=S.w[k];GOT.push({img:ic('w',k),g:W.name[0],t:L===MAXL?W.name+' 满级！':W.name+' '+(L-1)+'→'+L})}
+   if(t==='w'){S.w[k]++;const W=WEAPONS[k],L=S.w[k];GOT.push({img:ic('w',k),g:W.name[0],t:L===MAXL?W.name+' 进阶！':W.name+' '+(L-1)+'→'+L})}
    else{S.p[k]++;if(k==='hp'){S.maxHp+=20;survival?.setMax?.(S.maxHp,20)}GOT.push({img:ic('p',k),g:PASSIVES[k].name[0],t:PASSIVES[k].name+' '+(S.p[k]-1)+'→'+S.p[k]})}}
   const pool=GOT.length?GOT:[{g:'❤️'}];   // 转轮只转这次真的会给的东西
   if(window.META){S.paused=true;window.META.slot(big?'Boss 宝箱 ×'+n:'宝箱 ×'+n,GOT,pool,()=>{S.paused=false})}else S.banner={v:'宝箱：'+GOT.map(o=>o.t).join('、'),t:4,snd:1}}
