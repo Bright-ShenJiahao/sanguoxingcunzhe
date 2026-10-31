@@ -18,7 +18,7 @@ const PASSIVES={
  vamp:{name:'吸血',desc:'近战伤害的 2% 转为生命',max:5},greed:{name:'贪婪',desc:'金币 +10%',max:5},curse:{name:'诅咒',desc:'敌人数量、血量 +10%，经验 +10%',max:5},
  dodge:{name:'闪避',desc:'5% 概率完全躲开一次伤害',max:5},tough:{name:'坚韧',desc:'受伤后无敌时间 +0.2 秒',max:3},svamp:{name:'法术吸血',desc:'法术伤害的 1.5% 转为生命',max:5},rev:{name:'复苏',desc:'本局死亡时复活一次（回复一半生命）',max:1},
  berserk:{name:'狂暴',desc:'生命越低伤害越高，每级最多 +8%',max:5},exec:{name:'处决',desc:'小怪血量低于 2% 时直接击杀（每级 +2%）',max:5},hunt:{name:'猎王',desc:'对精英和 Boss 伤害 +5%',max:3},
- knock:{name:'击退',desc:'攻击击退距离 +25%',max:3},boom:{name:'连锁爆破',desc:'击杀时 4% 概率小范围爆炸',max:5},mag:{name:'磁力',desc:'拾取范围 +25%',max:5}};
+ knock:{name:'击退',desc:'攻击击退距离 +25%',max:3},boom:{name:'连锁爆破',desc:'击杀时 4% 概率小范围爆炸',max:5},mag:{name:'磁力',desc:'拾取范围 +25%',max:5},gamble:{name:'豪赌',desc:'伤害在 70%～130% 之间浮动，每级上限再 +10%',max:3}};
 export {WEAPONS,PASSIVES,WIC,PIC};
 export const PASS_KEYS=Object.keys(PASSIVES);
 WEAPONS.fireball={name:'火球术',cat:'spell',img:null,desc:['朝怪最密处丢火球，落地爆炸','爆炸范围变大','一次 2 颗，间隔缩短','伤害提升','【进阶】一次 3 颗，爆炸范围大增']};
@@ -37,11 +37,11 @@ const UIV=new URLSearchParams(location.search).get('ui')==='blue'?'blue':'card';
 const FRS='frames_';
 const MAXL=5,OL=[0,1,3,5,6,8];   // 5 级制：新等级 → 旧数值档位
 const WIC={sword:'ic_sword',hammer:'ic_hammer',axe:'icons_3',thunder:'ic_thunder',bow:'ic_bow',xbow:'ic_xbow',gb:'icons_0',hp:'icons_1',missile:'icons_2',axe:'icons_3',fireball:'icons_4',frost:'icons_5',chain:'icons_6',holy:'icons_7'};
-const PIC={arc:'icons_2',crit:'b_luck',critd:'b_atk',dodge:'icons_9',tough:'b_armor',svamp:'b_vamp',rev:'icons_10',berserk:'b_curse',exec:'b_dur',hunt:'icons_3',knock:'ic_hammer',boom:'icons_4',mag:'misc_0',atk:'b_atk',hp:'icons_10',spd:'icons_9',cd:'b_cd',area:'b_area',amt:'b_amt',regen:'b_regen',armor:'b_armor',luck:'b_luck',wis:'icons_12',dur:'b_dur',pspd:'b_pspd',vamp:'b_vamp',greed:'icons_11',curse:'b_curse'};
+const PIC={gamble:'misc_5',arc:'icons_2',crit:'b_luck',critd:'b_atk',dodge:'icons_9',tough:'b_armor',svamp:'b_vamp',rev:'icons_10',berserk:'b_curse',exec:'b_dur',hunt:'icons_3',knock:'ic_hammer',boom:'icons_4',mag:'misc_0',atk:'b_atk',hp:'icons_10',spd:'icons_9',cd:'b_cd',area:'b_area',amt:'b_amt',regen:'b_regen',armor:'b_armor',luck:'b_luck',wis:'icons_12',dur:'b_dur',pspd:'b_pspd',vamp:'b_vamp',greed:'icons_11',curse:'b_curse'};
 const isSp=k=>WEAPONS[k].cat==='spell',isOwn=k=>!!WEAPONS[k].own;
 function loadDeck(){let d=null;try{d=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
  if(d&&Array.isArray(d.w)&&Array.isArray(d.s)){d.w=d.w.filter(k=>POOL.w.includes(k));d.s=d.s.filter(k=>POOL.s.includes(k));d.lock=(d.lock||[]).filter(k=>PASS_KEYS.includes(k))}
- if(!d||!Array.isArray(d.w)||d.w.length!==5||!Array.isArray(d.s)||d.s.length!==5)d={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};d.lock=(d.lock||[]).slice(0,2);return d}
+ if(!d||!Array.isArray(d.w)||d.w.length!==5||!Array.isArray(d.s)||d.s.length!==5)d={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};d.lock=(d.lock||[]).slice(0,4);return d}
 export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  let S;
  const ui=document.createElement('div');ui.id='lvup';ui.hidden=true;
@@ -169,7 +169,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  // 抗性表（没写 = ×1）；同步 docs/ENEMIES.md
  RT={gob_shield:{rng:.3},gob_rock:{mel:.5,rng:.5},gob_wolf:{rng:1.5},gob_boar:{mel:.7},gob_ghost:{mel:.5,rng:.5,ele:1.5,holy:2,dark:.5},gob_mage:{ele:.5},gob_shaman:{dark:.5},
   skeleton:{rng:.7,holy:1.5,dark:.5},gob_necro:{rng:.7,holy:1.5,dark:.5},gob_giant:{mel:.8,rng:.8},gob_paladin:{holy:.5,dark:1.5},gob_hero:{rng:.5},gob_troll:{mel:.3,rng:.3}};
- function strike(e,v,dir,crit,mel){const dt_=DT[S.src]||'rng',rt=e.drum?null:RT[e.k],rm=(e.k==='gob_troll'&&e.brkT>0&&(dt_==='mel'||dt_==='rng'))?1:(rt?.[dt_]??1),arm=rm<1;v*=rm;if(S.src==='fireball')e.noRegT=4;if(dt_==='holy'&&e.bshield){e.bshield=0;e.brkT=6;S.texts.push({x:e.x,y:e.y-50,v:'血盾破碎！',t:1.2,c:'#ffe27a',big:1})}if(rm!==1&&!(e.rtT>0)){e.rtT=1.2;S.texts.push({x:e.x,y:e.y-28*(e.sc||1),v:rm<1?'抵抗':'克制！',t:.8,c:rm<1?'#9aa3ad':'#ff9a3c',big:rm>1})}if(mel&&S.p.vamp){S.vh=(S.vh||0)+v*.02*S.p.vamp;if(S.vh>=1){survival?.heal?.(Math.floor(S.vh));S.vh%=1}}window.SFX?.hit();if(e.elite||e.boss)v*=1+.05*S.p.hunt;if(!crit&&Math.random()<.05*S.p.crit+S.B.crit){v*=2+.2*S.p.critd;crit=true}v*=.85+Math.random()*.3;if(S.p.svamp&&(dt_==='ele'||dt_==='holy'||dt_==='dark')){S.sv=(S.sv||0)+v*.015*S.p.svamp;if(S.sv>=1){survival?.heal?.(Math.floor(S.sv));S.sv%=1}}window.KB=1+.25*S.p.knock;hitEnemy(e,v,dir);if(S.p.exec&&!e.dead&&!e.boss&&!e.elite&&!e.drum&&e.hp>0&&e.hp<e.hpMax*.02*S.p.exec)hitEnemy(e,e.hp+1,dir);S.texts.push({x:e.x+R(-3,3),y:e.y-18*(e.sc||1),v:(Math.round(v*10)/10)+'',t:.55,c:arm?'#8f98a3':crit?'#ffd166':'#ffffff',big:crit&&!arm})}
+ function strike(e,v,dir,crit,mel){const dt_=DT[S.src]||'rng',rt=e.drum?null:RT[e.k],rm=(e.k==='gob_troll'&&e.brkT>0&&(dt_==='mel'||dt_==='rng'))?1:(rt?.[dt_]??1),arm=rm<1;v*=rm;if(S.src==='fireball')e.noRegT=4;if(dt_==='holy'&&e.bshield){e.bshield=0;e.brkT=6;S.texts.push({x:e.x,y:e.y-50,v:'血盾破碎！',t:1.2,c:'#ffe27a',big:1})}if(rm!==1&&!(e.rtT>0)){e.rtT=1.2;S.texts.push({x:e.x,y:e.y-28*(e.sc||1),v:rm<1?'抵抗':'克制！',t:.8,c:rm<1?'#9aa3ad':'#ff9a3c',big:rm>1})}if(mel&&S.p.vamp){S.vh=(S.vh||0)+v*.02*S.p.vamp;if(S.vh>=1){survival?.heal?.(Math.floor(S.vh));S.vh%=1}}window.SFX?.hit();if(e.elite||e.boss)v*=1+.05*S.p.hunt;if(!crit&&Math.random()<.05*S.p.crit+S.B.crit){v*=2+.2*S.p.critd;crit=true}if(S.p.gamble)v*=.7+Math.random()*(.6+.1*S.p.gamble);if(S.p.svamp&&(dt_==='ele'||dt_==='holy'||dt_==='dark')){S.sv=(S.sv||0)+v*.015*S.p.svamp;if(S.sv>=1){survival?.heal?.(Math.floor(S.sv));S.sv%=1}}window.KB=1+.25*S.p.knock;hitEnemy(e,v,dir);if(S.p.exec&&!e.dead&&!e.boss&&!e.elite&&!e.drum&&e.hp>0&&e.hp<e.hpMax*.02*S.p.exec)hitEnemy(e,e.hp+1,dir);S.texts.push({x:e.x+R(-3,3),y:e.y-18*(e.sc||1),v:(Math.round(v*10)/10)+'',t:.55,c:arm?'#8f98a3':crit?'#ffd166':'#ffffff',big:crit&&!arm})}
  function knock(e,k){if(e.boss)k*=.15;if(e.armor)k*=.2;const dx=e.x-hero.x,dy=e.y-hero.y,l=Math.hypot(dx,dy)||1,nx=e.x+dx/l*k,ny=e.y+dy/l*k;if(ok(nx,ny)){e.x=nx;e.y=ny}}
  // ---------- 武器 ----------
  const FIRE={
