@@ -11,7 +11,7 @@ const UP=[
  {k:'wis',ic:'📘',nm:'智慧',fx:'+5% 经验',max:5,base:100},
  {k:'gold',ic:'🪙',nm:'财运',fx:'+8% 金币',max:5,base:120},
  {k:'crit',ic:'⭐',nm:'暴击',fx:'+3% 暴击率（双倍伤害）',max:8,base:90},
- {k:'area',ic:'🌀',nm:'范围',fx:'+5% 攻击范围',max:5,base:100},{k:'dur',ic:'⏳',nm:'持续',fx:'+5% 效果持续',max:5,base:90},{k:'pspd',ic:'🏹',nm:'疾矢',fx:'+5% 投射物速度、射程',max:5,base:80},{k:'amt',ic:'➕',nm:'多重',fx:'+1 投射物',max:1,base:2000},{k:'lock',ic:'🔒',nm:'锁定',fx:'祝福锁定上限 +1',max:2,base:400},{k:'ban',ic:'🚫',nm:'封印',fx:'可封印 1 张祝福（本局不出现）',max:5,base:300},{k:'rr',ic:'🔄',nm:'重抽',fx:'每局 +1 次重抽',max:3,base:150},
+ {k:'area',ic:'🌀',nm:'范围',fx:'+5% 攻击范围',max:5,base:100},{k:'dur',ic:'⏳',nm:'持续',fx:'+5% 效果持续',max:5,base:90},{k:'pspd',ic:'🏹',nm:'疾矢',fx:'+5% 投射物速度、射程',max:5,base:80},{k:'amt',ic:'➕',nm:'多重',fx:'+1 投射物',max:1,base:2000},{k:'ban',ic:'🚫',nm:'封印',fx:'可封印 1 张祝福（本局不出现）',max:5,base:300},{k:'rr',ic:'🔄',nm:'重抽',fx:'每局 +1 次重抽',max:3,base:150},
  {k:'rev',ic:'✨',nm:'复活',fx:'每局复活 1 次（50% 生命）',max:1,base:1500}];
 const price=(u,L)=>Math.round(u.base*Math.pow(1.35,L)/5)*5;
 export const ENEMY_NAMES={goblin:'哥布林',gob_blade:'哥布林剑士',gob_archer:'哥布林弓箭手',gob_shield:'哥布林盾卫',gob_shaman:'哥布林萨满',gob_kid:'哥布林崽',gob_bomb:'炸弹哥布林',gob_boar:'野猪骑兵',gob_rock:'岩甲哥布林',gob_mage:'哥布林法师',gob_ghost:'幽灵哥布林',gob_wolf:'狼骑兵',gob_thrower:'投石哥布林',gob_drum:'哥布林鼓手',gob_necro:'哥布林死灵师',gob_giant:'巨型哥布林',skeleton:'骷髅兵',gob_king:'哥布林大王',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士'};

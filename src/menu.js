@@ -1,4 +1,4 @@
-import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js?v=10311825';
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js?v=10311829';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -134,12 +134,12 @@ export function createMenu(game){
  const dk=prep.querySelector('.dkw'),dks=prep.querySelector('.dks'),dkr=prep.querySelector('.dkr');let deck;try{deck=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
  if(!deck||!Array.isArray(deck.w))deck={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};deck.lock=(deck.lock||[]).filter(k=>PASS_KEYS.includes(k));
  for(const [k,P] of [['w',POOL.w],['s',POOL.s]]){deck[k]=(deck[k]||[]).filter(x=>P.includes(x));for(const x of P)if(deck[k].length<5&&!deck[k].includes(x))deck[k].push(x)}
- const LIM={w:5,s:5,get lock(){return 4+(window.META?.bonus().lock||0)}};const BANL=()=>window.META?.bonus().ban||0;deck.ban=deck.ban||[];
+ const LIM={w:5,s:5,lock:0};const BANL=()=>window.META?.bonus().ban||0;deck.ban=deck.ban||[];
  function drawDeck(){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button class="ic" data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${WIC[k]?`<img src="assets/ui/${WIC[k]}.png" alt="">`:''}<span>${names(k)}</span></button>`).join('')}</div>`;
   dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'装备卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
-  dkr.innerHTML=`<h4>祝福卡<small>已锁定 ${deck.lock.length}/${LIM.lock}${BANL()?` · 已封印 ${deck.ban.length}/${BANL()}`:''} · 点一下锁定${BANL()?'，再点一下封印':''}；锁定必出，封印不出，其余随机凑满 12 张</small></h4><div class="rg">${PASS_KEYS.map(k=>`<button class="rc${deck.ban.includes(k)?' ban':''}" data-k="lock" data-v="${k}" aria-pressed="${deck.lock.includes(k)}">${deck.ban.includes(k)?'<em>封印</em>':''}<b>${PIC[k]?`<img src="assets/ui/${PIC[k]}.png" alt="">`:'✦'} ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></button>`).join('')}</div>`;
+  dkr.innerHTML=`<h4>祝福卡<small>${BANL()?`已封印 ${deck.ban.length}/${BANL()} · 点一下封印，本局不出现；`:'在「强化」里买「封印」后，可以点卡封印；'}每局从未封印的祝福里随机出 12 张</small></h4><div class="rg">${PASS_KEYS.map(k=>`<button class="rc${deck.ban.includes(k)?' ban':''}" data-k="lock" data-v="${k}" aria-pressed="false">${deck.ban.includes(k)?'<em>封印</em>':''}<b>${PIC[k]?`<img src="assets/ui/${PIC[k]}.png" alt="">`:'✦'} ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></button>`).join('')}</div>`;
   dks.innerHTML=row('s',POOL.s,k=>WEAPONS[k].name,'法术卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
-  prep.querySelectorAll('.dk button').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(b.dataset.k==='lock'){const j=deck.ban.indexOf(v);if(j>=0)deck.ban.splice(j,1);else if(i>=0){a.splice(i,1);if(deck.ban.length<BANL())deck.ban.push(v)}else if(a.length<LIM.lock)a.push(v);else if(deck.ban.length<BANL())deck.ban.push(v)}else if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}drawDeck()})}
+  prep.querySelectorAll('.dk button').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(b.dataset.k==='lock'){deck.lock=[];const j=deck.ban.indexOf(v);if(j>=0)deck.ban.splice(j,1);else if(deck.ban.length<BANL())deck.ban.push(v)}else if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}drawDeck()})}
  drawDeck();
  new MutationObserver(()=>document.body.classList.toggle('prep-open',!prep.hidden)).observe(prep,{attributes:true,attributeFilter:['hidden']});
  prep.querySelector('.pp-next').onclick=()=>{if(deck.w.length<5||deck.s.length<5){prep.querySelector('.pp-tabs [data-t='+(deck.w.length<5?'gear':'spell')+']').click();prep.querySelectorAll('.dk .warn').forEach(w=>w.textContent='装备卡和法术卡都要选满 5 张才能出发');return}try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}step('stage')};
