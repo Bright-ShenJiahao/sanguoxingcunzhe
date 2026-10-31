@@ -16,7 +16,7 @@ const PASSIVES={
  regen:{name:'再生',desc:'每秒回复 0.3 生命',max:5},armor:{name:'护甲',desc:'受到伤害 −5%',max:5},luck:{name:'幸运',desc:'暴击率 +5%，金币掉落更多',max:5},
  wis:{name:'智慧',desc:'经验获取 +8%',max:5},dur:{name:'恒久',desc:'减速等效果持续 +15%',max:5},pspd:{name:'疾矢',desc:'投射物速度、射程 +15%',max:5},
  vamp:{name:'吸血',desc:'近战伤害的 2% 转为生命',max:5},greed:{name:'贪婪',desc:'金币 +10%',max:5},curse:{name:'诅咒',desc:'敌人数量、血量 +10%，经验 +10%',max:5}};
-export {WEAPONS,PASSIVES};
+export {WEAPONS,PASSIVES,WIC,PIC};
 export const PASS_KEYS=Object.keys(PASSIVES);
 WEAPONS.fireball={name:'火球术',cat:'spell',img:null,desc:['朝怪最密处丢火球，落地爆炸','爆炸范围变大','一次 2 颗，间隔缩短','伤害提升','【进阶】一次 3 颗，爆炸范围大增']};
 WEAPONS.chain={name:'闪电链',cat:'spell',img:null,desc:['随机劈中敌人，弹跳 2 次；减速的敌人受伤翻倍','弹跳 3 次，伤害提升','弹跳 5 次，间隔缩短','伤害提升','【进阶】同时 2 道，弹跳 8 次']};
@@ -113,8 +113,6 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(const q of S.evq||[])if(!q.done&&S.t>=q.t&&EVN[q.k]){q.done=1;EVN[q.k][1](q.dur);S.banner={v:EVN[q.k][0],t:2.5}}
   S.evq=(S.evq||[]).filter(q=>!q.done);
   if(S.t>=660){E.gT=(E.gT??S.t)};if(S.t>=660&&S.t>=E.gT){E.gT=S.t+90;const a=Math.random()*6.28,x=hero.x+Math.cos(a)*200,y=hero.y+Math.sin(a)*150;if(ok(x,y)){const m=makeEnemy(x,y,'gob_giant');if(m){onSpawnBase(m);m.elite=true;m.armor=0;m.hp=m.hpMax=Math.ceil(40*(1+S.t/80));m.sc=1;en.push(m);S.banner={v:'巨型哥布林！看红圈躲开',t:3}}}}
-  if(S.t>=420&&!E.hero){E.hero=1;const a=Math.random()*6.28,x=hero.x+Math.cos(a)*220,y=hero.y+Math.sin(a)*160;const m=ok(x,y)?makeEnemy(x,y,'gob_hero'):null;if(m){onSpawnBase(m);m.boss=true;m.armor=0;m.res='';m.name='哥布林英雄';m.hp=m.hpMax=Math.round(150*(1+S.t/160));m.sc=1;en.push(m);S.banner={v:'小 Boss：哥布林英雄！远程会被盾挡',t:3.5}}else E.hero=0}
-  if(S.t>=720){E.trT=E.trT??S.t;if(S.t>=E.trT){E.trT=S.t+75;const a=Math.random()*6.28,x=hero.x+Math.cos(a)*220,y=hero.y+Math.sin(a)*160;if(ok(x,y)){const m=makeEnemy(x,y,'gob_troll');if(m){onSpawnBase(m);m.elite=true;m.armor=0;m.res='';m.bshield=1;m.hp=m.hpMax=Math.ceil(60*(1+S.t/80));m.sc=1;en.push(m);if(!S.seen.gob_troll){S.seen.gob_troll=1;S.banner={v:'血咒巨魔！物理难伤：用火焰止血、神圣破盾',t:4}}}}}}
   if(S.t>=1200&&!E.clear){E.clear=1;for(const e of en)if(!e.boss&&!e.dead)e.expired=true;S.evq=[]}
  }
 

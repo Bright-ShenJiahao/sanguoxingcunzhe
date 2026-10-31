@@ -1,4 +1,4 @@
-import {WEAPONS,PASSIVES,POOL,PASS_KEYS} from './run.js';
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -48,6 +48,10 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 #prep .dk h4{margin:6px 0 6px;color:#f6db94;font-size:14px}#prep .dk h4 small{color:#9fb6d8;font-weight:400;margin-left:6px}#prep .dk .g{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 #prep .dk button{cursor:pointer;padding:6px 10px;border:1px solid #83abe354;border-radius:6px;background:#0c225a66;color:#ecf5ff;font:inherit;font-size:13px}#prep .dk button[aria-pressed=true]{background:#77a9f055;border-color:#f0dc9c;box-shadow:0 0 0 1px #e2cb87}
 #prep .dk .rg{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px}#prep .dk button.rc{display:flex;flex-direction:column;gap:3px;text-align:left;padding:10px 12px;border-radius:10px}#prep .dk .rc b{font-size:15px;color:#f6db94}#prep .dk .rc span{font-size:12px;color:#c9d8f0}#prep .dk .rc i{font-size:11px;color:#9fb6d8;font-style:normal}
+#prep .dk button.ic{display:flex;flex-direction:column;align-items:center;gap:4px;width:84px;padding:8px 4px 6px;border-radius:10px;background:linear-gradient(180deg,#16306e99,#0a1c4c99)}
+#prep .dk button.ic img{width:48px;height:48px;object-fit:contain;image-rendering:pixelated;padding:4px;border-radius:8px;background:radial-gradient(circle,#2c4f9a 0%,#0d2257 75%);box-shadow:inset 0 0 0 1px #7fa6e44d}
+#prep .dk button.ic[aria-pressed=false]{opacity:.55;filter:saturate(.6)}#prep .dk button.ic span{font-size:12px}
+#prep .dk .rc b img{width:26px;height:26px;vertical-align:-7px;object-fit:contain;image-rendering:pixelated;border-radius:6px;background:radial-gradient(circle,#2c4f9a,#0d2257);padding:2px;margin-right:2px}
 #prep .dk .warn{color:#ff9a8a;font-size:12px;min-height:16px}
 #prep .lockrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;color:#9fb6d8;font-size:12px}#prep .lockrow span{width:100%}
 #prep .lockrow button{width:46px;padding:4px;border:1px solid #83abe333;border-radius:6px;background:#0c225a44;opacity:.45;cursor:not-allowed;color:#ccd}#prep .lockrow img{height:30px;filter:grayscale(1) brightness(.6);image-rendering:pixelated}#prep .lockrow button span{font-size:10px}
@@ -75,7 +79,7 @@ export function createMenu(game){
   <div class="menu-card"><canvas width="200" height="160" aria-label="当前角色待机动画"></canvas></div>
   <div class="menu-character" hidden></div><label class="menu-name" aria-label="你的名字"><input maxlength="20" placeholder="输入你的名字" autocomplete="nickname"></label>
  </section><nav class="menu-panel" aria-label="主菜单">
-  <button class="menu-start" type="button"><span>开始游戏<small>进入翠绿之地</small></span><span aria-hidden="true">→</span></button>
+  <button class="menu-start" type="button"><span>开始游戏</span><span aria-hidden="true">→</span></button>
   <div class="menu-note">WASD / 方向键移动 · 靠近敌人自动攻击<br>移动端在地图上拖动即可行走</div>
  </nav>`;
  document.body.append(root);document.body.classList.remove('loading');{const bt=document.getElementById('boot');if(bt){const go=()=>{if(performance.now()<(window.BOOT_MIN??2300)){setTimeout(go,100);return}bt.style.opacity='0';setTimeout(()=>bt.remove(),500)};go()}}document.body.classList.add('menu-open');document.title='异世界幸存者 · 无名之辈外传';
@@ -130,9 +134,9 @@ export function createMenu(game){
  if(!deck||!Array.isArray(deck.w))deck={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};deck.lock=(deck.lock||[]).filter(k=>PASS_KEYS.includes(k));
  for(const [k,P] of [['w',POOL.w],['s',POOL.s]]){deck[k]=(deck[k]||[]).filter(x=>P.includes(x));for(const x of P)if(deck[k].length<5&&!deck[k].includes(x))deck[k].push(x)}
  const LIM={w:5,s:5,lock:2};
- function drawDeck(){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${names(k)}</button>`).join('')}</div>`;
+ function drawDeck(){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button class="ic" data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${WIC[k]?`<img src="assets/ui/${WIC[k]}.png" alt="">`:''}<span>${names(k)}</span></button>`).join('')}</div>`;
   dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'装备卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
-  dkr.innerHTML=`<h4>祝福卡<small>已锁定 ${deck.lock.length}/2 · 锁定的祝福本局一定会出现，其余 ${10-deck.lock.length} 张随机</small></h4><div class="rg">${PASS_KEYS.map(k=>`<button class="rc" data-k="lock" data-v="${k}" aria-pressed="${deck.lock.includes(k)}"><b>✦ ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></button>`).join('')}</div>`;
+  dkr.innerHTML=`<h4>祝福卡<small>已锁定 ${deck.lock.length}/2 · 锁定的祝福本局一定会出现，其余 ${10-deck.lock.length} 张随机</small></h4><div class="rg">${PASS_KEYS.map(k=>`<button class="rc" data-k="lock" data-v="${k}" aria-pressed="${deck.lock.includes(k)}"><b>${PIC[k]?`<img src="assets/ui/${PIC[k]}.png" alt="">`:'✦'} ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></button>`).join('')}</div>`;
   dks.innerHTML=row('s',POOL.s,k=>WEAPONS[k].name,'法术卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
   prep.querySelectorAll('.dk button').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}drawDeck()})}
  drawDeck();
@@ -171,6 +175,6 @@ export function createMenu(game){
   preview.clearRect(0,0,200,160);preview.imageSmoothingEnabled=false;
   const scale=2.6;preview.imageSmoothingEnabled=false;if(image)preview.drawImage(image,100-size[0]*scale/2,145-size[1]*scale,size[0]*scale,size[1]*scale);
   caption.textContent=label;
-  if(!prep.hidden){info.querySelector('h3').textContent=label;{const f=(document.querySelector('#cs button[aria-pressed=true]')?.dataset.c||'m')[0]==='f';info.querySelector('.w').textContent=f?'专属武器：耳机（声波圈）':'专属武器：掌机（像素光弹）';info.querySelector('.t').textContent=f?'特性：拾取范围 +25%':'特性：经验 +10%'}ipv.clearRect(0,0,120,120);ipv.imageSmoothingEnabled=false;if(image){const s2=3.4;ipv.drawImage(image,60-size[0]*s2/2,112-size[1]*s2,size[0]*s2,size[1]*s2)}}
+  if(!prep.hidden){info.querySelector('h3').textContent=label.split(/\s*·\s*/)[0];{const f=(document.querySelector('#cs button[aria-pressed=true]')?.dataset.c||'m')[0]==='f';info.querySelector('.w').textContent=f?'专属武器：耳机（声波圈）':'专属武器：掌机（像素光弹）';info.querySelector('.t').textContent=f?'特性：拾取范围 +25%':'特性：经验 +10%'}ipv.clearRect(0,0,120,120);ipv.imageSmoothingEnabled=false;if(image){const s2=3.4;ipv.drawImage(image,60-size[0]*s2/2,112-size[1]*s2,size[0]*s2,size[1]*s2)}}
  }};
 }
