@@ -26,11 +26,12 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  function update(en,dt,speed){EN=en;
   for(const e of en){
    const stats=data[e.k];e.timer+=dt;e.moving=false;
-   if(e.dead){
+   if(e.dead){if(e.drum)continue;
     if(e.state==='fall'&&e.timer>=.4){e.state='down';e.timer=0}
     else if(e.state==='down'){e.alpha=Math.max(0,1-Math.max(0,e.timer-.55)/.8);if(e.timer>=1.35)e.expired=true}
     continue;
    }
+   if(e.drum){if(e.flash>0)e.flash-=dt;continue}
    const ax=hero.x-e.x,ay=hero.y-e.y,d=Math.hypot(ax,ay)||1;if(e.state!=='dash')e.face=ax>=0?1:-1;
    const BD=stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1);
    // 碰撞伤害：同一只怪每 0.5 秒最多一次
@@ -124,6 +125,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  }
  function getFrame(e,now){const f=frame(e,now),name=Object.keys(data[e.k].frames).find(key=>data[e.k].frames[key]===f);return {f,im:images['en_'+e.k+'_'+name]}}
  function draw(e,c,cx,cy,now){
+  if(e.drum){const im=images[e.dead?'camp_drum_x':'camp_drum'],w=44,h=38,x=e.x-cx,y=e.y-cy;c.save();if(e.flash>0)c.filter='brightness(1.8)';if(im)c.drawImage(im,x-w/2,y-h+4,w,h);c.filter='none';if(!e.dead){c.fillStyle='#0009';c.fillRect(x-22,y-h-3,44,4);c.fillStyle='#e8503a';c.fillRect(x-21,y-h-2,42*Math.max(0,e.hp/e.hpMax),2)}c.restore();return}
   const {f,im}=getFrame(e,now);
   if(e.state==='fuse'||e.state==='smash'){const T=e.state==='fuse'?1.5:(e.st||1.2),R_=e.state==='fuse'?40:(e.sr||35),k=Math.min(1,e.timer/T);c.save();c.globalAlpha=.15+.45*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(e.x-cx,e.y-cy,R_,R_*.8,0,0,6.3);c.fill();c.globalAlpha=.8;c.strokeStyle='#ff3a2a';c.lineWidth=1;c.beginPath();c.ellipse(e.x-cx,e.y-cy,R_*k,R_*.8*k,0,0,6.3);c.stroke();c.restore()}
   if(e.state==='leap'){const k=Math.min(1,e.timer/1);c.save();c.globalAlpha=.2+.4*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(e.lx1-cx,e.ly1-cy,50,40,0,0,6.3);c.fill();c.restore()}

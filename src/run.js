@@ -112,6 +112,20 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(S.t>=1200&&!E.clear){E.clear=1;for(const e of en)if(!e.boss&&!e.dead)e.expired=true;S.evq=[]}
  }
 
+
+ // ---------- 北部哥布林营地：部落战鼓 ----------
+ function camp(dt){const C=window.CAMP;if(!C)return;const K=S.camp=S.camp||{cd:0,gt:0};const d=Math.hypot(hero.x-C.x,(hero.y-C.y)*1.2);
+  if(K.e&&K.e.dead&&!K.done){K.done=1;K.cd=S.t+240;campWave(C)}
+  if(d<520&&S.t>=K.cd&&(!K.e||K.e.dead)){if(K.e)K.e.expired=true;const m=makeEnemy(C.x,C.y,'gob_shield');if(m){onSpawnBase(m);Object.assign(m,{drum:true,elite:true,armor:0,res:'',name:'部落战鼓',summonT:1e9,sc:1});m.hp=m.hpMax=Math.round(600+S.t*6);en.push(m);K.e=m;K.done=0;K.lh=m.hp}}
+  const e=K.e;if(!e||e.dead)return;
+  if(d>420){e.hp=e.hpMax;K.lh=e.hp;return}   // 离开营地就回满，不能磨
+  const guard=()=>{const a=R(0,6.28),x=C.x+Math.cos(a)*R(30,110),y=C.y+Math.sin(a)*R(20,70);if(!ok(x,y))return;const ks=S.t<300?['gob_shield','goblin','gob_archer']:['gob_shield','gob_archer','gob_rock','gob_blade'];const m=makeEnemy(x,y,ks[Math.floor(Math.random()*ks.length)]);if(m){onSpawnBase(m);m.guard=1;en.push(m)}};
+  if(d<330&&S.t>=K.gt){K.gt=S.t+5;let n=0;for(const o of en)if(o.guard&&!o.dead)n++;for(let i=n;i<5;i++)guard()}
+  if(K.lh-e.hp>e.hpMax*.08){K.lh=e.hp;guard();guard()}}   // 挨打就叫人
+ function campWave(C){S.banner={v:'战鼓破了！精英从四面涌来',t:3};window.SFX?.boss?.();
+  const ek=S.t>=600?['gob_shaman','gob_drum','gob_necro']:S.t>=420?['gob_shaman','gob_drum']:['gob_shaman','gob_blade'];
+  for(let i=0;i<3;i++){const a=i/3*6.283+R(0,1),x=C.x+Math.cos(a)*(C.rx+60),y=C.y+Math.sin(a)*(C.ry+50);if(!ok(x,y))continue;const m=makeEnemy(x,y,'goblin');if(!m)continue;onSpawnBase(m);m.elite=true;m.armor=0;m.res='';m.k=ek[Math.floor(Math.random()*ek.length)];m.hp=m.hpMax=Math.ceil(15*(1+S.t/100));m.sc=1.1;if(m.k==='gob_shaman')m.summonT=4;en.push(m)}
+  for(let i=0;i<16;i++){const a=i/16*6.283,x=C.x+Math.cos(a)*(C.rx+40),y=C.y+Math.sin(a)*(C.ry+35);if(ok(x,y)){const m=makeEnemy(x,y,'goblin');if(m){onSpawnBase(m);en.push(m)}}}}
  function onSpawnBase(e){const m=S.t/40;   // 一局 20 分钟：强度按 30 分钟曲线压缩
  e.hp=e.hpMax=Math.ceil(e.hp*(m<10?1+m/2:6+(m-10)*.9)*(1+.1*S.p.curse));e.dmgMul=Math.min(3,.6+m*.12);e.sc=e.sc0||1;e.res=RES[e.k]||'';e.armor=e.res==='iron'?1:0}
  function onSpawn(e){
@@ -126,7 +140,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  function cluster(){let b=null,bn=-1;const v=en.filter(e=>!e.dead&&Math.abs(e.x-hero.x)<230&&Math.abs(e.y-hero.y)<160);for(let i=0;i<Math.min(24,v.length);i++){const e=v[Math.floor(Math.random()*v.length)];let n=0;for(const o of v)if((o.x-e.x)**2+(o.y-e.y)**2<40*40)n++;if(n>bn){bn=n;b=e}}return b}
  function nearest(r,from=hero){let b=null,bd=r*r;for(const e of en){if(e.dead)continue;const d=(e.x-from.x)**2+(e.y-from.y)**2;if(d<bd){bd=d;b=e}}return b}
  function hitArc(ang,range,half,amount,opts={}){range*=AR();
-  let n=0;for(const e of en){if(e.dead)continue;const dx=e.x-hero.x,dy=(e.y-hero.y)*1.15,d=Math.hypot(dx,dy);if(d>range+4*(e.sc||1))continue;
+  let n=0;for(const e of en){if(e.dead||e.drum)continue;const dx=e.x-hero.x,dy=(e.y-hero.y)*1.15,d=Math.hypot(dx,dy);if(d>range+4*(e.sc||1))continue;
    let a=Math.atan2(dy,dx)-ang;a=Math.atan2(Math.sin(a),Math.cos(a));if(Math.abs(a)>half&&d>10)continue;
    let v=amount,crit=false;if(opts.crit&&Math.random()<opts.crit){v*=opts.cm;crit=true}
    strike(e,v,Math.sign(dx)||1,crit,true);if(opts.kb)knock(e,opts.kb);n++}return n}
@@ -250,7 +264,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  // ---------- 每帧 ----------
  function update(dt){
   if(!S||S.paused)return;
-  S.t+=dt;S.spT=(S.spT||0)+dt;if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}events();if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
+  S.t+=dt;S.spT=(S.spT||0)+dt;if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}events();camp(dt);if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
   for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0){S.src=k;S.cd[k]=FIRE[k](OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd)}}
   if(S.p.regen||S.B.reg){S.rg=(S.rg||0)+dt*(.3*S.p.regen+S.B.reg);if(S.rg>=1){survival?.heal?.(Math.floor(S.rg));S.rg%=1}}
   for(const z of S.zones||[]){z.t+=dt;z.tick-=dt;if(z.tick<=0){z.tick=z.every;const zx=z.follow?hero.x:z.x,zy=z.follow?hero.y:z.y;for(const e of en)if(!e.dead&&(e.x-zx)**2+((e.y-zy)*1.25)**2<z.r*z.r)strike(e,z.dm,Math.sign(e.x-zx)||1)}}
