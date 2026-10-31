@@ -41,7 +41,7 @@ const PIC={gamble:'misc_5',arc:'icons_2',crit:'b_luck',critd:'b_atk',dodge:'icon
 const isSp=k=>WEAPONS[k].cat==='spell',isOwn=k=>!!WEAPONS[k].own;
 function loadDeck(){let d=null;try{d=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
  if(d&&Array.isArray(d.w)&&Array.isArray(d.s)){d.w=d.w.filter(k=>POOL.w.includes(k));d.s=d.s.filter(k=>POOL.s.includes(k));d.lock=(d.lock||[]).filter(k=>PASS_KEYS.includes(k))}
- if(!d||!Array.isArray(d.w)||d.w.length!==5||!Array.isArray(d.s)||d.s.length!==5)d={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};d.lock=(d.lock||[]).slice(0,4);return d}
+ if(!d||!Array.isArray(d.w)||d.w.length!==5||!Array.isArray(d.s)||d.s.length!==5)d={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};d.lock=(d.lock||[]).slice(0,4+(window.META?.bonus().lock||0));d.ban=(d.ban||[]).filter(k=>PASS_KEYS.includes(k)&&!d.lock.includes(k)).slice(0,window.META?.bonus().ban||0);return d}
 export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  let S;
  const ui=document.createElement('div');ui.id='lvup';ui.hidden=true;
@@ -89,7 +89,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  function reset(start='sword'){
   S={B:window.META?.bonus()||{hp:0,atk:0,spd:0,cd:0,arm:0,reg:0,mag:0,wis:0,crit:0,rr:0,rev:0},coins:[],chests:[],seen:{},ev:{},calm:0,t:+(new URLSearchParams(location.search).get('t')||0),lv:1,xp:0,need:5,queue:0,lastLv:-9,rerolls:0,w:{[start]:1},cd:{},p:Object.fromEntries(PASS_KEYS.map(k=>[k,0])),gems:[],shots:[],fx:[],texts:[],eliteT:Math.max(180,+(new URLSearchParams(location.search).get('t')||0)+60),bossDone:{},paused:false,maxHp:100};
   {const P=Array.prototype.push;S.shots.push=function(...a){for(const x of a)if(!x.src)x.src=S.src;return P.apply(this,a)}}
-  {const d=loadDeck();S.deck=[...d.w,...d.s];const rest=PASS_KEYS.filter(k=>!d.lock.includes(k)).sort(()=>Math.random()-.5);S.pp=[...d.lock,...rest.slice(0,12-d.lock.length)]}
+  {const d=loadDeck();S.deck=[...d.w,...d.s];const ban=d.ban||[];const rest=PASS_KEYS.filter(k=>!d.lock.includes(k)&&!ban.includes(k)).sort(()=>Math.random()-.5);S.pp=[...d.lock,...rest.slice(0,12-d.lock.length)]}
   S.maxHp=100+S.B.hp;S.rerolls=S.B.rr;S.rev=S.B.rev;survival?.setMax?.(S.maxHp,S.B.hp);ui.hidden=true;
  }
  // ---------- 节奏 ----------
@@ -154,8 +154,8 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   else if(S.t>=S.eliteT){S.eliteT=S.t+R(40,60);e.elite=true;e.armor=0;e.res='';const ek=S.t>=600?['gob_shaman','gob_drum','gob_necro']:S.t>=420?['gob_shaman','gob_drum']:['gob_shaman'];e.k=ek[Math.floor(Math.random()*ek.length)];e.hp=e.hpMax=Math.ceil((e.k==='gob_shaman'?10:12)*(1+S.t/100));e.sc=1.1;if(e.k==='gob_shaman')e.summonT=4;if(NEWK[e.k]&&!S.seen[e.k]){S.seen[e.k]=1;S.banner={v:NEWK[e.k],t:3}}}
  }
  const ST=(f,t)=>{const k=S.src;return setTimeout(()=>{const o=S.src;S.src=k;f();S.src=o},t)};
- function dmg(base){const ph=PHYS.has(S.src)||DT[S.src]==='mel'||DT[S.src]==='rng',hpf=survival?survival.hp/Math.max(1,survival.max):1;return base*(1+(ph?0.1*S.p.atk:0.1*S.p.arc)+S.B.atk)*(1+.08*S.p.berserk*(1-hpf))}
- const AR=()=>1+.1*S.p.area,AMT=()=>S.p.amt,FA=()=>hero.face>0?0:Math.PI,MA=()=>Math.atan2(hero.my||0,hero.mx||hero.face),FN=()=>{const t=nearest(260);return t?(t.x>=hero.x?0:Math.PI):FA()},AIM=(r=260)=>{const t=nearest(r);return t?Math.atan2(t.y-10-hero.y+10,t.x-hero.x):MA()},PS=()=>1+.15*S.p.pspd,DUR=()=>1+.15*S.p.dur;
+ function dmg(base){const ph=PHYS.has(S.src)||DT[S.src]==='mel'||DT[S.src]==='rng',hpf=survival?survival.hp/Math.max(1,survival.max):1;return base*(1+(ph?0.1*S.p.atk+S.B.atk:0.1*S.p.arc+(S.B.arc||0)))*(1+.08*S.p.berserk*(1-hpf))}
+ const AR=()=>1+.1*S.p.area+(S.B.area||0),AMT=()=>S.p.amt+(S.B.amt||0),FA=()=>hero.face>0?0:Math.PI,MA=()=>Math.atan2(hero.my||0,hero.mx||hero.face),FN=()=>{const t=nearest(260);return t?(t.x>=hero.x?0:Math.PI):FA()},AIM=(r=260)=>{const t=nearest(r);return t?Math.atan2(t.y-10-hero.y+10,t.x-hero.x):MA()},PS=()=>1+.15*S.p.pspd+(S.B.pspd||0),DUR=()=>1+.15*S.p.dur+(S.B.dur||0);
  function cluster(){let b=null,bn=-1;const v=en.filter(e=>!e.dead&&Math.abs(e.x-hero.x)<230&&Math.abs(e.y-hero.y)<160);for(let i=0;i<Math.min(24,v.length);i++){const e=v[Math.floor(Math.random()*v.length)];let n=0;for(const o of v)if((o.x-e.x)**2+(o.y-e.y)**2<40*40)n++;if(n>bn){bn=n;b=e}}return b}
  function nearest(r,from=hero){let b=null,bd=r*r;for(const e of en){if(e.dead)continue;const d=(e.x-from.x)**2+(e.y-from.y)**2;if(d<bd){bd=d;b=e}}return b}
  function hitArc(ang,range,half,amount,opts={}){range*=AR();
