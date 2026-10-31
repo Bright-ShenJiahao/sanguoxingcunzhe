@@ -85,13 +85,13 @@ export function createMeta(){
  function slot(title,results,pool,done){
   sl.innerHTML=`<div class="m"><div class="sign">${title}</div><div class="reels">${[0,1,2].map(()=>'<div class="reel"><div class="strip"></div></div>').join('')}</div><div class="scr">转动中……</div><div class="lever"></div><div class="tip">按空格 / 点击跳过</div></div>`;sl.hidden=false;
   const cell=o=>`<div class="cell">${o.img?`<img src="${o.img}" alt="">`:`<span class="g">${o.g||'★'}</span>`}<span>${o.t||''}</span></div>`;
-  const reels=[...sl.querySelectorAll('.strip')],show=results.length===1?[pool[0],results[0],pool[1]||pool[0]]:[results[0],results[1]||results[0],results[2]||results[0]];
+  const reels=[...sl.querySelectorAll('.strip')],show=results.length===1?[{g:''},results[0],{g:''}]:[results[0],results[1]||{g:''},results[2]||{g:''}];
   const N=18,durs=[900,1300,1700];let finished=false;
   reels.forEach((s,i)=>{const items=Array.from({length:N},()=>pool[Math.floor(Math.random()*pool.length)]);items.push(show[i]);s.innerHTML=items.map(cell).join('');
    s.animate([{transform:'translateY(0)'},{transform:`translateY(${-N*90}px)`}],{duration:durs[i],easing:'cubic-bezier(.2,.6,.3,1)',fill:'forwards'})});
   let t2=setTimeout(fin,1900);
   function fin(){if(finished)return;finished=true;clearTimeout(t2);reels.forEach(s=>{s.getAnimations().forEach(a=>a.finish())});
-   sl.querySelector('.scr').textContent=results.map(r=>r.t).join('、');window.SFX?.level();setTimeout(()=>{sl.onclick=close;addEventListener('keydown',kd,true)},250)}
+   sl.querySelector('.scr').textContent=results.map(r=>r.t).join('　');window.SFX?.level();setTimeout(()=>{sl.onclick=close;addEventListener('keydown',kd,true)},250)}
   function close(){sl.hidden=true;sl.onclick=null;removeEventListener('keydown',kd,true);done&&done()}
   function kd(e){if(e.key===' '||e.key==='Enter'||e.key==='Escape'){e.preventDefault();e.stopPropagation();close()}}
   const skip=e=>{if(!finished&&(e.type==='click'||e.key===' '||e.key==='Enter')){e.preventDefault();e.stopPropagation();fin()}};

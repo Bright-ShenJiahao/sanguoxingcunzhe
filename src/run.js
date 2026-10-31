@@ -84,7 +84,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  const DW=(c,im,h)=>{const w=im.width*h/im.height;c.drawImage(im,-w/2,-h/2,w,h)},DA=(c,im,x,y,w)=>{if(!im||!im.complete||!im.width)return;const h=im.height*w/im.width;c.drawImage(im,x-w/2,y-h/2,w,h)};
  const GX={};for(const k of ['b0','b1','b2','b3','x0','x1','x2','x3','tet','w0','w1','w2','w3','n0','n1','n2','bass']){const im=new Image();im.src='assets/weapons/gear/'+k+'.png';GX[k]=im}
  function reset(start='sword'){
-  S={B:window.META?.bonus()||{hp:0,atk:0,spd:0,cd:0,arm:0,reg:0,mag:0,wis:0,crit:0,rr:0,rev:0},coins:[],chests:[],seen:{},ev:{},calm:0,t:+(new URLSearchParams(location.search).get('t')||0),lv:1,xp:0,need:5,queue:0,lastLv:-9,rerolls:0,w:{[start]:1},cd:{},p:Object.fromEntries(PASS_KEYS.map(k=>[k,0])),gems:[],shots:[],fx:[],texts:[],eliteT:Math.max(240,+(new URLSearchParams(location.search).get('t')||0)+60),bossDone:{},paused:false,maxHp:100};
+  S={B:window.META?.bonus()||{hp:0,atk:0,spd:0,cd:0,arm:0,reg:0,mag:0,wis:0,crit:0,rr:0,rev:0},coins:[],chests:[],seen:{},ev:{},calm:0,t:+(new URLSearchParams(location.search).get('t')||0),lv:1,xp:0,need:5,queue:0,lastLv:-9,rerolls:0,w:{[start]:1},cd:{},p:Object.fromEntries(PASS_KEYS.map(k=>[k,0])),gems:[],shots:[],fx:[],texts:[],eliteT:Math.max(180,+(new URLSearchParams(location.search).get('t')||0)+60),bossDone:{},paused:false,maxHp:100};
   {const P=Array.prototype.push;S.shots.push=function(...a){for(const x of a)if(!x.src)x.src=S.src;return P.apply(this,a)}}
   {const d=loadDeck();S.deck=[...d.w,...d.s];const rest=PASS_KEYS.filter(k=>!d.lock.includes(k)).sort(()=>Math.random()-.5);S.pp=[...d.lock,...rest.slice(0,10-d.lock.length)]}
   S.maxHp=100+S.B.hp;S.rerolls=S.B.rr;S.rev=S.B.rev;survival?.setMax?.(S.maxHp,S.B.hp);ui.hidden=true;
@@ -108,16 +108,17 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(wi!==S.wi){S.wi=wi;S.evq=S.evq||[];for(const [k,p,n,gap,dur] of wave().ev||[])if(Math.random()<p)for(let i=0;i<n;i++)S.evq.push({t:S.t+3+i*(gap||0)+Math.random()*3,k,dur})}
   for(const q of S.evq||[])if(!q.done&&S.t>=q.t&&EVN[q.k]){q.done=1;EVN[q.k][1](q.dur);S.banner={v:EVN[q.k][0],t:2.5}}
   S.evq=(S.evq||[]).filter(q=>!q.done);
-  if(S.t>=1320){E.gT=(E.gT??S.t)};if(S.t>=1320&&S.t>=E.gT){E.gT=S.t+90;const a=Math.random()*6.28,x=hero.x+Math.cos(a)*200,y=hero.y+Math.sin(a)*150;if(ok(x,y)){const m=makeEnemy(x,y,'gob_giant');if(m){onSpawnBase(m);m.elite=true;m.armor=0;m.hp=m.hpMax=Math.ceil(40*(1+S.t/120));m.sc=1;en.push(m);S.banner={v:'巨型哥布林！看红圈躲开',t:3}}}}
-  if(S.t>=1800&&!E.clear){E.clear=1;for(const e of en)if(!e.boss&&!e.dead)e.expired=true;S.evq=[]}
+  if(S.t>=660){E.gT=(E.gT??S.t)};if(S.t>=660&&S.t>=E.gT){E.gT=S.t+90;const a=Math.random()*6.28,x=hero.x+Math.cos(a)*200,y=hero.y+Math.sin(a)*150;if(ok(x,y)){const m=makeEnemy(x,y,'gob_giant');if(m){onSpawnBase(m);m.elite=true;m.armor=0;m.hp=m.hpMax=Math.ceil(40*(1+S.t/80));m.sc=1;en.push(m);S.banner={v:'巨型哥布林！看红圈躲开',t:3}}}}
+  if(S.t>=1200&&!E.clear){E.clear=1;for(const e of en)if(!e.boss&&!e.dead)e.expired=true;S.evq=[]}
  }
 
- function onSpawnBase(e){const m=S.t/60;e.hp=e.hpMax=Math.ceil(e.hp*(m<10?1+m/2:6+(m-10)*.9)*(1+.1*S.p.curse));e.dmgMul=Math.min(2.5,.6+m*.1);e.sc=e.sc0||1;e.res=RES[e.k]||'';e.armor=e.res==='iron'?1:0}
+ function onSpawnBase(e){const m=S.t/40;   // 一局 20 分钟：强度按 30 分钟曲线压缩
+ e.hp=e.hpMax=Math.ceil(e.hp*(m<10?1+m/2:6+(m-10)*.9)*(1+.1*S.p.curse));e.dmgMul=Math.min(3,.6+m*.12);e.sc=e.sc0||1;e.res=RES[e.k]||'';e.armor=e.res==='iron'?1:0}
  function onSpawn(e){
   onSpawnBase(e);S.pend=Math.max(0,(S.pend||0)-1);
-  const BS=[[600,'哥布林大王',80,1.25,'gob_king'],[900,'萨满长老',60,1.3,'gob_shaman'],[1200,'哥布林酋长',200,1.3,'gob_chief'],[1500,'哥布林圣骑士',160,1,'gob_paladin'],[1800,'哥布林皇帝',600,1.8,'gob_king']];
-  for(const [bt,nm,hp,sc,k] of BS)if(S.t>=bt&&!S.bossDone[bt]){S.bossDone[bt]=1;e.boss=true;e.armor=0;e.res='';e.k=k;e.hp=e.hpMax=Math.round(hp*(1+S.t/240));e.sc=sc;e.name=nm;if(k==='gob_shaman')e.summonT=3;S.calm=S.t+15;S.banner={v:'Boss：'+nm,t:3.5};S.texts.push({x:e.x,y:e.y-40,v:'Boss 来袭！',t:2.5,c:'#ff8a6a',big:1});return}
-  else if(S.t>=S.eliteT){S.eliteT=S.t+R(40,70);e.elite=true;e.armor=0;e.res='';const ek=S.t>=1200?['gob_shaman','gob_drum','gob_necro']:S.t>=900?['gob_shaman','gob_drum']:['gob_shaman'];e.k=ek[Math.floor(Math.random()*ek.length)];e.hp=e.hpMax=Math.ceil((e.k==='gob_shaman'?10:12)*(1+S.t/150));e.sc=1.1;if(e.k==='gob_shaman')e.summonT=4;if(NEWK[e.k]&&!S.seen[e.k]){S.seen[e.k]=1;S.banner={v:NEWK[e.k],t:3}}}
+  const BS=[[300,'哥布林大王',80,1.25,'gob_king'],[600,'哥布林酋长',200,1.3,'gob_chief'],[900,'哥布林圣骑士',160,1,'gob_paladin'],[1200,'哥布林皇帝',600,1.8,'gob_king']];   // 一局 20 分钟
+  for(const [bt,nm,hp,sc,k] of BS)if(S.t>=bt&&!S.bossDone[bt]){S.bossDone[bt]=1;e.boss=true;e.armor=0;e.res='';e.k=k;e.hp=e.hpMax=Math.round(hp*(1+S.t/160));e.sc=sc;e.name=nm;if(k==='gob_shaman')e.summonT=3;S.calm=S.t+15;S.banner={v:'Boss：'+nm,t:3.5};S.texts.push({x:e.x,y:e.y-40,v:'Boss 来袭！',t:2.5,c:'#ff8a6a',big:1});return}
+  else if(S.t>=S.eliteT){S.eliteT=S.t+R(40,60);e.elite=true;e.armor=0;e.res='';const ek=S.t>=600?['gob_shaman','gob_drum','gob_necro']:S.t>=420?['gob_shaman','gob_drum']:['gob_shaman'];e.k=ek[Math.floor(Math.random()*ek.length)];e.hp=e.hpMax=Math.ceil((e.k==='gob_shaman'?10:12)*(1+S.t/100));e.sc=1.1;if(e.k==='gob_shaman')e.summonT=4;if(NEWK[e.k]&&!S.seen[e.k]){S.seen[e.k]=1;S.banner={v:NEWK[e.k],t:3}}}
  }
  const ST=(f,t)=>{const k=S.src;return setTimeout(()=>{const o=S.src;S.src=k;f();S.src=o},t)};
  function dmg(base){return base*(1+0.1*S.p.atk+S.B.atk)}
@@ -195,13 +196,13 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  function tryLevel(){
   if(S.paused||S.t-S.lastLv<3)return;
   if(S.xp<S.need)return;
-  S.xp-=S.need;S.lv++;S.need=5+3*(S.lv-1);S.lastLv=S.t;
+  S.xp-=S.need;S.lv++;S.need=5+8*(S.lv-1);S.lastLv=S.t;
   if(S.lv%3===0)S.rerolls=Math.min(2,S.rerolls+1);
   window.SFX?.level();openLevel();
  }
  function options(){
   const pool=[],own=Object.keys(S.w),nw=own.filter(k=>!isOwn(k)&&!isSp(k)).length,ns=own.filter(isSp).length,np=Object.keys(S.p).filter(k=>S.p[k]>0).length;
-  for(const k in S.w)if(S.w[k]<MAXL)pool.push({t:'w',k,wt:1.2});
+  for(const k in S.w)if(S.w[k]<MAXL-1)pool.push({t:'w',k,wt:1.2});   // 满级（第 5 级）只能开宝箱拿
   for(const k of S.deck){if(S.w[k])continue;if(isSp(k)?ns>=MAXS:nw>=MAXW)continue;pool.push({t:'w',k,wt:1})}
   for(const k of S.pp){const L=S.p[k];if(L>=PASSIVES[k].max)continue;if(!L&&np>=MAXP)continue;pool.push({t:'p',k,wt:.8})}
   const out=[];while(out.length<3&&pool.length){const tot=pool.reduce((a,o)=>a+o.wt,0);let r=Math.random()*tot,i=0;while(i<pool.length-1&&r>pool[i].wt)r-=pool[i++].wt;out.push(pool.splice(i,1)[0])}
@@ -284,13 +285,19 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(const e of en){if(!e.elite||e.dead)continue;e.summonT-=dt;if(e.summonT<=0&&en.length<340){e.summonT=7;for(let i=0;i<3;i++){const a=R(0,6.28),x=e.x+Math.cos(a)*18,y=e.y+Math.sin(a)*12;if(ok(x,y)){const m=makeEnemy(x,y,'goblin');if(m){onSpawnBase(m);en.push(m)}}}S.fx.push({k:'ring',x:e.x,y:e.y,r:22,t:0,d:.4})}}
   tryLevel();
  }
- function openChest(big){const GOT=[];const r=Math.random(),n=big?(r<.2?5:3):(r<.05*(1+S.p.luck)?5:r<.25?3:1),got=[];
-  for(let i=0;i<n;i++){const ops=[...Object.keys(S.w).filter(k=>S.w[k]<MAXL).map(k=>['w',k]),...Object.keys(S.p).filter(k=>S.p[k]>0&&S.p[k]<PASSIVES[k].max).map(k=>['p',k])];
-   if(!ops.length){survival?.heal?.(30);got.push('回复 30');GOT.push({g:'❤️'});continue}const [t,k]=ops[Math.floor(Math.random()*ops.length)];GOT.push(t==='w'?{img:wImg[k]?.src,g:WEAPONS[k].name[0]}:{g:PASSIVES[k].name[0]});
-   if(t==='w'){S.w[k]++;got.push(WEAPONS[k].name+' '+S.w[k]+'级')}else{S.p[k]++;if(k==='hp'){S.maxHp+=20;survival?.setMax?.(S.maxHp,20)}got.push(PASSIVES[k].name+' '+S.p[k]+'级')}}
-  GOT.forEach((o,i)=>o.t=got[i]);const pool=[...Object.keys(S.w).map(k=>({img:wImg[k]?.src,g:WEAPONS[k].name[0]})),{g:'❤️'},{g:'🪙'}];
-  if(window.META){S.paused=true;window.META.slot(big?'Boss 宝箱 ×'+n:'宝箱 ×'+n,GOT,pool,()=>{S.paused=false})}else S.banner={v:'宝箱 ×'+n+'：'+got.join('、'),t:4,snd:1}}
- function onKill(e){window.SFX?.kill();window.META?.kill(e.k);{const c=e.boss?25:e.elite?5:Math.random()<.12*(1+.2*S.p.luck)?1:0;if(c)S.coins.push({x:e.x+R(-4,4),y:e.y-3,v:c});if(e.boss)window.META?.addTickets(1)}if(!e.boss&&Math.random()<.004)(S.mags=S.mags||[]).push({x:e.x,y:e.y-3});if(e.boss||e.elite)S.chests.push({x:e.x,y:e.y,big:!!e.boss});const v=e.boss?60:e.elite?12:1;S.gems.push({x:e.x+R(-3,3),y:e.y-4+R(-3,3),v});if(e.boss)S.texts.push({x:e.x,y:e.y-50,v:'击败 '+e.name+'！',t:2.5,c:'#ffd166',big:1})}
+ function openChest(big){const r=Math.random(),n=big?(r<.2?5:3):(r<.05*(1+S.p.luck)?5:r<.25?3:1),GOT=[];
+  const ic=(t,k)=>{const f=t==='w'?WIC[k]:PIC[k];return f?'assets/ui/'+f+'.png':(t==='w'?wImg[k]?.src:null)};
+  for(let i=0;i<n;i++){
+   const ready=Object.keys(S.w).filter(k=>S.w[k]===MAXL-1);   // 先给等着满级的卡
+   const ops=ready.length?ready.map(k=>['w',k]):[...Object.keys(S.w).filter(k=>S.w[k]<MAXL-1).map(k=>['w',k]),...Object.keys(S.p).filter(k=>S.p[k]>0&&S.p[k]<PASSIVES[k].max).map(k=>['p',k])];
+   if(!ops.length){survival?.heal?.(30);GOT.push({g:'❤️',t:'回复 30'});continue}
+   const [t,k]=ops[Math.floor(Math.random()*ops.length)];
+   if(t==='w'){S.w[k]++;const W=WEAPONS[k],L=S.w[k];GOT.push({img:ic('w',k),g:W.name[0],t:L===MAXL?W.name+' 满级！':W.name+' '+(L-1)+'→'+L})}
+   else{S.p[k]++;if(k==='hp'){S.maxHp+=20;survival?.setMax?.(S.maxHp,20)}GOT.push({img:ic('p',k),g:PASSIVES[k].name[0],t:PASSIVES[k].name+' '+(S.p[k]-1)+'→'+S.p[k]})}}
+  const pool=GOT.length?GOT:[{g:'❤️'}];   // 转轮只转这次真的会给的东西
+  if(window.META){S.paused=true;window.META.slot(big?'Boss 宝箱 ×'+n:'宝箱 ×'+n,GOT,pool,()=>{S.paused=false})}else S.banner={v:'宝箱：'+GOT.map(o=>o.t).join('、'),t:4,snd:1}}
+ const HARD=new Set(['gob_shield','gob_rock','gob_boar','gob_wolf','gob_mage']);
+ function onKill(e){window.SFX?.kill();window.META?.kill(e.k);{const c=e.boss?25:e.elite?5:Math.random()<.12*(1+.2*S.p.luck)?1:0;if(c)S.coins.push({x:e.x+R(-4,4),y:e.y-3,v:c});if(e.boss)window.META?.addTickets(1)}if(!e.boss&&Math.random()<.004)(S.mags=S.mags||[]).push({x:e.x,y:e.y-3});if(e.boss||e.elite)S.chests.push({x:e.x,y:e.y,big:!!e.boss});const v=e.boss?60:e.elite?12:(e.sweep||e.k==='gob_kid'||e.k==='skeleton')?0:HARD.has(e.k)?3:1;if(v)S.gems.push({x:e.x+R(-3,3),y:e.y-4+R(-3,3),v});if(e.boss)S.texts.push({x:e.x,y:e.y-50,v:'击败 '+e.name+'！',t:2.5,c:'#ffd166',big:1})}
  // ---------- 绘制 ----------
  function drawWorld(c,cx,cy,now){
   for(const g of S.gems){const x=g.x-cx,y=g.y-cy;if(x<-10||y<-10||x>2000||y>2000)continue;const big=g.v>=12,col=g.v>=60?'#ffd166':big?'#c77dff':g.v>1?'#5ab0ff':'#5fe0b8';
