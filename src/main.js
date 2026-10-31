@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=10312045';
-import {createSurvival} from './survival.js?v=10312045';
-import {createEnemies} from './enemies.js?v=10312045';
-import {createAudio} from './audio.js?v=10312045';
-import {createMeta} from './meta.js?v=10312045';
+import {createMenu} from './menu.js?v=11010115';
+import {createSurvival} from './survival.js?v=11010115';
+import {createEnemies} from './enemies.js?v=11010115';
+import {createAudio} from './audio.js?v=11010115';
+import {createMeta} from './meta.js?v=11010115';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=10312045';
+import {createPathing} from './pathing.js?v=11010115';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=10312045';
-import {createRun} from './run.js?v=10312045';
-import {createDebug} from './debug.js?v=10312045';
+import {createWeather} from './weather.js?v=11010115';
+import {createRun} from './run.js?v=11010115';
+import {createDebug} from './debug.js?v=11010115';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -37,7 +37,7 @@ const IM={};let left=0;
 let tot=0;const BAD=[];function ld(k,s,tr=0){if(!tr){left++;tot++}const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};
  i.onerror=()=>{if(tr<2){setTimeout(()=>ld(k,s,tr+1),600*(tr+1));return}BAD.push(s);console.warn('加载失败',s);const t=document.querySelector('#boot,.boot,#loading');if(t)t.setAttribute('data-err',BAD.join(' '));if(--left==0)start()};i.src=s}
 D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);for(const k of D.gt)ld(k,'assets/map/'+k+'.jpg?v='+W.ver);left++;tot++;fetch(D.coll).then(r=>r.blob()).then(b=>{const i=new Image();i.onload=()=>{IM.coll=i;if(--left==0)start()};i.src=URL.createObjectURL(b)});   // 碰撞图走 blob，避免跨域污染画布（试玩网址）
-for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');
+for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');ld('camp_crates','assets/map/sprites/camp_crates.png');
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
 // 发型按需下载：选中哪一套才加载哪一套（女主 5 套×9 帧，男主 4 套×8 帧）
@@ -98,10 +98,10 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>needLoad()?loadSet(CS):Promise.resolve(),fit,onStart(){survival.start();weather.reset?.();portal={x:hero.x+14,y:hero.y-2,t:performance.now()}}
  });
- survival=createSurvival({hero,enemies:en,get kills(){return kills},iframe:()=>run?.iframe,
+ survival=createSurvival({hero,enemies:en,get kills(){return kills},iframe:()=>run?.iframe,level:()=>run?.dbg?.S?.lv,
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
   reset(){run.reset(CS[0]==='f'?'hp':'gb');hero.x=WW*AT[0];hero.y=WH*AT[1];hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm=CS[0]==='f'?'hp':'gb';joy=null;for(const k in keys)keys[k]=0}
- });run=createRun({hero,en,images:IM,survival,ok,makeEnemy:(x,y,k)=>enemySystem.make(x,y,k),hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});window.__G={hero,en};dbg=createDebug({world:D,hero,en,run,survival,weather,hit:(e,v)=>hitEnemy(e,performance.now(),1,v)});dbg?.show(false);requestAnimationFrame(loop)}
+ });run=createRun({hero,en,images:IM,survival,ok,makeEnemy:(x,y,k)=>enemySystem.make(x,y,k),hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});window.__G={hero,en,ok,WW,WH,get S(){return run?.dbg?.S}};dbg=createDebug({world:D,hero,en,run,survival,weather,hit:(e,v)=>hitEnemy(e,performance.now(),1,v)});dbg?.show(false);requestAnimationFrame(loop)}
 function drawGroundRaw(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const T=D.tiles.T,z=dw/sw;for(const k of D.gt){const x0=+k[1]*T,y0=+k[2]*T,a=Math.max(sx,x0),b=Math.min(sx+sw,x0+T,WW),c0=Math.max(sy,y0),c1=Math.min(sy+sh,y0+T,WH);if(b<=a||c1<=c0)continue;const ex=b<sx+sw&&b<WW?.5:0,ey=c1<sy+sh&&c1<WH?.5:0;ctx.drawImage(IM[k],(a-x0)*HD,(c0-y0)*HD,(b-a+ex)*HD,(c1-c0+ey)*HD,dx+(a-sx)*z,dy+(c0-sy)*z,(b-a+ex)*z,(c1-c0+ey)*z)}}
 // 地面缓存：按当前屏幕缩放把地面切成 256 格的小块，各缩放一次存起来，之后每帧原样贴（画面不变，省显卡）
 const GC=new Map(),GCH=256;
@@ -128,6 +128,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  c.setTransform(SC,0,0,SC,0,0);
  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
  if(joy){const L=Math.hypot(joy.dx,joy.dy);if(L>8){dx=joy.dx/L;dy=joy.dy/L}}
+ if(window.BOTDIR&&!pz){dx=window.BOTDIR[0];dy=window.BOTDIR[1]}
  if(pz){dx=0;dy=0}
  const L=Math.hypot(dx,dy),moving=L>0;if(moving){dx/=L;dy/=L;if(dx)hero.face=dx>0?1:-1;hero.mx=dx;hero.my=dy}
  const wg=water(hero.x,hero.y),inSh=wg===2;
@@ -145,7 +146,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
    if(el>DUR){weaponAttack=null;nextAtk=now+140}}
   for(const p of pj){p.x+=p.dx*p.v*dt;p.y+=p.dy*p.v*dt;p.life-=dt;for(const e of en){if(!e.dead&&Math.abs(e.x-p.x)<7&&Math.abs(e.y-p.y)<9){hitEnemy(e,now,p.dx>0?1:-1);p.life=0;break}}}
   pj=pj.filter(p=>p.life>0&&ok(p.x,p.y))}
- for(let i=en.length-1;i>=0;i--){const e=en[i];if(e.dead&&!e.counted){e.counted=true;kills++;run.onKill(e)}if(e.expired)en.splice(i,1)}
+ for(let i=en.length-1;i>=0;i--){const e=en[i];if(e.dead&&!e.counted){e.counted=true;if(!e.crate)kills++;run.onKill(e)}if(e.expired)en.splice(i,1)}
  if(!pz&&!(portal&&now-portal.t<3500)){const w=run.want();for(let n=0;n<4&&en.filter(e=>!e.dead).length<w;n++)spawn()}
  survival?.update(gdt);
  $('kc').textContent='斩敌 '+kills;
@@ -187,6 +188,6 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  fx=fx.filter(f=>now-f.t<220);for(const f of fx){const k=(now-f.t)/220;c.strokeStyle=`rgba(255,255,245,${1-k})`;c.lineWidth=1;c.beginPath();c.arc(f.x-cx+f.dx*k*10,f.y-cy-10,3+k*9,0,6.3);c.stroke()}
  window.CAM={cx,cy,SC,VW,VH};dbg?.draw?.(c,cx,cy);
  run.drawUI(c,VW,VH);
- const m=$('mm').getContext('2d'),k=84/WW;m.drawImage(mmc,0,0);m.strokeStyle='#fff';m.strokeRect(cx*k,cy*k,VW*k,VH*k);m.fillStyle='#fff';m.fillRect(hero.x*k-1.5,hero.y*k-1.5,3,3);
+ const m=$('mm').getContext('2d'),k=84/WW;m.drawImage(mmc,0,0);m.strokeStyle='#fff';m.strokeRect(cx*k,cy*k,VW*k,VH*k);if(D.camp){const on=window.CAMPON!==false,x=D.camp.x*k,y=D.camp.y*k;m.fillStyle=on?'#ff5a3a':'#7a7f8a';m.beginPath();m.moveTo(x,y-3.5);m.lineTo(x+3,y+2.5);m.lineTo(x-3,y+2.5);m.closePath();m.fill();m.strokeStyle='#000a';m.lineWidth=.6;m.stroke()}m.fillStyle='#fff';m.fillRect(hero.x*k-1.5,hero.y*k-1.5,3,3);
  if($('pos'))$('pos').textContent='位置 '+Math.round(hero.x)+', '+Math.round(hero.y)+(inSh?' · 正在涉水（速度×0.55）':'')+' · 逻辑画布 480×300，输出 960×600，主角高约 25 像素';
  requestAnimationFrame(loop)}

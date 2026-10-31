@@ -5,7 +5,7 @@ const UP=[
  {k:'atk',ic:'🥊',nm:'力量',fx:'+4% 物理伤害',max:10,base:80},{k:'arc',ic:'🔮',nm:'奥义',fx:'+4% 法术伤害',max:10,base:80},
  {k:'spd',ic:'👟',nm:'步伐',fx:'+3% 移速',max:8,base:70},
  {k:'cd',ic:'⏱️',nm:'反应',fx:'−3% 攻击间隔',max:8,base:90},
- {k:'arm',ic:'🛡️',nm:'护甲',fx:'−2% 受到伤害',max:8,base:80},
+ {k:'arm',ic:'🛡️',nm:'护甲',fx:'+1 护甲（每次受伤少扣 1）',max:5,base:120},
  {k:'reg',ic:'🌱',nm:'再生',fx:'+0.2 每秒回血',max:5,base:120},
  {k:'mag',ic:'🧲',nm:'磁铁',fx:'+12% 拾取范围',max:5,base:50},
  {k:'wis',ic:'📘',nm:'智慧',fx:'+5% 经验',max:5,base:100},
@@ -106,6 +106,6 @@ export function createMeta(){
   addGold(v){M.gold+=Math.round(v*(1+.08*L('gold')));save()},addTickets(v){M.tickets+=v;save()},
   kill(k){M.kills[k]=(M.kills[k]||0)+1;if(!(M.kills[k]%20)||M.kills[k]===1)save()},
   runEnd(t,kills){const g=Math.round((kills/8+t/60*6)*(1+.08*L('gold'))),tk=Math.floor(t/180);M.gold+=g;M.tickets+=tk;M.runs++;save();return {g,tk}},
-  bonus(){return {hp:8*L('hp'),atk:.04*L('atk'),spd:.03*L('spd'),cd:.03*L('cd'),arm:.02*L('arm'),reg:.2*L('reg'),mag:.12*L('mag'),wis:.05*L('wis'),crit:.03*L('crit'),rr:L('rr'),rev:L('rev'),arc:.04*L('arc'),area:.05*L('area'),dur:.05*L('dur'),pspd:.05*L('pspd'),amt:L('amt')}},
+  bonus(){return {hp:8*L('hp'),atk:.04*L('atk'),spd:.03*L('spd'),cd:.03*L('cd'),arm:L('arm'),reg:.2*L('reg'),mag:.12*L('mag'),wis:.05*L('wis'),crit:.03*L('crit'),rr:L('rr'),rev:L('rev'),arc:.04*L('arc'),area:.05*L('area'),dur:.05*L('dur'),pspd:.05*L('pspd'),amt:L('amt')}},
   slot,openUp,openDex,renderUp,refresh:drawBar,save};
 }

@@ -13,7 +13,7 @@ const PASSIVES={
  hp:{name:'活力',desc:'生命上限 +20，并回复 20',max:5},
  spd:{name:'迅捷',desc:'移动速度 +8%',max:5},
  cd:{name:'急速',desc:'攻击间隔 −6%',max:5},area:{name:'扩展',desc:'攻击范围 +10%',max:5},amt:{name:'多重',desc:'投射物 +1',max:2},
- regen:{name:'再生',desc:'每秒回复 0.3 生命',max:5},armor:{name:'护甲',desc:'受到伤害 −5%',max:5},luck:{name:'幸运',desc:'宝箱更丰厚，金币、磁铁掉落更多',max:5},crit:{name:'暴击',desc:'暴击率 +5%',max:5},critd:{name:'暴击伤害',desc:'暴击倍率 +0.2（基础 ×2）',max:5},
+ regen:{name:'再生',desc:'每秒回复 0.3 生命',max:5},armor:{name:'护甲',desc:'每次受伤少扣 1 点（至少扣 1）',max:5},luck:{name:'幸运',desc:'宝箱更丰厚，金币、磁铁掉落更多',max:5},crit:{name:'暴击',desc:'暴击率 +5%',max:5},critd:{name:'暴击伤害',desc:'暴击倍率 +0.2（基础 ×2）',max:5},
  wis:{name:'智慧',desc:'经验获取 +8%',max:5},dur:{name:'恒久',desc:'减速等效果持续 +15%',max:5},pspd:{name:'疾矢',desc:'投射物速度、射程 +15%',max:5},
  vamp:{name:'吸血',desc:'近战伤害的 2% 转为生命',max:5},greed:{name:'贪婪',desc:'金币 +10%',max:5},curse:{name:'诅咒',desc:'敌人数量、血量 +10%，经验 +10%',max:5},
  dodge:{name:'闪避',desc:'5% 概率完全躲开一次伤害',max:5},tough:{name:'坚韧',desc:'受伤后获得 0.1 秒无敌（每级 +0.1 秒）',max:3},svamp:{name:'法术吸血',desc:'法术伤害的 1.5% 转为生命',max:5},rev:{name:'复苏',desc:'本局死亡时复活一次（回复一半生命）',max:1},
@@ -126,10 +126,18 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  function tribe(dt){const L=[];
   for(const e of en){if(e.rtT>0)e.rtT-=dt;if(e.dead||e.drum||e.totem)continue;if(e.k==='gob_troll'){if(e.noRegT>0)e.noRegT-=dt;else e.hp=Math.min(e.hpMax,e.hp+e.hpMax*.02*dt);if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);continue}
    e.age=(e.age||0)+dt;if(!e.vet&&!e.sweep&&!e.guard&&e.age>60&&e.k!=='gob_kid'&&e.k!=='skeleton'){e.vet=1;e.hp*=2;e.hpMax*=2;e.sc=(e.sc||1)*1.2;e.dmgMul=(e.dmgMul||1)*1.3}}
-  if(L.length)for(const e of en){if(e.dead||e.boss||e.elite||e.sweep)continue;for(const l of L){if((e.x-l.x)**2+(e.y-l.y)**2<90*90){e.buffT=Math.max(e.buffT||0,.3);break}}}}
+  if(L.length){for(const l of L)l.fol=0;for(const e of en){if(e.dead||e.boss||e.elite||e.sweep)continue;for(const l of L){if(l.fol<10&&(e.x-l.x)**2+(e.y-l.y)**2<90*90){l.fol++;e.buffT=Math.max(e.buffT||0,.3);break}}}}}
  function leaderDown(l){for(const e of en)if(!e.dead&&!e.boss&&!e.elite&&!e.drum&&(e.x-l.x)**2+(e.y-l.y)**2<130*130)e.fearT=2}
+ // ---------- 补给箱：打碎掉烤肉/金币袋/磁石/圣水 ----------
+ function crates(dt){S.crT=(S.crT??8)-dt;if(S.crT>0)return;S.crT=18;let n=0;for(const e of en)if(e.crate&&!e.dead)n++;if(n>=9)return;
+  for(let i=0;i<10;i++){const a=Math.random()*6.28,r=R(260,520),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r*.8;if(!ok(x,y))continue;const m=makeEnemy(x,y,'goblin');if(!m)return;Object.assign(m,{crate:true,drum:true,armor:0,res:'',sc:1,name:'补给箱'});m.hp=m.hpMax=1;en.push(m);return}}
+ function crateDrop(e){const r=Math.random();
+  if(r<.6)(S.meats=S.meats||[]).push({x:e.x,y:e.y-3});
+  else if(r<.82)S.coins.push({x:e.x,y:e.y-3,v:6});
+  else if(r<.95)(S.mags=S.mags||[]).push({x:e.x,y:e.y-3});
+  else (S.holy=S.holy||[]).push({x:e.x,y:e.y-3})}
  // ---------- 北部哥布林营地：部落战鼓 ----------
- function camp(dt){const C=window.CAMP;if(!C)return;const K=S.camp=S.camp||{cd:0,gt:0};const d=Math.hypot(hero.x-C.x,(hero.y-C.y)*1.2);
+ function camp(dt){const C=window.CAMP;if(!C)return;const K=S.camp=S.camp||{cd:0,gt:0};const d=Math.hypot(hero.x-C.x,(hero.y-C.y)*1.2);window.CAMPON=S.t>=K.cd;if(d<380&&!K.hint){K.hint=1;S.banner={v:'哥布林营地：先拆图腾，再打破战鼓得宝箱（会引来精英）',t:4}}
   if(K.e&&K.e.dead&&!K.done){K.done=1;K.cd=S.t+240;campWave(C)}
   if(d<520&&S.t>=K.cd&&(!K.e||K.e.dead)){if(K.e)K.e.expired=true;if(K.t)K.t.expired=true;const m=makeEnemy(C.x,C.y,'gob_shield');if(m){onSpawnBase(m);Object.assign(m,{drum:true,elite:true,armor:0,res:'',name:'部落战鼓',summonT:1e9,sc:1});m.hp=m.hpMax=Math.round(600+S.t*6);en.push(m);K.e=m;K.done=0;K.lh=m.hp}
    const tx=C.x-60,ty=C.y-14,t=makeEnemy(tx,ty,'gob_shield');if(t){onSpawnBase(t);Object.assign(t,{totem:true,drum:true,elite:true,armor:0,res:'',name:'萨满图腾',summonT:1e9,sc:1});t.hp=t.hpMax=Math.round((600+S.t*6)*.4);en.push(t);K.t=t}}
@@ -288,7 +296,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  // ---------- 每帧 ----------
  function update(dt){
   if(!S||S.paused)return;
-  S.t+=dt;S.spT=(S.spT||0)+dt;if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}events();camp(dt);tribe(dt);if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
+  S.t+=dt;S.spT=(S.spT||0)+dt;if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}events();camp(dt);tribe(dt);crates(dt);if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
   for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0){S.src=k;S.cd[k]=FIRE[k](OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd)}}
   if(S.p.regen||S.B.reg){S.rg=(S.rg||0)+dt*(.3*S.p.regen+S.B.reg);if(S.rg>=1){survival?.heal?.(Math.floor(S.rg));S.rg%=1}}
   for(const z of S.zones||[]){z.t+=dt;z.tick-=dt;if(z.tick<=0){z.tick=z.every;const zx=z.follow?hero.x:z.x,zy=z.follow?hero.y:z.y;for(const e of en)if(!e.dead&&(e.x-zx)**2+((e.y-zy)*1.25)**2<z.r*z.r)strike(e,z.dm,Math.sign(e.x-zx)||1)}}
@@ -317,6 +325,10 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   S.chests=S.chests.filter(c=>!c.got);
   for(const m of S.mags||[])if((hero.x-m.x)**2+(hero.y-m.y)**2<12*12){m.got=true;for(const g of S.gems)g.fly=true;window.SFX?.level()}
   S.mags=(S.mags||[]).filter(m=>!m.got);
+  for(const m of S.meats||[])if((hero.x-m.x)**2+(hero.y-m.y)**2<12*12){m.got=true;survival?.heal?.(30);S.texts.push({x:hero.x,y:hero.y-30,v:'+30',t:.8,c:'#7dff9a'});window.SFX?.level()}
+  S.meats=(S.meats||[]).filter(m=>!m.got);
+  for(const m of S.holy||[])if((hero.x-m.x)**2+(hero.y-m.y)**2<12*12){m.got=true;S.fx.push({k:'ring',x:hero.x,y:hero.y,t:0,r:140});for(const e of en)if(!e.dead&&!e.boss&&!e.drum&&(e.x-hero.x)**2+((e.y-hero.y)*1.2)**2<140*140)hitEnemy(e,e.hp+1,1);S.banner={v:'圣水！净化周围',t:1.5}}
+  S.holy=(S.holy||[]).filter(m=>!m.got);
   if(S.gems.length>500){const a=S.gems.splice(0,100);S.gems[0].v+=a.reduce((s,g)=>s+g.v,0)}
   // 离太远的敌人重新放到屏幕边（像吸血鬼幸存者）
   for(const e of en){if(e.dead||e.drum)continue;const dx=e.x-hero.x,dy=e.y-hero.y;if(dx*dx+dy*dy>520*520){const a=Math.atan2(hero.y-e.y,hero.x-e.x)+R(-.6,.6),r=300;const nx=hero.x+Math.cos(a)*r*-1,ny=hero.y+Math.sin(a)*r*-1;if(ok(nx,ny)){e.x=nx;e.y=ny}}}
@@ -335,7 +347,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   const pool=GOT.length?GOT:[{g:'❤️'}];   // 转轮只转这次真的会给的东西
   if(window.META){S.paused=true;window.META.slot(big?'Boss 宝箱 ×'+n:'宝箱 ×'+n,GOT,pool,()=>{S.paused=false})}else S.banner={v:'宝箱：'+GOT.map(o=>o.t).join('、'),t:4,snd:1}}
  const HARD=new Set(['gob_shield','gob_rock','gob_boar','gob_wolf','gob_mage']);
- function onKill(e){if(S.p.boom&&!e.drum&&Math.random()<.04*S.p.boom){S.fx.push({k:'ring',x:e.x,y:e.y,t:0,r:30});const o=S.src;S.src='boom';for(const t of en)if(!t.dead&&t!==e&&(t.x-e.x)**2+((t.y-e.y)*1.2)**2<30*30)strike(t,dmg(4),0);S.src=o}if((e.elite||e.boss)&&!e.drum&&!e.totem)leaderDown(e);window.SFX?.kill();window.META?.kill(e.k);{const c=e.boss?25:e.elite?5:Math.random()<.12*(1+.2*S.p.luck)?1:0;if(c)S.coins.push({x:e.x+R(-4,4),y:e.y-3,v:c});if(e.boss)window.META?.addTickets(1)}if(!e.boss&&Math.random()<.004*(1+.2*S.p.luck))(S.mags=S.mags||[]).push({x:e.x,y:e.y-3});if((e.boss||e.elite)&&!e.totem)S.chests.push({x:e.x,y:e.y,big:!!e.boss});const v=e.boss?60:e.elite?12:(e.sweep||e.k==='gob_kid'||e.k==='skeleton')?0:HARD.has(e.k)?3:1;if(v)S.gems.push({x:e.x+R(-3,3),y:e.y-4+R(-3,3),v:v+(window.NIGHT&&Math.random()<.3?Math.max(1,Math.round(v*.3)):0)});if(e.boss)S.texts.push({x:e.x,y:e.y-50,v:'击败 '+e.name+'！',t:2.5,c:'#ffd166',big:1})}
+ function onKill(e){if(e.crate){crateDrop(e);return}if(S.p.boom&&!e.drum&&Math.random()<.04*S.p.boom){S.fx.push({k:'ring',x:e.x,y:e.y,t:0,r:30});const o=S.src;S.src='boom';for(const t of en)if(!t.dead&&t!==e&&(t.x-e.x)**2+((t.y-e.y)*1.2)**2<30*30)strike(t,dmg(4),0);S.src=o}if((e.elite||e.boss)&&!e.drum&&!e.totem)leaderDown(e);window.SFX?.kill();window.META?.kill(e.k);{const c=e.boss?25:e.elite?5:Math.random()<.12*(1+.2*S.p.luck)?1:0;if(c)S.coins.push({x:e.x+R(-4,4),y:e.y-3,v:c});if(e.boss)window.META?.addTickets(1)}if(!e.boss&&Math.random()<.004*(1+.2*S.p.luck))(S.mags=S.mags||[]).push({x:e.x,y:e.y-3});if((e.boss||e.elite)&&!e.totem)S.chests.push({x:e.x,y:e.y,big:!!e.boss});const v=e.boss?60:e.elite?12:(e.sweep||e.k==='gob_kid'||e.k==='skeleton')?0:HARD.has(e.k)?3:1;if(v)S.gems.push({x:e.x+R(-3,3),y:e.y-4+R(-3,3),v:v+(window.NIGHT&&Math.random()<.3?Math.max(1,Math.round(v*.3)):0)});if(e.boss)S.texts.push({x:e.x,y:e.y-50,v:'击败 '+e.name+'！',t:2.5,c:'#ffd166',big:1})}
  // ---------- 绘制 ----------
  function drawWorld(c,cx,cy,now){
   for(const e of en){if(e.dead||e.drum)continue;const x=e.x-cx,y=e.y-cy-({gob_troll:74,gob_hero:50,gob_giant:50,gob_paladin:56}[e.k]||26)*(e.sc||1);if(e.vet){c.fillStyle='#ff4a3a';c.beginPath();c.moveTo(x-3,y);c.lineTo(x+3,y);c.lineTo(x,y+4);c.fill()}else if((e.elite||e.boss)){c.fillStyle='#ffd23f';c.beginPath();c.moveTo(x-4,y+3);c.lineTo(x-4,y-1);c.lineTo(x-2,y+1);c.lineTo(x,y-2);c.lineTo(x+2,y+1);c.lineTo(x+4,y-1);c.lineTo(x+4,y+3);c.fill()}}
@@ -343,6 +355,8 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    c.fillStyle='rgba(0,0,0,.25)';c.fillRect(x-1.5,y+2,3,1);c.fillStyle=col;c.beginPath();c.moveTo(x,y-(big?4:2.6));c.lineTo(x+(big?3:2),y);c.lineTo(x,y+(big?4:2.6));c.lineTo(x-(big?3:2),y);c.closePath();c.fill();c.fillStyle='rgba(255,255,255,.8)';c.fillRect(x-.6,y-1.4,1,1)}
   for(const co of S.coins){const x=co.x-cx,y=co.y-cy;c.fillStyle='#7a5208';c.beginPath();c.arc(x,y+.5,2.6,0,6.3);c.fill();c.fillStyle='#ffd23f';c.beginPath();c.arc(x,y,2.4,0,6.3);c.fill();c.fillStyle='#fff6c0';c.fillRect(x-1,y-1.4,1,1)}
   for(const m of S.mags||[])DA(c,UI.i_magnet,m.x-cx,m.y-cy-2+Math.sin(now/200),11);
+  for(const m of S.meats||[]){const x=m.x-cx,y=m.y-cy-2+Math.sin(now/220);c.fillStyle='#e9e2cf';c.fillRect(x+2,y-1,5,2);c.fillStyle='#a8461f';c.beginPath();c.ellipse(x-1,y,4.5,3.5,0,0,6.3);c.fill();c.fillStyle='#d9783a';c.beginPath();c.ellipse(x-2,y-1,2.2,1.5,0,0,6.3);c.fill()}
+  for(const m of S.holy||[]){const x=m.x-cx,y=m.y-cy-2+Math.sin(now/220);c.fillStyle='#bfe8ff';c.fillRect(x-2,y-6,4,3);c.fillStyle='#5ab8ff';c.beginPath();c.ellipse(x,y,4,4.5,0,0,6.3);c.fill();c.fillStyle='#fff';c.fillRect(x-1,y-2,1.5,1.5)}
   for(const ch of S.chests){const x=ch.x-cx,y=ch.y-cy,b=Math.sin(performance.now()/250)*1.2,w=ch.big?14:10,h=ch.big?10:8;c.fillStyle='rgba(0,0,0,.3)';c.fillRect(x-w/2,y,w,2);
    c.fillStyle='#7a4a1c';c.fillRect(x-w/2,y-h+b,w,h);c.fillStyle='#e8b23a';c.fillRect(x-w/2,y-h+b,w,2);c.fillRect(x-1,y-h+b,2,h);c.fillStyle='#fff3b0';c.fillRect(x-1,y-h/2+b-1,2,2);
    c.save();c.globalAlpha=.35+.25*Math.sin(performance.now()/180);c.fillStyle='#ffe27a';c.beginPath();c.arc(x,y-h/2+b,w*.9,0,6.3);c.fill();c.restore()}
@@ -391,5 +405,5 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(const k in S.w){c.fillStyle='rgba(8,14,30,.6)';c.fillRect(x,8,13,15);const im=HI[k]||wImg[k];if(!im){c.fillStyle='#ffd166';c.font='bold 8px "PingFang SC",sans-serif';c.fillText(WEAPONS[k].name[0],x+2.5,19)}else if(im.complete){const s=Math.min(11/im.width,13/im.height);c.drawImage(im,x+6.5-im.width*s/2,9,im.width*s,im.height*s)}c.fillStyle='#ffd166';c.font='6px monospace';c.fillText(S.w[k],x+9,22);x+=15}
   if(S.banner){c.save();c.globalAlpha=Math.min(1,S.banner.t*2);c.textAlign='center';c.font='bold 11px "PingFang SC","Microsoft YaHei",sans-serif';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.75)';c.strokeText(S.banner.v,VW/2,48);c.fillStyle='#ffd166';c.fillText(S.banner.v,VW/2,48);c.restore()}
   c.textAlign='start'}
- return {dbg:{get S(){return S},WEAPONS,PASSIVES,levelUp(){S.xp=S.need;S.lastLv=-9},maxAll(){for(const k of Object.keys(S.w).concat(S.deck))S.w[k]=MAXL;for(const k in PASSIVES)S.p[k]=PASSIVES[k].max},skip(sec){S.t+=sec}},reset,update,onSpawn,onKill,drawWorld,drawUI,want:()=>S?want():16,get paused(){return !!S&&S.paused},get armor(){return 0},pickKind:()=>S?pickKind():'goblin',get spawnR(){return S&&S.t<45?.75:1},get armPct(){return S?S.B.arm+.05*S.p.armor:0},dodge(){if(S&&S.p.dodge&&Math.random()<.05*S.p.dodge){S.texts.push({x:hero.x,y:hero.y-30,v:'闪避',t:.7,c:'#bfe6ff'});return true}return false},get iframe(){return S?.1*S.p.tough:0},useRevive(){if(S&&S.rev>0){S.rev--;S.banner={v:'复活！',t:2.5};return true}return false},get moveMul(){return S?(window.HSLOW>performance.now()?.5:1)*(1+.08*S.p.spd+S.B.spd):1}};
+ return {dbg:{get S(){return S},WEAPONS,PASSIVES,levelUp(){S.xp=S.need;S.lastLv=-9},maxAll(){for(const k of Object.keys(S.w).concat(S.deck))S.w[k]=MAXL;for(const k in PASSIVES)S.p[k]=PASSIVES[k].max},skip(sec){S.t+=sec}},reset,update,onSpawn,onKill,drawWorld,drawUI,want:()=>S?want():16,get paused(){return !!S&&S.paused},get armor(){return S?S.p.armor+(S.B.arm||0):0},pickKind:()=>S?pickKind():'goblin',get spawnR(){return S&&S.t<45?.75:1},get armPct(){return 0},dodge(){if(S&&S.p.dodge&&Math.random()<.05*S.p.dodge){S.texts.push({x:hero.x,y:hero.y-30,v:'闪避',t:.7,c:'#bfe6ff'});return true}return false},get iframe(){return S?.1*S.p.tough:0},useRevive(){if(S&&S.rev>0){S.rev--;S.banner={v:'复活！',t:2.5};return true}return false},get moveMul(){return S?(window.HSLOW>performance.now()?.5:1)*(1+.08*S.p.spd+S.B.spd):1}};
 }

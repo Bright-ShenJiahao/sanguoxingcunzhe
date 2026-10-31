@@ -9,7 +9,7 @@ export function createDebug(g){
  #dbg button{cursor:pointer;font:inherit;color:#eaf2ff;background:#1e3a72;border:1px solid #5d86c9;border-radius:4px;padding:3px 7px}
  #dbg button.on{background:#7a5a10;border-color:#f0dc9c}`;document.head.append(st);
  const el=document.createElement('div');el.id='dbg';document.body.append(el);
- const W=g.world,O=W.off||[0,0],places=[['出生点',W.spawn[0],W.spawn[1]],['北部营地',900,300],['河桥',1200,615],['东海岸',1600,700],['西南悬崖',330,830],['南湖',1050,975]];
+ const W=g.world,O=W.off||[0,0],places=[['出生点',W.spawn[0],W.spawn[1]],['营地',1370,320],['河桥',1200,615],['东海岸',1600,700],['西南悬崖',330,830],['南湖',1050,975]];
  const WK=['auto','clear','lightrain','heavyrain','lightsnow','heavysnow','blizzard','fog','overcast'];
  el.innerHTML=`<h4>🔧 开发者（点标题收起）</h4>
  <b>召唤（出现在身边）</b><div class="r">${[['gob_king','哥布林大王'],['gob_chief','哥布林酋长'],['gob_paladin','哥布林圣骑士'],['gob_giant','巨型哥布林'],['gob_shaman','萨满精英']].map(([k,n])=>`<button data-sum="${k}">${n}</button>`).join('')}</div>
@@ -18,6 +18,7 @@ export function createDebug(g){
  <b>传送</b><div class="r">${places.map((p,i)=>`<button data-p="${i}">${p[0]}</button>`).join('')}</div>
  <b>天气</b><div class="r">${WK.map(k=>`<button data-w="${k}">${{auto:'随机',clear:'晴',lightrain:'小雨',heavyrain:'大雨',lightsnow:'小雪',heavysnow:'大雪',blizzard:'暴雪',fog:'雾',overcast:'阴'}[k]}</button>`).join('')}</div>
  <b>地图（点小地图也能瞬移）</b><div class="r"><button data-t="tp">点地图瞬移</button><button data-t="pen">画笔</button><button data-c="#ff3040" class="on">红</button><button data-c="#20d060">绿</button><button data-c="#9040ff">紫</button><button data-a="undo">撤销</button><button data-a="clr">清除</button><button data-a="copy">复制线条坐标</button><button data-a="full">全图（可画线）</button></div>
+ <b>死亡记录</b><div class="r"><button data-a="dlog">查看</button><button data-a="dclr">清空</button></div><div class="dlog" style="font-size:11px;line-height:1.5"></div>
  <b>时间</b><div class="r">${g.weather.SC.map(s=>`<button data-h="${s}">${s}</button>`).join('')}</div>`;
  el.addEventListener('keydown',e=>e.stopPropagation());
  el.querySelector('h4').onclick=()=>el.classList.toggle('min');
@@ -51,6 +52,11 @@ export function createDebug(g){
  el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
   if(b.dataset.t){mode=mode===b.dataset.t?null:b.dataset.t;el.querySelectorAll('[data-t]').forEach(x=>x.classList.toggle('on',x.dataset.t===mode));cv.style.cursor=mode?'crosshair':''}
   if(b.dataset.c){col=b.dataset.c;el.querySelectorAll('[data-c]').forEach(x=>x.classList.toggle('on',x===b))}
+  if(b.dataset.a==='dclr'){try{localStorage.removeItem('deathlog')}catch(_){}}
+  if(b.dataset.a==='dlog'||b.dataset.a==='dclr'){let L=[];try{L=JSON.parse(localStorage.getItem('deathlog')||'[]')}catch(_){}const box=el.querySelector('.dlog');if(!L.length){box.textContent='还没有记录';return}
+   const ts=L.map(r=>r.t).sort((a,b)=>a-b),f=t=>Math.floor(t/60)+':'+String(t%60).padStart(2,'0'),avg=Math.round(ts.reduce((a,b)=>a+b,0)/ts.length),med=ts[Math.floor(ts.length/2)];
+   const by={};for(const r of L)by[r.by]=(by[r.by]||0)+1;const top=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,n])=>k+'×'+n).join('，');
+   box.innerHTML=`共 ${L.length} 局（真人 ${L.filter(r=>!r.bot).length} · AI ${L.filter(r=>r.bot).length}）<br>平均 ${f(avg)} · 中位 ${f(med)} · 最短 ${f(ts[0])} · 最长 ${f(ts[ts.length-1])}<br>死因：${top}<br>`+L.slice(-10).reverse().map(r=>`${r.bot?'🤖':'🙂'} ${f(r.t)} · Lv${r.lv} · ${r.kills}杀 · ${r.by}`).join('<br>');return}
   if(b.dataset.a==='full')openFull();
   if(b.dataset.a==='undo'){lines.pop();save()}
   if(b.dataset.a==='clr'){lines=[];save()}

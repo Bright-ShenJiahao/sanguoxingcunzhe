@@ -1,4 +1,4 @@
-import {createLeaderboard,submitScore,formatTime} from './leaderboard.js?v=10312045';
+import {createLeaderboard,submitScore,formatTime} from './leaderboard.js?v=11010115';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -32,6 +32,7 @@ export function createSurvival(game){
  function die(){
   finished=true;game.clearInput();render();
   const rec={name,t:Math.floor(elapsed),kills:game.kills},token=generation;
+  try{const L=JSON.parse(localStorage.getItem('deathlog')||'[]');L.push({t:rec.t,kills:rec.kills,lv:game.level?.()||0,by:window.LASTHIT||'?',at:Date.now(),bot:!!window.BOT});localStorage.setItem('deathlog',JSON.stringify(L.slice(-100)))}catch(_){}
   dialog.querySelector('.result-name').textContent='名字：'+name;
   dialog.querySelector('.result-stats').textContent='存活时间：'+formatTime(rec.t)+' · 击杀数：'+rec.kills;
   {const r=window.META?.runEnd(rec.t,rec.kills);if(r)dialog.querySelector('.result-stats').textContent+=` · 获得 🪙${r.g}`+(r.tk?` · 🎟️${r.tk}`:'')}
@@ -43,7 +44,7 @@ export function createSurvival(game){
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};
  return {start,get hp(){return hp},get max(){return maxHp},get finished(){return finished},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
   if(!playing||finished||cooldown>0||window.DBG?.god)return;
-  const big=amount>=maxHp*.12;hp=Math.max(0,hp-Math.round(amount));cooldown=Math.max(game.iframe?.()??0,big?.6:0);window.HURT=performance.now();render();if(hp===0)die();
+  window.LASTHIT=window.CUR_E;const big=amount>=maxHp*.12;hp=Math.max(0,hp-Math.round(amount));cooldown=Math.max(game.iframe?.()??0,big?.6:0);window.HURT=performance.now();render();if(hp===0)die();
  },update(dt){
   if(!playing||finished)return;
   elapsed+=dt;if(dt>0)cooldown=Math.max(0,cooldown-dt);
