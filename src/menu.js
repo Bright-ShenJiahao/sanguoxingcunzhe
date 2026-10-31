@@ -1,4 +1,4 @@
-import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js?v=10311855';
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js?v=10311858';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -149,7 +149,7 @@ export function createMenu(game){
  function ask(title,body,ok,cb){prep.querySelector('.cfm')?.remove();const d=document.createElement('div');d.className='cfm';d.innerHTML=`<div class="cb"><b>${title}</b><p>${body}</p><div><button class="no">取消</button><button class="yes">${ok}</button></div></div>`;prep.append(d);d.querySelector('.no').onclick=()=>d.remove();d.querySelector('.yes').onclick=()=>{d.remove();cb()}}
  function drawDeck(){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button class="ic" data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${WIC[k]?`<img src="assets/ui/${WIC[k]}.png" alt="">`:''}<span>${names(k)}</span></button>`).join('')}</div>`;
   dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'装备卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
-  dkr.innerHTML=`<h4>祝福卡<small>已锁定 ${deck.lock.length}/4 · 已封印 ${deck.ban.length}/8 · 锁定的每局必出；封印、解封在「商店」购买</small></h4><div class="rg">${PASS_KEYS.map(k=>{const B=deck.ban.includes(k),Lk=deck.lock.includes(k);return `<div class="rc${B?' ban':''}" aria-pressed="${Lk}">${B?'<em>封印</em>':`<em class="lk${Lk?' on':''}" data-v="${k}">${Lk?'已锁':'锁定'}</em>`}<b>${PIC[k]?`<img src="assets/ui/${PIC[k]}.png" alt="">`:'✦'} ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></div>`}).join('')}</div>`;
+  dkr.innerHTML=`<h4>祝福卡<small>已锁定 ${deck.lock.length}/4 · 已封印 ${deck.ban.length}/8 · 锁定的每局必出；封印、解封在「商店」购买</small></h4><div class="rg">${[...deck.ban,...deck.lock,...PASS_KEYS.filter(k=>!deck.ban.includes(k)&&!deck.lock.includes(k))].map(k=>{const B=deck.ban.includes(k),Lk=deck.lock.includes(k);return `<div class="rc${B?' ban':''}" aria-pressed="${Lk}">${B?'<em>封印</em>':`<em class="lk${Lk?' on':''}" data-v="${k}">${Lk?'已锁':'锁定'}</em>`}<b>${PIC[k]?`<img src="assets/ui/${PIC[k]}.png" alt="">`:'✦'} ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></div>`}).join('')}</div>`;
   dks.innerHTML=row('s',POOL.s,k=>WEAPONS[k].name,'法术卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
   prep.querySelectorAll('.dk button.ic').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);save_();drawDeck()});
   prep.querySelectorAll('.rc em.lk').forEach(e=>e.onclick=()=>{const v=e.dataset.v,nm=PASSIVES[v].name;

@@ -81,7 +81,7 @@ export function createMeta(){
   shell('永久强化','🪙 '+M.gold,body,'所有角色通用，每次购买价格上涨。');
   pan.querySelectorAll('.buy').forEach(b=>b.onclick=()=>{const u=UP.find(x=>x.k===b.dataset.k),l=L(u.k),p=price(u,l);if(l>=u.max||M.gold<p)return;M.gold-=p;M.up[u.k]=l+1;save();openUp();pan.querySelector(`[data-k=${u.k}]`)?.focus()})}
  function openDex(){
-  const ks=Object.keys(ENEMY_NAMES),found=ks.filter(k=>M.kills[k]).length,tot=Object.values(M.kills).reduce((a,b)=>a+b,0);
+  const ORD=['gob_kid','goblin','gob_blade','gob_shield','gob_archer','gob_bomb','gob_mage','gob_wolf','gob_ghost','gob_rock','gob_thrower','gob_boar','gob_shaman','gob_drum','gob_necro','skeleton','gob_giant','gob_king','gob_chief','gob_paladin'],ks=[...ORD.filter(k=>ENEMY_NAMES[k]),...Object.keys(ENEMY_NAMES).filter(k=>!ORD.includes(k))],found=ks.filter(k=>M.kills[k]).length,tot=Object.values(M.kills).reduce((a,b)=>a+b,0);
   const body=`<div class="bgrid">${ks.map((k,i)=>{const n=M.kills[k]||0;return `<div class="bcard ${n?'':'unk'}"><span class="no">${String(i+1).padStart(3,'0')}</span><div class="im"><img src="assets/characters/enemies/${k}/idle0.png" alt="" style="${n?'':'filter:brightness(0);opacity:.55'}" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='assets/characters/enemies/${k}/walk0.png'}"></div><div class="nm">${n?ENEMY_NAMES[k]:'？？？'}</div><div class="k">${n?'击杀 '+n:'未发现'}</div>${n&&RD[k]?`<div class="k" style="color:#ffcf8a">${RD[k]}</div>`:''}</div>`}).join('')}</div>`;
   shell('怪物图鉴',`已发现 ${found} / ${ks.length} · 累计击杀 ${tot}`,body)}
  // ---------- 老虎机 ----------
