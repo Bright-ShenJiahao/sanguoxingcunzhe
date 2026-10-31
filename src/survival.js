@@ -1,4 +1,4 @@
-import {createLeaderboard,submitScore,formatTime} from './leaderboard.js?v=10312031';
+import {createLeaderboard,submitScore,formatTime} from './leaderboard.js?v=10312037';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -43,7 +43,7 @@ export function createSurvival(game){
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};
  return {start,get hp(){return hp},get max(){return maxHp},get finished(){return finished},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
   if(!playing||finished||cooldown>0||window.DBG?.god)return;
-  hp=Math.max(0,hp-Math.round(amount));cooldown=game.iframe?.()??.75;render();if(hp===0)die();
+  hp=Math.max(0,hp-Math.round(amount));cooldown=game.iframe?.()??0;window.HURT=performance.now();render();if(hp===0)die();
  },update(dt){
   if(!playing||finished)return;
   elapsed+=dt;if(dt>0)cooldown=Math.max(0,cooldown-dt);
