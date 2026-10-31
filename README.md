@@ -22,3 +22,7 @@ GitHub Pages：Settings → Pages → Branch: main / root。
 - `docs/` 设计文档
 
 协作约定见 `AGENTS.md`。
+
+## 版权
+
+版权所有 © 2026 Bright-ShenJiahao。代码、美术、音乐、文字均保留所有权利，未经许可不得复制、修改、再分发或用于其他游戏和商业用途。详见 [LICENSE](LICENSE)。

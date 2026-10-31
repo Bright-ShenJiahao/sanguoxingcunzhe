@@ -135,7 +135,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  if(ok(nx,hero.y))hero.x=nx;if(ok(hero.x,ny))hero.y=ny;
  if(inSh&&moving&&Math.random()<dt*7)rip.push({x:hero.x,y:hero.y,t:now});
  enemySystem.update(en,gdt,1);
- for(let i=0;i<en.length;i++)for(let j=i+1;j<en.length;j++){const a=en[i],b=en[j];if(a.dead||b.dead)continue;const ddx=b.x-a.x,ddy=b.y-a.y,d=Math.hypot(ddx,ddy);if(d>0&&d<10){const f=(10-d)/24;if(ok(a.x-ddx/d*f,a.y-ddy/d*f)){a.x-=ddx/d*f;a.y-=ddy/d*f}if(ok(b.x+ddx/d*f,b.y+ddy/d*f)){b.x+=ddx/d*f;b.y+=ddy/d*f}}}
+ for(let i=0;i<en.length;i++)for(let j=i+1;j<en.length;j++){const a=en[i],b=en[j];if(a.dead||b.dead||a.drum||b.drum)continue;const ddx=b.x-a.x,ddy=b.y-a.y,d=Math.hypot(ddx,ddy);if(d>0&&d<10){const f=(10-d)/24;if(ok(a.x-ddx/d*f,a.y-ddy/d*f)){a.x-=ddx/d*f;a.y-=ddy/d*f}if(ok(b.x+ddx/d*f,b.y+ddy/d*f)){b.x+=ddx/d*f;b.y+=ddy/d*f}}}
  run.update(gdt);
  if(false){const RNG=(wpm=='bow'||wpm=='xbow'),DUR={short:380,none:380,long:430,bow:560,xbow:380,magic:380}[wpm]||380;
   if(!weaponAttack&&now>nextAtk){let best=null,bd=RNG?150:52;for(const e of en){if(e.dead)continue;const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d<bd){bd=d;best=e}}if(best){hero.face=best.x>=hero.x?1:-1;weaponAttack={t0:now,dur:DUR,hit:false,tx:best.x,ty:best.y}}}
