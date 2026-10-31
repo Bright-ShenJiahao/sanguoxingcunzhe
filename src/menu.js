@@ -1,4 +1,4 @@
-import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js?v=10311838';
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js?v=10311840';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -53,6 +53,7 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 #prep .dk button.ic[aria-pressed=false]{opacity:.55;filter:saturate(.6)}#prep .dk button.ic span{font-size:12px}
 #prep .dk .rc b img{width:26px;height:26px;vertical-align:-7px;object-fit:contain;image-rendering:pixelated;border-radius:6px;background:radial-gradient(circle,#2c4f9a,#0d2257);padding:2px;margin-right:2px}
 #prep .dk button.rc{position:relative}#prep .dk button.rc.ban{opacity:.5;border-color:#ff7a7a;filter:grayscale(.7)}#prep .dk button.rc em{position:absolute;right:8px;top:6px;font-style:normal;font-size:11px;color:#ffb0b0;border:1px solid #ff8a8a;border-radius:4px;padding:0 4px}
+#prep .bmode{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 10px}#prep .bmode button{display:flex;flex-direction:column;align-items:center;padding:6px 14px;border:1px solid #83abe354;border-radius:8px;background:#0c225a66;color:#ffe9a8;font:inherit;font-size:13px;cursor:pointer}#prep .bmode button small{font-size:10px;color:#9fb6d8}#prep .bmode button[aria-pressed=true]{background:#77a9f055;border-color:#f0dc9c;box-shadow:0 0 0 1px #e2cb87}#prep .bmode span{font-size:12px;color:#9fb6d8}
 #prep .dk .rc em.lk{color:#ffe08a;border-color:#e2cb87}#prep .bmenu{position:absolute;right:6px;bottom:6px;display:flex;gap:4px;z-index:2}#prep .bmenu button{padding:3px 7px;white-space:nowrap;box-shadow:0 2px 6px #0008;border:1px solid #f0dc9c;border-radius:6px;background:#0b1d4a;color:#ffe9a8;font:inherit;font-size:12px;cursor:pointer}#prep .bmenu button[disabled]{background:#26304a;color:#8a93a8;border-color:#5a6480;cursor:default}#prep .bmenu small{font-size:10px;color:#cfe0ff}
 #prep .dk .warn{color:#ff9a8a;font-size:12px;min-height:16px}
 #prep .lockrow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;color:#9fb6d8;font-size:12px}#prep .lockrow span{width:100%}
@@ -135,16 +136,18 @@ export function createMenu(game){
  const dk=prep.querySelector('.dkw'),dks=prep.querySelector('.dks'),dkr=prep.querySelector('.dkr');let deck;try{deck=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
  if(!deck||!Array.isArray(deck.w))deck={w:POOL.w.slice(0,5),s:POOL.s.slice(0,5),lock:[]};deck.lock=(deck.lock||[]).filter(k=>PASS_KEYS.includes(k));
  for(const [k,P] of [['w',POOL.w],['s',POOL.s]]){deck[k]=(deck[k]||[]).filter(x=>P.includes(x));for(const x of P)if(deck[k].length<5&&!deck[k].includes(x))deck[k].push(x)}
- const LIM={w:5,s:5,lock:4};const BANL=()=>8,PR={lock:400,ban:300,free:100};deck.ban=deck.ban||[];
- function drawDeck(){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button class="ic" data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${WIC[k]?`<img src="assets/ui/${WIC[k]}.png" alt="">`:''}<span>${names(k)}</span></button>`).join('')}</div>`;
+ const LIM={w:5,s:5,lock:4};let BM=null;const BANL=()=>8,PR={lock:400,ban:300,free:100};deck.ban=deck.ban||[];
+ function drawDeck(msg){const row=(key,list,names,title,tip)=>`<h4>${title}<small>${deck[key].length}/${LIM[key]} ${tip}</small></h4><div class="g">${list.map(k=>`<button class="ic" data-k="${key}" data-v="${k}" aria-pressed="${deck[key].includes(k)}">${WIC[k]?`<img src="assets/ui/${WIC[k]}.png" alt="">`:''}<span>${names(k)}</span></button>`).join('')}</div>`;
   dk.innerHTML=row('w',POOL.w,k=>WEAPONS[k].name,'装备卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
-  dkr.innerHTML=`<h4>祝福卡<small>已锁定 ${deck.lock.length}/4 · 已封印 ${deck.ban.length}/8 · 点卡片可花金币锁定（每局必出）、封印（不出现）或解封</small></h4><div class="rg">${PASS_KEYS.map(k=>`<button class="rc${deck.ban.includes(k)?' ban':''}" data-k="lock" data-v="${k}" aria-pressed="${deck.lock.includes(k)}">${deck.ban.includes(k)?'<em>封印</em>':deck.lock.includes(k)?'<em class="lk">锁定</em>':''}<b>${PIC[k]?`<img src="assets/ui/${PIC[k]}.png" alt="">`:'✦'} ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></button>`).join('')}</div>`;
+  dkr.innerHTML=`<h4>祝福卡<small>已锁定 ${deck.lock.length}/4 · 已封印 ${deck.ban.length}/8</small></h4><div class="bmode">${[['lock','锁定','每局必出'],['ban','封印','本局不出现'],['free','解封','恢复原状']].map(([k,n,t])=>`<button data-mode="${k}" aria-pressed="${BM===k}">${n} 🪙${PR[k]}<small>${t}</small></button>`).join('')}<span>${BM?'点一张祝福卡执行；再点按钮取消':'先选一个操作，再点祝福卡'}</span></div><div class="rg">${PASS_KEYS.map(k=>`<button class="rc${deck.ban.includes(k)?' ban':''}" data-k="lock" data-v="${k}" aria-pressed="${deck.lock.includes(k)}">${deck.ban.includes(k)?'<em>封印</em>':deck.lock.includes(k)?'<em class="lk">锁定</em>':''}<b>${PIC[k]?`<img src="assets/ui/${PIC[k]}.png" alt="">`:'✦'} ${PASSIVES[k].name}</b><span>${PASSIVES[k].desc}</span><i>最高 ${PASSIVES[k].max} 级</i></button>`).join('')}</div>`;
   dks.innerHTML=row('s',POOL.s,k=>WEAPONS[k].name,'法术卡','带 5 张进局，必须选满')+'<div class="warn"></div>';
-  prep.querySelectorAll('.dk button').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(b.dataset.k==='lock'){menuFor(b,v);return}else if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}drawDeck()})}
- function menuFor(b,v){const old=prep.querySelector('.bmenu');old?.remove();if(old&&old.parentNode===null&&old.dataset.v===v)return;const g=window.META?.gold??0,L=deck.lock.includes(v),B=deck.ban.includes(v);
-  const ops=L||B?[['free','解封']]:[['lock','锁定'],['ban','封印']];
-  const m=document.createElement('div');m.className='bmenu';m.innerHTML=ops.map(([k,n])=>{const dis=g<PR[k]||(k==='lock'&&deck.lock.length>=4)||(k==='ban'&&deck.ban.length>=8);return `<button data-op="${k}" ${dis?'disabled':''}>${n} ${PR[k]}</button>`}).join('')
-  m.dataset.v=v;b.append(m);m.onclick=e=>{e.stopPropagation();const o=e.target.closest('button')?.dataset.op;if(!o||e.target.closest('button').disabled)return;if(o!=='x'&&window.META.spend(PR[o])){if(o==='lock')deck.lock.push(v);else if(o==='ban')deck.ban.push(v);else{deck.lock=deck.lock.filter(x=>x!==v);deck.ban=deck.ban.filter(x=>x!==v)}try{localStorage.setItem('deck',JSON.stringify(deck))}catch(_){}}drawDeck()}}
+  prep.querySelectorAll('.bmode button').forEach(b=>b.onclick=()=>{BM=BM===b.dataset.mode?null:b.dataset.mode;drawDeck()});if(msg){const sp=prep.querySelector('.bmode span');sp.textContent=msg;sp.style.color='#ff9a8a'}
+  prep.querySelectorAll('.dk button:not([data-mode])').forEach(b=>b.onclick=()=>{const a=deck[b.dataset.k],v=b.dataset.v,i=a.indexOf(v);if(b.dataset.k==='lock'){apply(v);return}else if(i>=0)a.splice(i,1);else if(a.length<LIM[b.dataset.k])a.push(v);try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}drawDeck()})}
+ function apply(v){if(!BM)return;const L=deck.lock.includes(v),B=deck.ban.includes(v),w=prep.querySelector('.dkr .warn2');
+  const why=BM==='free'?(!L&&!B?'这张没有锁定或封印':''):(L||B?'这张已经锁定或封印，先解封':BM==='lock'&&deck.lock.length>=4?'锁定已满 4 张':BM==='ban'&&deck.ban.length>=8?'封印已满 8 张':'');
+  if(!why&&!window.META.spend(PR[BM]))return drawDeck('金币不够');if(why)return drawDeck(why);
+  if(BM==='lock')deck.lock.push(v);else if(BM==='ban')deck.ban.push(v);else{deck.lock=deck.lock.filter(x=>x!==v);deck.ban=deck.ban.filter(x=>x!==v)}
+  try{localStorage.setItem('deck',JSON.stringify(deck))}catch(_){}drawDeck()}
  drawDeck();
  new MutationObserver(()=>document.body.classList.toggle('prep-open',!prep.hidden)).observe(prep,{attributes:true,attributeFilter:['hidden']});
  prep.querySelector('.pp-next').onclick=()=>{if(deck.w.length<5||deck.s.length<5){prep.querySelector('.pp-tabs [data-t='+(deck.w.length<5?'gear':'spell')+']').click();prep.querySelectorAll('.dk .warn').forEach(w=>w.textContent='装备卡和法术卡都要选满 5 张才能出发');return}try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}step('stage')};
