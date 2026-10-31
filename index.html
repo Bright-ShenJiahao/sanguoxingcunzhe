@@ -31,13 +31,13 @@ body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
 #boot .bar i{display:block;height:100%;width:4%;background:#f0d58a;transition:width .25s}
 #bx{position:absolute;z-index:2200;display:flex;gap:14px;align-items:center;box-sizing:border-box;width:min(440px,90vw);padding:14px 18px 14px 14px;background:#101a3a;border:4px solid #f4f4f4;box-shadow:0 0 0 4px #101a3a,0 0 0 7px #8aa6e0,0 8px 24px #000a;color:#fff;font:700 17px/1.65 "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;letter-spacing:.08em;opacity:0;transition:opacity .2s}
 #bx.on{opacity:1}
-#bx canvas{flex:none;width:84px;height:75px;image-rendering:pixelated;border:3px solid #f4f4f4;background:linear-gradient(#3b5ba8,#22306a)}
+#bx canvas{flex:none;width:68px;height:61px;image-rendering:pixelated;border:3px solid #f4f4f4;background:linear-gradient(#3b5ba8,#22306a)}
 #bx p{margin:0;color:#fff;font-size:inherit;min-height:3.3em}
 #bx i{position:absolute;right:12px;bottom:6px;font-style:normal;font-size:12px;animation:bk .7s steps(2) infinite}
 #bx::after{content:"";position:absolute;left:var(--tail,50%);bottom:-17px;margin-left:-9px;border:9px solid transparent;border-top:9px solid #f4f4f4;border-bottom:0}
 @keyframes bk{50%{opacity:0}}
 </style></head><body class="loading">
-<div id="boot"><div id="bbg"></div><div id="bx"><canvas id="bxa" width="28" height="25"></canvas><p id="bxt"></p><i>▼</i></div><div class="tx">加载中…</div><div class="bar"><i id="bootbar"></i></div></div>
+<div id="boot"><div id="bbg"></div><div id="bx"><canvas id="bxa" width="37" height="33"></canvas><p id="bxt"></p><i>▼</i></div><div class="tx">加载中…</div><div class="bar"><i id="bootbar"></i></div></div>
 <script>
 (function(){var b=document.getElementById('boot');if(!b)return;
 // 加载动画：卧室里打掌机 → 掌机爆光 → 房间碎成积木掉落、露出异世界草地 → 哥布林冒出、主角跑路
@@ -66,7 +66,7 @@ var BS=Math.round(28*K/2),blocks=[],px=cx0,py=H-hb-14*K;
 for(var y=0;y<H;y+=BS)for(var x=0;x<W;x+=BS){var d=Math.hypot(x+BS/2-px,y+BS/2-py)/Math.hypot(W,H);blocks.push({x:x,y:y,d:d*.85+Math.random()*.08,r:(Math.random()-.5)*4,vx:(x+BS/2-px)/W*120})}
 var q=document.createElement('div');q.textContent='？';q.style.cssText='position:absolute;z-index:2300;font:900 '+(18*K)+'px sans-serif;color:#fff;text-shadow:0 3px #000;opacity:0;transition:opacity .2s;left:'+(cx0-6*K)+'px;bottom:'+(hb+46*K)+'px';b.appendChild(q);
 var tp=document.getElementById('bx'),tt=document.getElementById('bxt'),T1='再打一局就睡……',T2='我刚才不是在家里打游戏吗！？',t0=performance.now()-SKIP*1000,shown='';
-var av=new Image();av.onload=function(){var c=document.getElementById('bxa').getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(av,5,0,24,22,0,0,28,25)};av.src=P+'hero_b/w0.png';
+var av=new Image();av.onload=function(){var c=document.getElementById('bxa').getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(av,0,0,33,31,2,2,33,31)};av.src=P+'hero_b/w0.png';
 var bw=Math.min(440,W*.9);function place(x){var bl=Math.max(12,Math.min(x-bw/2,W-bw-12));tp.style.left=bl+'px';tp.style.bottom=(hb+50*K+26)+'px';tp.style.setProperty('--tail',(x-bl)+'px')}
 function say(s,t){if(shown!==s){shown=s;tt.textContent=''}tp.className='on';tt.textContent=s.slice(0,Math.min(s.length,Math.floor(t/.075)))}
 var bgw=H*1920/340,last=t0,scroll=0,hxNow=cx0;
