@@ -1,20 +1,20 @@
 // 局外系统：金币 / 抽奖券、永久强化（男女通用）、怪物图鉴、主界面顶部状态栏、老虎机动画（宝箱用，以后抽卡复用）。
 // 存档在 localStorage 'meta'。
 const UP=[
- {k:'hp',ic:'❤️',nm:'体魄',fx:'+8 生命',max:10,base:60},
- {k:'atk',ic:'🥊',nm:'力量',fx:'+4% 物理伤害',max:10,base:80},{k:'arc',ic:'🔮',nm:'奥义',fx:'+4% 法术伤害',max:10,base:80},
- {k:'spd',ic:'👟',nm:'步伐',fx:'+3% 移速',max:8,base:70},
- {k:'cd',ic:'⏱️',nm:'反应',fx:'−3% 攻击间隔',max:8,base:90},
- {k:'arm',ic:'🛡️',nm:'护甲',fx:'+1 护甲（每次受伤少扣 1）',max:5,base:120},
- {k:'reg',ic:'🌱',nm:'再生',fx:'+0.2 每秒回血',max:5,base:120},
- {k:'mag',ic:'🧲',nm:'磁铁',fx:'+12% 拾取范围',max:5,base:50},
- {k:'wis',ic:'📘',nm:'智慧',fx:'+5% 经验',max:5,base:100},
- {k:'gold',ic:'🪙',nm:'财运',fx:'+8% 金币',max:5,base:120},
- {k:'crit',ic:'⭐',nm:'暴击',fx:'+3% 暴击率（双倍伤害）',max:8,base:90},
- {k:'area',ic:'🌀',nm:'范围',fx:'+5% 攻击范围',max:5,base:100},{k:'dur',ic:'⏳',nm:'持续',fx:'+5% 效果持续',max:5,base:90},{k:'pspd',ic:'🏹',nm:'疾矢',fx:'+5% 投射物速度、射程',max:5,base:80},{k:'amt',ic:'➕',nm:'多重',fx:'+1 投射物',max:1,base:2000},{k:'rr',ic:'🔄',nm:'重抽',fx:'每局 +1 次重抽',max:3,base:150},
- {k:'rev',ic:'✨',nm:'复活',fx:'每局复活 1 次（50% 生命）',max:1,base:1500}];
+ {k:'hp',ic:'<img src="assets/ui/u_hp.png" alt="">',nm:'体魄',fx:'+8 生命',max:10,base:60},
+ {k:'atk',ic:'<img src="assets/ui/b_atk.png" alt="">',nm:'力量',fx:'+4% 物理伤害',max:10,base:80},{k:'arc',ic:'<img src="assets/ui/p_arc.png" alt="">',nm:'奥义',fx:'+4% 法术伤害',max:10,base:80},
+ {k:'spd',ic:'<img src="assets/ui/u_spd.png" alt="">',nm:'步伐',fx:'+3% 移速',max:8,base:70},
+ {k:'cd',ic:'<img src="assets/ui/u_cd.png" alt="">',nm:'反应',fx:'−3% 攻击间隔',max:8,base:90},
+ {k:'arm',ic:'<img src="assets/ui/b_armor.png" alt="">',nm:'护甲',fx:'+1 护甲（每次受伤少扣 1）',max:5,base:120},
+ {k:'reg',ic:'<img src="assets/ui/b_regen.png" alt="">',nm:'再生',fx:'+0.2 每秒回血',max:5,base:120},
+ {k:'mag',ic:'<img src="assets/ui/p_mag.png" alt="">',nm:'磁铁',fx:'+12% 拾取范围',max:5,base:50},
+ {k:'wis',ic:'<img src="assets/ui/icons_12.png" alt="">',nm:'智慧',fx:'+5% 经验',max:5,base:100},
+ {k:'gold',ic:'<img src="assets/ui/u_gold.png" alt="">',nm:'财运',fx:'+8% 金币',max:5,base:120},
+ {k:'crit',ic:'<img src="assets/ui/p_crit.png" alt="">',nm:'暴击',fx:'+3% 暴击率（双倍伤害）',max:8,base:90},
+ {k:'area',ic:'<img src="assets/ui/b_area.png" alt="">',nm:'范围',fx:'+5% 攻击范围',max:5,base:100},{k:'dur',ic:'<img src="assets/ui/u_dur.png" alt="">',nm:'持续',fx:'+5% 效果持续',max:5,base:90},{k:'pspd',ic:'<img src="assets/ui/b_pspd.png" alt="">',nm:'疾矢',fx:'+5% 投射物速度、射程',max:5,base:80},{k:'amt',ic:'<img src="assets/ui/u_amt.png" alt="">',nm:'多重',fx:'+1 投射物',max:1,base:2000},{k:'rr',ic:'<img src="assets/ui/u_rr.png" alt="">',nm:'重抽',fx:'每局 +1 次重抽',max:3,base:150},
+ {k:'rev',ic:'<img src="assets/ui/u_revive.png" alt="">',nm:'复活',fx:'每局复活 1 次（50% 生命）',max:1,base:1500}];
 const price=(u,L)=>Math.round(u.base*Math.pow(1.35,L)/5)*5;
-export const ENEMY_NAMES={goblin:'哥布林',gob_blade:'哥布林剑士',gob_archer:'哥布林弓箭手',gob_shield:'哥布林盾卫',gob_shaman:'哥布林萨满',gob_kid:'哥布林崽',gob_bomb:'炸弹哥布林',gob_boar:'野猪骑兵',gob_rock:'岩甲哥布林',gob_mage:'哥布林法师',gob_ghost:'幽灵哥布林',gob_wolf:'狼骑兵',gob_thrower:'投石哥布林',gob_drum:'哥布林鼓手',gob_necro:'哥布林死灵师',gob_giant:'巨型哥布林',skeleton:'骷髅兵',gob_king:'哥布林大王',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士'};
+export const ENEMY_NAMES={goblin:'哥布林',gob_blade:'哥布林剑士',gob_archer:'哥布林弓箭手',gob_shield:'哥布林盾卫',gob_shaman:'哥布林萨满',gob_kid:'哥布林崽',gob_bomb:'炸弹哥布林',gob_boar:'野猪骑兵',gob_rock:'岩甲哥布林',gob_mage:'哥布林法师',gob_ghost:'幽灵哥布林',gob_wolf:'狼骑兵',gob_thrower:'投石哥布林',gob_drum:'哥布林鼓手',gob_necro:'哥布林死灵师',gob_giant:'巨型哥布林',skeleton:'骷髅兵',gob_king:'哥布林大王',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士',gob_hero:'哥布林英雄',gob_troll:'血咒巨魔'};
 const RD={gob_shield:'远程被盾挡 ×0.3，靠近砍',gob_rock:'物理都只吃一半，用法术',gob_wolf:'怕远程 ×1.5',gob_boar:'皮厚，近战 ×0.7',gob_ghost:'物理打不实，怕神圣 ×2、元素 ×1.5',gob_mage:'元素只吃一半',gob_shaman:'耐黑暗',skeleton:'怕神圣 ×1.5，耐黑暗',gob_necro:'怕神圣 ×1.5，耐黑暗',gob_giant:'物理 ×0.8',gob_paladin:'耐神圣，怕黑暗 ×1.5',gob_hero:'正面举盾，远程 ×0.5',gob_troll:'物理 ×0.3，会回血；火焰止血，神圣破盾'};
 export function createMeta(){
  let M;try{M=JSON.parse(localStorage.getItem('meta')||'null')}catch(e){}
@@ -40,7 +40,7 @@ export function createMeta(){
  .mpanel .note{color:#c9d8f0;margin:-4px 0 14px;font-size:13px}
  .ugrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px}
  .ucard{display:flex;align-items:center;gap:12px;padding:12px 14px;border:2px solid #8fbbef66;border-radius:12px;background:#0d2a63aa}
- .ucard .ic{font-size:30px;width:40px;text-align:center}.ucard .t{flex:1;min-width:0}.ucard b{font-size:17px}.ucard .fx{color:#c9d8f0;font-size:13px;margin-left:6px}
+ .ucard .ic img{width:40px;height:40px;object-fit:contain;image-rendering:pixelated}.ucard .ic{font-size:30px;width:40px;text-align:center}.ucard .t{flex:1;min-width:0}.ucard b{font-size:17px}.ucard .fx{color:#c9d8f0;font-size:13px;margin-left:6px}
  .pips{display:flex;gap:3px;margin-top:6px}.pips i{width:16px;height:6px;border-radius:3px;background:#0a1838}.pips i.on{background:#ffd23f}
  .ucard .buy{cursor:pointer;min-width:74px;padding:8px 10px;border:2px solid #7a5208;border-radius:10px;background:linear-gradient(#ffd75a,#f0a91c);color:#4a2c00;font:700 15px inherit;box-shadow:0 3px 0 #7a5208}
  .ucard .buy:disabled{cursor:default;background:#56607a;border-color:#3a4256;color:#c9cfdd;box-shadow:none}
@@ -81,7 +81,7 @@ export function createMeta(){
   shell('永久强化','🪙 '+M.gold,body,'所有角色通用，每次购买价格上涨。');
   pan.querySelectorAll('.buy').forEach(b=>b.onclick=()=>{const u=UP.find(x=>x.k===b.dataset.k),l=L(u.k),p=price(u,l);if(l>=u.max||M.gold<p)return;M.gold-=p;M.up[u.k]=l+1;save();openUp();pan.querySelector(`[data-k=${u.k}]`)?.focus()})}
  function openDex(){
-  const ORD=['gob_kid','goblin','gob_blade','gob_shield','gob_archer','gob_bomb','gob_mage','gob_wolf','gob_ghost','gob_rock','gob_thrower','gob_boar','gob_shaman','gob_drum','gob_necro','skeleton','gob_giant','gob_king','gob_chief','gob_paladin'],ks=[...ORD.filter(k=>ENEMY_NAMES[k]),...Object.keys(ENEMY_NAMES).filter(k=>!ORD.includes(k))],found=ks.filter(k=>M.kills[k]).length,tot=Object.values(M.kills).reduce((a,b)=>a+b,0);
+  const ORD=['gob_kid','goblin','gob_blade','gob_shield','gob_archer','gob_bomb','gob_mage','gob_wolf','gob_ghost','gob_rock','gob_thrower','gob_boar','gob_shaman','gob_drum','gob_necro','skeleton','gob_giant','gob_hero','gob_troll','gob_king','gob_chief','gob_paladin'],ks=[...ORD.filter(k=>ENEMY_NAMES[k]),...Object.keys(ENEMY_NAMES).filter(k=>!ORD.includes(k))],found=ks.filter(k=>M.kills[k]).length,tot=Object.values(M.kills).reduce((a,b)=>a+b,0);
   const body=`<div class="bgrid">${ks.map((k,i)=>{const n=M.kills[k]||0;return `<div class="bcard ${n?'':'unk'}"><span class="no">${String(i+1).padStart(3,'0')}</span><div class="im"><img src="assets/characters/enemies/${k}/idle0.png" alt="" style="${n?'':'filter:brightness(0);opacity:.55'}" onerror="if(!this.dataset.f){this.dataset.f=1;this.src='assets/characters/enemies/${k}/walk0.png'}"></div><div class="nm">${n?ENEMY_NAMES[k]:'？？？'}</div><div class="k">${n?'击杀 '+n:'未发现'}</div>${n&&RD[k]?`<div class="k" style="color:#ffcf8a">${RD[k]}</div>`:''}</div>`}).join('')}</div>`;
   shell('怪物图鉴',`已发现 ${found} / ${ks.length} · 累计击杀 ${tot}`,body)}
  // ---------- 老虎机 ----------

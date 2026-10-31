@@ -1,4 +1,4 @@
-import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js?v=11010115';
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js?v=11010150';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -158,8 +158,8 @@ export function createMenu(game){
    else if((window.META?.gold||0)<PR.lock)ask('金币不够',`锁定需要 🪙${PR.lock}。`,'知道了',()=>{});
    else ask('锁定这张祝福？',`花 🪙${PR.lock} 锁定「${nm}」，之后每局必定出现。`,'锁定',()=>{if(window.META.spend(PR.lock)){deck.lock.push(v);save_();drawDeck()}})})}
  // 商店：封印符 / 解封符 → 买完弹出卡池选择
- function drawShop(){const sp=prep.querySelector('.pp-pane[data-t=shop]');const it=[['ban','封印符',PR.ban,'选 1 张祝福封印，之后每局都不出现',deck.ban.length<8&&PASS_KEYS.some(k=>!deck.ban.includes(k)&&!deck.lock.includes(k))],['free','解封符',PR.free,'选 1 张已封印的祝福，恢复出现',deck.ban.length>0]];
-  sp.innerHTML=`<div class="shop">${it.map(([k,n,p,d,ok])=>`<div class="si"><b>${n}</b><span>${d}</span><button data-buy="${k}" ${ok&&(window.META?.gold||0)>=p?'':'disabled'}>🪙 ${p}</button></div>`).join('')}</div><div class="pp-soon">抽卡 · 等武器和法术定稿后开放</div>`;
+ function drawShop(){const sp=prep.querySelector('.pp-pane[data-t=shop]');const IMG={ban:'s_ban',free:'s_free'};const it=[['ban','封印符',PR.ban,'选 1 张祝福封印，之后每局都不出现',deck.ban.length<8&&PASS_KEYS.some(k=>!deck.ban.includes(k)&&!deck.lock.includes(k))],['free','解封符',PR.free,'选 1 张已封印的祝福，恢复出现',deck.ban.length>0]];
+  sp.innerHTML=`<div class="shop">${it.map(([k,n,p,d,ok])=>`<div class="si"><b><img src="assets/ui/${IMG[k]}.png" alt="" style="width:36px;height:36px;vertical-align:middle;image-rendering:pixelated;margin-right:6px">${n}</b><span>${d}</span><button data-buy="${k}" ${ok&&(window.META?.gold||0)>=p?'':'disabled'}>🪙 ${p}</button></div>`).join('')}</div><div class="pp-soon">抽卡 · 等武器和法术定稿后开放</div>`;
   sp.querySelectorAll('[data-buy]').forEach(b=>b.onclick=()=>pick(b.dataset.buy))}
  function pick(kind){const list=kind==='ban'?PASS_KEYS.filter(k=>!deck.ban.includes(k)&&!deck.lock.includes(k)):deck.ban.slice();prep.querySelector('.cfm')?.remove();
   const d=document.createElement('div');d.className='cfm';d.innerHTML=`<div class="cb wide"><b>${kind==='ban'?'选择要封印的祝福':'选择要解封的祝福'}（🪙${PR[kind]}）</b><div class="pk">${list.map(k=>`<button data-v="${k}">${PIC[k]?`<img src="assets/ui/${PIC[k]}.png" alt="">`:''}${PASSIVES[k].name}</button>`).join('')}</div><div><button class="no">取消</button></div></div>`;
