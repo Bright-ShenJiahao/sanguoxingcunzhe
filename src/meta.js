@@ -11,7 +11,7 @@ const UP=[
  {k:'wis',ic:'📘',nm:'智慧',fx:'+5% 经验',max:5,base:100},
  {k:'gold',ic:'🪙',nm:'财运',fx:'+8% 金币',max:5,base:120},
  {k:'crit',ic:'⭐',nm:'暴击',fx:'+3% 暴击率（双倍伤害）',max:8,base:90},
- {k:'area',ic:'🌀',nm:'范围',fx:'+5% 攻击范围',max:5,base:100},{k:'dur',ic:'⏳',nm:'持续',fx:'+5% 效果持续',max:5,base:90},{k:'pspd',ic:'🏹',nm:'疾矢',fx:'+5% 投射物速度、射程',max:5,base:80},{k:'amt',ic:'➕',nm:'多重',fx:'+1 投射物',max:1,base:2000},{k:'ban',ic:'🚫',nm:'封印',fx:'可封印 1 张祝福（本局不出现）',max:5,base:300},{k:'rr',ic:'🔄',nm:'重抽',fx:'每局 +1 次重抽',max:3,base:150},
+ {k:'area',ic:'🌀',nm:'范围',fx:'+5% 攻击范围',max:5,base:100},{k:'dur',ic:'⏳',nm:'持续',fx:'+5% 效果持续',max:5,base:90},{k:'pspd',ic:'🏹',nm:'疾矢',fx:'+5% 投射物速度、射程',max:5,base:80},{k:'amt',ic:'➕',nm:'多重',fx:'+1 投射物',max:1,base:2000},{k:'rr',ic:'🔄',nm:'重抽',fx:'每局 +1 次重抽',max:3,base:150},
  {k:'rev',ic:'✨',nm:'复活',fx:'每局复活 1 次（50% 生命）',max:1,base:1500}];
 const price=(u,L)=>Math.round(u.base*Math.pow(1.35,L)/5)*5;
 export const ENEMY_NAMES={goblin:'哥布林',gob_blade:'哥布林剑士',gob_archer:'哥布林弓箭手',gob_shield:'哥布林盾卫',gob_shaman:'哥布林萨满',gob_kid:'哥布林崽',gob_bomb:'炸弹哥布林',gob_boar:'野猪骑兵',gob_rock:'岩甲哥布林',gob_mage:'哥布林法师',gob_ghost:'幽灵哥布林',gob_wolf:'狼骑兵',gob_thrower:'投石哥布林',gob_drum:'哥布林鼓手',gob_necro:'哥布林死灵师',gob_giant:'巨型哥布林',skeleton:'骷髅兵',gob_king:'哥布林大王',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士'};
@@ -102,10 +102,10 @@ export function createMeta(){
   sl.onclick=skip;const ks=e=>{if(!finished)skip(e);else removeEventListener('keydown',ks,true)};addEventListener('keydown',ks,true)}
  // ---------- 对外 ----------
  return {
-  get gold(){return M.gold},get tickets(){return M.tickets},
+  get gold(){return M.gold},spend(v){if(M.gold<v)return false;M.gold-=v;save();return true},get tickets(){return M.tickets},
   addGold(v){M.gold+=Math.round(v*(1+.08*L('gold')));save()},addTickets(v){M.tickets+=v;save()},
   kill(k){M.kills[k]=(M.kills[k]||0)+1;if(!(M.kills[k]%20)||M.kills[k]===1)save()},
   runEnd(t,kills){const g=Math.round((kills/8+t/60*6)*(1+.08*L('gold'))),tk=Math.floor(t/180);M.gold+=g;M.tickets+=tk;M.runs++;save();return {g,tk}},
-  bonus(){return {hp:8*L('hp'),atk:.04*L('atk'),spd:.03*L('spd'),cd:.03*L('cd'),arm:.02*L('arm'),reg:.2*L('reg'),mag:.12*L('mag'),wis:.05*L('wis'),crit:.03*L('crit'),rr:L('rr'),rev:L('rev'),arc:.04*L('arc'),area:.05*L('area'),dur:.05*L('dur'),pspd:.05*L('pspd'),amt:L('amt'),lock:L('lock'),ban:L('ban')}},
+  bonus(){return {hp:8*L('hp'),atk:.04*L('atk'),spd:.03*L('spd'),cd:.03*L('cd'),arm:.02*L('arm'),reg:.2*L('reg'),mag:.12*L('mag'),wis:.05*L('wis'),crit:.03*L('crit'),rr:L('rr'),rev:L('rev'),arc:.04*L('arc'),area:.05*L('area'),dur:.05*L('dur'),pspd:.05*L('pspd'),amt:L('amt')}},
   slot,openUp,openDex,renderUp,refresh:drawBar,save};
 }
