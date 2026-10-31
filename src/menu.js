@@ -98,7 +98,7 @@ export function createMenu(game){
     <div class="pp-pane" data-t="shop" hidden><div class="pp-soon">商店（抽卡）· 等武器和法术定稿后开放</div></div></div>
    <div class="pp-foot"><button class="pp-back">返回</button><button class="pp-next">下一步 →</button></div></div>
   <div class="pp-step" data-s="stage" hidden><div class="pp-head"><h2>选择关卡</h2></div>
-   <div class="pp-body pp-stages"><button class="pp-stage" aria-pressed="true"><b>翠绿之地</b><span>森林、平原、水乡 · 哥布林出没</span></button><button class="pp-stage" disabled><b>冰原</b><span>未解锁</span></button><button class="pp-stage" disabled><b>？？？</b><span>未解锁</span></button></div>
+   <div class="pp-body pp-stages"><button class="pp-stage" aria-pressed="true"><b>翠绿之地</b><span>森林、草原、海岸 · 哥布林出没</span></button><button class="pp-stage" disabled><b>冰原</b><span>未解锁</span></button><button class="pp-stage" disabled><b>？？？</b><span>未解锁</span></button></div>
    <div class="pp-foot"><button class="pp-back">返回</button><button class="pp-go">出发 →</button></div></div></div>`;
  document.body.append(prep);
  prep.addEventListener('keydown',e=>e.stopPropagation());

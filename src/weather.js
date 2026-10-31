@@ -15,11 +15,11 @@ export function createWeather(){
  let kind=forced||'clear',inten=0,target=forced?1:0,next=null,evReg=null;
  const rain=[],snow=[],splash=[];
  // 各地的随机天气：[天气, 权重]；大部分时间晴天，幽州长时间下雪
- const LOCAL={'幽州·塞外':{p:.5,gap:[30000,60000],dur:[30000,50000],ev:[['blizzard',1]]},
+ const LOCAL={'北境':{p:.5,gap:[30000,60000],dur:[30000,50000],ev:[['blizzard',1]]},
   '北方草原':{p:.45,gap:[40000,80000],dur:[25000,45000],ev:[['wind',.8],['overcast',.2]]},
-  '西凉':{p:.45,gap:[40000,80000],dur:[25000,45000],ev:[['sand',.7],['wind',.3]]},
+  '西境':{p:.45,gap:[40000,80000],dur:[25000,45000],ev:[['sand',.7],['wind',.3]]},
   '翠绿平原':{p:.35,gap:[45000,90000],dur:[25000,45000],ev:[['lightrain',.5],['overcast',.5]]},
-  '水乡湿地':{p:.5,gap:[35000,70000],dur:[30000,50000],ev:[['lightrain',.45],['heavyrain',.25],['fog',.3]]},
+  '湿地':{p:.5,gap:[35000,70000],dur:[30000,50000],ev:[['lightrain',.45],['heavyrain',.25],['fog',.3]]},
   '迷雾森林':{p:.55,gap:[35000,70000],dur:[30000,50000],ev:[['fog',.65],['lightrain',.35]]}};
  function pickFrom(ev){let s=ev.reduce((a,x)=>a+x[1],0),r=Math.random()*s;for(const x of ev){if((r-=x[1])<=0)return x[0]}return ev[0][0]}
  function update(dt,now,rg){
@@ -81,15 +81,15 @@ export function createWeather(){
   c.globalCompositeOperation='saturation';c.fillStyle=`rgba(128,128,128,${.5*i})`;c.fillRect(0,0,VW,VH);c.globalCompositeOperation='source-over'}
  // 区域气候：按主角在地图上的位置（北雪、南雨、西旱、东雾，中间随机天气）
  const NAMES=[['wn','北境·大雪'],['ws','南方·多雨'],['ww','西陲·干旱'],['we','东滨·海雾']];
- let zname='中原',ztime=-1e9,zfirst=true;
- const ZS={wn:0,ws:0,ww:0,we:0},RK={'幽州·塞外':'wn','江南':'ws','西凉':'ww','蜀':'we'};
+ let zname='中部',ztime=-1e9,zfirst=true;
+ const ZS={wn:0,ws:0,ww:0,we:0},RK={'北境':'wn','南境':'ws','西境':'ww','东境':'we'};
  let snowBase=0;
  function draw(c,now,dt,VW,VH,hx,hy,WW,WH,rg){
   update(dt,now,rg);
-  let nm=rg||'中原';
-  if(nm!==zname){zname=nm;if(!zfirst||nm!=='中原')ztime=now}zfirst=false;
-  snowBase+=((rg==='幽州·塞外'?1:0)-snowBase)*Math.min(1,dt*1.5);
-  const gi=inten,ys=snowBase,wd=rg==='西凉'?.35:0;
+  let nm=rg||'中部';
+  if(nm!==zname){zname=nm;if(!zfirst||nm!=='中部')ztime=now}zfirst=false;
+  snowBase+=((rg==='北境'?1:0)-snowBase)*Math.min(1,dt*1.5);
+  const gi=inten,ys=snowBase,wd=rg==='西境'?.35:0;
   c.save();
   if(gi>.01&&kind==='overcast'){c.fillStyle=`rgba(40,52,72,${.2*gi})`;c.fillRect(0,0,VW,VH)}
   if(gi>.01&&kind==='fog')drawFog(c,now,VW,VH,gi);
