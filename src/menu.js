@@ -30,7 +30,7 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 #main-menu #cs button{font-size:13px;padding:12px 8px;border:1px solid #83abe354;border-radius:5px;background:#0c225a55;text-align:left;color:#ecf5ff}
 #main-menu #cs button[aria-pressed=true]{background:#77a9f044;border-color:#c1e0ff;box-shadow:inset 3px 0 #e2cb87}
 .menu-note{color:#c3d3ef;font-size:12px;line-height:1.8;margin-top:20px;border-top:1px solid #9ebfe432;padding-top:16px}
-#prep{position:fixed;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;background:#050c1688;color:#f2f6ff;font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif}
+#prep{position:fixed;inset:0;z-index:11;display:flex;align-items:center;justify-content:center;padding:58px 20px 16px;box-sizing:border-box;background:#050c1688;color:#f2f6ff;font-family:"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif}
 #prep[hidden],#prep [hidden]{display:none!important}
 .pp-box{width:min(760px,100%);max-height:100%;display:flex;flex-direction:column;border:2px solid #b6d5ff;border-radius:12px;background:linear-gradient(145deg,#254f9cee,#142858ee);box-shadow:0 0 0 3px #101c35aa,0 18px 60px #0007}
 .pp-step{display:flex;flex-direction:column;min-height:0;padding:20px 22px}
