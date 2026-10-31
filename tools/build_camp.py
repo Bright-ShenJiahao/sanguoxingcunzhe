@@ -6,7 +6,7 @@ R=os.path.dirname(os.path.dirname(os.path.abspath(__file__)));M=R+'/assets/map/'
 J=json.load(open(R+'/data/world.json'))
 CX,CY,RX,RY=900,290,190,125
 GAPS=[(78,102),(198,222),(318,342)]   # 南门、西北门、东北门（角度，y 朝下）
-SZ={'fence_h':(30,20),'fence_v':(10,21),'tent_a':(62,50),'tent_b':(90,42),'totem':(22,62),'fire':(34,28),'rack':(46,30),'bones':(40,13),'crates':(40,19),'gate_l':(16,38),'gate_r':(16,38)}
+SZ={'fence_h':(30,15.5),'fence_v':(10,21),'tent_a':(62,50),'tent_b':(90,42),'totem':(22,62),'fire':(34,28),'rack':(46,30),'bones':(40,13),'crates':(40,19),'gate_l':(16,38),'gate_r':(16,38)}
 for k,v in SZ.items():J['size']['camp_'+k]=list(v)
 J['objs']=[o for o in J['objs'] if not (((o[1]-CX)/(RX+40))**2+((o[2]-CY)/(RY+40))**2<1 or str(o[0]).startswith('camp_'))]
 new=[];c=np.array(Image.open(M+'coll.png').convert('RGB'));blk=np.zeros(c.shape[:2],np.uint8)
