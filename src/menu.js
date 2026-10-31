@@ -1,4 +1,4 @@
-import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js?v=10312015';
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC} from './run.js?v=10312018';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');

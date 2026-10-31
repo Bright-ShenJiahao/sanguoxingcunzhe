@@ -86,8 +86,11 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     if(e.boss&&e.k==='gob_chief'){e.skT=(e.skT??3)-dt;if(e.skT<=0){e.skT=4;const r=Math.random();if(r<.45&&d<60){e.state='smash';e.timer=0;e.sr=55;e.st=1.2;e.bx=ax;continue}else if(r<.75){e.wwT=3}else{for(const o of en)if(!o.dead)o.buffT=10;e.cryFx=1}}}
     if(e.k==='gob_blade'&&!e.elite&&!e.boss&&d<70&&d>22&&e.dcd<=0){e.state='aim';e.timer=0;e.dx=ax/d;e.dy=ay/d;continue}   // 剑士：冲刺斩
     if(e.k==='gob_shield'&&!e.elite&&!e.boss&&d<26&&e.bcd<=0){e.state='bash';e.timer=0;e.bx=ax;continue}   // 盾卫：盾击
-    if(d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
-    if(d>stats.reach*(e.sc||1)*.85){
+    const plain=!e.elite&&!e.boss&&!stats.ranged&&!stats.lob&&!stats.bomb;   // 普通近战小怪：边走边砍（动作只是表现，伤害靠碰撞）
+    if(e.swT>0)e.swT-=dt;
+    if(plain){if(d<=stats.reach*(e.sc||1)*1.2&&e.cooldown===0){e.swT=.9;e.cooldown=.9+Math.random()*.5}}
+    else if(d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
+    if(d>(plain?6:stats.reach*(e.sc||1)*.85)){
      e.losT=(e.losT||0)-dt;if(e.losT<=0){e.losT=.25+Math.random()*.1;e.los=true;const n=Math.ceil(d/6);for(let k=1;k<n;k++){if(water(e.x+ax*k/n,e.y+ay*k/n)===1){e.los=false;break}}}   // 中间没有河/崖就直线走
      const fd=d>28&&!e.los&&!stats.ghost&&window.PATHDIR?.(e.x,e.y);let tx=fd?fd[0]:ax/d,ty=fd?fd[1]:ay/d;
      if(e.orT>0){const sg=e.ph>4.5?1:-1,rad=(d-70)/40;tx=-ay/d*sg+ax/d*rad;ty=ax/d*sg+ay/d*rad}
@@ -121,6 +124,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  function frame(e,now){
   if(e.k==='gob_paladin'){const F=data[e.k].frames,m={aim:'charge',dash:'charge',judge:'judge',howl:'howl',aegis:'aegis',smash:e.timer<(e.st||1)?'windup':'strike'};if(m[e.state]&&F[m[e.state]])return F[m[e.state]]}
   let name=e.state==='aim'||e.state==='bash'||e.state==='fuse'||e.state==='smash'||e.state==='cast'||(e.state==='leap'&&e.timer<1)?'windup':e.state==='dash'||e.state==='leap'?'strike':e.state;
+  if(name==='move'&&e.swT>0){const F=data[e.k].frames,p=.9-e.swT;name=p<.4?'windup':p<.6?'strike':'recover';if(!F[name])name='move'}
   if(name==='move')name=e.moving?'walk'+(Math.floor(now/110+e.ph)%(data[e.k].nw||6)):'idle'+(Math.floor(now/650)%2);
   if(name==='recover'&&!data[e.k].frames.recover)name='idle0';
   if(name==='windup'&&data[e.k].frames.draw&&e.timer>.22)name='draw';
