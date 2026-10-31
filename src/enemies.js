@@ -128,6 +128,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  }
  function getFrame(e,now){const f=frame(e,now),name=Object.keys(data[e.k].frames).find(key=>data[e.k].frames[key]===f);return {f,im:images['en_'+e.k+'_'+name]}}
  function draw(e,c,cx,cy,now){
+  if(e.bshield&&!e.dead){c.save();c.globalAlpha=.25+.12*Math.sin(now/180);c.fillStyle='#c0182a';c.beginPath();c.ellipse(e.x-cx,e.y-cy-30,26,36,0,0,6.3);c.fill();c.restore()}
   if(e.ward&&!e.dead){c.save();c.globalAlpha=.35+.15*Math.sin(now/200);c.strokeStyle='#7fd8ff';c.lineWidth=1.2;c.beginPath();c.ellipse(e.x-cx,e.y-cy,9*(e.sc||1),4*(e.sc||1),0,0,6.3);c.stroke();c.restore()}
   if(e.drum){if(e.totem&&e.dead)return;const im=images[e.totem?'camp_totem':e.dead?'camp_drum_x':'camp_drum'],w=e.totem?22:44,h=e.totem?62:38,x=e.x-cx,y=e.y-cy;c.save();if(e.flash>0)c.filter='brightness(1.8)';if(im)c.drawImage(im,x-w/2,y-h+4,w,h);c.filter='none';if(!e.dead){c.fillStyle='#0009';c.fillRect(x-22,y-h-3,44,4);c.fillStyle='#e8503a';c.fillRect(x-21,y-h-2,42*Math.max(0,e.hp/e.hpMax),2)}c.restore();return}
   const {f,im}=getFrame(e,now);
