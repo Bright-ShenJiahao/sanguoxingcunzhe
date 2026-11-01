@@ -174,9 +174,9 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    let a=Math.atan2(dy,dx)-ang;a=Math.atan2(Math.sin(a),Math.cos(a));if(Math.abs(a)>half&&d>10)continue;
    let v=amount,crit=false;if(opts.crit&&Math.random()<opts.crit){v*=opts.cm;crit=true}
    strike(e,v,Math.sign(dx)||1,crit,true);if(opts.kb)knock(e,opts.kb);n++}return n}
- const PHYS=new Set(['gb','sword','hammer','axe','bow','xbow']),
+ const PHYS=new Set(['sword','hammer','axe','bow','xbow']),
  // 伤害五类：近战物理 mel、远程物理 rng、元素 ele、神圣 holy、黑暗 dark
- DT={sword:'mel',hammer:'mel',axe:'rng',bow:'rng',xbow:'rng',gb:'rng',fireball:'ele',frost:'ele',chain:'ele',thunder:'ele',missile:'ele',hp:'holy',holy:'holy'},
+ DT={sword:'mel',hammer:'mel',axe:'rng',bow:'rng',xbow:'rng',gb:'ele',fireball:'ele',frost:'ele',chain:'ele',thunder:'ele',missile:'ele',hp:'holy',holy:'holy'},
  // 抗性表（没写 = ×1）；同步 docs/ENEMIES.md
  RT={gob_shield:{rng:.3},gob_rock:{mel:.5,rng:.5},gob_wolf:{rng:1.5},gob_boar:{mel:.7},gob_ghost:{mel:.5,rng:.5,ele:1.5,holy:2,dark:.5},gob_mage:{ele:.5},gob_shaman:{dark:.5},
   skeleton:{rng:.7,holy:1.5,dark:.5},gob_necro:{rng:.7,holy:1.5,dark:.5},gob_giant:{mel:.8,rng:.8},gob_paladin:{holy:.5,dark:1.5},gob_hero:{rng:.5},gob_troll:{mel:.3,rng:.3}};
