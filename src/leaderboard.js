@@ -10,12 +10,14 @@ async function request(options={}){
   const data=await response.json();if(!data?.ok)throw new Error('unavailable');return data;
  }finally{clearTimeout(timer)}
 }
+// 评分（与服务器一致）：存活每秒 2 分 + 击杀 1 分 + 等级 10 分 + 每个 Boss 200 分
+export const scoreOf=r=>Math.round((r.t||0)*2+(r.kills||0)+(r.lv||0)*10+(r.bosses||0)*200);
 export async function submitScore(record){
  try{await request({method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(record)});return true}catch{return false}
 }
 export function createLeaderboard(){
  const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.setAttribute('aria-label','排行榜');
- dialog.innerHTML='<section><h2>排行榜</h2><p>存活时间优先，同时间比较击杀数 · 前 20 名</p><div class="board-content" role="status"></div><button type="button">关闭</button></section>';
+ dialog.innerHTML='<section><h2>排行榜</h2><p>评分 = 存活秒数×2 + 击杀 + 等级×10 + Boss×200 · 同名只留最好一局 · 前 20 名</p><div class="board-content" role="status"></div><button type="button">关闭</button></section>';
  document.body.append(dialog);
  dialog.querySelector('button').onclick=()=>dialog.close();
  const content=dialog.querySelector('.board-content');let version=0;
@@ -26,13 +28,13 @@ export function createLeaderboard(){
    if(current!==version)return;
    if(!Array.isArray(data.list))throw new Error('invalid list');
    const rows=data.list.filter(r=>typeof r.name==='string'&&Number.isFinite(r.t)&&Number.isFinite(r.kills))
-    .sort((a,b)=>b.t-a.t||b.kills-a.kills).slice(0,20);
+    .slice(0,20);
    content.replaceChildren();
    if(!rows.length){content.textContent='暂无成绩，来打第一局吧';return}
    const table=document.createElement('table');
-   table.innerHTML='<thead><tr><th>名次</th><th>名字</th><th>存活时间</th><th>击杀数</th></tr></thead>';
+   table.innerHTML='<thead><tr><th>#</th><th>名字</th><th>评分</th><th>存活</th><th>击杀</th><th>等级</th><th>Boss</th><th>日期</th></tr></thead>';
    const body=document.createElement('tbody');
-   rows.forEach((r,i)=>{const tr=document.createElement('tr');for(const value of [i+1,r.name,formatTime(r.t),r.kills]){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}body.append(tr)});
+   rows.forEach((r,i)=>{const tr=document.createElement('tr');const d=new Date(r.at||0);for(const value of [i+1,r.name,r.score??scoreOf(r),formatTime(r.t),r.kills,r.lv??'-',r.bosses??'-',(d.getMonth()+1)+'/'+d.getDate()]){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}body.append(tr)});
    table.append(body);content.append(table);
   }catch{if(current===version)content.textContent='暂时无法连接'}
  }};

@@ -1,4 +1,4 @@
-import {createLeaderboard,submitScore,formatTime} from './leaderboard.js?v=11010158';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11011247';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -26,15 +26,15 @@ export function createSurvival(game){
  function stop(){playing=false;finished=false;generation++;hud.hidden=true;document.body.classList.remove('survival-playing');if(dialog.open)dialog.close()}
  function start(){
   stop();playing=true;maxHp=100;hp=100;game.reset();elapsed=0;cooldown=0;
-  name=(document.querySelector('.menu-name input').value.trim()||'无名氏').slice(0,20);
+  name=(document.querySelector('.menu-name input').value.trim()||'无名氏').slice(0,8);
   hud.hidden=false;document.body.classList.add('survival-playing');render();
  }
  function die(){
   finished=true;game.clearInput();render();
-  const rec={name,t:Math.floor(elapsed),kills:game.kills},token=generation;
+  const rec={name,t:Math.floor(elapsed),kills:game.kills,lv:game.level?.()||1,bosses:game.bosses?.()||0},token=generation;
   try{const L=JSON.parse(localStorage.getItem('deathlog')||'[]');L.push({t:rec.t,kills:rec.kills,lv:game.level?.()||0,by:window.LASTHIT||'?',at:Date.now(),bot:!!window.BOT});localStorage.setItem('deathlog',JSON.stringify(L.slice(-100)))}catch(_){}
   dialog.querySelector('.result-name').textContent='名字：'+name;
-  dialog.querySelector('.result-stats').textContent='存活时间：'+formatTime(rec.t)+' · 击杀数：'+rec.kills;
+  dialog.querySelector('.result-stats').textContent='存活时间：'+formatTime(rec.t)+' · 击杀数：'+rec.kills+' · 等级 '+rec.lv+' · Boss '+rec.bosses+' · 评分 '+scoreOf(rec);
   {const r=window.META?.runEnd(rec.t,rec.kills);if(r)dialog.querySelector('.result-stats').textContent+=` · 获得 🪙${r.g}`+(r.tk?` · 🎟️${r.tk}`:'')}
   const upload=dialog.querySelector('.upload');upload.textContent='正在提交成绩……';dialog.showModal();
   // 每局仅在首次死亡时提交一次；晚到的网络响应不写入下一局界面。
