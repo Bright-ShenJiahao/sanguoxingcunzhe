@@ -1,0 +1,92 @@
+<title>新卡设计稿</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root{--bg:#f4f1ea;--card:#fffdf8;--fg:#2a2622;--mut:#7a6f62;--line:#e3dccf;--gold:#a8741e;--holy:#c79a2a;--dark:#6a3d8f;--hunt:#3d7a4a;--craft:#8a5a2b;--mage:#2f6aa8;--x:#b23b3b}
+@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#1a1814;--card:#24211c;--fg:#ece6da;--mut:#a69c8c;--line:#3a352d;--gold:#e0b45a;--holy:#e8c35a;--dark:#b48ae0;--hunt:#7cc48a;--craft:#d39a60;--mage:#7fb2ea;--x:#e07a7a;color-scheme:dark}}
+:root[data-theme=dark]{--bg:#1a1814;--card:#24211c;--fg:#ece6da;--mut:#a69c8c;--line:#3a352d;--gold:#e0b45a;--holy:#e8c35a;--dark:#b48ae0;--hunt:#7cc48a;--craft:#d39a60;--mage:#7fb2ea;--x:#e07a7a;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.7 "Noto Sans SC","PingFang SC",sans-serif;padding:24px max(16px,env(safe-area-inset-right,0px)) 60px max(16px,env(safe-area-inset-left,0px))}
+main{max-width:860px;margin:0 auto}h1{font-size:26px;margin:0 0 4px}h2{font-size:19px;margin:36px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--line);text-wrap:balance}
+.lead{color:var(--mut);margin:0 0 20px}.c{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--k,var(--gold));border-radius:10px;padding:14px 18px;margin:12px 0}
+.c h3{margin:0 0 6px;font-size:17px}.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:99px;border:1px solid var(--line);color:var(--mut);margin-right:4px;font-weight:400}
+.c p{margin:4px 0}table{width:100%;border-collapse:collapse;font-size:14px;margin:6px 0}td,th{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}th{color:var(--mut);font-weight:500;width:64px}
+.q{color:var(--x);font-size:13.5px}.holy{--k:var(--holy)}.dark{--k:var(--dark)}.hunt{--k:var(--hunt)}.craft{--k:var(--craft)}.mage{--k:var(--mage)}.no{opacity:.6;--k:var(--line)}
+.wrap{overflow-x:auto}
+</style>
+<main>
+<h1>新卡设计稿 · 待批注</h1>
+<p class="lead">综合 GPT / Gemini / DS 三份方案和黑暗系资料整理。伤害单位 D = 长剑 1 级单次伤害。红字是需要你定的点。</p>
+
+<h2>神圣系</h2>
+<div class="c holy"><h3>圣光球 <span class="tag">法术卡</span><span class="tag">神圣</span><span class="tag">祭司</span></h3>
+<p>朝最近敌人慢慢飘出一颗光球（约主角走速一半），每 0.5 秒伤害身边一小圈，穿过敌人；飞 3 秒后爆炸。</p>
+<table><tr><th>1</th><td>1 颗，持续 0.3D/0.5 秒，爆炸 1.5D</td></tr><tr><th>2</th><td>伤害提升</td></tr><tr><th>3</th><td>光球变大</td></tr><tr><th>4</th><td>一次 2 颗</td></tr><tr><th>进阶</th><td>爆炸后分裂成 3 颗小光球，再飘 1.5 秒后各自爆炸</td></tr></table>
+<p>克制：幽灵、亡灵；与火球区别：慢推磨血、最后才炸。</p></div>
+
+<div class="c holy"><h3>圣盾 <span class="tag">装备卡</span><span class="tag">神圣·近战判定</span><span class="tag">剑士</span></h3>
+<p>盾绕身旋转，撞到敌人 0.8D 并推开；同一敌人 0.6 秒最多一次；挡掉敌方箭和投射物。</p>
+<table><tr><th>1</th><td>1 面，0.8D，挡投射物</td></tr><tr><th>2</th><td>伤害 1.0D</td></tr><tr><th>3</th><td>2 面对称</td></tr><tr><th>4</th><td>转更快、击退更远</td></tr><tr><th>进阶</th><td>3 面；每挡一枚投射物，朝最近敌人反射一道圣光</td></tr></table>
+<p>克制：盾卫（近战判定）、弓手、幽灵。</p></div>
+
+<div class="c holy"><h3>圣水 <span class="tag">法术卡</span><span class="tag">神圣</span><span class="tag">祭司</span></h3>
+<p>朝怪最密处扔一瓶，落地成圣泉（半径约 2 身位，持续 5 秒），池内敌人每 0.5 秒受伤；主角站池内每秒回血。<b>现有卡里唯一的地面持续池，也是回血手段。</b></p>
+<table><tr><th>1</th><td>0.2D/0.5 秒，回血 0.5%/秒</td></tr><tr><th>2</th><td>持续 6 秒</td></tr><tr><th>3</th><td>一次 2 瓶</td></tr><tr><th>4</th><td>池内敌人受神圣伤害 +15%</td></tr><tr><th>进阶</th><td>每 2 秒发一次净化波，推开敌人；能打碎血咒巨魔血盾</td></tr></table></div>
+
+<p class="q">耳机：改成神圣伤害，归祭司系（已定）。</p>
+
+<h2>黑暗系（参考游戏 / 动漫后的新方案）</h2>
+<div class="c dark"><h3>暗影魔矢 <span class="tag">法术卡</span><span class="tag">黑暗</span><span class="tag">法师</span></h3>
+<p>出处：魔兽术士暗影箭、黑暗之魂暗术。一颗慢速追踪黑球，命中爆炸，附带「诅咒：受到伤害 +20%，持续 4 秒」。</p>
+<table><tr><th>1</th><td>1 颗，2D 爆炸</td></tr><tr><th>2</th><td>伤害提升</td></tr><tr><th>3</th><td>爆炸范围变大</td></tr><tr><th>4</th><td>冷却缩短</td></tr><tr><th>进阶</th><td>被诅咒的敌人死后爆出黑雾，伤害周围</td></tr></table>
+<p>与魔法飞弹区别：一颗、慢、大爆炸 + 易伤。克制：圣骑士。</p></div>
+
+<div class="c dark"><h3>死亡缠绕 <span class="tag">法术卡</span><span class="tag">黑暗</span><span class="tag">祭司</span></h3>
+<p>出处：魔兽争霸 3 死亡骑士。一颗黑色魂球在敌人间弹射 3 次，最后飞回主角回一点血。</p>
+<table><tr><th>1</th><td>弹 3 次，每次 1D，回 2 血</td></tr><tr><th>2</th><td>伤害提升</td></tr><tr><th>3</th><td>弹 4 次</td></tr><tr><th>4</th><td>冷却缩短</td></tr><tr><th>进阶</th><td>同时 2 颗；回血翻倍</td></tr></table>
+<p>与闪电链区别：会回到自己身上回血、速度慢看得清。</p></div>
+
+<div class="c dark"><h3>黑洞 <span class="tag">法术卡</span><span class="tag">黑暗</span><span class="tag">法师</span></h3>
+<p>出处：黑暗之魂黑之风暴、各类 RPG。在怪最多处生成小漩涡，持续 3 秒，把周围敌人往中心吸并持续伤害。</p>
+<table><tr><th>1</th><td>半径 2 身位，0.3D/0.5 秒</td></tr><tr><th>2</th><td>伤害提升</td></tr><tr><th>3</th><td>范围变大</td></tr><tr><th>4</th><td>持续 4 秒</td></tr><tr><th>进阶</th><td>结束时坍缩爆炸 3D</td></tr></table>
+<p>聚怪神器，搭配火球、圣光球、火药桶。Boss 不会被吸动。</p></div>
+
+<div class="c dark no"><h3>备选（暂不做）</h3>
+<p>诅咒（易伤）、吸魂（连线吸血）、骷髅侍从（留给死灵法师转职）、尸爆（可做成祝福）、骨矛、恐惧术、影子绑定、黑炎、黑棺。</p></div>
+
+<h2>猎手 / 工匠 / 法师</h2>
+<div class="c hunt"><h3>唤鹰 <span class="tag">法术卡</span><span class="tag">远程物理</span><span class="tag">猎手</span></h3>
+<p>召唤 1 只猎鹰绕主角盘旋，每 3 秒俯冲最近敌人，落点小范围 0.6D，然后飞回。不可被攻击。</p>
+<table><tr><th>1</th><td>1 只，0.6D</td></tr><tr><th>2</th><td>伤害提升、间隔 2.8 秒</td></tr><tr><th>3</th><td>命中给目标挂「猎印」：受远程伤害 +10%</td></tr><tr><th>4</th><td>俯冲路径上的敌人也受一半伤害</td></tr><tr><th>进阶</th><td>2 只交替俯冲；被标记敌人死亡时双鹰各追加一次俯冲</td></tr></table></div>
+
+<div class="c hunt"><h3>猎夹 <span class="tag">装备卡</span><span class="tag">近战物理</span><span class="tag">猎手</span></h3>
+<p>每 2.4 秒在脚下放一个夹子，最多 4 个，持续 8 秒；敌人踩中 1.3D 并减速 35%（1.2 秒），夹子消失。</p>
+<table><tr><th>1</th><td>1.3D，上限 4</td></tr><tr><th>2</th><td>伤害 1.7D</td></tr><tr><th>3</th><td>上限 6</td></tr><tr><th>4</th><td>放置间隔 1.8 秒</td></tr><tr><th>进阶</th><td>夹住 1.5 秒后崩裂，对周围造成 1D</td></tr></table>
+<p>克制：盾卫、冲锋怪。</p></div>
+
+<div class="c craft"><h3>弩台 <span class="tag">装备卡</span><span class="tag">远程物理</span><span class="tag">工匠</span></h3>
+<p>在脚下放一座弩台，持续 8 秒，冷却 10 秒，不跟人走；每 0.8 秒射最近敌人 0.3D。</p>
+<table><tr><th>1</th><td>上限 1 座</td></tr><tr><th>2</th><td>伤害提升</td></tr><tr><th>3</th><td>上限 2 座</td></tr><tr><th>4</th><td>射速提升</td></tr><tr><th>进阶</th><td>两座同时存在时交叉火力，弩箭穿透 1 个</td></tr></table>
+<p class="q">防过强：不跟人走、有空窗期、单发伤害低。</p></div>
+
+<div class="c craft"><h3>火药桶 <span class="tag">装备卡</span><span class="tag">元素·火</span><span class="tag">工匠</span></h3>
+<p>每 4 秒朝移动方向滚出一只桶，1.2 秒后爆炸 1.6D（半径 1.6 身位）。火焰：命中的血咒巨魔停止回血。</p>
+<table><tr><th>1</th><td>1.6D</td></tr><tr><th>2</th><td>2.0D</td></tr><tr><th>3</th><td>爆炸半径 2.0</td></tr><tr><th>4</th><td>间隔 3.2 秒</td></tr><tr><th>进阶</th><td>爆炸后留下 2.5 秒燃油火地</td></tr></table></div>
+
+<div class="c mage"><h3>元素口袋 <span class="tag">法术卡</span><span class="tag">元素</span><span class="tag">法师</span></h3>
+<p>朝前方喷一道扇形吐息（60°），按顺序轮换：火（高伤）→ 冰（减速）→ 雷（必暴击）→ 火…</p>
+<table><tr><th>1</th><td>1.2D，冷却 3 秒</td></tr><tr><th>2</th><td>扇形 90°</td></tr><tr><th>3</th><td>冷却 2.2 秒</td></tr><tr><th>4</th><td>射程变长</td></tr><tr><th>进阶</th><td>每次同时喷三种元素，三种效果都有</td></tr></table></div>
+
+<div class="c no"><h3>不做 / 换掉</h3>
+<p>回旋刃：与飞斧太像；往返机制可并入飞斧进阶。<br>圣光（直线光束）：太亮眼，改为圣光球。<br>审判之锤、噬魂鬼爪：与现有卡重复。</p></div>
+
+<h2>转职（先记录，暂不做）</h2>
+<div class="wrap"><table>
+<tr><th style="width:auto">系</th><td><b>可组合</b></td><td><b>示例</b></td></tr>
+<tr><th>剑士</th><td>长剑 + 圣盾</td><td>圣殿骑士</td></tr>
+<tr><th>战士</th><td>战锤 + 飞斧</td><td>破阵领主</td></tr>
+<tr><th>猎手</th><td>长弓 / 唤鹰 / 猎夹</td><td>风行游侠</td></tr>
+<tr><th>工匠</th><td>连发弩 / 弩台 / 火药桶 / 掌机</td><td>机关大师</td></tr>
+<tr><th>法师</th><td>元素五张 + 元素口袋 + 暗影魔矢 + 黑洞</td><td>像素法师（掌机+元素）、暗影术士（魔矢+黑洞）</td></tr>
+<tr><th>祭司</th><td>耳机 / 圣光球 / 圣水 / 死亡缠绕</td><td>圣歌祭司（耳机+圣光球）</td></tr>
+</table></div>
+<p class="lead">规则：同系两张都进阶即转职；同时满足多个时让玩家选。</p>
+</main>
