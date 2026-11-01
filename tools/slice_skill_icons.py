@@ -18,6 +18,7 @@ def grid(path,cols,rows):
             im=Image.fromarray(np.dstack([a[ya:yb,xa:xb],keep*255]).astype(np.uint8));out.append(im.crop(im.getbbox()))
     return out
 K='greatsword rapier gsword whip fist trap golem treant wolf mgun wedge hawk orb keg flamestep pouch waterel fireel holyorb hshield hwall sigil fairy shadow bmist dcoil vortex undead'.split()
-for k,im in zip(K,grid(R+'/art_src/gpt/skill_icons.png',7,4)):
+if __name__=="__main__":
+  for k,im in zip(K,grid(R+'/art_src/gpt/skill_icons.png',7,4)):
     im.thumbnail((128,128));im.save(R+f'/assets/ui/sk_{k}.png')
-print(len(K))
+  print(len(K))
