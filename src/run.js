@@ -50,7 +50,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup[hidden]{display:none}#lvup .box{width:min(560px,94vw);padding:20px 22px 16px;border:3px solid #cfe2ff;border-radius:18px;background:linear-gradient(160deg,#2a5aae99,#173a7ca6);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);box-shadow:0 8px 24px #0006}
  #lvup h2{margin:0 0 2px;text-align:center;color:#fff;font-size:30px;letter-spacing:2px;text-shadow:0 2px 0 #0008}#lvup .sub{text-align:center;color:#c9d8f0;margin-bottom:14px;font-size:15px}
  #lvup button.card{display:flex;gap:16px;align-items:center;width:100%;text-align:left;margin:10px 0;padding:14px 16px;border:2px solid #8fbbef66;border-radius:16px;background:#0d2a6388;color:#f2f6ff;font:inherit;text-shadow:0 1px 3px #000a;cursor:pointer;transition:transform .08s}
- #lvup button.card:hover,#lvup button.card:focus{border-color:#ffe08a;background:#1d4590dd;outline:none;transform:translateY(-1px)}
+ #lvup button#lvup button.card:focus{border-color:#ffe08a;background:#1d4590dd;outline:none;transform:translateY(-1px)}
  #lvup .ic{flex:none;width:64px;height:64px;border-radius:12px;background:#0a1838;display:grid;place-items:center;font-weight:700;color:#f6db94;font-size:26px}
  #lvup .ic img{max-width:54px;max-height:54px;image-rendering:pixelated}
  #lvup .nm{font-weight:800;font-size:21px}#lvup .tag{display:inline-block;margin-left:10px;padding:3px 10px;border-radius:8px;font-size:13px;font-weight:700;vertical-align:3px;background:#c9d4e8;color:#1b2a48}
@@ -63,7 +63,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup .b2 .sub{color:#ffe7a8;text-shadow:0 1px 3px #000;margin:0 0 14px}
  #lvup .cards{display:flex;gap:min(10px,2vw);justify-content:center;width:100%}
  #lvup button.c2{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:min(200px,30vw);transition:transform .1s}
- #lvup button.c2:hover,#lvup button.c2:focus{background:none!important;border:0!important;outline:none;transform:translateY(-4px);filter:drop-shadow(0 0 8px #ffd860)}
+ #lvup button.c2:focus{background:none!important;border:0!important;outline:none;transform:translateY(-4px);filter:drop-shadow(0 0 8px #ffd860)}
  #lvup .cn{position:absolute;top:-9%;height:8%;left:0;right:0;display:grid;place-items:center;line-height:1;color:#ffe7a8;text-shadow:0 2px 2px #000;font-weight:900;font-size:clamp(13px,3.6vw,18px);white-space:nowrap}
  #lvup .cf{position:relative;margin-top:12%;width:100%;aspect-ratio:180/290;background:center/100% 100% no-repeat}
  #lvup .ty{position:absolute;top:7.6%;left:30%;right:30%;height:4.6%;z-index:2;display:grid;place-items:center;font-size:clamp(8px,2.2vw,10.5px);font-weight:900;line-height:1;white-space:nowrap;border-radius:3px;color:#fff;text-shadow:0 1px 1px #0008}.ty_mel{background:#b8452e}.ty_rng{background:#3f7d3a}.ty_ele,.ty_dark{background:#6a3fa8}.ty_holy{background:#c49a24}.ty_o{background:#b88a1a}.ty_p{background:#5e6670}
@@ -109,7 +109,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(NEWK[k]&&!S.seen[k]){S.seen[k]=1;S.banner={v:NEWK[k],t:3}}return k}
  function ring(n,r,k,life){for(let i=0;i<n;i++){const a=i/n*6.283,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r*.8;if(ok(x,y)){const m=makeEnemy(x,y,k);if(m){onSpawnBase(m);if(life)m.lifeT=life;en.push(m)}}}}
  function swarm(k,n){const a=Math.random()*6.283,R0=290,dx=-Math.cos(a),dy=-Math.sin(a);for(let i=0;i<n;i++){const s_=(Math.random()-.5)*300,b=R0+Math.random()*60,x=hero.x+Math.cos(a)*b-dy*s_,y=hero.y+Math.sin(a)*b*.8+dx*s_;const m=makeEnemy(x,y,k);if(m){onSpawnBase(m);m.sweep=[dx,dy];m.lifeT=14;en.push(m)}}}
- const EVN={kids:['小哥布林成群冲过来了！',()=>swarm('goblin',30)],ghosts:['幽灵群横穿！',()=>swarm('gob_ghost',25)],boars:['野猪冲锋潮！',()=>swarm('gob_boar',10)],
+ const EVN={kids:['哥布林崽冲锋！',()=>swarm('gob_kid',40)],ghosts:['幽灵群横穿！',()=>swarm('gob_ghost',25)],boars:['野猪冲锋潮！',()=>swarm('gob_boar',10)],
   wall:['盾墙合拢！快突围',d=>ring(28,200,'gob_shield',d||30)],ring:['包围圈！从四面合拢',()=>ring(22,170,'goblin')],flank:['剑士包抄！',()=>ring(14,170,'gob_blade')],wolfring:['狼群包围！',()=>ring(10,150,'gob_wolf')]};
  function events(){
   const E=S.ev,wi=Math.floor(S.t/60);
@@ -279,7 +279,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    const tip=ui.querySelector('.tip');ui.querySelectorAll('.sl').forEach(el=>{const o=ow[+el.dataset.j];if(!o)return;const show=()=>{const W=o.t==='w'?WEAPONS[o.k]:PASSIVES[o.k],L=o.t==='w'?S.w[o.k]:S.p[o.k],d=o.t==='w'?W.desc.slice(0,L).map((x,i)=>`<i>Lv${i+1}</i> ${x}`).join('<br>'):W.desc;tip.innerHTML=`<b>${W.name}</b> Lv ${L}<br>${d}`;tip.hidden=false};el.onmouseenter=show;el.onclick=e=>{e.stopPropagation();tip.hidden?show():tip.hidden=true};el.onmouseleave=()=>tip.hidden=true})}
   else ui.innerHTML=`<div class="box"><h2>等级 ${S.lv}！</h2><div class="sub">选择奖励 · 按 1 / 2 / 3</div>${list.map(card).join('')}
    <div class="row">${sub?'<button data-a="back">返回</button>':(S.rerolls>0?`<button data-a="rr">重抽（${S.rerolls}）· R</button>`:'')}</div><div class="slots">装备 ${Object.keys(S.w).filter(k=>!isOwn(k)&&!isSp(k)).length}/${MAXW} · 法术 ${Object.keys(S.w).filter(isSp).length}/${MAXS} · 祝福 ${Object.keys(S.p).filter(k=>S.p[k]>0).length}/${MAXP}</div></div>`;
-  ui.querySelectorAll('button.card').forEach(b=>b.onclick=()=>choose(list[+b.dataset.i]));
+  ui.querySelectorAll('button.card').forEach(b=>{b.onclick=()=>choose(list[+b.dataset.i]);b.onmouseenter=()=>b.focus({preventScroll:true})});
   const bk=ui.querySelector('[data-a=back]');if(bk)bk.onclick=()=>{sub=null;render()};
   const rr=ui.querySelector('[data-a=rr]');if(rr)rr.onclick=reroll;
   const sk=ui.querySelector('[data-a=skip]');if(sk)sk.onclick=()=>{ui.hidden=true;S.paused=false;sub=null};
