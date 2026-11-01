@@ -63,10 +63,11 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup .b2 .sub{color:#ffe7a8;text-shadow:0 1px 3px #000;margin:0 0 14px}
  #lvup .cards{display:flex;gap:min(10px,2vw);justify-content:center;width:100%}
  #lvup button.c2{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:min(200px,30vw);transition:transform .1s}
- #lvup button.c2:hover,#lvup button.c2:focus{background:none!important;border:0!important;outline:none;transform:translateY(-4px) scale(1.03);filter:drop-shadow(0 0 8px #ffd860)}
+ #lvup button.c2:hover,#lvup button.c2:focus{background:none!important;border:0!important;outline:none;transform:translateY(-4px);filter:drop-shadow(0 0 8px #ffd860)}
  #lvup .cn{position:absolute;top:-9%;height:8%;left:0;right:0;display:grid;place-items:center;line-height:1;color:#ffe7a8;text-shadow:0 2px 2px #000;font-weight:900;font-size:clamp(13px,3.6vw,18px);white-space:nowrap}
  #lvup .cf{position:relative;margin-top:12%;width:100%;aspect-ratio:180/290;background:center/100% 100% no-repeat}
- #lvup .nw{position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:1;padding:0 5px;background:#c8323a;border-radius:3px;color:#fff;font-size:10px;font-weight:900;line-height:15px}
+ #lvup .ty{position:absolute;top:7.6%;left:30%;right:30%;height:4.6%;z-index:2;display:grid;place-items:center;font-size:clamp(8px,2.2vw,10.5px);font-weight:900;line-height:1;white-space:nowrap;border-radius:3px;color:#fff;text-shadow:0 1px 1px #0008}.ty_mel{background:#b8452e}.ty_rng{background:#3f7d3a}.ty_ele,.ty_dark{background:#6a3fa8}.ty_holy{background:#c49a24}.ty_o{background:#b88a1a}.ty_p{background:#5e6670}
+.nw{position:absolute;top:1%;right:6%;transform:rotate(8deg);z-index:1;padding:0 5px;background:#c8323a;border-radius:3px;color:#fff;font-size:10px;font-weight:900;line-height:15px}
  #lvup .ci{position:absolute;left:26%;right:26%;top:22.5%;height:29%;display:grid;place-items:center;font-size:clamp(22px,7vw,34px);font-weight:900;color:#5a3a14}
  #lvup .ci img{max-width:55%;max-height:55%;image-rendering:pixelated}#lvup .ci img.u{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;image-rendering:auto}
  #lvup .st{position:absolute;top:55%;left:0;right:0;text-align:center;color:#7a5a2a;font-size:clamp(9px,2.5vw,12px);font-weight:700}
@@ -95,7 +96,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  // ---------- 节奏 ----------
   const want=()=>{if(S.t<(S.calm||0))return 0;const W=wave();let a=0;for(const e of en)if(!e.dead)a++;return Math.min(WV.cap,Math.max(Math.round(W.min*(1+.1*S.p.curse)*(window.NIGHT?1.3:1)),a+((S.pend||0)>0?1:0)))};
  // ---------- 波数：按时间逐步加入兵种 ----------
- const NEWK={gob_kid:'哥布林崽群！',goblin:'哥布林棍兵',gob_blade:'剑士出现！会冲刺斩',gob_shield:'盾卫出现！举盾挡箭：远程只吃三成，靠近砍',gob_archer:'弓箭手出现！会放冷箭',gob_bomb:'炸弹哥布林！看到红圈快跑',gob_boar:'野猪骑兵！会直线冲锋',gob_rock:'岩甲哥布林！石皮：物理减半，用法术',gob_mage:'哥布林法师！护符：元素减半',gob_ghost:'幽灵哥布林！物理打不实，怕神圣和元素',gob_wolf:'狼骑兵！会绕圈扑咬',gob_thrower:'投石哥布林！看地上阴影',gob_drum:'精英·鼓手！先打掉它',gob_necro:'精英·死灵师！会复活尸体'};
+ const NEWK={goblin:'小哥布林',gob_blade:'剑士出现！会冲刺斩',gob_shield:'盾卫出现！举盾挡箭：远程只吃三成，靠近砍',gob_archer:'弓箭手出现！会放冷箭',gob_bomb:'炸弹哥布林！看到红圈快跑',gob_boar:'野猪骑兵！会直线冲锋',gob_rock:'岩甲哥布林！石皮：物理减半，用法术',gob_mage:'哥布林法师！护符：元素减半',gob_ghost:'幽灵哥布林！物理打不实，怕神圣和元素',gob_wolf:'狼骑兵！会绕圈扑咬',gob_thrower:'投石哥布林！看地上阴影',gob_drum:'精英·鼓手！先打掉它',gob_necro:'精英·死灵师！会复活尸体'};
  const RES={gob_shield:'iron',gob_rock:'iron',gob_ghost:'spirit',gob_mage:'magic'};
  window.SUMMON=k=>{for(let i=0;i<12;i++){const a=Math.random()*6.28,x=hero.x+Math.cos(a)*120,y=hero.y+Math.sin(a)*90;if(!ok(x,y))continue;const m=makeEnemy(x,y,k);if(!m)return;onSpawnBase(m);m.armor=0;m.res='';m.sc=1;
   const B={gob_king:['哥布林大王',80,1.25],gob_chief:['哥布林酋长',200,1.3],gob_paladin:['哥布林圣骑士',160,1],gob_hero:['哥布林英雄',150,1]}[k];
@@ -108,7 +109,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(NEWK[k]&&!S.seen[k]){S.seen[k]=1;S.banner={v:NEWK[k],t:3}}return k}
  function ring(n,r,k,life){for(let i=0;i<n;i++){const a=i/n*6.283,x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r*.8;if(ok(x,y)){const m=makeEnemy(x,y,k);if(m){onSpawnBase(m);if(life)m.lifeT=life;en.push(m)}}}}
  function swarm(k,n){const a=Math.random()*6.283,R0=290,dx=-Math.cos(a),dy=-Math.sin(a);for(let i=0;i<n;i++){const s_=(Math.random()-.5)*300,b=R0+Math.random()*60,x=hero.x+Math.cos(a)*b-dy*s_,y=hero.y+Math.sin(a)*b*.8+dx*s_;const m=makeEnemy(x,y,k);if(m){onSpawnBase(m);m.sweep=[dx,dy];m.lifeT=14;en.push(m)}}}
- const EVN={kids:['哥布林崽群冲过来了！',()=>swarm('gob_kid',40)],ghosts:['幽灵群横穿！',()=>swarm('gob_ghost',25)],boars:['野猪冲锋潮！',()=>swarm('gob_boar',10)],
+ const EVN={kids:['小哥布林成群冲过来了！',()=>swarm('goblin',30)],ghosts:['幽灵群横穿！',()=>swarm('gob_ghost',25)],boars:['野猪冲锋潮！',()=>swarm('gob_boar',10)],
   wall:['盾墙合拢！快突围',d=>ring(28,200,'gob_shield',d||30)],ring:['包围圈！从四面合拢',()=>ring(22,170,'goblin')],flank:['剑士包抄！',()=>ring(14,170,'gob_blade')],wolfring:['狼群包围！',()=>ring(10,150,'gob_wolf')]};
  function events(){
   const E=S.ev,wi=Math.floor(S.t/60);
@@ -175,7 +176,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    strike(e,v,Math.sign(dx)||1,crit,true);if(opts.kb)knock(e,opts.kb);n++}return n}
  const PHYS=new Set(['gb','sword','hammer','axe','bow','xbow']),
  // 伤害五类：近战物理 mel、远程物理 rng、元素 ele、神圣 holy、黑暗 dark
- DT={sword:'mel',hammer:'mel',axe:'rng',bow:'rng',xbow:'rng',gb:'rng',fireball:'ele',frost:'ele',chain:'ele',thunder:'ele',missile:'ele',hp:'ele',holy:'holy'},
+ DT={sword:'mel',hammer:'mel',axe:'rng',bow:'rng',xbow:'rng',gb:'rng',fireball:'ele',frost:'ele',chain:'ele',thunder:'ele',missile:'ele',hp:'holy',holy:'holy'},
  // 抗性表（没写 = ×1）；同步 docs/ENEMIES.md
  RT={gob_shield:{rng:.3},gob_rock:{mel:.5,rng:.5},gob_wolf:{rng:1.5},gob_boar:{mel:.7},gob_ghost:{mel:.5,rng:.5,ele:1.5,holy:2,dark:.5},gob_mage:{ele:.5},gob_shaman:{dark:.5},
   skeleton:{rng:.7,holy:1.5,dark:.5},gob_necro:{rng:.7,holy:1.5,dark:.5},gob_giant:{mel:.8,rng:.8},gob_paladin:{holy:.5,dark:1.5},gob_hero:{rng:.5},gob_troll:{mel:.3,rng:.3}};
@@ -267,7 +268,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(o.t==='w'){const W=WEAPONS[o.k];L=S.w[o.k]||0;nm=W.name;d=W.desc[L];nw=!L;fr=FRS+(isOwn(o.k)?3:isSp(o.k)?2:1)}
   else if(o.t==='p'){L=S.p[o.k];nm=PASSIVES[o.k].name;d=PASSIVES[o.k].desc;nw=!L}else{nm='调息';d='回复 30 点生命'}
   const st=o.t==='heal'?'':`<span class="st">${L?'Lv '+L+' → '+(L+1):'Lv 1'}</span>`;
-  return `<button class="card c2" data-i="${i}"><span class="cf" style="background-image:url(assets/ui/${fr.replace('frames_','card_')}.png)"><span class="cn">${nm}</span>${nw?'<span class="nw">NEW</span>':''}<span class="ci">${icon(o)}</span>${st}<span class="cd">${d}</span></span></button>`}
+  return `<button class="card c2" data-i="${i}"><span class="cf" style="background-image:url(assets/ui/${fr.replace('frames_','card_')}.png)"><span class="cn">${nm}</span>${nw?'<span class="nw">NEW</span>':''}<span class="ty ty_${o.t==='p'?'p':isOwn(o.k)?'o':DT[o.k]}">${o.t==='p'?'祝福':(isOwn(o.k)?'专属·':'')+({mel:'物理·近战',rng:'物理·远程',ele:'法术·元素',holy:'法术·神圣',dark:'法术·黑暗'}[DT[o.k]]||'')}</span><span class="ci">${icon(o)}</span>${st}<span class="cd">${d}</span></span></button>`}
  function owned(){return Object.keys(S.w).map(k=>({t:'w',k})).concat(Object.keys(S.p).filter(k=>S.p[k]>0).map(k=>({t:'p',k})))}
  let cur=[],sub=null;
  function render(){
