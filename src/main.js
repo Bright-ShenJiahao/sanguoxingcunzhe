@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11030300';
-import {createSurvival} from './survival.js?v=11030300';
-import {createEnemies} from './enemies.js?v=11030300';
-import {createAudio} from './audio.js?v=11030300';
-import {createMeta} from './meta.js?v=11030300';
+import {createMenu} from './menu.js?v=11030320';
+import {createSurvival} from './survival.js?v=11030320';
+import {createEnemies} from './enemies.js?v=11030320';
+import {createAudio} from './audio.js?v=11030320';
+import {createMeta} from './meta.js?v=11030320';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11030300';
+import {createPathing} from './pathing.js?v=11030320';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11030300';
-import {createRun} from './run.js?v=11030300';
-import {createDebug} from './debug.js?v=11030300';
+import {createWeather} from './weather.js?v=11030320';
+import {createRun} from './run.js?v=11030320';
+import {createDebug} from './debug.js?v=11030320';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -57,7 +57,17 @@ let hairG=false,weaponAttack=null,pj=[],CM,mmc,wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
 const QP=new URLSearchParams(location.search);const AT=QP.get('x')?[+QP.get('x')/D.WW,+QP.get('y')/D.WH]:({n:[.8,.15],s:[.85,.85],w:[.15,.2],e:[.95,.6],sw:[.15,.85]})[QP.get('at')]||[D.spawn[0]/D.WW,D.spawn[1]/D.WH];
 const region=()=>'翠绿平原',region0=(x,y)=>{const [gw,gh]=D.rgrid||[64,64],i=D.rmap[Math.min(gh-1,Math.max(0,Math.floor(y/D.WH*gh)))*gw+Math.min(gw-1,Math.max(0,Math.floor(x/D.WW*gw)))];return D.rnames[i]};
-const hero={x:WW*AT[0],y:WH*AT[1],face:1};const CO=objs.filter(o=>o.r);
+const hero={x:WW*AT[0],y:WH*AT[1],face:1};
+// 暂停：右下角按钮或 Esc / P；可以继续或回主界面
+const PZ={on:false};{const st=document.createElement('style');st.textContent=`#pzb{position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));z-index:40;width:40px;height:40px;border-radius:8px;border:1px solid #8fbbef;background:#0b1530d0;color:#fff;font-size:18px;cursor:pointer}
+#pzm{position:fixed;inset:0;z-index:45;background:#0008;display:grid;place-items:center}#pzm[hidden],#pzb[hidden]{display:none}#pzm>div{background:#0b1530f0;border:1px solid #8fbbef;border-radius:12px;padding:22px 28px;display:grid;gap:12px;min-width:200px;text-align:center;color:#f7d987;font:900 22px "PingFang SC","Microsoft YaHei",sans-serif}
+#pzm button{font:700 16px "PingFang SC","Microsoft YaHei",sans-serif;padding:10px 18px;border-radius:8px;border:1px solid #f0dc9c;background:#1e3a72;color:#fff;cursor:pointer}`;document.head.append(st);
+ PZ.btn=document.createElement('button');PZ.btn.id='pzb';PZ.btn.textContent='⏸';PZ.btn.hidden=true;document.body.append(PZ.btn);
+ PZ.m=document.createElement('div');PZ.m.id='pzm';PZ.m.hidden=true;PZ.m.innerHTML='<div>暂停<button data-z="go">继续游戏</button><button data-z="home">结束本局，回主界面</button></div>';document.body.append(PZ.m);
+ PZ.set=v=>{PZ.on=v;PZ.m.hidden=!v;if(v)survival?.game?.clearInput?.()};
+ PZ.btn.onclick=()=>{PZ.btn.blur();PZ.set(true)};
+ PZ.m.onclick=e=>{const z=e.target.dataset?.z;if(z==='go')PZ.set(false);if(z==='home'){PZ.set(false);PZ.btn.hidden=true;joy=null;for(const k in keys)keys[k]=0;survival.stop();menu.show()}};
+ addEventListener('keydown',e=>{if((e.key==='Escape'||e.key==='p'||e.key==='P')&&survival?.playing&&!run?.paused){PZ.set(!PZ.on);e.preventDefault()}})}const CO=objs.filter(o=>o.r);
 window.SETC=(x,y,v)=>{x=Math.round(x);y=Math.round(y);if(CM&&x>=0&&y>=0&&x<WW&&y<WH)CM[(y*WW+x)*4]=v};   // 运行时改碰撞（城堡城墙/城门）
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WH)return 1;return CM[(y*WW+x)*4]}
 function blocked(x,y){
@@ -125,7 +135,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  if(menu?.visible){menu.draw(now);requestAnimationFrame(loop);return}
  if(CM){PATH??=createPathing(WW,WH,ok);PATH.update(hero.x,hero.y,now)}
  if(survival?.finished){requestAnimationFrame(loop);return}
- const pz=run?.paused,gdt=pz?0:dt;
+ const pz=run?.paused||PZ.on,gdt=pz?0:dt;PZ.btn.hidden=!survival?.playing;
  c.setTransform(SC,0,0,SC,0,0);
  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
  if(joy){const L=Math.hypot(joy.dx,joy.dy);if(L>8){dx=joy.dx/L;dy=joy.dy/L}}

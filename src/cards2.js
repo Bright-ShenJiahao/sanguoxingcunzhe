@@ -254,7 +254,7 @@ export function install(X){
    if(p.k==='lob'){const k=Math.min(1,p.t/p.d),lx=p.x0+(p.x-p.x0)*k-cx,ly=p.y0+(p.y-p.y0)*k-cy-Math.sin(k*Math.PI)*50;c.save();c.translate(lx,ly);c.rotate(now/150);DI(c,'fx_rock',0,0,14);c.restore();continue}
    if(p.k==='buck'||p.k==='light'||p.k==='shard'||p.k==='spear'){c.save();c.translate(x,y);c.rotate(a);c.fillStyle=p.k==='buck'?'#bfe6ff':p.k==='light'?'#fff3b0':p.k==='shard'?'#b98cff':'#e8dcc0';c.fillRect(-(p.size||5)/2,-1,p.size||5,2);c.restore();continue}
    if(p.k==='wave'){c.save();c.translate(x,y-6);c.rotate(Math.atan2(p.dy,p.dx)+Math.PI/2);DI(c,'fx_jet',0,0,p.len,0,false,.9);c.restore();continue}
-   if(p.k==='hwall'){c.save();c.translate(x,y);c.rotate(Math.atan2(p.dy,p.dx));for(let i=-1;i<=1;i++)DI(c,'fx_hwall',0,i*p.len/3,p.len/3,Math.PI/2,false,.85);c.restore();continue}
+   if(p.k==='hwall'){c.save();c.translate(x,y-8);c.rotate(Math.atan2(p.dy,p.dx));const L2=p.len/2,fl=.75+.25*Math.sin(now/60),g=c.createLinearGradient(-7,0,7,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,`rgba(255,255,255,${.85*fl})`);g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(-7,-L2,14,p.len);c.fillStyle=`rgba(255,250,225,${.95*fl})`;c.fillRect(-1.2,-L2,2.4,p.len);c.restore();continue}
    if(p.k==='keg'){c.save();c.translate(x,y-6);c.rotate(p.age*6*(p.dx>=0?1:-1));DI(c,'fx_keg',0,0,p.size);c.restore();continue}
    if(p.k==='dcoil'){c.save();c.translate(x,y);c.rotate(now/80);DI(c,'fx_dcoil',0,0,p.size);c.restore();continue}
    if(p.k==='fbolt'){c.fillStyle='rgba(255,140,40,.6)';c.beginPath();c.arc(x,y,4,0,6.3);c.fill();c.fillStyle='#ffe08a';c.fillRect(x-1.5,y-1.5,3,3);continue}
