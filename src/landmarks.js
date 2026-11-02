@@ -16,9 +16,8 @@ fetch('data/palisade.json?v=1').then(r=>r.json()).then(Ls=>{let seed=7;const rnd
  for(const L of Ls)for(let i=0;i<L.length-1;i++){const [x0,y0]=L[i],[x1,y1]=L[i+1],len=Math.hypot(x1-x0,y1-y0);for(let t=0;t<len;t+=5){const x=x0+(x1-x0)*t/len,y=y0+(y1-y0)*t/len;
   POSTS.push({k:'post'+[0,1,1,2][Math.floor(rnd()*4)],x:x+(rnd()-.5)*1.5,y:y+(rnd()-.5)*1.5,h:.85+rnd()*.3})}}}).catch(()=>{});   // 地标在游戏里的高度
 // 哥布林瞭望塔（用户圈点 11/03）：射程内放箭，前期伤害高；可被打掉，碎了这局不再出现
-const TW=[[88,628],[224,640],[341,617],[206,816],[420,788]];
-const DEC=[['banner',300,560,1],['banner',372,560,1],['banner',455,760,1],['banner',455,815,1],['skulls',100,640],['skulls',236,652],['skulls',352,630],['skulls',218,828],['skulls',432,800],
- ['brazier',318,575],['brazier',356,575],['brazier',448,745],['brazier',448,830],['spikes',152,585],['spikes',395,700]];
+const TW=[];   // 等用户重新摆放
+const DEC=[];
 for(const k of ['tower','banner','skulls','brazier','spikes']){const i=new Image();i.src=`assets/map/fort/${k}.png?v=1`;IM['f_'+k]=i}
 const FH={tower:55,banner:34,skulls:16,brazier:26,spikes:22};
 export function install(X){
