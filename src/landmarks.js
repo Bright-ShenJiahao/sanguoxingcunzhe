@@ -9,23 +9,25 @@ const CD=150,BUF=30;
 const IM={};for(const k of ['atk','spd','heal','gold'])for(const t of ['on','off']){const i=new Image();i.src=`assets/map/landmarks/${k}_${t}.png`;IM[k+'_'+t]=i}
 for(const f of ['idle','run1','run2','hit']){const i=new Image();i.src=`assets/characters/summons/tg/${f}.png`;IM['tg_'+f]=i}
 const LH={atk:26,spd:30,heal:24,gold:20};   // 地标在游戏里的高度
-// 哥布林城堡（山顶，左下角）：GPT 整张城堡院落图，城门朝东，第 15 分钟打开
-const CI=new Image();CI.crossOrigin='anonymous';CI.src='assets/map/castle/castle.png?v=2';const CIW=1247,CIH=1108;   // 坐标按原图 1247×1108 写；实际文件已缩小，画的时候按比例换算
-const CX0=30,CY0=625,CS=235/CIW;   // 城堡左上角的世界坐标、缩放
-const cw=(ix,iy)=>[CX0+ix*CS,CY0+iy*CS];
-const YARD=[...cw(183,401),...cw(1078,906)],GATE_R=[...cw(1068,526),...cw(1247,701)],SOUTH_Y=880,CBASE=CY0+CIH*CS;   // 院子、城门通道（世界坐标 x0,y0,x1,y1）
-const GATE=[(GATE_R[0]+GATE_R[2])/2,(GATE_R[1]+GATE_R[3])/2];
-for(const k of ['tower','banner','skulls','brazier','spikes']){const i=new Image();i.src=`assets/map/castle/${k}.png`;IM['c_'+k]=i}
-const CH={tower:46,banner:32,skulls:13,brazier:20,spikes:17};
-const DECO=[['tower',372,690],['tower',330,612],['banner',282,708],['brazier',276,724],['banner',300,650],['skulls',172,895],['skulls',360,790],['spikes',345,840],['spikes',150,885]];
-let CMASK=null;function castleMask(){if(CMASK||!CI.complete||!CI.width)return CMASK;const c=document.createElement('canvas');c.width=CIW;c.height=CIH;const g=c.getContext('2d');g.drawImage(CI,0,0,CIW,CIH);try{CMASK=g.getImageData(0,0,CIW,CIH).data}catch(e){CMASK=new Uint8ClampedArray(CIW*CIH*4).fill(255)}return CMASK}   // 读不到像素就按整块矩形算
+// 哥布林城堡（山顶，左下角）：沿地形一根根插木桩围起来，东侧开门（第 15 分钟撤掉拒马），院子后面是主楼
+const CW=[[45,700],[80,676],[110,665],[155,661],[200,665],[240,672],[275,685],[298,712],[292,742],[268,760],[252,772],[236,800],[225,830],[175,842],[120,848],[85,830],[55,800],[44,750],[45,700]];
+const GATE=[296,727],GATE_HALF=16;
+for(const k of ['tower','banner','skulls','brazier','spikes','keep']){const i=new Image();i.src=`assets/map/castle/${k}.png`;IM['c_'+k]=i}
+for(const k of ['post0','post1','post2','cpost','gate_l','gate_r']){const i=new Image();i.src=`assets/map/sprites/camp_${k}.png`;IM['p_'+k]=i}
+const CH={tower:46,banner:32,skulls:13,brazier:20,spikes:17,keep:78};
+const PH={post0:31,post1:24,post2:19,cpost:26,gate_l:38,gate_r:38};
+const DECO=[['keep',140,712],['tower',372,690],['tower',62,640],['banner',318,700],['banner',318,758],['brazier',312,716],['brazier',312,742],['banner',190,700],['brazier',110,735],['brazier',200,735],['skulls',172,895],['skulls',360,790],['spikes',345,840],['spikes',150,885]];
+const POSTS=(()=>{let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;const P=[];
+ for(let i=0;i<CW.length-1;i++){const [x0,y0]=CW[i],[x1,y1]=CW[i+1],len=Math.hypot(x1-x0,y1-y0);for(let t=0;t<len;t+=5){const x=x0+(x1-x0)*t/len,y=y0+(y1-y0)*t/len;if(Math.hypot(x-GATE[0],y-GATE[1])<GATE_HALF)continue;
+  P.push({k:'post'+[0,1,1,2][Math.floor(rnd()*4)],x:x+(rnd()-.5)*1.5,y:y+(rnd()-.5)*1.5})}}
+ for(const [x,y] of CW.slice(0,-1))if(Math.hypot(x-GATE[0],y-GATE[1])>=GATE_HALF+4)P.push({k:'cpost',x,y:y+1});return P})();
 export function install(X){
  const {hero,en,ok,makeEnemy,survival}=X,R=(a,b)=>a+Math.random()*(b-a);
  let L=null;
  function place(){L=LM_DEF.map(d=>{let best=[d.x,d.y];for(let r=0;r<120&&!ok(best[0],best[1]);r+=6)for(let a=0;a<6.28;a+=.5){const x=d.x+Math.cos(a)*r,y=d.y+Math.sin(a)*r;if(ok(x,y)){best=[x,y];r=999;break}}return {...d,x:best[0],y:best[1],cd:0}});window.LM=L}
- function setWall(open){const W=window.SETC,M=castleMask();if(!W||!M)return false;const inR=(x,y,r)=>x>=r[0]&&x<=r[2]&&y>=r[1]&&y<=r[3];
-   for(let y=Math.floor(CY0);y<CBASE;y++)for(let x=Math.floor(CX0);x<CX0+CIW*CS;x++){const ix=Math.floor((x-CX0)/CS),iy=Math.floor((y-CY0)/CS);if(ix<0||iy<0||ix>=CIW||iy>=CIH)continue;
-    if(M[(iy*CIW+ix)*4+3]<40)continue;if(inR(x,y,YARD))continue;if(inR(x,y,GATE_R)){W(x,y,open?0:1);continue}W(x,y,1)}return true}
+ function setWall(open){const W=window.SETC;if(!W)return false;for(let i=0;i<CW.length-1;i++){const [x0,y0]=CW[i],[x1,y1]=CW[i+1],len=Math.hypot(x1-x0,y1-y0);
+   for(let t=0;t<=len;t+=1){const x=x0+(x1-x0)*t/len,y=y0+(y1-y0)*t/len,g=Math.hypot(x-GATE[0],y-GATE[1])<GATE_HALF;for(let o=-3;o<=3;o++)for(let q=-3;q<=3;q++)W(x+o,y+q,g&&open?0:1)}}
+  for(const [k,x,y] of DECO)if(k==='keep')for(let o=-30;o<=30;o++)for(let q=-10;q<=2;q++)W(x+o,y+q,1);return true}
  function update(dt){const S=X.S;if(!S)return;if(!L||S.lmRun!==S){S.lmRun=S;place();S.buf={atk:0,spd:0,gold:0};S.gateOpen=false;S.wallSet=false}
   if(!S.wallSet)S.wallSet=setWall(S.gateOpen);
   if(!S.gateOpen&&S.t>=900){S.gateOpen=true;setWall(true);S.banner={v:'哥布林城堡的城门打开了！（左下角山顶）',t:4};window.SFX?.boss?.()}
@@ -54,16 +56,18 @@ export function install(X){
   else{c.fillStyle='#7d8590';c.fillRect(-9,-8,18,8);c.fillStyle='#9aa2ac';c.fillRect(-10,-9,20,2);if(on){c.fillStyle='#ffd23f';for(const [px,py] of [[-5,-11],[0,-12],[5,-11],[-2,-14],[3,-14],[0,-16]]){c.beginPath();c.arc(px,py,2,0,6.3);c.fill()}}}
   c.restore()}
  function drawPiece(c,k,x,y,flip){const I=IM['c_'+k];if(!I?.complete||!I.width)return;const h=CH[k],w=I.width*h/I.height;c.save();c.translate(x,y);if(flip)c.scale(-1,1);c.imageSmoothingEnabled=true;c.drawImage(I,-w/2,-h+3,w,h);c.restore()}
- function ground(c,cx,cy){if(!CI.complete||!CI.width)return;c.save();c.imageSmoothingEnabled=true;const k=CI.width/CIW;c.drawImage(CI,0,0,CI.width,SOUTH_Y*k,CX0-cx,CY0-cy,CIW*CS,SOUTH_Y*CS);c.restore()}   // 城堡（除南墙）当地面画
+ function ground(){}
+ function drawPost(c,k,x,y){const I=IM['p_'+k];if(!I?.complete||!I.width)return;const h=PH[k],w=I.width*h/I.height;c.imageSmoothingEnabled=true;c.drawImage(I,x-w/2,y-h+2,w,h)}
  function sprites(items,cx,cy,c,now){if(!L)return;const S=X.S;
-  if(CI.complete&&CI.width)items.push({y:CBASE-4,f:()=>{c.save();c.imageSmoothingEnabled=true;const k=CI.width/CIW;c.drawImage(CI,0,SOUTH_Y*k,CI.width,CI.height-SOUTH_Y*k,CX0-cx,CY0+SOUTH_Y*CS-cy,CIW*CS,(CIH-SOUTH_Y)*CS);c.restore()}});   // 南墙按 y 排序，能挡住院子里的人
+  for(const p of POSTS){const x=p.x-cx,y=p.y-cy;if(x<-20||y<-10||x>520||y>360)continue;items.push({y:p.y,f:()=>drawPost(c,p.k,x,y)})}
+  for(const [k,dx] of [['gate_l',-1],['gate_r',1]]){const x=GATE[0]-cx,y=GATE[1]+dx*GATE_HALF-cy;items.push({y:GATE[1]+dx*GATE_HALF,f:()=>drawPost(c,k,x,y)})}
   if(!S?.gateOpen){for(const dy of [-9,9])items.push({y:GATE[1]+dy,f:()=>drawPiece(c,'spikes',GATE[0]+4-cx,GATE[1]+dy-cy)})}   // 城门没开：拒马堵门
   for(const [k,wx,wy] of DECO){const x=wx-cx,y=wy-cy;if(x<-80||y<-20||x>580||y>440)continue;items.push({y:wy,f:()=>drawPiece(c,k,x,y)})}for(const l of L){const x=l.x-cx,y=l.y-cy;if(x<-40||y<-40||x>600||y>400)continue;items.push({y:l.y,f:()=>drawLM(c,l,x,y,now)})}
   for(const e of en){if(!e.tg||e.dead)continue;const x=e.x-cx,y=e.y-cy;items.push({y:e.y+.5,f:()=>{const I=IM['tg_'+(e.flash>0?'hit':Math.floor(now/110)%2?'run1':'run2')];if(!I?.complete||!I.width)return;const h=26,w=I.width*h/I.height;c.save();c.translate(x,y);c.scale(e.face||1,1);c.imageSmoothingEnabled=true;c.drawImage(I,-w/2,-h+1,w,h);c.restore()}})}}
  function draw(c,cx,cy,now){const S=X.S;if(!S)return;
   const B=S.buf||{};let y=64;c.save();c.font='bold 8px "PingFang SC","Microsoft YaHei",sans-serif';c.textAlign='left';
   for(const [k,n,col] of [['atk','战神',  '#ff8a6a'],['spd','疾风','#7df9ff'],['gold','黄金','#ffd23f']])if(B[k]>0){const v=n+' '+Math.ceil(B[k])+'s';c.lineWidth=2;c.strokeStyle='rgba(0,0,0,.7)';c.strokeText(v,6,y);c.fillStyle=col;c.fillText(v,6,y);y+=10}c.restore()}
- function mini(m,k,now){if(!L)return;m.strokeStyle=X.S?.gateOpen?'#ff5a3a':'#a8463a';m.lineWidth=1;m.strokeRect(CX0*k,CY0*k,CIW*CS*k,CIH*CS*k);for(const l of L){const x=l.x*k,y=l.y*k;m.fillStyle=l.cd<=0?l.col:'#6a6f78';m.beginPath();m.moveTo(x,y-2.6);m.lineTo(x+2.2,y);m.lineTo(x,y+2.6);m.lineTo(x-2.2,y);m.closePath();m.fill();m.strokeStyle='#000a';m.lineWidth=.5;m.stroke()}
+ function mini(m,k,now){if(!L)return;m.strokeStyle=X.S?.gateOpen?'#ff5a3a':'#a8463a';m.lineWidth=1;m.beginPath();CW.forEach(([x,y],i)=>i?m.lineTo(x*k,y*k):m.moveTo(x*k,y*k));m.stroke();for(const l of L){const x=l.x*k,y=l.y*k;m.fillStyle=l.cd<=0?l.col:'#6a6f78';m.beginPath();m.moveTo(x,y-2.6);m.lineTo(x+2.2,y);m.lineTo(x,y+2.6);m.lineTo(x-2.2,y);m.closePath();m.fill();m.strokeStyle='#000a';m.lineWidth=.5;m.stroke()}
   for(const e of en)if(e.tg&&!e.dead&&Math.floor(now/250)%2){m.fillStyle='#ffd23f';m.beginPath();m.arc(e.x*k,e.y*k,2.2,0,6.3);m.fill()}}
  return {update,sprites,draw,mini,onKill,ground};
 }
