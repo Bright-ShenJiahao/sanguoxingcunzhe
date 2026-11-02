@@ -1,0 +1,50 @@
+name: 平衡测试
+on:
+  push:
+    branches: [balance-test]
+  workflow_dispatch:
+    inputs:
+      solo_reps:
+        description: '单卡测试：每张卡跑几局（0=不跑）'
+        default: '4'
+      mix_per_job:
+        description: '随机搭配：每台机器跑几局（16 台）'
+        default: '24'
+      maxt:
+        description: '一局最长多少秒（游戏时间）'
+        default: '1200'
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: nohup python3 -m http.server 8765 >/dev/null 2>&1 &
+      - name: 单卡
+        if: ${{ (inputs.solo_reps || '4') != '0' }}
+        env: { MAXT: '${{ inputs.maxt || '1200' }}', PAGES: '2' }
+        run: node tools/balance.js solo ${{ matrix.part }} 16 ${{ inputs.solo_reps || '4' }} solo-${{ matrix.part }}.json
+      - name: 随机搭配
+        env: { MAXT: '${{ inputs.maxt || '1200' }}', PAGES: '2' }
+        run: node tools/balance.js mix ${{ matrix.part }} 16 ${{ inputs.mix_per_job || '24' }} mix-${{ matrix.part }}.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: 'res-${{ matrix.part }}', path: '*.json', if-no-files-found: ignore }
+  report:
+    needs: run
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: results }
+      - run: node tools/balance_report.js results report && cp -r results report/raw
+      - uses: actions/upload-artifact@v4
+        with: { name: balance-report, path: report }
