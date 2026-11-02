@@ -1,0 +1,49 @@
+name: 走位AI训练（神经进化）
+on:
+  push:
+    branches: [neuro-train]
+  workflow_dispatch:
+    inputs:
+      gens:
+        description: '每个岛跑几代'
+        default: '30'
+      maxt:
+        description: '每局最长多少秒（游戏时间）'
+        default: '600'
+permissions:
+  contents: write
+jobs:
+  island:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        id: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: nohup python3 -m http.server 8765 >/dev/null 2>&1 &
+      - name: 进化
+        env: { MAXT: "${{ inputs.maxt || '600' }}", PAGES: '4' }
+        run: node tools/neuro.js ${{ matrix.id }} ${{ inputs.gens || '30' }} island-${{ matrix.id }}.json tools/neuro/best.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: 'island-${{ matrix.id }}', path: 'island-*.json', if-no-files-found: ignore }
+  pick:
+    needs: island
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: islands }
+      - name: 选出最强的岛，存为下次起点
+        run: |
+          node -e "const fs=require('fs');let best=null;for(const d of fs.readdirSync('islands'))for(const f of fs.readdirSync('islands/'+d)){const j=JSON.parse(fs.readFileSync('islands/'+d+'/'+f));console.log('岛',j.island,'适应度',Math.round(j.fit));if(!best||j.fit>best.fit)best=j}fs.mkdirSync('tools/neuro',{recursive:true});fs.writeFileSync('tools/neuro/best.json',JSON.stringify(best));console.log('最强',best.island,Math.round(best.fit))"
+          git config user.name "neuro-bot" && git config user.email "neuro-bot@users.noreply.github.com"
+          git add tools/neuro/best.json && git commit -m "走位AI：保存本轮最强权重" && git push || true
+      - uses: actions/upload-artifact@v4
+        with: { name: neuro-best, path: tools/neuro/best.json }
