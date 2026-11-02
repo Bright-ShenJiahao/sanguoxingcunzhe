@@ -41,7 +41,8 @@ for(const k of 'slash crack whip fistwave trap rock buck wedge orb keg jet holyo
 for(const k of 'golem treant wolf waterel fireel firelet hawk fairy'.split(' '))for(const f of ['idle','walk','atk'])ld(k+'_'+f,`assets/characters/summons/${k}/${f}.png`);
 for(const f of ['walk0','walk1','walk2','walk3','strike'])ld('sk_'+f,'assets/characters/enemies/skeleton/'+f+'.png');
 ld('swd','assets/ui/w_sword.png');
-const SH={golem:104,treant:120,wolf:68,waterel:100,fireel:108,firelet:40,hawk:60,fairy:44},DH={golem:30,treant:36,wolf:17,waterel:30,fireel:32,firelet:11,hawk:15,fairy:13};   // 召唤物：站立帧原图高 → 游戏里的高
+for(const f of ['idle','walk','walk2','atk'])ld('wolf_'+f,'assets/characters/summons/cat/'+f+'.png');   // 布偶猫用 wolf 这个卡位
+const SH={golem:104,treant:120,wolf:64,waterel:100,fireel:108,firelet:40,hawk:60,fairy:44},DH={golem:30,treant:36,wolf:16,waterel:30,fireel:32,firelet:11,hawk:15,fairy:13};   // 召唤物：站立帧原图高 → 游戏里的高
 
 export function install(X){
  const {en,hero,strike,knock,nearest,cluster,dmg,AR,AMT,DUR,ok,burn,survival,AIM,MA,FN}=X,R=(a,b)=>a+Math.random()*(b-a);
@@ -240,7 +241,7 @@ export function install(X){
    if(m.k==='skel'){const k=m.rise>0?1-m.rise/.6:1;if(m.rise>0)DI(c,'fx_rise',x,y-6,22);const im=m.at>0?'sk_strike':'sk_walk'+(m.walk?Math.floor(now/120)%4:0);c.save();c.globalAlpha=k;c.translate(x,y);c.scale(-(m.face||1),1);const I=IMG[im];if(I?.complete&&I.width){c.filter='hue-rotate(160deg) saturate(1.6)';c.drawImage(I,-16,-30,32,32);c.filter='none'}c.restore();
      c.fillStyle='rgba(90,170,255,.55)';c.beginPath();c.ellipse(x,y,6,2,0,0,6.3);c.fill();return}
    if(m.broken>0){DI(c,'fx_rock',x,y-6,18,0,false,.6);return}
-   const key=m.k,f=m.at>0?'atk':m.walk?'walk':'idle',I=IMG[key+'_'+f];if(!I?.complete||!I.width)return;const sc=DH[key]/SH[key]*(lv(m.src)>=4&&(m.k==='golem'||m.k==='treant')?1.15:1),h=I.height*sc,w=I.width*sc;
+   const key=m.k,f=m.at>0?'atk':m.walk?(m.k==='wolf'&&Math.floor(now/110)%2?'walk2':'walk'):'idle',I=IMG[key+'_'+f];if(!I?.complete||!I.width)return;const sc=DH[key]/SH[key]*(lv(m.src)>=4&&(m.k==='golem'||m.k==='treant')?1.15:1),h=I.height*sc,w=I.width*sc;
    const bob=m.fly?Math.sin(now/180+(m.i||0))*2:0;c.save();c.translate(x,y-h/2+2+bob);if(m.face<0)c.scale(-1,1);
    const nearHero=Math.abs(m.x-hero.x)<14&&m.y>hero.y-4&&m.y<hero.y+20;if(nearHero)c.globalAlpha=.55;   // 挡住主角时半透明
    if(m.life!==undefined&&m.life<2)c.globalAlpha*=.5+.5*Math.sin(now/60);
