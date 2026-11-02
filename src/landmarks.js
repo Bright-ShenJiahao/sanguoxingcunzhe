@@ -17,7 +17,7 @@ fetch('data/palisade.json?v=1').then(r=>r.json()).then(Ls=>{let seed=7;const rnd
   POSTS.push({k:'post'+[0,1,1,2][Math.floor(rnd()*4)],x:x+(rnd()-.5)*1.5,y:y+(rnd()-.5)*1.5,h:.85+rnd()*.3})}}}).catch(()=>{});   // 地标在游戏里的高度
 // 哥布林瞭望塔（用户圈点 11/03）：射程内放箭，前期伤害高；可被打掉，碎了这局不再出现
 const TW=[[88,628],[224,640],[341,617],[206,816],[420,788]];
-const DEC=[['brazier',489,725],['brazier',463,801],['brazier',126,542],['brazier',199,538]];
+const DEC=[['brazier',489,725],['brazier',463,801],['brazier',126,542],['brazier',199,538],['banner',320,836]];
 // 拒马（用户画线 11/03）：沿线每 16px 一组，尖头朝外（背向山顶中心）
 const SPK=[[[505,725],[505,752]],[[502,779],[495,803]],[[532,726],[534,756]],[[531,782],[525,809]],[[559,728],[558,756]],[[559,790],[553,810]],[[487,820],[468,842]],[[523,828],[494,857]],[[546,838],[526,865]]];
 for(const k of ['tower','banner','skulls','brazier','spikes']){const i=new Image();i.src=`assets/map/fort/${k}.png?v=1`;IM['f_'+k]=i}
