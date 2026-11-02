@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11021910';
-import {createSurvival} from './survival.js?v=11021910';
-import {createEnemies} from './enemies.js?v=11021910';
-import {createAudio} from './audio.js?v=11021910';
-import {createMeta} from './meta.js?v=11021910';
+import {createMenu} from './menu.js?v=11021912';
+import {createSurvival} from './survival.js?v=11021912';
+import {createEnemies} from './enemies.js?v=11021912';
+import {createAudio} from './audio.js?v=11021912';
+import {createMeta} from './meta.js?v=11021912';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11021910';
+import {createPathing} from './pathing.js?v=11021912';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11021910';
-import {createRun} from './run.js?v=11021910';
-import {createDebug} from './debug.js?v=11021910';
+import {createWeather} from './weather.js?v=11021912';
+import {createRun} from './run.js?v=11021912';
+import {createDebug} from './debug.js?v=11021912';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -65,7 +65,7 @@ function blocked(x,y){
 const ok=(x,y)=>!blocked(x,y);
 const HK=+(new URLSearchParams(location.search).get('hk')||1);let nextAtk=0;
 function drawHero(px,py,moving,now){
- const ST=SETS[CS],f=moving?ST.walk[Math.floor(now/105)%ST.walk.length]:Math.floor(now/650)%2,im=IM[(hairG&&ST.gpre?ST.gpre:ST.pre)+f],[w,h]=ST.size;c.save();c.translate(px,py);c.scale(hero.face*HK*1.15,HK*1.15);c.imageSmoothingEnabled=false;
+ const ST=SETS[CS],f=moving?ST.walk[Math.floor(now/105)%ST.walk.length]:Math.floor(now/650)%2,im=IM[(hairG&&ST.gpre?ST.gpre:ST.pre)+f],[w,h]=ST.size;c.save();c.translate(px,py);c.scale(hero.face*HK*1.07,HK*1.07);c.imageSmoothingEnabled=false;
  const RH=ST.grip.front,FH=ST.grip.front,tl=p=>[(p[0]-ST.size[0])/2,(p[1]-ST.size[1]*2)/2];
  const wi=IM['wp_'+wpm],T=weaponAttack?Math.min(1,(now-weaponAttack.t0)/weaponAttack.dur):0,sw=Math.min(1,T*1.25);
  if(wpm=='long'&&!weaponAttack){c.save();c.translate(-3,-12);c.rotate(-.5);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
