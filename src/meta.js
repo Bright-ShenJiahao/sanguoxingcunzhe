@@ -1,18 +1,18 @@
 // 局外系统：金币 / 抽奖券、永久强化（男女通用）、怪物图鉴、主界面顶部状态栏、老虎机动画（宝箱用，以后抽卡复用）。
 // 存档在 localStorage 'meta'。
 const UP=[
- {k:'hp',ic:'<img src="assets/ui/u_hp.png" alt="">',nm:'体魄',fx:'+8 生命',max:10,base:60},
- {k:'atk',ic:'<img src="assets/ui/b_atk.png" alt="">',nm:'力量',fx:'+4% 物理伤害',max:10,base:80},{k:'arc',ic:'<img src="assets/ui/p_arc.png" alt="">',nm:'奥义',fx:'+4% 法术伤害',max:10,base:80},
- {k:'spd',ic:'<img src="assets/ui/u_spd.png" alt="">',nm:'步伐',fx:'+3% 移速',max:8,base:70},
- {k:'cd',ic:'<img src="assets/ui/u_cd.png" alt="">',nm:'反应',fx:'−3% 攻击间隔',max:8,base:90},
- {k:'arm',ic:'<img src="assets/ui/b_armor.png" alt="">',nm:'护甲',fx:'+1 护甲（每次受伤少扣 1）',max:5,base:120},
- {k:'reg',ic:'<img src="assets/ui/b_regen.png" alt="">',nm:'再生',fx:'+0.2 每秒回血',max:5,base:120},
- {k:'mag',ic:'<img src="assets/ui/p_mag.png" alt="">',nm:'磁铁',fx:'+12% 拾取范围',max:5,base:50},
- {k:'wis',ic:'<img src="assets/ui/icons_12.png" alt="">',nm:'智慧',fx:'+5% 经验',max:5,base:100},
- {k:'gold',ic:'<img src="assets/ui/u_gold.png" alt="">',nm:'财运',fx:'+8% 金币',max:5,base:120},
- {k:'crit',ic:'<img src="assets/ui/p_crit.png" alt="">',nm:'暴击',fx:'+3% 暴击率（双倍伤害）',max:8,base:90},
- {k:'area',ic:'<img src="assets/ui/b_area.png" alt="">',nm:'范围',fx:'+5% 攻击范围',max:5,base:100},{k:'dur',ic:'<img src="assets/ui/u_dur.png" alt="">',nm:'持续',fx:'+5% 效果持续',max:5,base:90},{k:'pspd',ic:'<img src="assets/ui/b_pspd.png" alt="">',nm:'疾矢',fx:'+5% 投射物速度、射程',max:5,base:80},{k:'amt',ic:'<img src="assets/ui/u_amt.png" alt="">',nm:'多重',fx:'+1 投射物',max:1,base:2000},{k:'rr',ic:'<img src="assets/ui/u_rr.png" alt="">',nm:'重抽',fx:'每局 +1 次重抽',max:3,base:150},
- {k:'rev',ic:'<img src="assets/ui/u_revive.png" alt="">',nm:'复活',fx:'每局复活 1 次（50% 生命）',max:1,base:1500}];
+ {k:'hp',ic:'<img src="assets/ui/u_hp.png?v=1103a" alt="">',nm:'体魄',fx:'+8 生命',max:10,base:60},
+ {k:'atk',ic:'<img src="assets/ui/b_atk.png?v=1103a" alt="">',nm:'力量',fx:'+4% 物理伤害',max:10,base:80},{k:'arc',ic:'<img src="assets/ui/p_arc.png?v=1103a" alt="">',nm:'奥义',fx:'+4% 法术伤害',max:10,base:80},
+ {k:'spd',ic:'<img src="assets/ui/u_spd.png?v=1103a" alt="">',nm:'步伐',fx:'+3% 移速',max:8,base:70},
+ {k:'cd',ic:'<img src="assets/ui/u_cd.png?v=1103a" alt="">',nm:'反应',fx:'−3% 攻击间隔',max:8,base:90},
+ {k:'arm',ic:'<img src="assets/ui/b_armor.png?v=1103a" alt="">',nm:'护甲',fx:'+1 护甲（每次受伤少扣 1）',max:5,base:120},
+ {k:'reg',ic:'<img src="assets/ui/b_regen.png?v=1103a" alt="">',nm:'再生',fx:'+0.2 每秒回血',max:5,base:120},
+ {k:'mag',ic:'<img src="assets/ui/p_mag.png?v=1103a" alt="">',nm:'磁铁',fx:'+12% 拾取范围',max:5,base:50},
+ {k:'wis',ic:'<img src="assets/ui/icons_12.png?v=1103a" alt="">',nm:'智慧',fx:'+5% 经验',max:5,base:100},
+ {k:'gold',ic:'<img src="assets/ui/u_gold.png?v=1103a" alt="">',nm:'财运',fx:'+8% 金币',max:5,base:120},
+ {k:'crit',ic:'<img src="assets/ui/p_crit.png?v=1103a" alt="">',nm:'暴击',fx:'+3% 暴击率（双倍伤害）',max:8,base:90},
+ {k:'area',ic:'<img src="assets/ui/b_area.png?v=1103a" alt="">',nm:'范围',fx:'+5% 攻击范围',max:5,base:100},{k:'dur',ic:'<img src="assets/ui/u_dur.png?v=1103a" alt="">',nm:'持续',fx:'+5% 效果持续',max:5,base:90},{k:'pspd',ic:'<img src="assets/ui/b_pspd.png?v=1103a" alt="">',nm:'疾矢',fx:'+5% 投射物速度、射程',max:5,base:80},{k:'amt',ic:'<img src="assets/ui/u_amt.png?v=1103a" alt="">',nm:'多重',fx:'+1 投射物',max:1,base:2000},{k:'rr',ic:'<img src="assets/ui/u_rr.png?v=1103a" alt="">',nm:'重抽',fx:'每局 +1 次重抽',max:3,base:150},
+ {k:'rev',ic:'<img src="assets/ui/u_revive.png?v=1103a" alt="">',nm:'复活',fx:'每局复活 1 次（50% 生命）',max:1,base:1500}];
 const price=(u,L)=>Math.round(u.base*Math.pow(1.35,L)/5)*5;
 export const ENEMY_NAMES={goblin:'小哥布林',gob_kid:'哥布林崽',gob_blade:'哥布林剑士',gob_archer:'哥布林弓箭手',gob_shield:'哥布林盾卫',gob_shaman:'哥布林萨满',gob_bomb:'炸弹哥布林',gob_boar:'野猪骑兵',gob_rock:'岩甲哥布林',gob_mage:'哥布林法师',gob_ghost:'幽灵哥布林',gob_wolf:'狼骑兵',gob_thrower:'投石哥布林',gob_drum:'哥布林鼓手',gob_necro:'哥布林死灵师',gob_giant:'巨型哥布林',skeleton:'骷髅兵',gob_king:'哥布林大王',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士',gob_hero:'哥布林英雄',gob_troll:'血咒巨魔'};
 const RD={gob_shield:'远程被盾挡 ×0.3，靠近砍',gob_rock:'物理都只吃一半，用法术',gob_wolf:'怕远程 ×1.5',gob_boar:'皮厚，近战 ×0.7',gob_ghost:'物理打不实，怕神圣 ×2、元素 ×1.5',gob_mage:'元素只吃一半',gob_shaman:'耐黑暗',skeleton:'怕神圣 ×1.5，耐黑暗',gob_necro:'怕神圣 ×1.5，耐黑暗',gob_giant:'物理 ×0.8',gob_paladin:'耐神圣，怕黑暗 ×1.5',gob_hero:'正面举盾，远程 ×0.5',gob_troll:'物理 ×0.3，会回血；火焰止血，神圣破盾'};
@@ -50,23 +50,23 @@ export function createMeta(){
  .bcard img{max-height:56px;image-rendering:pixelated}.bcard.unk img{filter:brightness(0) opacity(.55)}.bcard .nm{margin-top:4px;font-weight:700}.bcard .k{color:#ffd23f;font-size:13px}
  #slot{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:#04081099;font:600 15px "PingFang SC","Microsoft YaHei",sans-serif}
  #slot[hidden]{display:none}
- #slot .m{position:relative;width:min(380px,74vw);aspect-ratio:760/544;margin-top:40px;background:url(assets/ui/slot_body.png) center/100% 100% no-repeat;image-rendering:pixelated}
-#slot .sign{position:absolute;left:-2%;right:-2%;top:-15%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_sign.png) center/100% 100% no-repeat;color:#ffd96a;font-size:18px;letter-spacing:3px;text-shadow:0 2px 0 #000}
+ #slot .m{position:relative;width:min(380px,74vw);aspect-ratio:760/544;margin-top:40px;background:url(assets/ui/slot_body.png?v=1103a) center/100% 100% no-repeat;image-rendering:pixelated}
+#slot .sign{position:absolute;left:-2%;right:-2%;top:-15%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_sign.png?v=1103a) center/100% 100% no-repeat;color:#ffd96a;font-size:18px;letter-spacing:3px;text-shadow:0 2px 0 #000}
 #slot .reels{position:absolute;left:15.5%;width:69%;top:40%;height:34%;display:flex;gap:4px;padding:4px}
-#slot .reel{flex:1;overflow:hidden;background:url(assets/ui/slot_cell.png) center/100% 100% no-repeat;position:relative}
+#slot .reel{flex:1;overflow:hidden;background:url(assets/ui/slot_cell.png?v=1103a) center/100% 100% no-repeat;position:relative}
 #slot .strip{position:absolute;left:0;right:0;top:0}
 #slot .cell{height:var(--h);box-sizing:border-box;padding:12% 16% 10%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#3a2410;font-size:12px;font-weight:700;text-align:center;line-height:1.2}
 #slot .cell .g{font-size:30px;line-height:36px}#slot .cell img{height:44%;max-width:64%;object-fit:contain;margin-bottom:2px;image-rendering:pixelated}
-#slot .scr{position:absolute;left:0;right:0;bottom:-24%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_bar.png) center/100% 100% no-repeat;color:#ffe9a8;font-size:15px;text-shadow:0 2px 0 #000;padding:0 8%}
-#slot .lever{position:absolute;right:-15%;top:12%;width:13%;height:62%;background:url(assets/ui/slot_lever_up.png) center/contain no-repeat}
-#slot .lever.dn{background-image:url(assets/ui/slot_lever_dn.png);top:30%}
+#slot .scr{position:absolute;left:0;right:0;bottom:-24%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_bar.png?v=1103a) center/100% 100% no-repeat;color:#ffe9a8;font-size:15px;text-shadow:0 2px 0 #000;padding:0 8%}
+#slot .lever{position:absolute;right:-15%;top:12%;width:13%;height:62%;background:url(assets/ui/slot_lever_up.png?v=1103a) center/contain no-repeat}
+#slot .lever.dn{background-image:url(assets/ui/slot_lever_dn.png?v=1103a);top:30%}
 #slot .fx{position:absolute;pointer-events:none;width:32%;aspect-ratio:1;background:center/contain no-repeat;animation:sfx 1s ease-out forwards}
 @keyframes sfx{0%{opacity:0;transform:scale(.4) translateY(20px)}30%{opacity:1}100%{opacity:0;transform:scale(1.2) translateY(-30px)}}
 #slot .tip{position:absolute;left:0;right:0;bottom:-36%;color:#ffe9b0;text-align:center;font-size:12px}`;
  document.head.append(st);
  // ---------- 顶部状态栏 ----------
  const bar=document.createElement('div');bar.id='mbar';document.body.append(bar);
- function drawBar(){bar.innerHTML=`<span class="pill" title="金币"><img src="assets/ui/misc_0.png" alt="">${M.gold}</span><span class="pill" title="抽奖券"><img src="assets/ui/misc_1.png" alt="">${M.tickets}</span><button class="pill" data-p="dex" title="怪物图鉴"><img src="assets/ui/misc_2.png" alt=""><span class="lb">图鉴</span></button><button class="pill" data-p="snd" title="静音（M 键）"><img src="assets/ui/misc_${window.SFX?.muted?9:8}.png" alt=""></button>`;
+ function drawBar(){bar.innerHTML=`<span class="pill" title="金币"><img src="assets/ui/misc_0.png?v=1103a" alt="">${M.gold}</span><span class="pill" title="抽奖券"><img src="assets/ui/misc_1.png?v=1103a" alt="">${M.tickets}</span><button class="pill" data-p="dex" title="怪物图鉴"><img src="assets/ui/misc_2.png?v=1103a" alt=""><span class="lb">图鉴</span></button><button class="pill" data-p="snd" title="静音（M 键）"><img src="assets/ui/misc_${window.SFX?.muted?9:8}.png?v=1103a" alt=""></button>`;
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.p==='dex')openDex();else{dispatchEvent(new KeyboardEvent('keydown',{key:'m'}));setTimeout(drawBar,50)}})}
  drawBar();
  // ---------- 面板 ----------
@@ -95,7 +95,7 @@ export function createMeta(){
    s.animate([{transform:'translateY(0)'},{transform:`translateY(${-N*H}px)`}],{duration:durs[i],easing:'cubic-bezier(.2,.6,.3,1)',fill:'forwards'})});
   let t2=setTimeout(fin,1900);
   function fin(){if(finished)return;finished=true;clearTimeout(t2);reels.forEach(s=>{s.getAnimations().forEach(a=>a.finish())});
-   sl.querySelector('.scr').textContent=results.map(r=>r.t).join('　');window.SFX?.level();const M2=sl.querySelector('.m');[['coins',30,10],['spark',-5,5],['spark',65,0]].forEach(([n,l,t])=>{const d=document.createElement('div');d.className='fx';d.style.cssText=`left:${l}%;top:${t}%;background-image:url(assets/ui/slot_${n}.png)`;M2.append(d)});setTimeout(()=>{sl.onclick=close;addEventListener('keydown',kd,true)},250)}
+   sl.querySelector('.scr').textContent=results.map(r=>r.t).join('　');window.SFX?.level();const M2=sl.querySelector('.m');[['coins',30,10],['spark',-5,5],['spark',65,0]].forEach(([n,l,t])=>{const d=document.createElement('div');d.className='fx';d.style.cssText=`left:${l}%;top:${t}%;background-image:url(assets/ui/slot_${n}.png?v=1103a)`;M2.append(d)});setTimeout(()=>{sl.onclick=close;addEventListener('keydown',kd,true)},250)}
   function close(){sl.hidden=true;sl.onclick=null;removeEventListener('keydown',kd,true);done&&done()}
   function kd(e){if(e.key===' '||e.key==='Enter'||e.key==='Escape'){e.preventDefault();e.stopPropagation();close()}}
   const skip=e=>{if(!finished&&(e.type==='click'||e.key===' '||e.key==='Enter')){e.preventDefault();e.stopPropagation();fin()}};

@@ -40,7 +40,7 @@ const IMG={};const ld=(k,p)=>{const im=new Image();im.src=p;IMG[k]=im};
 for(const k of 'slash crack whip fistwave trap rock buck wedge orb keg jet holyorb hwall sigil bubble skull mist dcoil vortex rise'.split(' '))ld('fx_'+k,'assets/fx/skill/'+k+'.png');
 for(const k of 'golem treant wolf waterel fireel firelet hawk fairy'.split(' '))for(const f of ['idle','walk','atk'])ld(k+'_'+f,`assets/characters/summons/${k}/${f}.png`);
 for(const f of ['walk0','walk1','walk2','walk3','strike'])ld('sk_'+f,'assets/characters/enemies/skeleton/'+f+'.png');
-ld('swd','assets/ui/w_sword.png');
+ld('swd','assets/ui/w_sword.png?v=1103a');
 for(const f of ['idle','walk','walk2','atk'])ld('wolf_'+f,'assets/characters/summons/cat/'+f+'.png');   // 布偶猫用 wolf 这个卡位
 const SH={golem:104,treant:120,wolf:64,waterel:100,fireel:108,firelet:40,hawk:60,fairy:44},DH={golem:30,treant:36,wolf:16,waterel:30,fireel:32,firelet:11,hawk:15,fairy:13};   // 召唤物：站立帧原图高 → 游戏里的高
 
