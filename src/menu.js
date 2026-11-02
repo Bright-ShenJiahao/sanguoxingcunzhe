@@ -1,4 +1,4 @@
-import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC,fixDeck,DECKN,KIND} from './run.js?v=11021912';
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC,fixDeck,DECKN,KIND} from './run.js?v=11022000';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -67,7 +67,7 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 #prep .lockrow button{width:46px;padding:4px;border:1px solid #83abe333;border-radius:6px;background:#0c225a44;opacity:.45;cursor:not-allowed;color:#ccd}#prep .lockrow img{height:30px;filter:grayscale(1) brightness(.6);image-rendering:pixelated}#prep .lockrow button span{font-size:10px}
 #prep #cs button[aria-pressed=true]{background:#77a9f044;border-color:#f0dc9c;box-shadow:0 0 0 2px #e2cb8788}
 .pp-info{flex:0 0 200px;text-align:center;border:1px solid #9ebfe444;border-radius:10px;padding:14px;background:#0a183a66}
-.pp-info canvas{width:120px;height:120px;image-rendering:pixelated}.pp-info h3{margin:6px 0 10px;color:#f7d987}.pp-info p{margin:6px 0;color:#c9d8f0;font-size:13px}
+.pp-info canvas{width:120px;height:120px;image-rendering:pixelated}.pp-info h3{margin:6px 0 10px;color:#f7d987}.pp-info p{margin:6px 0;color:#c9d8f0;font-size:13px}.pp-info p.b{color:#e9dcb8;font-size:12px;line-height:1.5;text-align:left}
 .pp-soon{display:grid;place-items:center;height:280px;color:#9fb6d8;font-size:16px;letter-spacing:.15em;border:1px dashed #9ebfe455;border-radius:10px}
 .pp-stages{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px;align-content:start}
 .pp-stage{cursor:pointer;text-align:left;padding:18px;border:1px solid #8fbbef88;border-radius:10px;background:linear-gradient(160deg,#2f6d3aaa,#123222cc);color:#fff;font:inherit;min-height:110px}
@@ -107,7 +107,7 @@ export function createMenu(game){
  const prep=document.createElement('section');prep.id='prep';prep.hidden=true;prep.setAttribute('aria-label','备战');
  prep.innerHTML=`<div class="pp-box">
   <div class="pp-step" data-s="prep"><div class="pp-head"><h2>备战</h2><div class="pp-tabs" role="tablist"><button data-t="role" aria-selected="true">角色</button><button data-t="gear">技能卡</button><button data-t="rune">祝福卡</button><button data-t="up">强化</button><button data-t="shop">商店</button></div></div>
-   <div class="pp-body"><div class="pp-pane" data-t="role"><div class="pp-roles"></div><div class="pp-info"><canvas width="120" height="120"></canvas><h3></h3><p class="w"></p><p class="t"></p></div></div>
+   <div class="pp-body"><div class="pp-pane" data-t="role"><div class="pp-roles"></div><div class="pp-info"><canvas width="120" height="120"></canvas><h3></h3><p class="b"></p><p class="w"></p><p class="t"></p></div></div>
     <div class="pp-pane" data-t="gear" hidden><div class="dk dkw"></div></div><div class="pp-pane" data-t="rune" hidden><div class="dk dkr"></div></div><div class="pp-pane" data-t="up" hidden><div class="upw"></div></div>
     <div class="pp-pane" data-t="shop" hidden><div class="pp-soon">商店（抽卡）· 等武器和法术定稿后开放</div></div></div>
    <div class="pp-foot"><button class="pp-back">返回</button><button class="pp-next">下一步 →</button></div></div>
@@ -198,6 +198,6 @@ export function createMenu(game){
   preview.clearRect(0,0,200,160);preview.imageSmoothingEnabled=false;
   const scale=2.6;preview.imageSmoothingEnabled=false;if(image)preview.drawImage(image,100-size[0]*scale/2,145-size[1]*scale,size[0]*scale,size[1]*scale);
   caption.textContent=label;
-  if(!prep.hidden){info.querySelector('h3').textContent=label.split(/\s*·\s*/)[0];{const f=(document.querySelector('#cs button[aria-pressed=true]')?.dataset.c||'m')[0]==='f';info.querySelector('.w').textContent=f?'专属武器：耳机（声波圈）':'专属武器：掌机（像素光弹）';info.querySelector('.t').textContent=f?'特性：拾取范围 +25%':'特性：经验 +10%'}ipv.clearRect(0,0,120,120);ipv.imageSmoothingEnabled=false;if(image){const s2=3.4;ipv.drawImage(image,60-size[0]*s2/2,112-size[1]*s2,size[0]*s2,size[1]*s2)}}
+  if(!prep.hidden){info.querySelector('h3').textContent=label.split(/\s*·\s*/)[0];{const f=(document.querySelector('#cs button[aria-pressed=true]')?.dataset.c||'m')[0]==='f';info.querySelector('.b').textContent=f?'深夜和男友窝在沙发上打游戏，一起被吸进了翠绿之地。耳机里的歌变成了声波，每 10 秒自动切歌。':'深夜打游戏时被电视里的光吸进了翠绿之地。手里的掌机成了法器，光弹连续命中越多越强。';info.querySelector('.w').textContent=f?'专属武器：耳机 · 法术·神圣（声波圈）':'专属武器：掌机 · 法术·元素（像素光弹）';info.querySelector('.t').textContent=f?'特性：拾取范围 +25%':'特性：经验 +10%'}ipv.clearRect(0,0,120,120);ipv.imageSmoothingEnabled=false;if(image){const s2=3.4;ipv.drawImage(image,60-size[0]*s2/2,112-size[1]*s2,size[0]*s2,size[1]*s2)}}
  }};
 }
