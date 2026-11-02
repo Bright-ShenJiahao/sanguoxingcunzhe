@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11022030';
-import {createSurvival} from './survival.js?v=11022030';
-import {createEnemies} from './enemies.js?v=11022030';
-import {createAudio} from './audio.js?v=11022030';
-import {createMeta} from './meta.js?v=11022030';
+import {createMenu} from './menu.js?v=11022100';
+import {createSurvival} from './survival.js?v=11022100';
+import {createEnemies} from './enemies.js?v=11022100';
+import {createAudio} from './audio.js?v=11022100';
+import {createMeta} from './meta.js?v=11022100';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11022030';
+import {createPathing} from './pathing.js?v=11022100';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11022030';
-import {createRun} from './run.js?v=11022030';
-import {createDebug} from './debug.js?v=11022030';
+import {createWeather} from './weather.js?v=11022100';
+import {createRun} from './run.js?v=11022100';
+import {createDebug} from './debug.js?v=11022100';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -189,6 +189,6 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  fx=fx.filter(f=>now-f.t<220);for(const f of fx){const k=(now-f.t)/220;c.strokeStyle=`rgba(255,255,245,${1-k})`;c.lineWidth=1;c.beginPath();c.arc(f.x-cx+f.dx*k*10,f.y-cy-10,3+k*9,0,6.3);c.stroke()}
  window.CAM={cx,cy,SC,VW,VH};dbg?.draw?.(c,cx,cy);
  run.drawUI(c,VW,VH);
- const m=$('mm').getContext('2d'),k=84/WW;m.drawImage(mmc,0,0);m.strokeStyle='#fff';m.strokeRect(cx*k,cy*k,VW*k,VH*k);if(D.camp){const on=window.CAMPON!==false,x=D.camp.x*k,y=D.camp.y*k;m.fillStyle=on?'#ff5a3a':'#7a7f8a';m.beginPath();m.moveTo(x,y-3.5);m.lineTo(x+3,y+2.5);m.lineTo(x-3,y+2.5);m.closePath();m.fill();m.strokeStyle='#000a';m.lineWidth=.6;m.stroke()}m.fillStyle='#fff';m.fillRect(hero.x*k-1.5,hero.y*k-1.5,3,3);
+ const m=$('mm').getContext('2d'),k=84/WW;m.drawImage(mmc,0,0);m.strokeStyle='#fff';m.strokeRect(cx*k,cy*k,VW*k,VH*k);if(D.camp){const on=window.CAMPON!==false,x=D.camp.x*k,y=D.camp.y*k;m.fillStyle=on?'#ff5a3a':'#7a7f8a';m.beginPath();m.moveTo(x,y-3.5);m.lineTo(x+3,y+2.5);m.lineTo(x-3,y+2.5);m.closePath();m.fill();m.strokeStyle='#000a';m.lineWidth=.6;m.stroke()}run?.mini?.(m,k,now);m.fillStyle='#fff';m.fillRect(hero.x*k-1.5,hero.y*k-1.5,3,3);
  if($('pos'))$('pos').textContent='位置 '+Math.round(hero.x)+', '+Math.round(hero.y)+(inSh?' · 正在涉水（速度×0.55）':'')+' · 逻辑画布 480×300，输出 960×600，主角高约 25 像素';
  requestAnimationFrame(loop)}
