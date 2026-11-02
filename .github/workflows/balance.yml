@@ -29,10 +29,10 @@ jobs:
       - run: nohup python3 -m http.server 8765 >/dev/null 2>&1 &
       - name: 单卡
         if: ${{ (inputs.solo_reps || '4') != '0' }}
-        env: { MAXT: '${{ inputs.maxt || '1200' }}', PAGES: '2' }
+        env: { MAXT: "${{ inputs.maxt || '1200' }}", PAGES: '2' }
         run: node tools/balance.js solo ${{ matrix.part }} 16 ${{ inputs.solo_reps || '4' }} solo-${{ matrix.part }}.json
       - name: 随机搭配
-        env: { MAXT: '${{ inputs.maxt || '1200' }}', PAGES: '2' }
+        env: { MAXT: "${{ inputs.maxt || '1200' }}", PAGES: '2' }
         run: node tools/balance.js mix ${{ matrix.part }} 16 ${{ inputs.mix_per_job || '24' }} mix-${{ matrix.part }}.json
       - uses: actions/upload-artifact@v4
         if: always()
