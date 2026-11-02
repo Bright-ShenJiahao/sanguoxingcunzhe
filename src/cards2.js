@@ -54,7 +54,7 @@ export function install(X){
  const near=(x,y,r)=>en.filter(e=>alive(e)&&(e.x-x)**2+((e.y-y)*1.2)**2<r*r);
  const hit=(src,e,v,dir,o={})=>{if(!alive(e))return;const s=X.S,ps=s.src,pm=s.isSum;s.src=src;s.isSum=!!o.sum;strike(e,v,dir||Math.sign(e.x-hero.x)||1,o.crit,o.mel);s.src=ps;s.isSum=pm};
  const lineHit=(src,x,y,a,len,w,v,f)=>{const c=Math.cos(a),s_=Math.sin(a);for(const e of en){if(!alive(e))continue;const dx=e.x-x,dy=e.y-6-y,al=dx*c+dy*s_,sd=Math.abs(-dx*s_+dy*c);if(al>-4&&al<len&&sd<w+3*(e.sc||1)){hit(src,e,v,Math.sign(c)||1,{mel:true});f?.(e)}}};
- const fx=(o)=>st().F.push(Object.assign({t:0},o));
+ const fx=(o)=>{const F=st().F;if(F.length>160)F.shift();F.push(Object.assign({t:0},o))};
  const sumN=()=>st().M.length;
  const moveDir=()=>{const l=Math.hypot(hero.mx||0,hero.my||0);return l>.1?[hero.mx/l,hero.my/l]:[hero.face||1,0]};
  const tgtSum=(from,r)=>{let b=null,bd=r*r;for(const e of en){if(!alive(e))continue;const d=d2(e,from)*(e.markT>0?.3:1);if(d<bd){bd=d;b=e}}return b};   // 召唤物：优先猎印目标
