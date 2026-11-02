@@ -67,8 +67,8 @@ export function install(X){
  function sprites(items,cx,cy,c,now){if(!L)return;const VW_=(window.CAM?.VW||640),VH_=(window.CAM?.VH||400),S_=X.S;
   const dimg=(k,x,y,fl)=>{const I=IM['f_'+k];if(!I?.complete||!I.width)return;const h=FH[k],w=I.width*h/I.height;c.save();c.translate(x,y);if(fl)c.scale(-1,1);c.drawImage(I,-w/2,-h+2,w,h);c.restore()};
   for(const d of DEC){const x=d[1]-cx,y=d[2]-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+70)continue;items.push({y:d[2],f:()=>{dimg(d[0],x,y,d[3]&&d[1]>380);if(d[0]==='brazier'){c.save();c.globalAlpha=.25+.1*Math.sin(now/120);c.fillStyle='#ffb040';c.beginPath();c.arc(x,y-20,9,0,6.3);c.fill();c.restore()}}})}
-  for(const [[x0,y0],[x1,y1]] of SPK){const L=Math.hypot(x1-x0,y1-y0),n=Math.max(1,Math.round(L/16)),fl=(x0+x1)/2<250;
-   for(let i=0;i<n;i++){const t=(i+.5)/n,X0=x0+(x1-x0)*t,Y0=y0+(y1-y0)*t,x=X0-cx,y=Y0-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+60)continue;items.push({y:Y0,f:()=>dimg('spikes',x,y+4,fl)})}}
+  for(const [[x0,y0],[x1,y1]] of SPK){const L=Math.hypot(x1-x0,y1-y0),n=2,fl=(x0+x1)/2<250;
+   for(let i=0;i<n;i++){const t=i,X0=x0+(x1-x0)*t,Y0=y0+(y1-y0)*t,x=X0-cx,y=Y0-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+60)continue;items.push({y:Y0,f:()=>dimg('spikes',x,y+4,fl)})}}
   if(S_?.tw)for(const T of S_.tw){if(T.dead)continue;const x=T.x-cx,y=T.y-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+80)continue;const e=T.e;items.push({y:T.y,f:()=>{c.save();if(e?.flash>0)c.filter='brightness(1.8)';dimg('tower',x,y);c.restore();
     if(e&&!e.dead&&e.hp<e.hpMax){c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x-12,y-60,24,3);c.fillStyle='#ff6a4a';c.fillRect(x-12,y-60,24*e.hp/e.hpMax,3)}}})}
   if(S_?.arrows)for(const A of S_.arrows){const x=A.x-cx,y=A.y-cy;items.push({y:A.y+40,f:()=>{c.save();c.translate(x,y);c.rotate(Math.atan2(A.dy,A.dx));c.fillStyle='#e8dcc0';c.fillRect(-6,-.6,9,1.2);c.fillStyle='#9a9a9a';c.fillRect(3,-1,2.5,2);c.restore()}})}
