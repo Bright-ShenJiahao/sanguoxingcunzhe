@@ -3,7 +3,7 @@
 const T=(k,n,dt,cat,desc)=>[k,{name:n,cat,img:null,dt,desc}];
 export const DEFS=Object.fromEntries([
  T('greatsword','双手大剑','mel','blade',['往前方直线重劈，伤害高、能破盾（打盾卫、圣骑士 +50%）','伤害提升','劈得更远，间隔缩短','伤害提升','【进阶】重劈后地面延迟裂斩，再追一次伤害']),
- T('rapier','疾风突刺剑','mel','blade',['每隔几秒往移动方向冲刺，穿过一排怪','伤害提升','冲得更远，间隔缩短','伤害提升','【进阶】冲刺路径留下残影，稍后沿原路再刺一次']),
+ T('rapier','疾风突刺剑','mel','blade',['每隔几秒往移动方向刺出一道突刺剑气，穿过一排怪','伤害提升','剑气更长，间隔缩短','伤害提升','【进阶】剑气路径留下残影，稍后沿原路再刺一次']),
  T('gsword','守护飞剑','mel','blade',['2 把剑绕身旋转，碰到的怪受伤并被弹开','3 把剑','转得更快，伤害提升','4 把剑','【进阶】飞剑周期性向外飞出，再回旋归位']),
  T('whip','长鞭','mel','blade',['朝一侧横抽一条长线','伤害提升','鞭子更长，间隔缩短','两侧都抽','【进阶】鞭梢回抽，沿原路再打一次']),
  T('fist','震波拳','mel','blade',['朝最近的怪打出扇形拳风，减速','伤害提升','拳风更大，间隔缩短','减速更久','【进阶】拳风向两侧展开，扫出一圈减速带']),
@@ -65,12 +65,10 @@ export function install(X){
    fx({k:'img',im:'fx_crack',x:hero.x+Math.cos(a)*len/2,y:hero.y+Math.sin(a)*len/2-4,a:a+Math.PI/4,w:len*.9,d:.35});
    if(l>=5){const x=hero.x,y=hero.y;X.ST(()=>{lineHit('greatsword',x,y,a,len,12,v*.6);fx({k:'img',im:'fx_crack',x:x+Math.cos(a)*len/2,y:y+Math.sin(a)*len/2-4,a:a+Math.PI/4,w:len*.9,d:.35})},400)}
    return l>=3?1.6:2.1},
-  rapier(L){const l=LV(L),[mx,my]=moveDir(),len=(l>=3?75:60)*AR(),v=dmg(1.8+.5*(l-1)+(l>=4?.6:0)),x0=hero.x,y0=hero.y,a=Math.atan2(my,mx);
-   let moved=0;for(let i=1;i<=10;i++){const nx=x0+mx*len*i/10,ny=y0+my*len*i/10;if(!ok(nx,ny))break;moved=len*i/10}
-   if(moved>0){hero.x=x0+mx*moved;hero.y=y0+my*moved}
-   lineHit('rapier',x0,y0+6,a,Math.max(moved,40),10,v);window.SFX?.slash();fx({k:'streak',x0,y0,x1:x0+mx*Math.max(moved,40),y1:y0+my*Math.max(moved,40),d:.3,c:'190,235,255'});
-   if(l>=5)X.ST(()=>{lineHit('rapier',x0,y0+6,a,Math.max(moved,40),10,v*.7);fx({k:'streak',x0,y0,x1:x0+mx*Math.max(moved,40),y1:y0+my*Math.max(moved,40),d:.3,c:'160,140,255'})},500);
-   return l>=3?1.8:2.4},
+  rapier(L){const l=LV(L),[mx,my]=moveDir(),len=(l>=3?95:78)*AR(),v=dmg(1.8+.5*(l-1)+(l>=4?.6:0)),x0=hero.x,y0=hero.y,a=Math.atan2(my,mx);   // 人不动，往移动方向刺出剑气
+   lineHit('rapier',x0,y0+6,a,len,10,v);window.SFX?.slash();fx({k:'streak',x0,y0,x1:x0+mx*len,y1:y0+my*len,d:.3,c:'190,235,255'});
+   if(l>=5)X.ST(()=>{lineHit('rapier',x0,y0+6,a,len,10,v*.7);fx({k:'streak',x0,y0,x1:x0+mx*len,y1:y0+my*len,d:.3,c:'160,140,255'})},500);
+   return l>=3?1.5:2},
   gsword(){return 9},orb(){return 9},hshield(){return 9},bmist(){return 9},flamestep(){return 9},
   wolf(){return 9},hawk(){return 9},
   treant(L){const l=LV(L);let best=null,bn=0;for(const e of en){if(!alive(e))continue;const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d>(l>=3?250:210)||d<40)continue;const k=near(e.x,e.y,40).length+d/100;if(k>bn){bn=k;best=e}}if(!best)return .5;
