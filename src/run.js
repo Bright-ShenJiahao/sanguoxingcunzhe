@@ -1,4 +1,4 @@
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11021840';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11021900';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -14,10 +14,10 @@ const PASSIVES={
  hp:{name:'活力',desc:'生命上限 +20，并回复 20',max:5},
  spd:{name:'迅捷',desc:'移动速度 +8%',max:5},
  cd:{name:'急速',desc:'攻击间隔 −6%',max:5},area:{name:'扩展',desc:'攻击范围 +10%',max:5},amt:{name:'多重',desc:'投射物 +1',max:2},
- regen:{name:'再生',desc:'每秒回复 0.3 生命',max:5},armor:{name:'护甲',desc:'每次受伤少扣 1 点（至少扣 1）',max:5},luck:{name:'幸运',desc:'宝箱更丰厚，金币、磁铁掉落更多',max:5},crit:{name:'暴击',desc:'暴击率 +5%',max:5},critd:{name:'暴击伤害',desc:'暴击倍率 +0.2（基础 ×2）',max:5},
+ regen:{name:'再生',desc:'每秒回复 0.15 生命',max:5},armor:{name:'护甲',desc:'每次受伤少扣 1 点（至少扣 1）',max:5},luck:{name:'幸运',desc:'宝箱更丰厚，金币、磁铁掉落更多',max:5},crit:{name:'暴击',desc:'暴击率 +5%',max:5},critd:{name:'暴击伤害',desc:'暴击倍率 +0.2（基础 ×2）',max:5},
  wis:{name:'智慧',desc:'经验获取 +8%',max:5},dur:{name:'恒久',desc:'减速等效果持续 +15%',max:5},pspd:{name:'疾矢',desc:'投射物速度、射程 +15%',max:5},
- vamp:{name:'吸血',desc:'近战伤害的 2% 转为生命',max:5},greed:{name:'贪婪',desc:'金币 +10%',max:5},curse:{name:'诅咒',desc:'敌人数量、血量 +10%，经验 +10%',max:5},
- dodge:{name:'闪避',desc:'5% 概率完全躲开一次伤害',max:5},tough:{name:'坚韧',desc:'受伤后获得 0.1 秒无敌（每级 +0.1 秒）',max:3},svamp:{name:'法术吸血',desc:'法术伤害的 1.5% 转为生命',max:5},rev:{name:'复苏',desc:'本局死亡时复活一次（回复一半生命）',max:1},
+ vamp:{name:'吸血',desc:'近战伤害的 1% 转为生命',max:5},greed:{name:'贪婪',desc:'金币 +10%',max:5},curse:{name:'诅咒',desc:'敌人数量、血量 +10%，经验 +10%',max:5},
+ dodge:{name:'闪避',desc:'5% 概率完全躲开一次伤害',max:5},tough:{name:'坚韧',desc:'受伤后获得 0.1 秒无敌（每级 +0.1 秒）',max:3},svamp:{name:'法术吸血',desc:'法术伤害的 0.8% 转为生命',max:5},rev:{name:'复苏',desc:'本局死亡时复活一次（回复一半生命）',max:1},
  berserk:{name:'狂暴',desc:'生命越低伤害越高，每级最多 +8%',max:5},exec:{name:'处决',desc:'小怪血量低于 2% 时直接击杀（每级 +2%）',max:5},hunt:{name:'猎王',desc:'对精英和 Boss 伤害 +5%',max:3},
  knock:{name:'击退',desc:'攻击击退距离 +25%',max:3},boom:{name:'连锁爆破',desc:'击杀时 4% 概率小范围爆炸',max:5},mag:{name:'磁力',desc:'拾取范围 +25%',max:5},gamble:{name:'豪赌',desc:'伤害在 70%～130% 之间浮动，每级上限再 +10%',max:3}};
 export {WEAPONS,PASSIVES,WIC,PIC};
@@ -133,14 +133,14 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  function burn(e,dm){if(e.drum||e.totem)return;e.burnT=2;e.burnDm=Math.max(e.burnDm&&e.burnT>0?e.burnDm:0,dm)}
  function tribe(dt){const L=[];
   for(const e of en){if(e.rtT>0)e.rtT-=dt;if(e.dead||e.drum||e.totem)continue;if(e.burnT>0){e.burnT-=dt;e.noRegT=Math.max(e.noRegT||0,.2);e.bt=(e.bt||0)+dt;if(e.bt>=.5){e.bt=0;const o=S.src;S.src='fireball';strike(e,e.burnDm,1,true);S.src=o;if(e.dead)continue}}if(e.k==='gob_troll'){if(e.noRegT>0)e.noRegT-=dt;else e.hp=Math.min(e.hpMax,e.hp+e.hpMax*.02*dt);if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);continue}
-   e.age=(e.age||0)+dt;if(!e.vet&&!e.sweep&&!e.guard&&e.age>60&&e.k!=='gob_kid'&&e.k!=='skeleton'){e.vet=1;e.hp*=2;e.hpMax*=2;e.sc=(e.sc||1)*1.2;e.dmgMul=(e.dmgMul||1)*1.3}}
+   e.age=(e.age||0)+dt;if(!e.vet&&!e.sweep&&!e.guard&&e.age>60&&e.k!=='gob_kid'&&e.k!=='skeleton'){e.vet=1;e.hp*=1.5;e.hpMax*=1.5;e.sc=(e.sc||1)*1.1;e.dmgMul=(e.dmgMul||1)*1.15}}
   if(L.length){for(const l of L)l.fol=0;for(const e of en){if(e.dead||e.boss||e.elite||e.sweep)continue;for(const l of L){if(l.fol<10&&(e.x-l.x)**2+(e.y-l.y)**2<90*90){l.fol++;e.buffT=Math.max(e.buffT||0,.3);break}}}}}
  function leaderDown(l){for(const e of en)if(!e.dead&&!e.boss&&!e.elite&&!e.drum&&(e.x-l.x)**2+(e.y-l.y)**2<130*130)e.fearT=2}
  // ---------- 补给箱：打碎掉烤肉/金币袋/磁石/圣水 ----------
  function crates(dt){S.crT=(S.crT??8)-dt;if(S.crT>0)return;S.crT=18;let n=0;for(const e of en)if(e.crate&&!e.dead)n++;if(n>=9)return;
   for(let i=0;i<10;i++){const a=Math.random()*6.28,r=R(260,520),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r*.8;if(!ok(x,y))continue;const m=makeEnemy(x,y,'goblin');if(!m)return;Object.assign(m,{ct:['barrel','pot','box'][Math.floor(Math.random()*3)],crate:true,drum:true,armor:0,res:'',sc:1,name:'补给箱'});m.hp=m.hpMax=1;en.push(m);return}}
  function crateDrop(e){(S.debris=S.debris||[]).push({x:e.x,y:e.y-6,k:e.ct,t:1.2});const r=Math.random();
-  if(r<.6)(S.meats=S.meats||[]).push({x:e.x,y:e.y-3});
+  if(r<.35)(S.meats=S.meats||[]).push({x:e.x,y:e.y-3});
   else if(r<.82)S.coins.push({x:e.x,y:e.y-3,v:6,bag:1});
   else if(r<.95)(S.mags=S.mags||[]).push({x:e.x,y:e.y-3});
   else (S.holy=S.holy||[]).push({x:e.x,y:e.y-3})}
@@ -187,7 +187,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   skeleton:{rng:.7,holy:1.5,dark:.5},gob_necro:{rng:.7,holy:1.5,dark:.5},gob_giant:{mel:.8,rng:.8},gob_paladin:{holy:.5,dark:1.5},gob_hero:{rng:.5},gob_troll:{mel:.3,rng:.3}};
  Object.assign(DT,CARD_DT);
  for(const k in RT)for(const t in RT[k])RT[k][t]=Math.min(1.5,Math.max(k==='gob_troll'?.4:.6,RT[k][t]));   // 抗性：最低 60%（巨魔 40%），克制最高 1.5 倍
- function strike(e,v,dir,crit,mel){v*=C2.mul(e);const dt_=DT[S.src]||'rng',rt=e.drum?null:RT[e.k],rm=(e.k==='gob_troll'&&e.brkT>0&&(dt_==='mel'||dt_==='rng'))?1:(rt?.[dt_]??1),arm=rm<1;v*=rm;if(S.src==='fireball')e.noRegT=4;if(dt_==='holy'&&e.bshield){e.bshield=0;e.brkT=6;S.texts.push({x:e.x,y:e.y-50,v:'血盾破碎！',t:1.2,c:'#ffe27a',big:1})}if(rm!==1&&!(e.rtT>0)){e.rtT=1.2;S.texts.push({x:e.x,y:e.y-28*(e.sc||1),v:rm<1?'抵抗':'克制！',t:.8,c:rm<1?'#9aa3ad':'#ff9a3c',big:rm>1})}if(mel&&S.p.vamp){S.vh=(S.vh||0)+v*.02*S.p.vamp;if(S.vh>=1){survival?.heal?.(Math.floor(S.vh));S.vh%=1}}window.SFX?.hit();if(e.elite||e.boss)v*=1+.05*S.p.hunt;if(!crit&&Math.random()<.05*S.p.crit+S.B.crit){v*=2+.2*S.p.critd;crit=true}if(S.p.gamble)v*=.7+Math.random()*(.6+.1*S.p.gamble);if(S.p.svamp&&(dt_==='ele'||dt_==='holy'||dt_==='dark')){S.sv=(S.sv||0)+v*.015*S.p.svamp;if(S.sv>=1){survival?.heal?.(Math.floor(S.sv));S.sv%=1}}window.KB=1+.25*S.p.knock;hitEnemy(e,v,dir);if(S.p.exec&&!e.dead&&!e.boss&&!e.elite&&!e.drum&&e.hp>0&&e.hp<e.hpMax*.02*S.p.exec)hitEnemy(e,e.hp+1,dir);S.texts.push({x:e.x+R(-3,3),y:e.y-18*(e.sc||1),v:(Math.round(v*10)/10)+'',t:.55,c:arm?'#8f98a3':crit?'#ffd166':'#ffffff',big:crit&&!arm})}
+ function strike(e,v,dir,crit,mel){v*=C2.mul(e);const dt_=DT[S.src]||'rng',rt=e.drum?null:RT[e.k],rm=(e.k==='gob_troll'&&e.brkT>0&&(dt_==='mel'||dt_==='rng'))?1:(rt?.[dt_]??1),arm=rm<1;v*=rm;if(S.src==='fireball')e.noRegT=4;if(dt_==='holy'&&e.bshield){e.bshield=0;e.brkT=6;S.texts.push({x:e.x,y:e.y-50,v:'血盾破碎！',t:1.2,c:'#ffe27a',big:1})}if(rm!==1&&!(e.rtT>0)){e.rtT=1.2;S.texts.push({x:e.x,y:e.y-28*(e.sc||1),v:rm<1?'抵抗':'克制！',t:.8,c:rm<1?'#9aa3ad':'#ff9a3c',big:rm>1})}if(mel&&S.p.vamp){S.vh=(S.vh||0)+v*.01*S.p.vamp;if(S.vh>=1){survival?.heal?.(Math.floor(S.vh));S.vh%=1}}window.SFX?.hit();if(e.elite||e.boss)v*=1+.05*S.p.hunt;if(!crit&&Math.random()<.05*S.p.crit+S.B.crit){v*=2+.2*S.p.critd;crit=true}if(S.p.gamble)v*=.7+Math.random()*(.6+.1*S.p.gamble);if(S.p.svamp&&(dt_==='ele'||dt_==='holy'||dt_==='dark')){S.sv=(S.sv||0)+v*.008*S.p.svamp;if(S.sv>=1){survival?.heal?.(Math.floor(S.sv));S.sv%=1}}window.KB=1+.25*S.p.knock;hitEnemy(e,v,dir);if(S.p.exec&&!e.dead&&!e.boss&&!e.elite&&!e.drum&&e.hp>0&&e.hp<e.hpMax*.02*S.p.exec)hitEnemy(e,e.hp+1,dir);S.texts.push({x:e.x+R(-3,3),y:e.y-18*(e.sc||1),v:(Math.round(v*10)/10)+'',t:.55,c:arm?'#8f98a3':crit?'#ffd166':'#ffffff',big:crit&&!arm})}
  function knock(e,k){if(e.drum)return;if(e.boss)k*=.15;if(e.armor)k*=.2;const dx=e.x-hero.x,dy=e.y-hero.y,l=Math.hypot(dx,dy)||1,nx=e.x+dx/l*k,ny=e.y+dy/l*k;if(ok(nx,ny)){e.x=nx;e.y=ny}}
  // ---------- 武器 ----------
  const FIRE={
@@ -315,7 +315,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0){S.src=k;S.cd[k]=FIRE[k](OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd)}}
   C2.update(dt);
   if(S.comboT>0){S.comboT-=dt;if(S.comboT<=0&&!(S.ocT>0))S.combo=0}if(S.ocT>0)S.ocT-=dt;if(S.ocCd>0)S.ocCd-=dt;
-  if(S.p.regen||S.B.reg){S.rg=(S.rg||0)+dt*(.3*S.p.regen+S.B.reg);if(S.rg>=1){survival?.heal?.(Math.floor(S.rg));S.rg%=1}}
+  if(S.p.regen||S.B.reg){S.rg=(S.rg||0)+dt*(.15*S.p.regen+S.B.reg);if(S.rg>=1){survival?.heal?.(Math.floor(S.rg));S.rg%=1}}
   for(const z of S.zones||[]){z.t+=dt;z.tick-=dt;if(z.tick<=0){z.tick=z.every;const zx=z.follow?hero.x:z.x,zy=z.follow?hero.y:z.y;const o=S.src;if(z.src)S.src=z.src;for(const e of en)if(!e.dead&&(e.x-zx)**2+((e.y-zy)*1.25)**2<z.r*z.r){strike(e,z.dm,Math.sign(e.x-zx)||1);if(z.k==='fire')burn(e,z.dm)}S.src=o}}
   S.zones=(S.zones||[]).filter(z=>z.t<z.d);
   for(const s of S.shots){S.src=s.src;
@@ -342,7 +342,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   S.chests=S.chests.filter(c=>!c.got);
   for(const m of S.mags||[])if((hero.x-m.x)**2+(hero.y-m.y)**2<12*12){m.got=true;for(const g of S.gems)g.fly=true;window.SFX?.level()}
   S.mags=(S.mags||[]).filter(m=>!m.got);
-  for(const m of S.meats||[])if((hero.x-m.x)**2+(hero.y-m.y)**2<12*12){m.got=true;survival?.heal?.(30);S.texts.push({x:hero.x,y:hero.y-30,v:'+30',t:.8,c:'#7dff9a'});window.SFX?.level()}
+  for(const m of S.meats||[])if((hero.x-m.x)**2+(hero.y-m.y)**2<12*12){m.got=true;survival?.heal?.(20);S.texts.push({x:hero.x,y:hero.y-30,v:'+20',t:.8,c:'#7dff9a'});window.SFX?.level()}
   S.meats=(S.meats||[]).filter(m=>!m.got);
   for(const m of S.holy||[])if((hero.x-m.x)**2+(hero.y-m.y)**2<12*12){m.got=true;S.fx.push({k:'ring',x:hero.x,y:hero.y,t:0,r:140});for(const e of en)if(!e.dead&&!e.boss&&!e.drum&&(e.x-hero.x)**2+((e.y-hero.y)*1.2)**2<140*140)hitEnemy(e,e.hp+1,1);S.banner={v:'圣水！净化周围',t:1.5}}
   S.holy=(S.holy||[]).filter(m=>!m.got);
