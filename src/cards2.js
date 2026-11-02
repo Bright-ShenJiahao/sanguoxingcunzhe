@@ -82,8 +82,8 @@ export function install(X){
   undead(L){const l=LV(L),n=l>=5?3:l>=4?2:1,v=dmg(.7+.2*(l-1)),d=l>=3?2.8:2;const c=en.filter(e=>alive(e)&&!e.boss&&!(e.boneT>0)&&Math.hypot(e.x-hero.x,e.y-hero.y)<200).sort((a,b)=>d2(a,hero)-d2(b,hero));if(!c.length)return .5;
    for(let i=0;i<Math.min(n,c.length);i++){const e=c[i];e.boneT=d;st().Z.push({k:'bone',e,x:e.x,y:e.y,t:0,d,v,tick:0,src:'undead'})}return l>=4?2.2:3},
   whip(L){const l=LV(L),side=FN()===0?1:-1,len=(l>=3?130:110)*AR(),v=dmg(1.6+.45*(l-1)),sides=l>=4?[side,-side]:[side];window.SFX?.slash();
-   for(const sd of sides){const a=sd>0?0:Math.PI;lineHit('whip',hero.x,hero.y,a,len,9,v);fx({k:'img',im:'fx_whip',x:hero.x+sd*len/2,y:hero.y-8,a:0,flip:sd<0,w:len,d:.25});
-    if(l>=5)X.ST(()=>{lineHit('whip',hero.x,hero.y,a,len,9,v*.7);fx({k:'img',im:'fx_whip',x:hero.x+sd*len/2,y:hero.y-6,a:0,flip:sd>0,w:len,d:.2})},220)}
+   for(const sd of sides){const a=sd>0?0:Math.PI;lineHit('whip',hero.x,hero.y,a,len,9,v);fx({k:'streak',x0:hero.x,y0:hero.y,x1:hero.x+sd*len,y1:hero.y+4,d:.22,c:'255,230,170'});
+    if(l>=5)X.ST(()=>{lineHit('whip',hero.x,hero.y,a,len,9,v*.7);fx({k:'streak',x0:hero.x+sd*len,y0:hero.y+4,x1:hero.x,y1:hero.y,d:.2,c:'255,200,120'})},220)}
    return l>=3?.95:1.25},
   fist(L){const l=LV(L),a=AIM(120),r=(l>=3?72:60)*AR(),v=dmg(1.7+.4*(l-1)),sl=(l>=4?2:1.3)*DUR();
    const go=(ang,half)=>{for(const e of near(hero.x,hero.y,r+6)){let d=Math.atan2((e.y-hero.y)*1.15,e.x-hero.x)-ang;d=Math.atan2(Math.sin(d),Math.cos(d));if(Math.abs(d)<=half){hit('fist',e,v,Math.sign(Math.cos(ang))||1,{mel:true});e.slowT=Math.max(e.slowT||0,e.boss?sl*.3:sl);knock(e,5)}}};

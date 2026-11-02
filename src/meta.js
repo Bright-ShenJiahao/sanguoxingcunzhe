@@ -57,12 +57,12 @@ export function createMeta(){
 #slot .strip{position:absolute;left:0;right:0;top:0}
 #slot .cell{height:var(--h);box-sizing:border-box;padding:12% 16% 10%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#3a2410;font-size:12px;font-weight:700;text-align:center;line-height:1.2}
 #slot .cell .g{font-size:30px;line-height:36px}#slot .cell img{height:44%;max-width:64%;object-fit:contain;margin-bottom:2px;image-rendering:pixelated}
-#slot .scr{position:absolute;left:0;right:0;bottom:-24%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_bar.png?v=1103a) center/100% 100% no-repeat;color:#ffe9a8;font-size:15px;text-shadow:0 2px 0 #000;padding:0 8%}
+#slot .scr{position:absolute;left:0;right:0;bottom:-24%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_bar.png?v=1103a) center/100% 100% no-repeat;color:#ffe9a8;font-size:15px;text-shadow:0 2px 0 #000;padding:0 8%}#slot .scr.many{height:auto;min-height:19%;bottom:auto;top:104%;flex-wrap:wrap;gap:2px 12px;font-size:13px;line-height:1.35;padding:6px 9%}#slot .scr span{white-space:nowrap}
 #slot .lever{position:absolute;right:-15%;top:12%;width:13%;height:62%;background:url(assets/ui/slot_lever_up.png?v=1103a) center/contain no-repeat}
 #slot .lever.dn{background-image:url(assets/ui/slot_lever_dn.png?v=1103a);top:30%}
 #slot .fx{position:absolute;pointer-events:none;width:32%;aspect-ratio:1;background:center/contain no-repeat;animation:sfx 1s ease-out forwards}
 @keyframes sfx{0%{opacity:0;transform:scale(.4) translateY(20px)}30%{opacity:1}100%{opacity:0;transform:scale(1.2) translateY(-30px)}}
-#slot .tip{position:absolute;left:0;right:0;bottom:-36%;color:#ffe9b0;text-align:center;font-size:12px}`;
+#slot .tip{position:absolute;left:0;right:0;bottom:-48%;color:#ffe9b0;text-align:center;font-size:12px}`;
  document.head.append(st);
  // ---------- 顶部状态栏 ----------
  const bar=document.createElement('div');bar.id='mbar';document.body.append(bar);
@@ -95,7 +95,7 @@ export function createMeta(){
    s.animate([{transform:'translateY(0)'},{transform:`translateY(${-N*H}px)`}],{duration:durs[i],easing:'cubic-bezier(.2,.6,.3,1)',fill:'forwards'})});
   let t2=setTimeout(fin,1900);
   function fin(){if(finished)return;finished=true;clearTimeout(t2);reels.forEach(s=>{s.getAnimations().forEach(a=>a.finish())});
-   sl.querySelector('.scr').textContent=results.map(r=>r.t).join('　');window.SFX?.level();const M2=sl.querySelector('.m');[['coins',30,10],['spark',-5,5],['spark',65,0]].forEach(([n,l,t])=>{const d=document.createElement('div');d.className='fx';d.style.cssText=`left:${l}%;top:${t}%;background-image:url(assets/ui/slot_${n}.png?v=1103a)`;M2.append(d)});setTimeout(()=>{sl.onclick=close;addEventListener('keydown',kd,true)},250)}
+   {const sc=sl.querySelector('.scr');sc.classList.toggle('many',results.length>1);sc.innerHTML=results.map(r=>`<span>${r.t}</span>`).join('')}window.SFX?.level();const M2=sl.querySelector('.m');[['coins',30,10],['spark',-5,5],['spark',65,0]].forEach(([n,l,t])=>{const d=document.createElement('div');d.className='fx';d.style.cssText=`left:${l}%;top:${t}%;background-image:url(assets/ui/slot_${n}.png?v=1103a)`;M2.append(d)});setTimeout(()=>{sl.onclick=close;addEventListener('keydown',kd,true)},250)}
   function close(){sl.hidden=true;sl.onclick=null;removeEventListener('keydown',kd,true);done&&done()}
   function kd(e){if(e.key===' '||e.key==='Enter'||e.key==='Escape'){e.preventDefault();e.stopPropagation();close()}}
   const skip=e=>{if(!finished&&(e.type==='click'||e.key===' '||e.key==='Enter')){e.preventDefault();e.stopPropagation();fin()}};
