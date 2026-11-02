@@ -1,4 +1,4 @@
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11022000';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11022030';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -162,7 +162,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   for(let i=0;i<3;i++){const a=i/3*6.283+R(0,1),x=C.x+Math.cos(a)*(C.rx+60),y=C.y+Math.sin(a)*(C.ry+50);if(!ok(x,y))continue;const m=makeEnemy(x,y,'goblin');if(!m)continue;onSpawnBase(m);m.elite=true;m.armor=0;m.res='';m.k=ek[Math.floor(Math.random()*ek.length)];m.hp=m.hpMax=Math.ceil(15*(1+S.t/100));m.sc=1.1;if(m.k==='gob_shaman')m.summonT=4;en.push(m)}
   for(let i=0;i<16;i++){const a=i/16*6.283,x=C.x+Math.cos(a)*(C.rx+40),y=C.y+Math.sin(a)*(C.ry+35);if(ok(x,y)){const m=makeEnemy(x,y,'goblin');if(m){onSpawnBase(m);en.push(m)}}}}
  function onSpawnBase(e){const m=S.t/40;   // 一局 20 分钟：强度按 30 分钟曲线压缩
- e.hp=e.hpMax=Math.ceil(e.hp*(m<10?1+m/2.5:5+(m-10)*.7)*(1+.1*S.p.curse));e.dmgMul=Math.min(3,.6+m*.12);e.sc=e.sc0||1;e.res=RES[e.k]||'';e.armor=e.res==='iron'?1:0}
+ e.hp=e.hpMax=Math.ceil(e.hp*(m<10?1+m/2:6+(m-10)*.9)*(1+.1*S.p.curse));e.dmgMul=Math.min(3,.6+m*.12);e.sc=e.sc0||1;e.res=RES[e.k]||'';e.armor=e.res==='iron'?1:0}
  function onSpawn(e){
   onSpawnBase(e);S.pend=Math.max(0,(S.pend||0)-1);
   const BS=[[300,'哥布林大王',80,1.25,'gob_king'],[600,'哥布林酋长',200,1.3,'gob_chief'],[900,'哥布林圣骑士',160,1,'gob_paladin'],[1200,'哥布林皇帝',600,1.8,'gob_king']];   // 一局 20 分钟
@@ -170,7 +170,8 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   else if(S.t>=S.eliteT){S.eliteT=S.t+R(40,60);e.elite=true;e.armor=0;e.res='';const ek=S.t>=600?['gob_shaman','gob_drum','gob_necro']:S.t>=420?['gob_shaman','gob_drum']:['gob_shaman'];e.k=ek[Math.floor(Math.random()*ek.length)];e.hp=e.hpMax=Math.ceil((e.k==='gob_shaman'?10:12)*(1+S.t/100));e.sc=1.1;if(e.k==='gob_shaman')e.summonT=4;if(NEWK[e.k]&&!S.seen[e.k]){S.seen[e.k]=1;S.banner={v:NEWK[e.k],t:3}}}
  }
  const ST=(f,t)=>{const k=S.src;return setTimeout(()=>{const o=S.src;S.src=k;f();S.src=o},t)};
- function dmg(base){const ph=PHYS.has(S.src)||DT[S.src]==='mel'||DT[S.src]==='rng',hpf=survival?survival.hp/Math.max(1,survival.max):1;return base*(1+(ph?0.1*S.p.atk+S.B.atk:0.1*S.p.arc+(S.B.arc||0)))*(1+.08*S.p.berserk*(1-hpf))}
+ function dmg(base){base*=1.5;   // 武器伤害整体 ×1.5：开局小怪一下死（参考吸血鬼：鞭子 10 / 蝙蝠 1 血）
+ const ph=PHYS.has(S.src)||DT[S.src]==='mel'||DT[S.src]==='rng',hpf=survival?survival.hp/Math.max(1,survival.max):1;return base*(1+(ph?0.1*S.p.atk+S.B.atk:0.1*S.p.arc+(S.B.arc||0)))*(1+.08*S.p.berserk*(1-hpf))}
  const AR=()=>1+.1*S.p.area+(S.B.area||0),AMT=()=>S.p.amt+(S.B.amt||0),FA=()=>hero.face>0?0:Math.PI,MA=()=>Math.atan2(hero.my||0,hero.mx||hero.face),FN=()=>{const t=nearest(260);return t?(t.x>=hero.x?0:Math.PI):FA()},AIM=(r=260)=>{const t=nearest(r);return t?Math.atan2(t.y-10-hero.y+10,t.x-hero.x):MA()},PS=()=>1+.15*S.p.pspd+(S.B.pspd||0),DUR=()=>1+.15*S.p.dur+(S.B.dur||0);
  function cluster(){let b=null,bn=-1;const v=en.filter(e=>!e.dead&&Math.abs(e.x-hero.x)<230&&Math.abs(e.y-hero.y)<160);for(let i=0;i<Math.min(24,v.length);i++){const e=v[Math.floor(Math.random()*v.length)];let n=0;for(const o of v)if((o.x-e.x)**2+(o.y-e.y)**2<40*40)n++;if(n>bn){bn=n;b=e}}return b}
  function nearest(r,from=hero){let b=null,bd=r*r;for(const e of en){if(e.dead)continue;const d=(e.x-from.x)**2+(e.y-from.y)**2;if(d<bd){bd=d;b=e}}return b}
