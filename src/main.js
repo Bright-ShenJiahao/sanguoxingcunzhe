@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11022130';
-import {createSurvival} from './survival.js?v=11022130';
-import {createEnemies} from './enemies.js?v=11022130';
-import {createAudio} from './audio.js?v=11022130';
-import {createMeta} from './meta.js?v=11022130';
+import {createMenu} from './menu.js?v=11030110';
+import {createSurvival} from './survival.js?v=11030110';
+import {createEnemies} from './enemies.js?v=11030110';
+import {createAudio} from './audio.js?v=11030110';
+import {createMeta} from './meta.js?v=11030110';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11022130';
+import {createPathing} from './pathing.js?v=11030110';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11022130';
-import {createRun} from './run.js?v=11022130';
-import {createDebug} from './debug.js?v=11022130';
+import {createWeather} from './weather.js?v=11030110';
+import {createRun} from './run.js?v=11030110';
+import {createDebug} from './debug.js?v=11030110';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -58,6 +58,7 @@ const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k
 const QP=new URLSearchParams(location.search);const AT=QP.get('x')?[+QP.get('x')/D.WW,+QP.get('y')/D.WH]:({n:[.8,.15],s:[.85,.85],w:[.15,.2],e:[.95,.6],sw:[.15,.85]})[QP.get('at')]||[D.spawn[0]/D.WW,D.spawn[1]/D.WH];
 const region=()=>'翠绿平原',region0=(x,y)=>{const [gw,gh]=D.rgrid||[64,64],i=D.rmap[Math.min(gh-1,Math.max(0,Math.floor(y/D.WH*gh)))*gw+Math.min(gw-1,Math.max(0,Math.floor(x/D.WW*gw)))];return D.rnames[i]};
 const hero={x:WW*AT[0],y:WH*AT[1],face:1};const CO=objs.filter(o=>o.r);
+window.SETC=(x,y,v)=>{x=Math.round(x);y=Math.round(y);if(CM&&x>=0&&y>=0&&x<WW&&y<WH)CM[(y*WW+x)*4]=v};   // 运行时改碰撞（城堡城墙/城门）
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WH)return 1;return CM[(y*WW+x)*4]}
 function blocked(x,y){
  if(water(x,y)===1||water(x-3,y)===1||water(x+3,y)===1||water(x,y-2)===1)return true;
