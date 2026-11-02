@@ -8,7 +8,13 @@ const LM_DEF=[
 const CD=150,BUF=30;
 const IM={};for(const k of ['atk','spd','heal','gold'])for(const t of ['on','off']){const i=new Image();i.src=`assets/map/landmarks/${k}_${t}.png`;IM[k+'_'+t]=i}
 for(const f of ['idle','run1','run2','hit']){const i=new Image();i.src=`assets/characters/summons/tg/${f}.png`;IM['tg_'+f]=i}
-const LH={atk:26,spd:30,heal:24,gold:20};   // 地标在游戏里的高度
+const LH={atk:26,spd:30,heal:24,gold:20};
+// 山顶木栅（用户画线 11/03，data/palisade.json）：沿线每 5px 一根营地木桩；碰撞已烘进 coll.png
+for(const k of ['post0','post1','post2']){const i=new Image();i.src=`assets/map/sprites/camp_${k}.png`;IM['p_'+k]=i}
+const PH={post0:31,post1:24,post2:19};let POSTS=[];
+fetch('data/palisade.json?v=1').then(r=>r.json()).then(Ls=>{let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ for(const L of Ls)for(let i=0;i<L.length-1;i++){const [x0,y0]=L[i],[x1,y1]=L[i+1],len=Math.hypot(x1-x0,y1-y0);for(let t=0;t<len;t+=5){const x=x0+(x1-x0)*t/len,y=y0+(y1-y0)*t/len;
+  POSTS.push({k:'post'+[0,1,1,2][Math.floor(rnd()*4)],x:x+(rnd()-.5)*1.5,y:y+(rnd()-.5)*1.5,h:.85+rnd()*.3})}}}).catch(()=>{});   // 地标在游戏里的高度
 export function install(X){
  const {hero,en,ok,makeEnemy,survival}=X,R=(a,b)=>a+Math.random()*(b-a);
  let L=null;
@@ -38,7 +44,7 @@ export function install(X){
   else if(l.k==='heal'){c.fillStyle='#7d8590';c.beginPath();c.ellipse(0,-3,10,4,0,0,6.3);c.fill();c.fillStyle=on?'#4fd18a':'#3b4048';c.beginPath();c.ellipse(0,-4,8,2.8,0,0,6.3);c.fill();c.fillStyle='#8a929c';c.fillRect(-1.5,-12,3,8);if(on){c.fillStyle='#bfffd6';for(let i=0;i<3;i++){const t=(now/400+i/3)%1;c.fillRect(-1+Math.sin(i*2)*2,-12-t*8,1.5,1.5)}}}
   else{c.fillStyle='#7d8590';c.fillRect(-9,-8,18,8);c.fillStyle='#9aa2ac';c.fillRect(-10,-9,20,2);if(on){c.fillStyle='#ffd23f';for(const [px,py] of [[-5,-11],[0,-12],[5,-11],[-2,-14],[3,-14],[0,-16]]){c.beginPath();c.arc(px,py,2,0,6.3);c.fill()}}}
   c.restore()}
- function sprites(items,cx,cy,c,now){if(!L)return;for(const l of L){const x=l.x-cx,y=l.y-cy;if(x<-40||y<-40||x>600||y>400)continue;items.push({y:l.y,f:()=>drawLM(c,l,x,y,now)})}
+ function sprites(items,cx,cy,c,now){if(!L)return;for(const p of POSTS){const x=p.x-cx,y=p.y-cy;if(x<-20||y<-40||x>620||y>420)continue;const I=IM['p_'+p.k];if(!I?.complete||!I.width)continue;items.push({y:p.y,f:()=>{const h=PH[p.k]*p.h,w=I.width*h/I.height;c.drawImage(I,x-w/2,y-h+2,w,h)}})}for(const l of L){const x=l.x-cx,y=l.y-cy;if(x<-40||y<-40||x>600||y>400)continue;items.push({y:l.y,f:()=>drawLM(c,l,x,y,now)})}
   for(const e of en){if(!e.tg||e.dead)continue;const x=e.x-cx,y=e.y-cy;items.push({y:e.y+.5,f:()=>{const I=IM['tg_'+(e.flash>0?'hit':Math.floor(now/110)%2?'run1':'run2')];if(!I?.complete||!I.width)return;const h=26,w=I.width*h/I.height;c.save();c.translate(x,y);c.scale(e.face||1,1);c.imageSmoothingEnabled=true;c.drawImage(I,-w/2,-h+1,w,h);c.restore()}})}}
  function draw(c,cx,cy,now){const S=X.S;if(!S)return;
   const B=S.buf||{};let y=64;c.save();c.font='bold 8px "PingFang SC","Microsoft YaHei",sans-serif';c.textAlign='left';
