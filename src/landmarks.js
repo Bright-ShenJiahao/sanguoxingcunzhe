@@ -16,8 +16,10 @@ fetch('data/palisade.json?v=1').then(r=>r.json()).then(Ls=>{let seed=7;const rnd
  for(const L of Ls)for(let i=0;i<L.length-1;i++){const [x0,y0]=L[i],[x1,y1]=L[i+1],len=Math.hypot(x1-x0,y1-y0);for(let t=0;t<len;t+=5){const x=x0+(x1-x0)*t/len,y=y0+(y1-y0)*t/len;
   POSTS.push({k:'post'+[0,1,1,2][Math.floor(rnd()*4)],x:x+(rnd()-.5)*1.5,y:y+(rnd()-.5)*1.5,h:.85+rnd()*.3})}}}).catch(()=>{});   // 地标在游戏里的高度
 // 哥布林瞭望塔（用户圈点 11/03）：射程内放箭，前期伤害高；可被打掉，碎了这局不再出现
-const TW=[];   // 等用户重新摆放
-const DEC=[];
+const TW=[[88,628],[224,640],[341,617],[206,816],[420,788]];
+const DEC=[['brazier',489,725],['brazier',463,801],['brazier',126,542],['brazier',199,538]];
+// 拒马（用户画线 11/03）：沿线每 16px 一组，尖头朝外（背向山顶中心）
+const SPK=[[[505,725],[505,752]],[[502,779],[495,803]],[[532,726],[534,756]],[[531,782],[525,809]],[[559,728],[558,756]],[[559,790],[553,810]],[[487,820],[468,842]],[[523,828],[494,857]],[[546,838],[526,865]]];
 for(const k of ['tower','banner','skulls','brazier','spikes']){const i=new Image();i.src=`assets/map/fort/${k}.png?v=1`;IM['f_'+k]=i}
 const FH={tower:55,banner:34,skulls:16,brazier:26,spikes:22};
 export function install(X){
@@ -37,6 +39,7 @@ export function install(X){
    if(ok(nx,ny)&&nx>30&&ny>30&&nx<(window.__G?.WW||1880)-30&&ny<(window.__G?.WH||1188)-30){e.x=nx;e.y=ny}else{const b=a+R(-2,2);const mx=e.x+Math.cos(b)*sp,my=e.y+Math.sin(b)*sp;if(ok(mx,my)){e.x=mx;e.y=my}}e.face=Math.cos(a)>=0?1:-1;e.moving=true;
    if(e.tgL<=0){e.expired=true;e.dead=true;S.banner={v:'宝箱哥布林逃走了……',t:2}}}}
  function towers(S,dt){if(!S.tw){S.tw=TW.map(([x,y])=>({x,y,dead:false,e:null,cd:2,n:0}));S.arrows=[];S.twKills=0;
+   for(const [[x0,y0],[x1,y1]] of SPK){const L=Math.hypot(x1-x0,y1-y0);for(let t=0;t<=L;t++){const x=x0+(x1-x0)*t/L,y=y0+(y1-y0)*t/L;for(let o=-3;o<=3;o++)for(let q=-2;q<=2;q++)window.SETC?.(x+o,y+q,1)}}
    for(const d of DEC)if(d[0]==='spikes')for(let o=-9;o<=9;o++)for(let q=-3;q<=3;q++)window.SETC?.(d[1]+o,d[2]+q,1)}
   for(const T of S.tw){if(T.dead)continue;
    if(!T.e||T.e.expired||(T.e.dead&&!T.e.tower)){const m=makeEnemy(T.x,T.y,'goblin');if(!m)continue;X.onSpawnBase?.(m);Object.assign(m,{tower:T,name:'哥布林瞭望塔',armor:0,res:'',sc:1.5,alpha:0});m.hp=m.hpMax=150;en.push(m);T.e=m;
@@ -64,6 +67,8 @@ export function install(X){
  function sprites(items,cx,cy,c,now){if(!L)return;const VW_=(window.CAM?.VW||640),VH_=(window.CAM?.VH||400),S_=X.S;
   const dimg=(k,x,y,fl)=>{const I=IM['f_'+k];if(!I?.complete||!I.width)return;const h=FH[k],w=I.width*h/I.height;c.save();c.translate(x,y);if(fl)c.scale(-1,1);c.drawImage(I,-w/2,-h+2,w,h);c.restore()};
   for(const d of DEC){const x=d[1]-cx,y=d[2]-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+70)continue;items.push({y:d[2],f:()=>{dimg(d[0],x,y,d[3]&&d[1]>380);if(d[0]==='brazier'){c.save();c.globalAlpha=.25+.1*Math.sin(now/120);c.fillStyle='#ffb040';c.beginPath();c.arc(x,y-20,9,0,6.3);c.fill();c.restore()}}})}
+  for(const [[x0,y0],[x1,y1]] of SPK){const L=Math.hypot(x1-x0,y1-y0),n=Math.max(1,Math.round(L/16)),fl=(x0+x1)/2<250;
+   for(let i=0;i<n;i++){const t=(i+.5)/n,X0=x0+(x1-x0)*t,Y0=y0+(y1-y0)*t,x=X0-cx,y=Y0-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+60)continue;items.push({y:Y0,f:()=>dimg('spikes',x,y+4,fl)})}}
   if(S_?.tw)for(const T of S_.tw){if(T.dead)continue;const x=T.x-cx,y=T.y-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+80)continue;const e=T.e;items.push({y:T.y,f:()=>{c.save();if(e?.flash>0)c.filter='brightness(1.8)';dimg('tower',x,y);c.restore();
     if(e&&!e.dead&&e.hp<e.hpMax){c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x-12,y-60,24,3);c.fillStyle='#ff6a4a';c.fillRect(x-12,y-60,24*e.hp/e.hpMax,3)}}})}
   if(S_?.arrows)for(const A of S_.arrows){const x=A.x-cx,y=A.y-cy;items.push({y:A.y+40,f:()=>{c.save();c.translate(x,y);c.rotate(Math.atan2(A.dy,A.dx));c.fillStyle='#e8dcc0';c.fillRect(-6,-.6,9,1.2);c.fillStyle='#9a9a9a';c.fillRect(3,-1,2.5,2);c.restore()}})}
