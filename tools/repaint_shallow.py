@@ -14,7 +14,7 @@ fl=np.zeros((H,W),np.uint8);cv2.ellipse(fl,(1062,1018),(30,16),0,0,360,1,-1)
 flare=(fl>0);S=S|flare;b[flare]=2
 cc=np.array(Image.open(M+'coll.png').convert('RGB'));cc[...,0]=b;Image.fromarray(cc).save(M+'coll.png')
 up=lambda x:cv2.resize(x.astype(np.uint8),(W*HD,H*HD),interpolation=cv2.INTER_NEAREST)>0
-tl=np.array(Image.open(M+'shallow/tile_a.png').convert('RGB'));tl=cv2.resize(tl,(180,170),interpolation=cv2.INTER_AREA).astype(np.float32)
+tl=np.array(Image.open(R+'/art_src/gpt/shallow/tile_a.png').convert('RGB'));tl=cv2.resize(tl,(180,170),interpolation=cv2.INTER_AREA).astype(np.float32)
 pm=np.concatenate([tl,tl[:,::-1]],1);pm=np.concatenate([pm,pm[::-1]],0)
 water=np.tile(pm,(H*HD//pm.shape[0]+1,W*HD//pm.shape[1]+1,1))[:H*HD,:W*HD]
 SH=up(S)

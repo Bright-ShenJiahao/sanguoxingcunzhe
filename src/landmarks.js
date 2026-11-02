@@ -15,6 +15,12 @@ const PH={post0:31,post1:24,post2:19};let POSTS=[];
 fetch('data/palisade.json?v=1').then(r=>r.json()).then(Ls=>{let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
  for(const L of Ls)for(let i=0;i<L.length-1;i++){const [x0,y0]=L[i],[x1,y1]=L[i+1],len=Math.hypot(x1-x0,y1-y0);for(let t=0;t<len;t+=5){const x=x0+(x1-x0)*t/len,y=y0+(y1-y0)*t/len;
   POSTS.push({k:'post'+[0,1,1,2][Math.floor(rnd()*4)],x:x+(rnd()-.5)*1.5,y:y+(rnd()-.5)*1.5,h:.85+rnd()*.3})}}}).catch(()=>{});   // 地标在游戏里的高度
+// 哥布林瞭望塔（用户圈点 11/03）：射程内放箭，前期伤害高；可被打掉，碎了这局不再出现
+const TW=[[88,628],[224,640],[341,617],[206,816],[420,788]];
+const DEC=[['banner',300,560,1],['banner',372,560,1],['banner',455,760,1],['banner',455,815,1],['skulls',100,640],['skulls',236,652],['skulls',352,630],['skulls',218,828],['skulls',432,800],
+ ['brazier',318,575],['brazier',356,575],['brazier',448,745],['brazier',448,830],['spikes',152,585],['spikes',395,700]];
+for(const k of ['tower','banner','skulls','brazier','spikes']){const i=new Image();i.src=`assets/map/fort/${k}.png?v=1`;IM['f_'+k]=i}
+const FH={tower:55,banner:34,skulls:16,brazier:26,spikes:22};
 export function install(X){
  const {hero,en,ok,makeEnemy,survival}=X,R=(a,b)=>a+Math.random()*(b-a);
  let L=null;
@@ -24,15 +30,27 @@ export function install(X){
   for(const l of L){if(l.cd>0){l.cd-=dt;continue}if((hero.x-l.x)**2+((hero.y-l.y)*1.2)**2<16*16){l.cd=CD;
     if(l.k==='heal')survival?.heal?.(40);else S.buf[l.k]=BUF;
     S.banner={v:l.name+'：'+l.tip,t:2.5};S.texts.push({x:l.x,y:l.y-30,v:l.tip,t:1.5,c:l.col,big:1});window.SFX?.level?.()}}
+  towers(S,dt);
   // 宝箱哥布林：60 秒后，每 2.5～3.5 分钟出现一次，逃跑 25 秒
   S.tgT=S.tgT??90;S.tgT-=dt;if(S.tgT<=0){S.tgT=R(150,210);spawnTG(S)}
   for(const e of en){if(!e.tg||e.dead)continue;e.alpha=0;e.stunT=Math.max(e.stunT||0,.05);e.tgL-=dt;
    const dx=e.x-hero.x,dy=e.y-hero.y,d=Math.hypot(dx,dy)||1;e.wob=(e.wob||0)+dt;const a=Math.atan2(dy,dx)+Math.sin(e.wob*1.7)*.8,sp=(d<160?62:30)*dt,nx=e.x+Math.cos(a)*sp,ny=e.y+Math.sin(a)*sp;
    if(ok(nx,ny)&&nx>30&&ny>30&&nx<(window.__G?.WW||1880)-30&&ny<(window.__G?.WH||1188)-30){e.x=nx;e.y=ny}else{const b=a+R(-2,2);const mx=e.x+Math.cos(b)*sp,my=e.y+Math.sin(b)*sp;if(ok(mx,my)){e.x=mx;e.y=my}}e.face=Math.cos(a)>=0?1:-1;e.moving=true;
    if(e.tgL<=0){e.expired=true;e.dead=true;S.banner={v:'宝箱哥布林逃走了……',t:2}}}}
+ function towers(S,dt){if(!S.tw){S.tw=TW.map(([x,y])=>({x,y,dead:false,e:null,cd:2,n:0}));S.arrows=[];S.twKills=0;
+   for(const d of DEC)if(d[0]==='spikes')for(let o=-9;o<=9;o++)for(let q=-3;q<=3;q++)window.SETC?.(d[1]+o,d[2]+q,1)}
+  for(const T of S.tw){if(T.dead)continue;
+   if(!T.e||T.e.expired||(T.e.dead&&!T.e.tower)){const m=makeEnemy(T.x,T.y,'goblin');if(!m)continue;X.onSpawnBase?.(m);Object.assign(m,{tower:T,name:'哥布林瞭望塔',armor:0,res:'',sc:1.5,alpha:0});m.hp=m.hpMax=150;en.push(m);T.e=m;
+    for(let o=-8;o<=8;o++)for(let q=-4;q<=3;q++)window.SETC?.(T.x+o,T.y+q,1)}
+   const e=T.e;if(e.dead){T.dead=true;for(let o=-8;o<=8;o++)for(let q=-4;q<=3;q++)window.SETC?.(T.x+o,T.y+q,0);continue}
+   e.x=T.x;e.y=T.y;e.alpha=0;e.stunT=Math.max(e.stunT||0,.1);
+   T.cd-=dt;const d=Math.hypot(hero.x-T.x,(hero.y-T.y));if(T.cd<=0&&d<115){T.cd=1.5;const dx=hero.x-T.x,dy=hero.y-8-(T.y-40),L=Math.hypot(dx,dy)||1;S.arrows.push({x:T.x,y:T.y-40,dx:dx/L,dy:dy/L,t:0});window.SFX?.shoot?.()}}
+  for(let i=S.arrows.length-1;i>=0;i--){const A=S.arrows[i];A.t+=dt;A.x+=A.dx*150*dt;A.y+=A.dy*150*dt;
+   if(Math.hypot(A.x-hero.x,A.y-(hero.y-8))<7){survival?.damage?.(9);window.LASTHIT='哥布林瞭望塔';S.arrows.splice(i,1);continue}
+   if(A.t>1.4||(A.t>.25&&!ok(A.x,A.y+40)))S.arrows.splice(i,1)}}
  function spawnTG(S){for(let i=0;i<30;i++){const a=R(0,6.28),r=R(200,280),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r*.8;if(!ok(x,y))continue;const m=makeEnemy(x,y,'goblin');if(!m)continue;
    X.onSpawnBase?.(m);m.tg=1;m.tgL=25;m.hp=m.hpMax=Math.round(25+S.t/5);m.name='宝箱哥布林';m.armor=0;m.res='';m.sc=1.15;en.push(m);S.banner={v:'宝箱哥布林出现了！追上去打倒它（看小地图金点）',t:3.5};window.SFX?.banner?.();return}}
- function onKill(e){const S=X.S;if(!e.tg||!S)return;for(let i=0;i<14;i++)S.coins.push({x:e.x+R(-14,14),y:e.y+R(-10,10),v:6,bag:i<3});S.gems.push({x:e.x,y:e.y-4,v:60});S.chests.push({x:e.x,y:e.y,big:false});S.banner={v:'打倒宝箱哥布林！金币、经验和宝箱',t:2.5}}
+ function onKill(e){const S=X.S;if(!S)return;if(e.tower){S.twKills=(S.twKills||0)+1;for(let i=0;i<8;i++)S.coins.push({x:e.x+R(-12,12),y:e.y+R(-8,8),v:6,bag:i<2});S.gems.push({x:e.x,y:e.y-4,v:30});if(S.twKills===1)S.chests.push({x:e.x+10,y:e.y+6,big:false});S.banner={v:'瞭望塔被摧毁！',t:2};return}if(!e.tg)return;for(let i=0;i<14;i++)S.coins.push({x:e.x+R(-14,14),y:e.y+R(-10,10),v:6,bag:i<3});S.gems.push({x:e.x,y:e.y-4,v:60});S.chests.push({x:e.x,y:e.y,big:false});S.banner={v:'打倒宝箱哥布林！金币、经验和宝箱',t:2.5}}
  // 占位图：代码画的小地标（一个木箱的 1.5～2 倍大）
  function drawLM(c,l,x,y,now){const on=l.cd<=0,I=IM[l.k+(on?'_on':'_off')];
   if(I?.complete&&I.width){const h=LH[l.k],w=I.width*h/I.height;c.save();c.fillStyle='rgba(10,20,10,.3)';c.beginPath();c.ellipse(x,y,w*.45,3,0,0,6.3);c.fill();if(on){c.globalAlpha=.18+.12*Math.sin(now/300);c.fillStyle=l.col;c.beginPath();c.ellipse(x,y-h*.45,w*.7,h*.6,0,0,6.3);c.fill();c.globalAlpha=1}c.imageSmoothingEnabled=true;c.drawImage(I,x-w/2,y-h+2,w,h);c.restore();return}
@@ -44,7 +62,13 @@ export function install(X){
   else if(l.k==='heal'){c.fillStyle='#7d8590';c.beginPath();c.ellipse(0,-3,10,4,0,0,6.3);c.fill();c.fillStyle=on?'#4fd18a':'#3b4048';c.beginPath();c.ellipse(0,-4,8,2.8,0,0,6.3);c.fill();c.fillStyle='#8a929c';c.fillRect(-1.5,-12,3,8);if(on){c.fillStyle='#bfffd6';for(let i=0;i<3;i++){const t=(now/400+i/3)%1;c.fillRect(-1+Math.sin(i*2)*2,-12-t*8,1.5,1.5)}}}
   else{c.fillStyle='#7d8590';c.fillRect(-9,-8,18,8);c.fillStyle='#9aa2ac';c.fillRect(-10,-9,20,2);if(on){c.fillStyle='#ffd23f';for(const [px,py] of [[-5,-11],[0,-12],[5,-11],[-2,-14],[3,-14],[0,-16]]){c.beginPath();c.arc(px,py,2,0,6.3);c.fill()}}}
   c.restore()}
- function sprites(items,cx,cy,c,now){if(!L)return;for(const p of POSTS){const x=p.x-cx,y=p.y-cy;if(x<-20||y<-10||x>(window.CAM?.VW||640)+20||y>(window.CAM?.VH||400)+50)continue;const I=IM['p_'+p.k];if(!I?.complete||!I.width)continue;items.push({y:p.y,f:()=>{const h=PH[p.k]*p.h,w=I.width*h/I.height;c.drawImage(I,x-w/2,y-h+2,w,h)}})}for(const l of L){const x=l.x-cx,y=l.y-cy;if(x<-40||y<-10||x>(window.CAM?.VW||640)+40||y>(window.CAM?.VH||400)+60)continue;items.push({y:l.y,f:()=>drawLM(c,l,x,y,now)})}
+ function sprites(items,cx,cy,c,now){if(!L)return;const VW_=(window.CAM?.VW||640),VH_=(window.CAM?.VH||400),S_=X.S;
+  const dimg=(k,x,y,fl)=>{const I=IM['f_'+k];if(!I?.complete||!I.width)return;const h=FH[k],w=I.width*h/I.height;c.save();c.translate(x,y);if(fl)c.scale(-1,1);c.drawImage(I,-w/2,-h+2,w,h);c.restore()};
+  for(const d of DEC){const x=d[1]-cx,y=d[2]-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+70)continue;items.push({y:d[2],f:()=>{dimg(d[0],x,y,d[3]&&d[1]>380);if(d[0]==='brazier'){c.save();c.globalAlpha=.25+.1*Math.sin(now/120);c.fillStyle='#ffb040';c.beginPath();c.arc(x,y-20,9,0,6.3);c.fill();c.restore()}}})}
+  if(S_?.tw)for(const T of S_.tw){if(T.dead)continue;const x=T.x-cx,y=T.y-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+80)continue;const e=T.e;items.push({y:T.y,f:()=>{c.save();if(e?.flash>0)c.filter='brightness(1.8)';dimg('tower',x,y);c.restore();
+    if(e&&!e.dead&&e.hp<e.hpMax){c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x-12,y-60,24,3);c.fillStyle='#ff6a4a';c.fillRect(x-12,y-60,24*e.hp/e.hpMax,3)}}})}
+  if(S_?.arrows)for(const A of S_.arrows){const x=A.x-cx,y=A.y-cy;items.push({y:A.y+40,f:()=>{c.save();c.translate(x,y);c.rotate(Math.atan2(A.dy,A.dx));c.fillStyle='#e8dcc0';c.fillRect(-6,-.6,9,1.2);c.fillStyle='#9a9a9a';c.fillRect(3,-1,2.5,2);c.restore()}})}
+for(const p of POSTS){const x=p.x-cx,y=p.y-cy;if(x<-20||y<-10||x>(window.CAM?.VW||640)+20||y>(window.CAM?.VH||400)+50)continue;const I=IM['p_'+p.k];if(!I?.complete||!I.width)continue;items.push({y:p.y,f:()=>{const h=PH[p.k]*p.h,w=I.width*h/I.height;c.drawImage(I,x-w/2,y-h+2,w,h)}})}for(const l of L){const x=l.x-cx,y=l.y-cy;if(x<-40||y<-10||x>(window.CAM?.VW||640)+40||y>(window.CAM?.VH||400)+60)continue;items.push({y:l.y,f:()=>drawLM(c,l,x,y,now)})}
   for(const e of en){if(!e.tg||e.dead)continue;const x=e.x-cx,y=e.y-cy;items.push({y:e.y+.5,f:()=>{const I=IM['tg_'+(e.flash>0?'hit':Math.floor(now/110)%2?'run1':'run2')];if(!I?.complete||!I.width)return;const h=26,w=I.width*h/I.height;c.save();c.translate(x,y);c.scale(e.face||1,1);c.imageSmoothingEnabled=true;c.drawImage(I,-w/2,-h+1,w,h);c.restore()}})}}
  function draw(c,cx,cy,now){const S=X.S;if(!S)return;
   const B=S.buf||{};let y=64;c.save();c.font='bold 8px "PingFang SC","Microsoft YaHei",sans-serif';c.textAlign='left';
