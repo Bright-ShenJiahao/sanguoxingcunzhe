@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11022110';
-import {createSurvival} from './survival.js?v=11022110';
-import {createEnemies} from './enemies.js?v=11022110';
-import {createAudio} from './audio.js?v=11022110';
-import {createMeta} from './meta.js?v=11022110';
+import {createMenu} from './menu.js?v=11022120';
+import {createSurvival} from './survival.js?v=11022120';
+import {createEnemies} from './enemies.js?v=11022120';
+import {createAudio} from './audio.js?v=11022120';
+import {createMeta} from './meta.js?v=11022120';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11022110';
+import {createPathing} from './pathing.js?v=11022120';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11022110';
-import {createRun} from './run.js?v=11022110';
-import {createDebug} from './debug.js?v=11022110';
+import {createWeather} from './weather.js?v=11022120';
+import {createRun} from './run.js?v=11022120';
+import {createDebug} from './debug.js?v=11022120';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -98,7 +98,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
   character(frame){const s=SETS[CS];return {image:IM[(hairG&&s.gpre?s.gpre:s.pre)+frame],size:s.size,label:document.querySelector('#cs button[aria-pressed="true"]').textContent}},
   clearInput(){joy=null;for(const k in keys)keys[k]=0},ready:()=>needLoad()?loadSet(CS):Promise.resolve(),fit,onStart(){survival.start();weather.reset?.();portal={x:hero.x+14,y:hero.y-2,t:performance.now()}}
  });
- survival=createSurvival({hero,enemies:en,get kills(){return kills},iframe:()=>run?.iframe,level:()=>run?.dbg?.S?.lv,bosses:()=>run?.dbg?.S?.bosses||0,
+ survival=createSurvival({hero,enemies:en,get kills(){return kills},iframe:()=>run?.iframe,level:()=>run?.dbg?.S?.lv,build:()=>{const S=run?.dbg?.S;return S?{cards:Object.entries(S.w).map(([k,v])=>k+':'+v),bless:Object.entries(S.p).filter(([,v])=>v>0).map(([k,v])=>k+':'+v),role:CS[0]==='f'?'f':'m'}:{}},bosses:()=>run?.dbg?.S?.bosses||0,
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
   reset(){run.reset(CS[0]==='f'?'hp':'gb');hero.x=WW*AT[0];hero.y=WH*AT[1];hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm=CS[0]==='f'?'hp':'gb';joy=null;for(const k in keys)keys[k]=0}
  });run=createRun({hero,en,images:IM,survival,ok,makeEnemy:(x,y,k)=>enemySystem.make(x,y,k),hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});window.__G={hero,en,ok,WW,WH,get S(){return run?.dbg?.S}};dbg=createDebug({world:D,hero,en,run,survival,weather,hit:(e,v)=>hitEnemy(e,performance.now(),1,v)});dbg?.show(false);requestAnimationFrame(loop)}

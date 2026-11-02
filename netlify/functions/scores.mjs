@@ -39,8 +39,9 @@ export default async function handler(req,context){
   }
   let body;try{body=await req.json()}catch{return json({ok:false,error:'bad json'},400)}
   // 维护：删单条 / 清空
-  if(body?.op==='del'||body?.op==='purge'){
+  if(body?.op==='del'||body?.op==='purge'||body?.op==='dump'){
    if(body.token!==ADMIN)return json({ok:false,error:'forbidden'},403);
+   if(body.op==='dump'){const all=(await readAll(store)).map(({ip,...r})=>r);return json({ok:true,runs:all})}   // 导出全部对局（不含 IP），做平衡分析
    if(body.op==='del'){await store.delete(String(body.key));return json({ok:true,deleted:1})}
    const {blobs}=await store.list({prefix:'run-'});for(const b of blobs)await store.delete(b.key);return json({ok:true,deleted:blobs.length});
   }
@@ -51,7 +52,8 @@ export default async function handler(req,context){
   if(lv<1||lv>200||bosses<0||bosses>Math.floor(t/120)+2)return json({ok:false,error:'bad stats'},400);
   const ip=context?.ip||req.headers.get('x-nf-client-connection-ip')||'unknown',now=Date.now();
   if((await readAll(store)).filter(r=>r.ip===ip&&now-r.at<RATE_WINDOW*1000).length>=RATE_MAX)return json({ok:false,error:'too many'},429);
-  const rec={name:cleanName(body.name),t,kills,lv,bosses,at:now,season:SEASON,ip,cheat:0};
+  const tags=a=>Array.isArray(a)?a.slice(0,12).map(x=>String(x).replace(/[^a-z_0-9:]/gi,'').slice(0,16)):[];   // 平衡分析用：带了哪些卡、祝福、被什么打死
+  const rec={name:cleanName(body.name),t,kills,lv,bosses,at:now,season:SEASON,ip,cheat:0,by:String(body.by||'').slice(0,30),cards:tags(body.cards),bless:tags(body.bless),role:body.role==='f'?'f':'m'};
   await store.set('run-'+randomUUID(),JSON.stringify(rec));
   return json({ok:true,score:scoreOf(rec)});
  }catch{return json({ok:false,error:'temporarily unavailable'},503)}

@@ -1,4 +1,4 @@
-import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11022110';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11022120';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -31,7 +31,7 @@ export function createSurvival(game){
  }
  function die(){
   finished=true;game.clearInput();render();
-  const rec={name,t:Math.floor(elapsed),kills:game.kills,lv:game.level?.()||1,bosses:game.bosses?.()||0},token=generation;
+  const rec={name,t:Math.floor(elapsed),kills:game.kills,lv:game.level?.()||1,bosses:game.bosses?.()||0,by:String(window.LASTHIT||'?').slice(0,30),...(game.build?.()||{})},token=generation;
   try{const L=JSON.parse(localStorage.getItem('deathlog')||'[]');L.push({t:rec.t,kills:rec.kills,lv:game.level?.()||0,by:window.LASTHIT||'?',at:Date.now(),bot:!!window.BOT});localStorage.setItem('deathlog',JSON.stringify(L.slice(-100)))}catch(_){}
   dialog.querySelector('.result-name').textContent='名字：'+name;
   dialog.querySelector('.result-stats').textContent='存活时间：'+formatTime(rec.t)+' · 击杀数：'+rec.kills+' · 等级 '+rec.lv+' · Boss '+rec.bosses+' · 评分 '+scoreOf(rec);
