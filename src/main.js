@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11030780';
-import {createSurvival} from './survival.js?v=11030780';
-import {createEnemies} from './enemies.js?v=11030780';
-import {createAudio} from './audio.js?v=11030780';
-import {createMeta} from './meta.js?v=11030780';
+import {createMenu} from './menu.js?v=11030790';
+import {createSurvival} from './survival.js?v=11030790';
+import {createEnemies} from './enemies.js?v=11030790';
+import {createAudio} from './audio.js?v=11030790';
+import {createMeta} from './meta.js?v=11030790';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11030780';
+import {createPathing} from './pathing.js?v=11030790';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11030780';
-import {createRun} from './run.js?v=11030780';
-import {createDebug} from './debug.js?v=11030780';
+import {createWeather} from './weather.js?v=11030790';
+import {createRun} from './run.js?v=11030790';
+import {createDebug} from './debug.js?v=11030790';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -181,7 +181,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
   const fl=/^(st\d|wlily)/.test(o.k);   // 踏脚石、睡莲贴地画，永远在人物下面
   items.push({y:fl?-1e9:o.y,f:()=>{c.imageSmoothingEnabled=true;c.globalAlpha=o.a;c.drawImage(IM['s_'+o.k],sx-o.w/2,fl?sy-o.h/2:sy-o.h,o.w,o.h);c.globalAlpha=1}})}
  for(const p of pj){const sx=p.x-cx,sy=p.y-cy;items.push({y:p.y+1,f:()=>{c.strokeStyle='#eadfc2';c.lineWidth=1;c.beginPath();c.moveTo(sx-p.dx*7,sy-9-p.dy*7);c.lineTo(sx,sy-9);c.stroke();c.fillStyle='#9aa0a6';c.fillRect(sx-.7,sy-9.7,1.6,1.4);c.fillStyle='rgba(18,40,20,.25)';c.fillRect(sx-1,sy-1,2,1)}})}
- for(const e of en){const sx=e.x-cx,sy=e.y-cy;if(sx<-60||sx>VW+60||sy<-30||sy>VH+60)continue;items.push({y:e.y,f:()=>{if(!e.dead)contact(sx,sy,16);enemySystem.draw(e,c,cx,cy,now)}})}
+ for(const e of en){const sx=e.x-cx,sy=e.y-cy;if(sx<-60||sx>VW+60||sy<-30||sy>VH+60)continue;items.push({y:e.y,f:()=>{if(!e.dead&&!e.tower&&(e.alpha??1)>.3)contact(sx,sy,16);enemySystem.draw(e,c,cx,cy,now)}})}
  items.push({y:hero.y+1,f:()=>enemySystem.drawArrows(c,cx,cy)});
  items.push({y:hero.y,f:()=>{c.imageSmoothingEnabled=false;drawHero(px,py,moving,now);if(inSh){c.fillStyle='rgba(200,228,232,.6)';c.fillRect(px-7,py-4,14,4)}}});
  run?.ground?.(c,cx,cy,now);run?.sprites?.(items,cx,cy,c,now);
