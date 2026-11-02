@@ -35,6 +35,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    }
    if(e.drum){if(e.flash>0)e.flash-=dt;continue}
    const ax=hero.x-e.x,ay=hero.y-e.y,d=Math.hypot(ax,ay)||1;if(e.state!=='dash')e.face=ax>=0?1:-1;
+   if(e.stunT>0){e.stunT-=dt;e.moving=false;continue}   // 圣印定身：不动、不打、不碰撞伤害
    const BD=stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1);
    // 碰撞伤害：同一只怪每 0.5 秒最多一次
    e.cc=(e.cc||0)-dt;if(!stats.ranged&&!stats.bomb&&e.cc<=0&&Math.hypot(ax,(ay+2)*1.2)<Math.max(13+5*(e.sc||1),stats.reach*(e.sc||1)*.9)){e.cc=.5;onHit(BD*.5)}

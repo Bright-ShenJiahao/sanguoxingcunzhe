@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11020500';
-import {createSurvival} from './survival.js?v=11020500';
-import {createEnemies} from './enemies.js?v=11020500';
-import {createAudio} from './audio.js?v=11020500';
-import {createMeta} from './meta.js?v=11020500';
+import {createMenu} from './menu.js?v=11021600';
+import {createSurvival} from './survival.js?v=11021600';
+import {createEnemies} from './enemies.js?v=11021600';
+import {createAudio} from './audio.js?v=11021600';
+import {createMeta} from './meta.js?v=11021600';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11020500';
+import {createPathing} from './pathing.js?v=11021600';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11020500';
-import {createRun} from './run.js?v=11020500';
-import {createDebug} from './debug.js?v=11020500';
+import {createWeather} from './weather.js?v=11021600';
+import {createRun} from './run.js?v=11021600';
+import {createDebug} from './debug.js?v=11021600';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -79,7 +79,7 @@ function drawHero(px,py,moving,now){
  if(wpm=='magic'){const bob=Math.sin(now/380)*1.3;c.save();c.translate(-11,-19+bob);c.scale(.5,.5);c.globalAlpha=.97;c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
  c.restore()}
 const en=[];let kills=0,fx=[];
-const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{if(run?.dodge?.())return;SFX.hurt();const v=Math.max(1,(amount-(run?.armor||0))*(1-(run?.armPct||0)));if(survival&&survival.hp-v<=0&&run?.useRevive()){survival.heal(survival.max*.5);return}survival?.damage(v)}});
+const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{if(run?.dodge?.())return;SFX.hurt();let v=Math.max(1,(amount-(run?.armor||0))*(1-(run?.armPct||0)));v=run?.absorb?run.absorb(v):v;if(v<=0)return;if(survival&&survival.hp-v<=0&&run?.useRevive()){survival.heal(survival.max*.5);return}survival?.damage(v)}});
 function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg)){fx.push({x:e.x,y:e.y,t:now,dx});const kb=(window.KB||1)-1;if(kb>0&&!e.boss&&!e.drum&&!e.dead){const ax=e.x-hero.x,ay=e.y-hero.y,d=Math.hypot(ax,ay)||1,nx=e.x+ax/d*kb*8,ny=e.y+ay/d*kb*8;if(ok(nx,ny)){e.x=nx;e.y=ny}}}}
 function spawn(){if(window.DBG?.noMob)return;let fb=null;for(let n=0;n<40;n++){const a=Math.random()*6.28,r=(n<28?(Math.hypot(VW,VH)/2+20+Math.random()*90):(140+Math.random()*160))*(run?.spawnR||1),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
  if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;
@@ -173,6 +173,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  for(const e of en){const sx=e.x-cx,sy=e.y-cy;if(sx<-60||sx>VW+60||sy<-30||sy>VH+60)continue;items.push({y:e.y,f:()=>{if(!e.dead)contact(sx,sy,16);enemySystem.draw(e,c,cx,cy,now)}})}
  items.push({y:hero.y+1,f:()=>enemySystem.drawArrows(c,cx,cy)});
  items.push({y:hero.y,f:()=>{c.imageSmoothingEnabled=false;drawHero(px,py,moving,now);if(inSh){c.fillStyle='rgba(200,228,232,.6)';c.fillRect(px-7,py-4,14,4)}}});
+ run?.ground?.(c,cx,cy,now);run?.sprites?.(items,cx,cy,c,now);
  items.sort((a,b)=>a.y-b.y).forEach(o=>o.f());
  run.drawWorld(c,cx,cy,now);
  if(portal){const t=Math.max(0,(now-portal.t)/1000);if(t>4.2)portal=null;else{   // 开局传送门：3 秒后缩小淡出
