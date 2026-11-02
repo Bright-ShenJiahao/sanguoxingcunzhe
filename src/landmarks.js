@@ -10,7 +10,7 @@ const IM={};for(const k of ['atk','spd','heal','gold'])for(const t of ['on','off
 for(const f of ['idle','run1','run2','hit']){const i=new Image();i.src=`assets/characters/summons/tg/${f}.png`;IM['tg_'+f]=i}
 const LH={atk:26,spd:30,heal:24,gold:20};   // 地标在游戏里的高度
 // 哥布林城堡（山顶，左下角）：GPT 整张城堡院落图，城门朝东，第 15 分钟打开
-const CI=new Image();CI.src='assets/map/castle/castle.png';const CIW=1247,CIH=1108;
+const CI=new Image();CI.src='assets/map/castle/castle.png?v=2';const CIW=1247,CIH=1108;   // 坐标按原图 1247×1108 写；实际文件已缩小，画的时候按比例换算
 const CX0=30,CY0=625,CS=235/CIW;   // 城堡左上角的世界坐标、缩放
 const cw=(ix,iy)=>[CX0+ix*CS,CY0+iy*CS];
 const YARD=[...cw(183,401),...cw(1078,906)],GATE_R=[...cw(1068,526),...cw(1247,701)],SOUTH_Y=880,CBASE=CY0+CIH*CS;   // 院子、城门通道（世界坐标 x0,y0,x1,y1）
@@ -18,7 +18,7 @@ const GATE=[(GATE_R[0]+GATE_R[2])/2,(GATE_R[1]+GATE_R[3])/2];
 for(const k of ['tower','banner','skulls','brazier','spikes']){const i=new Image();i.src=`assets/map/castle/${k}.png`;IM['c_'+k]=i}
 const CH={tower:46,banner:32,skulls:13,brazier:20,spikes:17};
 const DECO=[['tower',372,690],['tower',330,612],['banner',282,708],['brazier',276,724],['banner',300,650],['skulls',172,895],['skulls',360,790],['spikes',345,840],['spikes',150,885]];
-let CMASK=null;function castleMask(){if(CMASK||!CI.complete||!CI.width)return CMASK;const c=document.createElement('canvas');c.width=CIW;c.height=CIH;const g=c.getContext('2d');g.drawImage(CI,0,0);CMASK=g.getImageData(0,0,CIW,CIH).data;return CMASK}
+let CMASK=null;function castleMask(){if(CMASK||!CI.complete||!CI.width)return CMASK;const c=document.createElement('canvas');c.width=CIW;c.height=CIH;const g=c.getContext('2d');g.drawImage(CI,0,0,CIW,CIH);CMASK=g.getImageData(0,0,CIW,CIH).data;return CMASK}
 export function install(X){
  const {hero,en,ok,makeEnemy,survival}=X,R=(a,b)=>a+Math.random()*(b-a);
  let L=null;
@@ -54,9 +54,9 @@ export function install(X){
   else{c.fillStyle='#7d8590';c.fillRect(-9,-8,18,8);c.fillStyle='#9aa2ac';c.fillRect(-10,-9,20,2);if(on){c.fillStyle='#ffd23f';for(const [px,py] of [[-5,-11],[0,-12],[5,-11],[-2,-14],[3,-14],[0,-16]]){c.beginPath();c.arc(px,py,2,0,6.3);c.fill()}}}
   c.restore()}
  function drawPiece(c,k,x,y,flip){const I=IM['c_'+k];if(!I?.complete||!I.width)return;const h=CH[k],w=I.width*h/I.height;c.save();c.translate(x,y);if(flip)c.scale(-1,1);c.imageSmoothingEnabled=true;c.drawImage(I,-w/2,-h+3,w,h);c.restore()}
- function ground(c,cx,cy){if(!CI.complete||!CI.width)return;c.save();c.imageSmoothingEnabled=true;c.drawImage(CI,0,0,CIW,SOUTH_Y,CX0-cx,CY0-cy,CIW*CS,SOUTH_Y*CS);c.restore()}   // 城堡（除南墙）当地面画
+ function ground(c,cx,cy){if(!CI.complete||!CI.width)return;c.save();c.imageSmoothingEnabled=true;const k=CI.width/CIW;c.drawImage(CI,0,0,CI.width,SOUTH_Y*k,CX0-cx,CY0-cy,CIW*CS,SOUTH_Y*CS);c.restore()}   // 城堡（除南墙）当地面画
  function sprites(items,cx,cy,c,now){if(!L)return;const S=X.S;
-  if(CI.complete&&CI.width)items.push({y:CBASE-4,f:()=>{c.save();c.imageSmoothingEnabled=true;c.drawImage(CI,0,SOUTH_Y,CIW,CIH-SOUTH_Y,CX0-cx,CY0+SOUTH_Y*CS-cy,CIW*CS,(CIH-SOUTH_Y)*CS);c.restore()}});   // 南墙按 y 排序，能挡住院子里的人
+  if(CI.complete&&CI.width)items.push({y:CBASE-4,f:()=>{c.save();c.imageSmoothingEnabled=true;const k=CI.width/CIW;c.drawImage(CI,0,SOUTH_Y*k,CI.width,CI.height-SOUTH_Y*k,CX0-cx,CY0+SOUTH_Y*CS-cy,CIW*CS,(CIH-SOUTH_Y)*CS);c.restore()}});   // 南墙按 y 排序，能挡住院子里的人
   if(!S?.gateOpen){for(const dy of [-9,9])items.push({y:GATE[1]+dy,f:()=>drawPiece(c,'spikes',GATE[0]+4-cx,GATE[1]+dy-cy)})}   // 城门没开：拒马堵门
   for(const [k,wx,wy] of DECO){const x=wx-cx,y=wy-cy;if(x<-80||y<-20||x>580||y>440)continue;items.push({y:wy,f:()=>drawPiece(c,k,x,y)})}for(const l of L){const x=l.x-cx,y=l.y-cy;if(x<-40||y<-40||x>600||y>400)continue;items.push({y:l.y,f:()=>drawLM(c,l,x,y,now)})}
   for(const e of en){if(!e.tg||e.dead)continue;const x=e.x-cx,y=e.y-cy;items.push({y:e.y+.5,f:()=>{const I=IM['tg_'+(e.flash>0?'hit':Math.floor(now/110)%2?'run1':'run2')];if(!I?.complete||!I.width)return;const h=26,w=I.width*h/I.height;c.save();c.translate(x,y);c.scale(e.face||1,1);c.imageSmoothingEnabled=true;c.drawImage(I,-w/2,-h+1,w,h);c.restore()}})}}
