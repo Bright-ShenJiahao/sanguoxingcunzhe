@@ -36,7 +36,7 @@ jobs:
         run: node tools/balance.js mix ${{ matrix.part }} 16 ${{ inputs.mix_per_job || '24' }} mix-${{ matrix.part }}.json
       - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: 'res-${{ matrix.part }}', path: '*.json', if-no-files-found: ignore }
+        with: { name: 'res-${{ matrix.part }}', path: '*-[0-9]*.json', if-no-files-found: ignore }
   report:
     needs: run
     if: always()
