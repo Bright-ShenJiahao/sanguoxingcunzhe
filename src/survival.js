@@ -1,4 +1,4 @@
-import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11030760';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11030770';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
