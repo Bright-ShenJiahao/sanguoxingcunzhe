@@ -1,5 +1,5 @@
-import {install as installLM} from './landmarks.js?v=11030400';
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11030400';
+import {install as installLM} from './landmarks.js?v=11030500';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11030500';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -67,7 +67,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  #lvup .scroll{width:min(560px,92vw);aspect-ratio:1414/264;background:url(assets/ui/buttons_0.png?v=1103a) center/100% 100%;display:grid;place-items:center;font-size:clamp(22px,6vw,32px);font-weight:900;color:#5a2e0e;image-rendering:pixelated}
  #lvup .b2 .sub{color:#ffe7a8;text-shadow:0 1px 3px #000;margin:0 0 14px}
  #lvup .cards{display:flex;gap:min(10px,2vw);justify-content:center;width:100%}
- #lvup button.c2{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:min(200px,30vw);transition:transform .1s}
+ #lvup button.c2{all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;width:min(240px,30vw);transition:transform .1s}
  #lvup button.c2:focus{background:none!important;border:0!important;outline:none;transform:translateY(-4px);filter:drop-shadow(0 0 8px #ffd860)}
  #lvup .cn{position:absolute;top:-9%;height:8%;left:0;right:0;display:grid;place-items:center;line-height:1;color:#ffe7a8;text-shadow:0 2px 2px #000;font-weight:900;font-size:clamp(13px,3.6vw,18px);white-space:nowrap}
  #lvup .cf{position:relative;margin-top:12%;width:100%;aspect-ratio:180/290;background:center/100% 100% no-repeat}
@@ -287,7 +287,8 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   return `<button class="card c2" data-i="${i}"><span class="cf" style="background-image:url(assets/ui/${fr.replace('frames_','card_')}.png)"><span class="cn">${nm}</span>${nw?'<span class="nw">NEW</span>':''}<span class="ty ty_${o.t==='p'?'p':isOwn(o.k)?'o':DT[o.k]}">${o.t==='p'?'祝福':(isOwn(o.k)?'专属·':'')+({mel:'物理·近战',rng:'物理·远程',ele:'法术·元素',holy:'法术·神圣',dark:'法术·黑暗'}[DT[o.k]]||'')}</span><span class="ci">${icon(o)}</span>${st}<span class="cd">${d}</span></span></button>`}
  function owned(){return Object.keys(S.w).map(k=>({t:'w',k})).concat(Object.keys(S.p).filter(k=>S.p[k]>0).map(k=>({t:'p',k})))}
  let cur=[],sub=null;
- function render(){
+ function fitCd(){requestAnimationFrame(()=>{for(const d of ui.querySelectorAll('.cd')){let f=parseFloat(getComputedStyle(d).fontSize);while(d.scrollHeight>d.clientHeight+1&&f>7.5){f-=.5;d.style.fontSize=f+'px';d.style.lineHeight='1.12'}}})}   // 说明文字放不下就自动缩小
+ function render(){fitCd();
   const list=sub?CATS[sub].ws.filter(k=>!S.w[k]).map(k=>({t:'w',k})):cur;
   if(UIV==='card'){const ow=owned();ui.innerHTML=`<div class="b2"><div class="scroll">等级 ${S.lv}！</div><div class="sub">选择一张卡 · 按 1 / 2 / 3</div><div class="cards">${list.map(card).join('')}</div>
    <div class="btns">${sub?'<button class="pb gray" data-a="back">返回</button>':`<button class="pb green" data-a="rr" ${S.rerolls>0?'':'disabled'}>刷新 ${S.rerolls}</button><button class="pb gray" data-a="skip">跳过</button>`}</div>
