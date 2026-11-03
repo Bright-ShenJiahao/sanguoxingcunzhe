@@ -40,7 +40,7 @@ const IMG={};const ld=(k,p)=>{const im=new Image();im.src=p;IMG[k]=im};
 for(const k of 'slash crack whip fistwave trap rock buck wedge orb keg jet holyorb hwall sigil bubble skull mist dcoil vortex rise'.split(' '))ld('fx_'+k,'assets/fx/skill/'+k+'.png');
 for(const k of 'golem treant wolf waterel fireel firelet hawk fairy'.split(' '))for(const f of ['idle','walk','atk'])ld(k+'_'+f,`assets/characters/summons/${k}/${f}.png`);
 for(const f of ['walk0','walk1','walk2','walk3','strike'])ld('sk_'+f,'assets/characters/enemies/skeleton/'+f+'.png');
-for(const k of 'bone0 bone1 bone2 bone3 tornado0 tornado1 tornado2 tornado3 flame0 flame1 flame2 flame3 pf0 pf1 pf2 pi0 pi1 pi2 pl0 pl1 pl2 crack0 crack1 crack2'.split(' '))ld('s2_'+k,'assets/fx/skill2/'+k+'.png?v=1');
+for(const k of 'bone0 bone1 bone2 bone3 tornado0 tornado1 tornado2 tornado3 flame0 flame1 flame2 flame3 pf0 pf1 pf2 pi0 pi1 pi2 pl0 pl1 pl2 crack0 crack1 crack2 wave0 wave1 wave2 wave3 feet0 feet1 feet2 feet3 rock0 rock1 rock2 rock3 rockhit bmist0 bmist1 bmist2 qi0 qi1 qi2'.split(' '))ld('s2_'+k,'assets/fx/skill2/'+k+'.png?v=1');
 const DB=(c,im,x,y,w,alpha=1)=>{const I=IMG[im];if(!I?.complete||!I.width)return;const h=I.height*w/I.width;c.save();c.globalAlpha*=alpha;c.drawImage(I,x-w/2,y-h,w,h);c.restore()};   // 脚底对齐
 ld('swd','assets/ui/w_sword.png?v=1103a');
 for(const f of ['idle','walk','walk2','atk'])ld('wolf_'+f,'assets/characters/summons/cat/'+f+'.png');   // 布偶猫用 wolf 这个卡位
@@ -143,8 +143,8 @@ export function install(X){
   const b=lv('bmist');if(b){c.bT=(c.bT||0)-dt;const r=(b>=3?52:42)*AR(),v=dmK('bmist',.5+.15*(b-1)+(b>=4?.2:0));if(c.bT<=0){c.bT=.5;for(const e of near(hero.x,hero.y,r)){hit('bmist',e,v);e.vulnT=Math.max(e.vulnT||0,.8);e.vuln=Math.max(e.vuln||0,1)}}
    if(b>=5&&Math.hypot(hero.mx||0,hero.my||0)>.1&&(hero.moving??true)){c.bmT=(c.bmT||0)-dt;if(c.bmT<=0){c.bmT=.35;c.Z.push({k:'mist',x:hero.x,y:hero.y,t:0,d:2,r:22,v:v*.6,tick:0,src:'bmist'})}}}
   // 烈焰足迹
-  const fs=lv('flamestep');if(fs){c.fsT=(c.fsT||0)-dt;const mv=Math.hypot(hero.x-(c.px??hero.x),hero.y-(c.py??hero.y))>.05;c.px=hero.x;c.py=hero.y;
-   if(mv&&c.fsT<=0){c.fsT=.22;const z={k:'flame',x:hero.x,y:hero.y+2,t:0,d:(fs>=4?3:2)*DUR(),r:(fs>=3?15:11)*AR(),v:dmK('flamestep',.5+.15*(fs-1)),tick:0,src:'flamestep'};c.Z.push(z);c.tr.push(z);if(c.tr.length>14)c.tr.shift()}
+  const fs=lv('flamestep');if(fs){c.fsT=(c.fsT||0)-dt;const mv=Math.hypot(hero.x-(c.px??hero.x),hero.y-(c.py??hero.y))>.05;if(mv&&c.fsT<=0){c.px0=c.px;c.py0=c.py}c.px=hero.x;c.py=hero.y;
+   if(mv&&c.fsT<=0){c.fsT=.22;c.fsT=.32;const z={k:'flame',a:Math.atan2(hero.y-(c.py0??hero.y),hero.x-(c.px0??hero.x)),x:hero.x,y:hero.y+2,t:0,d:(fs>=4?3:2)*DUR(),r:(fs>=3?15:11)*AR(),v:dmK('flamestep',.5+.15*(fs-1)),tick:0,src:'flamestep'};c.Z.push(z);c.tr.push(z);if(c.tr.length>14)c.tr.shift()}
    if(fs>=5){c.fbT=(c.fbT||0)+dt;if(c.fbT>4&&c.tr.length>=8){c.fbT=0;c.tr.filter(z=>z.t<z.d).forEach((z,i)=>X.ST(()=>{fx({k:'boom',x:z.x,y:z.y,r:24,d:.3});for(const e of near(z.x,z.y,24)){hit('flamestep',e,z.v*3);burn(e,z.v)}z.t=z.d},i*70))}}}
   // 召唤：数量维护
   const wf=lv('wolf');if(wf)keepSum('wolf',wf>=4?2:1,i=>({k:'wolf',x:hero.x+R(-15,15),y:hero.y+R(-8,8),cd:.3,face:1,i,src:'wolf'}));
@@ -185,7 +185,7 @@ export function install(X){
   for(const k of ['wolf','hawk'])if(!lv(k))c.M=c.M.filter(m=>m.k!==k);if(!lv('undead'))c.M=c.M.filter(m=>m.k!=='skel');
   // ---------- 弹道 ----------
   for(const p of c.P){p.age=(p.age||0)+dt;
-   if(p.k==='lob'){p.t+=dt;if(p.t>=p.d){p.dead=1;fx({k:'img',im:'fx_rock',x:p.x,y:p.y-4,a:0,w:18,d:.25});fx({k:'ring',x:p.x,y:p.y,r:p.r,d:.3,c:'140,200,90'});for(const e of near(p.x,p.y,p.r)){hit(p.src,e,p.dm,1);if(p.mark)e.markT=6;else e.slowT=Math.max(e.slowT||0,e.boss?.3:1)}}continue}
+   if(p.k==='lob'){p.t+=dt;if(p.t>=p.d){p.dead=1;fx({k:'img',im:'s2_rockhit',x:p.x,y:p.y-6,a:0,w:p.r*1.3,d:.35});for(const e of near(p.x,p.y,p.r)){hit(p.src,e,p.dm,1);if(p.mark)e.markT=6;else e.slowT=Math.max(e.slowT||0,e.boss?.3:1)}}continue}
    if(p.k==='dcoil'&&!p.back&&p.age>=p.out){p.back=1;p.hit.clear()}
    if(p.k==='dcoil'&&p.back){const dx=hero.x-p.x,dy=hero.y-10-p.y,d=Math.hypot(dx,dy);if(d<10){p.dead=1;continue}p.dx=dx/d;p.dy=dy/d}
    if(p.k==='keg'){if(p.age>=p.life){p.dead=1;kegBoom(p);continue}p.dT=(p.dT||0)-dt;if(p.dT<=0){p.dT=.09;fx({k:'dust',x:p.x-p.dx*6,y:p.y+2,r:5,d:.35})}}
@@ -238,10 +238,10 @@ export function install(X){
    if(z.k==='trap')DI(c,'fx_trap',x,y-3,13);
    else if(z.k==='sigil'||z.k==='sigil2'){if(z.t<0)continue;c.save();c.globalAlpha=(z.on?.55:.3)*fade;c.translate(x,y);c.scale(1,.8);c.rotate(now/900);DI(c,'fx_sigil',0,0,z.r*2.1);c.restore()}
    else if(z.k==='vortex'){c.save();c.globalAlpha=.7*fade;c.translate(x,y);c.scale(1,.8);c.rotate(-now/150);DI(c,'fx_vortex',0,0,z.r*1.4*(1-z.t*.4));c.restore()}
-   else if(z.k==='flame')DB(c,'s2_flame'+(Math.floor(now/110+z.x)%4),x,y+z.r*.4,z.r*2.3,.9*fade)
-   else if(z.k==='mist'){DI(c,'fx_mist',x,y,z.r*2.4,0,false,.45*fade)}
+   else if(z.k==='flame'){c.save();c.globalAlpha=.9*fade;c.translate(x,y);c.scale(1,.8);c.rotate((z.a||0)+Math.PI/2);DI(c,'s2_feet'+(Math.floor(now/120+z.x)%4),0,0,z.r*2.2);c.restore()}
+   else if(z.k==='mist'){DI(c,'s2_bmist'+(Math.floor(now/260+z.x)%3),x,y,z.r*2.4,0,false,.4*fade)}
    else if(z.k==='pillar'&&z.t<0){c.save();c.globalAlpha=.6;c.strokeStyle='#ffffff';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y,z.r,z.r*.7,0,0,6.3);c.stroke();c.restore()}}
-  const b=lv('bmist');if(b){const r=(b>=3?52:42)*AR();c.save();c.translate(hero.x-cx,hero.y-cy);c.rotate(now/2000);DI(c,'fx_mist',0,0,r*2.2,0,false,.3);c.restore()}}
+  const b=lv('bmist');if(b){const r=(b>=3?52:42)*AR();c.save();c.translate(hero.x-cx,hero.y-cy);c.rotate(now/2000);DI(c,'s2_bmist'+(Math.floor(now/260)%3),0,0,r*2.2,0,false,.32);c.restore()}}
  function sprites(items,cx,cy,c,now){const s=X.S;if(!s?.c2)return;const C=s.c2;
   for(const m of C.M){const x=m.x-cx,y=m.y-cy;items.push({y:m.y,f:()=>{c.imageSmoothingEnabled=true;
    if(m.k==='skel'){const k=m.rise>0?1-m.rise/.6:1;if(m.rise>0)DI(c,'fx_rise',x,y-6,22);const im=m.at>0?'sk_strike':'sk_walk'+(m.walk?Math.floor(now/120)%4:0);c.save();c.globalAlpha=k;c.translate(x,y);c.scale(-(m.face||1),1);const I=IMG[im];if(I?.complete&&I.width){c.filter='hue-rotate(160deg) saturate(1.6)';c.drawImage(I,-16,-30,32,32);c.filter='none'}c.restore();
@@ -259,16 +259,11 @@ export function install(X){
   if(C.os)for(const o of C.os)DI(c,'fx_orb',o.x-cx,o.y-cy,10);
   if(C.sh>0){c.save();c.globalAlpha=.25+.15*(C.sh/C.shMax);DI(c,'fx_bubble',hero.x-cx,hero.y-cy-12,34);c.restore()}
   for(const p of C.P){const x=p.x-cx,y=p.y-cy,a=Math.atan2(p.dy||0,p.dx||1);
-   if(p.k==='lob'){const k=Math.min(1,p.t/p.d),lx=p.x0+(p.x-p.x0)*k-cx,ly=p.y0+(p.y-p.y0)*k-cy-Math.sin(k*Math.PI)*50;c.save();c.translate(lx,ly);c.rotate(now/150);DI(c,'fx_rock',0,0,14);c.restore();continue}
+   if(p.k==='lob'){const k=Math.min(1,p.t/p.d),lx=p.x0+(p.x-p.x0)*k-cx,ly=p.y0+(p.y-p.y0)*k-cy-Math.sin(k*Math.PI)*50;p.rk=p.rk??Math.floor(Math.random()*4);c.save();c.translate(lx,ly);c.rotate(now/250);DI(c,'s2_rock'+p.rk,0,0,(p.size||14)*.9);c.restore();continue}
    if(p.k==='buck'){c.save();c.translate(x,y);c.rotate(a);c.fillStyle='rgba(255,200,90,.35)';c.fillRect(-12,-1.5,12,3);c.fillStyle='#fff1b8';c.fillRect(-6,-.8,8,1.6);c.restore();continue}
-   if(p.k==='qi'){const rr=p.r*(.85+.15*Math.sin(now/40));c.save();for(let i=0;i<p.tr.length;i++){const q=(i+1)/p.tr.length;c.fillStyle=`rgba(255,190,80,${q*.25})`;c.beginPath();c.arc(p.tr[i][0]-cx,p.tr[i][1]-cy,rr*q*.8,0,6.3);c.fill()}
-    const g=c.createRadialGradient(x,y,0,x,y,rr*1.5);g.addColorStop(0,'rgba(255,255,240,1)');g.addColorStop(.35,'rgba(255,230,150,.95)');g.addColorStop(.7,'rgba(255,160,60,.55)');g.addColorStop(1,'rgba(255,120,30,0)');c.fillStyle=g;c.beginPath();c.arc(x,y,rr*1.5,0,6.3);c.fill();c.restore();continue}
+   if(p.k==='qi'){const I=IMG['s2_qi'+Math.min(2,Math.floor(p.age/p.life*3))];if(I?.complete&&I.width){const w=p.r*4.5,h=I.height*w/I.width;c.save();c.translate(x,y);c.rotate(a);c.drawImage(I,-w*.82,-h/2,w,h);c.restore()}continue}
    if(p.k==='buck'||p.k==='light'||p.k==='shard'||p.k==='spear'){c.save();c.translate(x,y);c.rotate(a);c.fillStyle=p.k==='buck'?'#bfe6ff':p.k==='light'?'#fff3b0':p.k==='shard'?'#b98cff':'#e8dcc0';c.fillRect(-(p.size||5)/2,-1,p.size||5,2);c.restore();continue}
-   if(p.k==='wave'){const L2=p.len/2,fd=Math.min(1,(p.life-p.age)*3);c.save();c.translate(x,y-4);c.rotate(a);c.globalAlpha=fd;c.scale(1,.85);
-    c.fillStyle='rgba(40,110,210,.55)';c.beginPath();c.moveTo(-6,-L2);c.quadraticCurveTo(14,0,-6,L2);c.quadraticCurveTo(-2,0,-6,-L2);c.fill();
-    c.fillStyle='rgba(110,190,255,.75)';c.beginPath();c.moveTo(-2,-L2*.9);c.quadraticCurveTo(15,0,-2,L2*.9);c.quadraticCurveTo(4,0,-2,-L2*.9);c.fill();
-    c.strokeStyle='rgba(255,255,255,.95)';c.lineWidth=2;c.beginPath();c.moveTo(-1,-L2*.85);c.quadraticCurveTo(15,0,-1,L2*.85);c.stroke();
-    c.fillStyle='rgba(255,255,255,.8)';for(let i=0;i<6;i++){const t=(i/5-.5)*1.6,ph=(now/90+i*1.7)%4;c.fillRect(-6-ph*2,t*L2*.6,1.5,1.5)}c.restore();continue}
+   if(p.k==='wave'){const fd=Math.min(1,(p.life-p.age)*3,p.age*6),I=IMG['s2_wave'+(Math.floor(now/120)%4)];if(I?.complete&&I.width){const w=p.len*1.1,h=I.height*w/I.width;c.save();c.globalAlpha=fd;c.translate(x,y+4);if(p.dx<0)c.scale(-1,1);c.drawImage(I,-w/2,-h,w,h);c.restore()}continue}
    if(p.k==='hwall'){c.save();c.translate(x,y-8);c.rotate(Math.atan2(p.dy,p.dx));const L2=p.len/2,fl=.75+.25*Math.sin(now/60),g=c.createLinearGradient(-7,0,7,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,`rgba(255,255,255,${.85*fl})`);g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(-7,-L2,14,p.len);c.fillStyle=`rgba(255,250,225,${.95*fl})`;c.fillRect(-1.2,-L2,2.4,p.len);c.restore();continue}
    if(p.k==='keg'){c.fillStyle='rgba(18,40,20,.25)';c.beginPath();c.ellipse(x,y+2,p.size*.4,2,0,0,6.3);c.fill();c.save();c.translate(x,y-p.size/2+2);c.rotate(p.age*p.v/(p.size/2)*(p.dx>=0?1:-1));DI(c,'fx_keg',0,0,p.size);c.restore();continue}
    if(p.k==='dcoil'){c.save();for(let i=0;i<(p.tr||[]).length;i++){const q=(i+1)/p.tr.length;c.fillStyle=`rgba(40,0,60,${q*.35})`;c.beginPath();c.arc(p.tr[i][0]-cx,p.tr[i][1]-cy,4*q,0,6.3);c.fill()}
