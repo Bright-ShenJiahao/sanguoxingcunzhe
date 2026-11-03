@@ -1,6 +1,6 @@
-# 三国幸存者（无名之辈 · 外传）
+# 异世界幸存者
 
-三国题材割草 / 幸存者类 roguelike，网页版（纯静态，无需服务器）。
+日式西方奇幻题材割草 / 幸存者类 roguelike（第一关：翠绿之地 · 哥布林），网页版（纯静态，无需服务器）。
 
 ## 本地运行
 ```
@@ -15,7 +15,7 @@ GitHub Pages：Settings → Pages → Branch: main / root。
 - `index.html` `src/main.js` 游戏页与逻辑（480×300 逻辑画布，2 倍渲染）
 - `data/world.json` 地图物件、尺寸、碰撞半径；`data/characters.json` 人物/武器素材清单与对齐数据
 - `assets/map/` 写实俯瞰地图成品（草地/湿泥地底图、碰撞图、物件精灵）
-- `assets/characters/` 主角（旧版 hero_old、细像素 hero_b）、黄巾（enemies_old）、武器
+- `assets/characters/` 主角（hero_b / heroine）、哥布林等敌人（enemies）
 - `assets/weapons/` 40 件武器原始 PNG
 - `art_src/` 美术原始图（地图素材表、人物旧资源）
 - `tools/build_world.sh` 由 art_src/map 重新生成世界（需 numpy、opencv-python、pillow）
