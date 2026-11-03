@@ -1,6 +1,6 @@
-import * as UNL from './unlock.js?v=11040015';window.UNL=UNL;
-import {install as installLM} from './landmarks.js?v=11040015';
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11040015';
+import * as UNL from './unlock.js?v=11040020';window.UNL=UNL;
+import {install as installLM} from './landmarks.js?v=11040020';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11040020';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -451,5 +451,6 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(S.banner){c.save();c.globalAlpha=Math.min(1,S.banner.t*2);c.textAlign='center';c.font='bold 11px "PingFang SC","Microsoft YaHei",sans-serif';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.75)';c.strokeText(S.banner.v,VW/2,62);c.fillStyle='#ffd166';c.fillText(S.banner.v,VW/2,62);c.restore()}
   c.textAlign='start'}
  window.HUDTIP=k=>{const W=WEAPONS[k],L=S.w[k]||0;if(!W)return null;return {n:W.name,L,max:MAXL,d:(W.desc||[]).slice(0,Math.min(L,(W.desc||[]).length)).join('；'),kind:KIND[k]||''}};
- return {dbg:{get S(){return S},WEAPONS,PASSIVES,levelUp(){S.xp=S.need;S.lastLv=-9},maxAll(){for(const k of Object.keys(S.w).concat(S.deck))S.w[k]=MAXL;for(const k in PASSIVES)S.p[k]=PASSIVES[k].max},skip(sec){S.t+=sec},MAXL,KIND},reset,update,onSpawn,onKill,drawWorld,drawUI,absorb:v=>S?C2.absorb(v):v,ground:(c,cx,cy,now)=>{if(S){LM.ground(c,cx,cy,now);C2.ground(c,cx,cy,now)}},sprites:(it,cx,cy,c,now)=>{if(S){C2.sprites(it,cx,cy,c,now);LM.sprites(it,cx,cy,c,now)}},mini:(m,k,now)=>S&&LM.mini(m,k,now),want:()=>S?want():16,get paused(){return !!S&&S.paused},get armor(){return S?S.p.armor+(S.B.arm||0):0},pickKind:()=>S?pickKind():'goblin',get spawnR(){return S&&S.t<45?.75:1},get armPct(){return 0},dodge(){if(S&&S.p.dodge&&Math.random()<.05*S.p.dodge){S.texts.push({x:hero.x,y:hero.y-30,v:'闪避',t:.7,c:'#bfe6ff'});return true}return false},get iframe(){return S?.1*S.p.tough:0},useRevive(){if(S&&S.rev>0){S.rev--;S.banner={v:'复活！',t:2.5};return true}return false},get moveMul(){return S?(window.HSLOW>performance.now()?.5:1)*(1+.08*S.p.spd+S.B.spd)*(S.buf?.spd>0?1.3:1):1}};
+ const dud=e=>{if(S.texts.length<60)S.texts.push({x:e.x,y:e.y-24,v:'哑弹',t:.6,c:'#bdbdbd'})};
+ return {dud,dbg:{get S(){return S},WEAPONS,PASSIVES,levelUp(){S.xp=S.need;S.lastLv=-9},maxAll(){for(const k of Object.keys(S.w).concat(S.deck))S.w[k]=MAXL;for(const k in PASSIVES)S.p[k]=PASSIVES[k].max},skip(sec){S.t+=sec},MAXL,KIND},reset,update,onSpawn,onKill,drawWorld,drawUI,absorb:v=>S?C2.absorb(v):v,ground:(c,cx,cy,now)=>{if(S){LM.ground(c,cx,cy,now);C2.ground(c,cx,cy,now)}},sprites:(it,cx,cy,c,now)=>{if(S){C2.sprites(it,cx,cy,c,now);LM.sprites(it,cx,cy,c,now)}},mini:(m,k,now)=>S&&LM.mini(m,k,now),want:()=>S?want():16,get paused(){return !!S&&S.paused},get armor(){return S?S.p.armor+(S.B.arm||0):0},pickKind:()=>S?pickKind():'goblin',get spawnR(){return S&&S.t<45?.75:1},get armPct(){return 0},dodge(){if(S&&S.p.dodge&&Math.random()<.05*S.p.dodge){S.texts.push({x:hero.x,y:hero.y-30,v:'闪避',t:.7,c:'#bfe6ff'});return true}return false},get iframe(){return S?.1*S.p.tough:0},useRevive(){if(S&&S.rev>0){S.rev--;S.banner={v:'复活！',t:2.5};return true}return false},get moveMul(){return S?(window.HSLOW>performance.now()?.5:1)*(1+.08*S.p.spd+S.B.spd)*(S.buf?.spd>0?1.3:1):1}};
 }

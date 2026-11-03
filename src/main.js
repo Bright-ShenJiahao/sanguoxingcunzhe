@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11040015';
-import {createSurvival} from './survival.js?v=11040015';
-import {createEnemies} from './enemies.js?v=11040015';
-import {createAudio} from './audio.js?v=11040015';
-import {createMeta} from './meta.js?v=11040015';
+import {createMenu} from './menu.js?v=11040020';
+import {createSurvival} from './survival.js?v=11040020';
+import {createEnemies} from './enemies.js?v=11040020';
+import {createAudio} from './audio.js?v=11040020';
+import {createMeta} from './meta.js?v=11040020';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11040015';
+import {createPathing} from './pathing.js?v=11040020';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11040015';
-import {createRun} from './run.js?v=11040015';
-import {createDebug} from './debug.js?v=11040015';
+import {createWeather} from './weather.js?v=11040020';
+import {createRun} from './run.js?v=11040020';
+import {createDebug} from './debug.js?v=11040020';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -168,7 +168,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
    if(el>DUR){weaponAttack=null;nextAtk=now+140}}
   for(const p of pj){p.x+=p.dx*p.v*dt;p.y+=p.dy*p.v*dt;p.life-=dt;for(const e of en){if(!e.dead&&Math.abs(e.x-p.x)<7&&Math.abs(e.y-p.y)<9){hitEnemy(e,now,p.dx>0?1:-1);p.life=0;break}}}
   pj=pj.filter(p=>p.life>0&&ok(p.x,p.y))}
- for(let i=en.length-1;i>=0;i--){const e=en[i];if(e.dead&&!e.counted){e.counted=true;if(!e.crate&&!e.drum)burst(e);if(!e.crate)kills++;run.onKill(e)}if(e.expired)en.splice(i,1)}
+ for(let i=en.length-1;i>=0;i--){const e=en[i];if(e.dead&&!e.counted){e.counted=true;if(!e.crate&&!e.drum)burst(e);if(e.k==='gob_bomb'&&!e.boomed){for(let i=0;i<8;i++){const a=Math.random()*6.28;PARTS.push({x:e.x,y:e.y-10,vx:Math.cos(a)*20,vy:-30-Math.random()*25,t:0,d:.8,c:i%2?'#9a9a9a':'#cfcfcf',s:2.5})}run.dud?.(e)}if(!e.crate)kills++;run.onKill(e)}if(e.expired)en.splice(i,1)}
  if(!pz&&!(portal&&now-portal.t<3500)){const w=run.want();for(let n=0;n<4&&en.filter(e=>!e.dead).length<w;n++)spawn()}
  survival?.update(gdt);
  $('kc').textContent='斩敌 '+kills;
