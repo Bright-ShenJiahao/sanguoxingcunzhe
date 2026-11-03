@@ -1,6 +1,6 @@
-import * as UNL from './unlock.js?v=11032450';window.UNL=UNL;
-import {install as installLM} from './landmarks.js?v=11032450';
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11032450';
+import * as UNL from './unlock.js?v=11040015';window.UNL=UNL;
+import {install as installLM} from './landmarks.js?v=11040015';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11040015';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -362,7 +362,16 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(S.gems.length>500){const a=S.gems.splice(0,100);S.gems[0].v+=a.reduce((s,g)=>s+g.v,0)}
   // 离太远的敌人重新放到屏幕边（像吸血鬼幸存者）
   for(const e of en){if(e.dead||e.drum)continue;const dx=e.x-hero.x,dy=e.y-hero.y;if(dx*dx+dy*dy>520*520){const a=Math.atan2(hero.y-e.y,hero.x-e.x)+R(-.6,.6),r=300;const nx=hero.x+Math.cos(a)*r*-1,ny=hero.y+Math.sin(a)*r*-1;if(ok(nx,ny)){e.x=nx;e.y=ny}}}
-  for(const e of en){if(!e.elite||e.dead)continue;e.summonT-=dt;if(e.summonT<=0&&en.length<340){e.summonT=7;for(let i=0;i<3;i++){const a=R(0,6.28),x=e.x+Math.cos(a)*18,y=e.y+Math.sin(a)*12;if(ok(x,y)){const m=makeEnemy(x,y,'goblin');if(m){onSpawnBase(m);en.push(m)}}}S.fx.push({k:'ring',x:e.x,y:e.y,r:22,t:0,d:.4})}}
+  for(const e of en){if(e.k!=='sp_wolf'||e.expired)continue;if(e.dead||!e.owner||e.owner.dead){e.expired=true;e.dead=true;S.fx.push({k:'ring',x:e.x,y:e.y-6,r:12,t:0,d:.3})}}   // 灵狼：死了或萨满死了就化光消散
+  for(const e of en){if(!e.totem||!e.shTot||e.dead)continue;e.hT=(e.hT||0)-dt;if(e.hT<=0){e.hT=1;for(const o of en){if(o.dead||o.drum||!o.hpMax||o===e)continue;if((o.x-e.x)**2+(o.y-e.y)**2<75*75&&o.hp<o.hpMax){o.hp=Math.min(o.hpMax,o.hp+o.hpMax*.05);if(S.texts.length<50&&Math.random()<.3)S.texts.push({x:o.x,y:o.y-20,v:'+',t:.5,c:'#7dff8a'})}}}}   // 治疗图腾
+  for(const e of en){if(e.k!=='gob_shaman'||e.boss||e.dead)continue;
+   e.ritCd=(e.ritCd??3)-dt;e.totCd=(e.totCd??5)-dt;
+   if(e.rit>0){e.rit-=dt;e.stunT=Math.max(e.stunT||0,.05);
+    if(e.hp<e.ritHp-e.hpMax*.08){e.rit=0;e.ritCd=6;S.texts.push({x:e.x,y:e.y-34,v:'打断！',t:.8,c:'#7df9ff',big:1})}
+    else if(e.rit<=0){e.ritCd=9;let n=0;for(const q of en)if(q.k==='sp_wolf'&&q.owner===e&&!q.dead)n++;for(let i=0;i<Math.min(2,4-n);i++){const a=R(0,6.28),x=e.x+Math.cos(a)*16,y=e.y+Math.sin(a)*10;if(!ok(x,y))continue;const m=makeEnemy(x,y,'sp_wolf');if(!m)continue;onSpawnBase(m);m.owner=e;m.lifeT=15;m.noChest=1;m.res='';m.armor=0;en.push(m)}S.fx.push({k:'ring',x:e.x,y:e.y,r:30,t:0,d:.4})}}
+   else if(e.ritCd<=0&&Math.hypot(e.x-hero.x,e.y-hero.y)<260){e.rit=1.5;e.ritHp=e.hp}
+   if(e.totCd<=0&&(!e.tot||e.tot.dead)){e.totCd=14;const a=R(0,6.28),x=e.x+Math.cos(a)*24,y=e.y+Math.sin(a)*14;if(ok(x,y)){const t=makeEnemy(x,y,'gob_shield');if(t){onSpawnBase(t);Object.assign(t,{totem:true,drum:true,shTot:true,elite:true,noChest:1,armor:0,res:'',name:'治疗图腾',summonT:1e9,sc:.7});t.hp=t.hpMax=Math.round(30+S.t*.25);en.push(t);e.tot=t;S.texts.push({x,y:y-40,v:'治疗图腾',t:1,c:'#7dff8a'})}}}}
+  for(const e of en){if(!e.elite||e.dead||e.k==='gob_shaman')continue;e.summonT-=dt;if(e.summonT<=0&&en.length<340){e.summonT=7;for(let i=0;i<3;i++){const a=R(0,6.28),x=e.x+Math.cos(a)*18,y=e.y+Math.sin(a)*12;if(ok(x,y)){const m=makeEnemy(x,y,'goblin');if(m){onSpawnBase(m);en.push(m)}}}S.fx.push({k:'ring',x:e.x,y:e.y,r:22,t:0,d:.4})}}
   tryLevel();
  }
  function openChest(big){const r=Math.random(),lk=1+.2*S.p.luck,silver=S.t>=600;let n=big?(r<.2*lk?5:3):(r<.03*lk?5:r<.13*lk?3:1),GOT=[];
