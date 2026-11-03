@@ -31,7 +31,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    const stats=data[e.k];e.timer+=dt;e.moving=false;
    if(e.dead){if(e.crate){e.expired=true;continue}if(e.drum)continue;
     if(e.state==='fall'&&e.timer>=.4){e.state='down';e.timer=0}
-    else if(e.state==='down'){e.alpha=Math.max(0,1-Math.max(0,e.timer-.55)/.8);if(e.timer>=1.35)e.expired=true}
+    else if(e.state==='down'&&e.soulT>0){e.alpha=1}else if(e.state==='down'){e.alpha=Math.max(0,1-Math.max(0,e.timer-.55)/.8);if(e.timer>=1.35)e.expired=true}
     continue;
    }
    if(e.drum){if(e.flash>0)e.flash-=dt;continue}
@@ -88,7 +88,9 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     if(stats.orbit&&reg){if(d<100&&(e.orT??-1)<0&&e.dcd<=0)e.orT=2+Math.random();if(e.orT>0){e.orT-=dt;if(e.orT<=0){e.orT=-1;e.state='aim';e.timer=0;e.aimT=.4;e.dx=ax/d;e.dy=ay/d;e.dsp=300;e.dlen=(d+20)/300;e.dcdN=4;e.alen=d+20;continue}}}
     if(stats.drum){e.drT=(e.drT??1)-dt;e.chT=(e.chT??6)-dt;if(e.drT<=0){e.drT=e.rollT>0?.25:2;e.drFx=.6;window.SFX?.drum?.(e.rollT>0);for(const o of near(e.x,e.y,110,en))o.buffT=2.5}   // 鼓手：每 2 秒一下鼓点，鼓舞周围
      if(e.rollT>0)e.rollT-=dt;if(e.chT<=0){e.chT=11;e.rollT=1.2;window.onDrumRoll?.(e);for(const o of near(e.x,e.y,170,en))if(!o.boss&&o!==e)o.chgT=3}}   // 战鼓冲锋：急促鼓点，周围怪一起冲 3 秒
-    if(stats.necro){e.nkT=(e.nkT??3)-dt;if(e.nkT<=0){e.nkT=6;let n=0;for(const o of en){if(n>=4)break;if(o.dead&&!o.raised&&!o.boss&&o.k!=='skeleton'&&(o.x-e.x)**2+(o.y-e.y)**2<130*130){o.raised=1;o.expired=true;window.SPAWN?.('skeleton',o.x,o.y);n++}}}}
+    if(stats.necro){e.nkT=(e.nkT??3)-dt;e.dnT=(e.dnT??3)-dt;
+     if(e.nkT<=0){e.nkT=6;e.flash=.15;let n=0;for(const o of en){if(n>=4)break;if(o.dead&&!o.expired&&!o.raised&&!o.boss&&!o.drum&&o.k!=='skeleton'&&(o.x-e.x)**2+(o.y-e.y)**2<130*130){o.raised=1;o.soulT=1.5;o.soulBy=e;n++}}}   // 死灵师：尸体冒魂火 1.5 秒后爬起来；主角踩上去可踩碎
+     if(e.dnT<=0&&e.hp<e.hpMax){e.dnT=3;let b=null,bd=120*120;for(const o of en){if(o.k!=='skeleton'||o.dead)continue;const q=(o.x-e.x)**2+(o.y-e.y)**2;if(q<bd){bd=q;b=o}}if(b){b.dead=true;b.expired=true;e.hp=Math.min(e.hpMax,e.hp+e.hpMax*.15);window.onDrain?.(e,b)}}}   // 献祭骷髅回血
     if(e.boss&&e.k==='gob_paladin'){e.skT=(e.skT??2.5)-dt;if(e.skT<=0){e.skT=3.5;const r=Math.random();
       if(d<60&&r<.4){e.state='smash';e.timer=0;e.sr=55;e.st=.8;e.bx=ax;continue}
       else if(r<.65&&d>40){e.state='aim';e.timer=0;e.aimT=1;e.dx=ax/d;e.dy=ay/d;e.dsp=300;e.dlen=(d+100)/300;e.dcdN=0;e.alen=d+100;continue}
@@ -122,6 +124,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     }
    }
   }
+  for(const o of en){if(!(o.soulT>0))continue;if(o.expired||!o.soulBy||o.soulBy.dead){o.soulT=0;continue}if(Math.hypot(hero.x-o.x,hero.y-o.y)<14){o.soulT=0;o.expired=true;window.onStomp?.(o);continue}o.soulT-=dt;if(o.soulT<=0){o.expired=true;window.SPAWN?.('skeleton',o.x,o.y)}}   // 魂火尸体
   for(let i=lobs.length-1;i>=0;i--){const L=lobs[i];L.t+=dt;if(L.t>=L.d){let dm=L.dm;if(L.vol){dm*=[1,.6,.35][Math.min(2,L.vol.n)];if(Math.hypot(hero.x-L.x,(hero.y-L.y)*1.25)<L.r)L.vol.n++}explode(L.x,L.y,L.r,dm,false);lobs.splice(i,1)}}
   for(let i=booms.length-1;i>=0;i--){booms[i].t+=dt;if(booms[i].t>.4)booms.splice(i,1)}
   for(let i=arrows.length-1;i>=0;i--){
@@ -162,6 +165,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.state==='windup'&&(e.boss||e.elite)&&!e.dead&&!data[e.k].ranged){const k=Math.min(1,e.timer/.45),R=((data[e.k].reach||30)+5)*(e.sc||1);c.save();c.globalAlpha=.15+.35*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(e.x-cx,e.y-cy,R,R*.75,0,0,6.3);c.fill();c.globalAlpha=.8;c.strokeStyle='#ff3a2a';c.lineWidth=1.5;c.beginPath();c.ellipse(e.x-cx,e.y-cy,R,R*.75,0,0,6.3);c.stroke();c.restore()}   // Boss/精英挥砍预警
   if(e.state==='fuse'&&e.timer<.5&&!e.dead){const k=e.timer/.5,L_=150,N=10,ux=e.fx,uy=e.fy,px=-uy,py=ux;c.save();c.lineWidth=1.6;c.lineCap='round';for(let i=1;i<=N;i++){const t=i/(N+1),x=e.x-cx+ux*L_*t,y=e.y-cy+uy*L_*t,s_=3.2,on=t<=k;c.strokeStyle=on?'rgba(255,150,40,.95)':'rgba(255,255,255,.3)';c.beginPath();c.moveTo(x-ux*s_+px*s_,y-uy*s_+py*s_);c.lineTo(x+ux*s_,y+uy*s_);c.lineTo(x-ux*s_-px*s_,y-uy*s_-py*s_);c.stroke()}c.restore()}
   if(e.dazeT>0&&!e.dead){const x=e.x-cx,y=e.y-cy-30*(e.sc||1);c.save();c.fillStyle='#ffe066';for(let i=0;i<3;i++){const a=now/180+i*2.09;c.fillRect(Math.round(x+Math.cos(a)*9)-1.5,Math.round(y+Math.sin(a)*3)-1.5,3,3)}c.restore()}
+  if(e.soulT>0){const x=e.x-cx,y=e.y-cy-6,k=1-e.soulT/1.5;c.save();for(let i=0;i<4;i++){const ph=now/90+i*1.6,h=6+k*8+Math.sin(ph)*2;c.globalAlpha=.5+.4*Math.sin(ph);c.fillStyle=i%2?'#5dff9a':'#b8ffd0';c.beginPath();c.ellipse(x+(i-1.5)*3,y-h/2,2,h/2,0,0,6.3);c.fill()}c.restore()}   // 魂火
   if(e.rain>0&&!e.dead){const k=1-e.rain/2,x=e.x-cx,y=e.y-cy;c.save();c.globalAlpha=.4+.4*k;c.strokeStyle='#ff8a3a';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y,18,11,0,0,6.3);c.stroke();for(let i=0;i<5;i++){const a=now/200+i*1.257;c.fillStyle='#ffd27a';c.fillRect(x+Math.cos(a)*14-1,y-26-k*6+Math.sin(a)*4-1,2,2)}c.restore()}
   if(e.rit>0&&!e.dead){const k=1-e.rit/1.5,x=e.x-cx,y=e.y-cy,R=24;c.save();c.globalAlpha=.35+.45*k;c.strokeStyle='#7df9ff';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y,R,R*.6,0,0,6.3);c.stroke();c.beginPath();c.ellipse(x,y,R*k,R*.6*k,0,0,6.3);c.stroke();for(let i=0;i<6;i++){const a=now/300+i*1.047;c.fillStyle='#bff7ff';c.fillRect(x+Math.cos(a)*R*.8-1,y+Math.sin(a)*R*.48-1,2,2)}c.restore()}   // 萨满召唤法阵
   if(e.state==='bash'){const k=Math.min(1,e.timer),a0=(e.bx||1)>0?-Math.PI/2:Math.PI/2;c.save();c.globalAlpha=.2+.45*k;c.fillStyle='#ff3a2a';c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.ellipse(e.x-cx,e.y-cy,32*k,22*k,0,a0,a0+Math.PI);c.closePath();c.fill();c.restore()}
