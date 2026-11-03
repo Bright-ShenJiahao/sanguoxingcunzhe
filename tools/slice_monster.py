@@ -36,7 +36,10 @@ for (y0,y1),N in zip(B,rows):
     c=rgba[y0:y1,x0:x1].copy();cr,cg,cb=[c[...,k].astype(int) for k in range(3)]
     c[...,3]=np.where((cr>120)&(cb>120)&(cg<cr-50)&(cg<cb-50),0,c[...,3])
     ys,xs=np.where(c[...,3]>0);crops[nm]=c[ys.min():ys.max()+1,xs.min():xs.max()+1]
-first=rows[0][0];s=H0/crops[first].shape[0]
+first=next((n for r in rows for n in r if n.startswith('walk') or n.startswith('n_walk')),rows[0][0]);s=H0/crops[first].shape[0]   # 以走路帧为基准缩放
+REF=crops[first].shape[0]
+for a_ in sys.argv:
+  if a_.startswith('--ref='):nm_,hh_=a_[6:].split(':');s=float(hh_)/crops[nm_].shape[0];REF=crops[nm_].shape[0];first=nm_
 def skinmask(a):
   h=np.array(Image.fromarray(a[...,:3]).convert('HSV')).astype(float)
   return (a[...,3]>0)&(h[...,0]>28)&(h[...,0]<75)&(h[...,1]>70)&(h[...,2]>60)
@@ -47,7 +50,8 @@ P=np.concatenate(P).astype(float);P=P[np.argsort(P@[.3,.59,.11])]
 out={}
 for nm,c in crops.items():
   I=Image.fromarray(c)
-  I=I.resize((round(I.width*96/I.height),96),Image.LANCZOS) if nm=='portrait' else I.resize((max(1,round(I.width*s)),max(1,round(I.height*s))),Image.LANCZOS)
+  ss=s*(REF/c.shape[0]) if nm.lstrip('n_').startswith('idle') and first.startswith('walk') else s   # 待机帧和走路帧一样高
+  I=I.resize((round(I.width*96/I.height),96),Image.LANCZOS) if nm=='portrait' else I.resize((max(1,round(I.width*ss)),max(1,round(I.height*ss))),Image.LANCZOS)
   a=np.array(I);a[...,3]=np.where(a[...,3]>100,255,0);out[nm]=np.array(outline(Image.fromarray(a)))
 Q=np.sort(np.concatenate([o[skinmask(o)][:,:3] for n,o in out.items() if n!='portrait']).astype(float)@[.3,.59,.11])
 d=json.load(open('data/enemies.json'));F=d[key]['frames'];D=f'assets/characters/enemies/{key}/'

@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11040220';
-import {createSurvival} from './survival.js?v=11040220';
-import {createEnemies} from './enemies.js?v=11040220';
-import {createAudio} from './audio.js?v=11040220';
-import {createMeta} from './meta.js?v=11040220';
+import {createMenu} from './menu.js?v=11040305';
+import {createSurvival} from './survival.js?v=11040305';
+import {createEnemies} from './enemies.js?v=11040305';
+import {createAudio} from './audio.js?v=11040305';
+import {createMeta} from './meta.js?v=11040305';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11040220';
+import {createPathing} from './pathing.js?v=11040305';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11040220';
-import {createRun} from './run.js?v=11040220';
-import {createDebug} from './debug.js?v=11040220';
+import {createWeather} from './weather.js?v=11040305';
+import {createRun} from './run.js?v=11040305';
+import {createDebug} from './debug.js?v=11040305';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());

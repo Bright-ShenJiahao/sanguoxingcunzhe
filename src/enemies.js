@@ -13,7 +13,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  function hit(e,dmg=1){
   if(e.dead)return false;
   if(data[e.k].ghost&&e.phT>0)dmg*=.5;
-  if(e.aegT>0){e.flash=.08;return true}
+  if(e.aegT>0||e.crT>0){e.flash=.08;return true}
   if(e.k==='gob_paladin'&&e.hpMax){for(const th of [.5,.25])if(!e['ag'+th]&&e.hp-dmg<e.hpMax*th){e['ag'+th]=1;e.state='aegis';e.timer=0;e.aegT=4;e.aegHp=e.hpMax*.12;e.aegMax=e.aegHp;for(const o of near(e.x,e.y,120,EN))if(o!==e&&o.hpMax)o.hp=Math.min(o.hpMax,o.hp+o.hpMax*.3)}}
   if(e.ward)dmg*=.5;
   if(e.k==='gob_wolf'&&!e.dism&&e.hp-dmg<e.hpMax*.5&&e.hp-dmg>0){e.dism=1;window.onDismount?.(e);e.k='goblin';e.sc0=data.goblin.sc;e.sc=data.goblin.sc||1;e.fell=.6}
@@ -104,6 +104,20 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
       else if(r<.65&&d>40){e.state='aim';e.timer=0;e.aimT=1;e.dx=ax/d;e.dy=ay/d;e.dsp=300;e.dlen=(d+100)/300;e.dcdN=0;e.alen=d+100;continue}
       else if(r<.85){e.state='judge';e.timer=0;e.jx=hero.x;e.jy=hero.y;continue}
       else{e.state='howl';e.timer=0;continue}}}
+    if(e.k==='gob_emperor'){   // 皇帝：三阶段＋皇冠之怒
+     const P=e.hp>e.hpMax*.6?1:e.hp>e.hpMax*.3?2:3;
+     if(e.crT>0){e.crT-=dt;e.moving=false;let n=e.crN||0;for(const o of en){if(n>=20)break;if(o===e||o.dead||o.elite||o.boss||o.drum||o.suck)continue;if((o.x-e.x)**2+(o.y-e.y)**2<200*200){o.suck=e;n++}}e.crN=n;
+      for(const o of en){if(o.suck!==e||o.dead)continue;const qx=e.x-o.x,qy=e.y-30-o.y,q=Math.hypot(qx,qy);if(q<12){o.dead=true;o.expired=true;o.noChest=1;e.aegMax=Math.max(e.aegMax||0,e.hpMax*.2);e.aegHp=Math.min(e.hpMax*.2,(e.aegHp||0)+e.hpMax*.01);e.aegT=1e9}else{o.x+=qx/q*Math.min(q,260*dt);o.y+=qy/q*Math.min(q,260*dt)}}
+      if(e.crT<=0){window.SHAKE?.(3);if(d<120){const k=60/d;for(let i=8;i>=1;i--){const hx=hero.x+ax/d*60*i/8,hy=hero.y+ay/d*60*i/8;if(ok(hx,hy)){hero.x=hx;hero.y=hy;break}}}window.onCrownEnd?.(e)}continue}
+     if(P>(e.ph||1)){e.ph=P;e.crT=2;e.crN=0;e.wwT=0;e.wwPre=0;e.spQ=0;if(P===2){e.rage=1;e.spdMul=1.4}window.onCrown?.(e);continue}
+     if(e.wwPre>0){e.wwPre-=dt;e.moving=false;if(e.wwPre<=0){e.wwT=2;e.wwS=.6}continue}
+     if(e.spQ>0){e.moving=false;e.spT-=dt;if(e.spT<=0){SPR_.push({x:e.x,y:e.y-20,dx:e.spD[0],dy:e.spD[1],life:.9,dm:BD*.9,st:0,img:1});e.spQ--;e.spT=.4;e.spD=[ax/d,ay/d]}continue}
+     if(P===3){e.plT=(e.plT??0)-dt;if(e.plT<=0){e.plT=.9;for(let i=0;i<2;i++){const a=Math.random()*6.28,r=Math.random()*80;PIL.push({x:hero.x+Math.cos(a)*r,y:hero.y+Math.sin(a)*r*.8,t:0,d:.8,r:18,dm:BD*.7})}}}
+     e.skT=(e.skT??3)-dt;if(e.skT<=0&&e.state!=='judge'){
+      if(P===1){if(d<100){e.skT=5;e.wwPre=.6;continue}if(!(e.smT>0)){e.smT=1;window.onHorn2?.(e)}e.skT=1}
+      else if(P===2){e.skT=3.2;e.spQ=3;e.spT=.4;e.spD=[ax/d,ay/d];continue}
+      else{e.skT=2.5;e.state='judge';e.timer=0;e.jx=hero.x;e.jy=hero.y;continue}}
+     if(e.smT>0)e.smT-=dt/14}
     if(e.boss&&e.name==='哥布林大王'){   // 大王：70%/40% 吹号召小弟；旋风斩
      for(const th of [.7,.4])if(!e['hn'+th]&&e.hp<e.hpMax*th){e['hn'+th]=1;window.onHorn?.(e)}
      if(e.wwPre>0){e.wwPre-=dt;e.moving=false;if(e.wwPre<=0){e.wwT=2;e.wwS=.6}continue}
@@ -161,6 +175,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  function frame(e,now){
   if(e.k==='gob_paladin'){const F=data[e.k].frames,m={aim:'charge',dash:'charge',judge:'judge',howl:'howl',aegis:'aegis',smash:e.timer<(e.st||1)?'windup':'strike'};if(m[e.state]&&F[m[e.state]])return F[m[e.state]]}
   {const F=data[e.k].frames;if(F.charge&&e.state==='aim')return F.charge;if(F.dash&&e.state==='dash')return F.dash;if(F.tired&&e.tiredT>0&&e.state!=='hurt'){e.tiredT-=1/60;return F.tired}}
+  if(e.k==='gob_emperor'){const F=data[e.k].frames;if(e.crT>0)return F.crown;if(e.wwPre>0)return F.cast;if(e.wwT>0&&e.wwS)return Math.floor(now/90)%2?F.ww1:F.ww0;if(e.spQ>0)return e.spT>.12?F.throw0:F.throw1;if(e.state==='judge')return F.cast;if(e.rage&&!e.moving&&e.state==='move')return F.rage}
   if(e.state==='combo'){const t=e.timer,F=data[e.k].frames;const hit=[.45,.9,1.5].some(h=>t>=h&&t<h+.15);return (hit?F.strike:F.windup)||F.idle0}
   let name=e.state==='aim'||e.state==='bash'||e.state==='fuse'||e.state==='smash'||e.state==='cast'||(e.state==='leap'&&e.timer<1)?'windup':e.state==='dash'||e.state==='leap'?'strike':e.state;
   if(name==='move'&&e.swT>0){const F=data[e.k].frames,p=.9-e.swT;name=p<.4?'windup':p<.6?'strike':'recover';if(!F[name])name='move'}
@@ -194,7 +209,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.spQ>0&&!e.dead&&e.spD){const k=1-e.spT/(e.rage?.35:.5),x=e.x-cx,y=e.y-cy-14;c.save();c.globalAlpha=.3+.5*k;c.strokeStyle='#ff3a2a';c.lineWidth=1.5;c.setLineDash([6,4]);c.beginPath();c.moveTo(x,y);c.lineTo(x+e.spD[0]*256,y+e.spD[1]*256);c.stroke();c.restore()}
   if(e.rage&&!e.dead){c.save();c.globalAlpha=.3+.15*Math.sin(now/90);c.fillStyle='#ff2a1a';c.beginPath();c.ellipse(e.x-cx,e.y-cy-18*(e.sc||1),20*(e.sc||1),26*(e.sc||1),0,0,6.3);c.fill();c.restore()}
   if(e.wwPre>0&&!e.dead){const k=1-e.wwPre/.6,R=34;c.save();c.globalAlpha=.2+.4*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(e.x-cx,e.y-cy,R,R*.75,0,0,6.3);c.fill();c.globalAlpha=.8;c.strokeStyle='#ff3a2a';c.lineWidth=1.5;c.beginPath();c.ellipse(e.x-cx,e.y-cy,R*k,R*.75*k,0,0,6.3);c.stroke();c.restore()}
-  if(e.wwT>0&&e.wwS&&!e.dead){const x=e.x-cx,y=e.y-cy-10;c.save();c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=2.5;for(let i=0;i<3;i++){const a=now/70+i*2.09;c.beginPath();c.ellipse(x,y,34,22,0,a,a+1.2);c.stroke()}c.restore()}
+  if(e.wwT>0&&e.wwS&&!e.dead&&e.k!=='gob_emperor'){const x=e.x-cx,y=e.y-cy-10;c.save();c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=2.5;for(let i=0;i<3;i++){const a=now/70+i*2.09;c.beginPath();c.ellipse(x,y,34,22,0,a,a+1.2);c.stroke()}c.restore()}
   if(e.thrown){const T=e.thrown,k=Math.min(1,T.t/T.d);c.save();c.globalAlpha=.25+.5*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(T.x1-cx,T.y1-cy,24,19,0,0,6.3);c.fill();c.restore()}
   if(e.stFx>0&&!e.dead){e.stFx-=1/60;c.save();c.globalAlpha=e.stFx*2;c.strokeStyle='#c9b38a';c.lineWidth=1.5;c.beginPath();c.ellipse(e.x-cx,e.y-cy,30*(1-e.stFx),18*(1-e.stFx),0,0,6.3);c.stroke();c.restore()}
   if(e.soulT>0){const x=e.x-cx,y=e.y-cy-6,k=1-e.soulT/1.5;c.save();for(let i=0;i<4;i++){const ph=now/90+i*1.6,h=6+k*8+Math.sin(ph)*2;c.globalAlpha=.5+.4*Math.sin(ph);c.fillStyle=i%2?'#5dff9a':'#b8ffd0';c.beginPath();c.ellipse(x+(i-1.5)*3,y-h/2,2,h/2,0,0,6.3);c.fill()}c.restore()}   // 魂火
@@ -211,7 +226,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  }
  function drawArrows(c,cx,cy){
   for(const L of PIL){const x=L.x-cx,y=L.y-cy;c.save();if(L.t<L.d){const k=L.t/L.d;c.globalAlpha=.25+.4*k;c.strokeStyle='#ffe27a';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y,L.r,L.r*.8,0,0,6.3);c.stroke();c.fillStyle='#fff3c0';c.beginPath();c.ellipse(x,y,L.r*k,L.r*.8*k,0,0,6.3);c.fill()}else{const k=1-(L.t-L.d)/.25;c.globalAlpha=k;const g=c.createLinearGradient(x-L.r,0,x+L.r,0);g.addColorStop(0,'rgba(255,240,190,0)');g.addColorStop(.5,'rgba(255,255,240,1)');g.addColorStop(1,'rgba(255,240,190,0)');c.fillStyle=g;c.fillRect(x-L.r,y-140,L.r*2,140)}c.restore()}
-  for(const p of SPR_){const a=Math.atan2(p.dy,p.dx);c.save();c.translate(p.x-cx,p.y-cy+(p.st>0?6:0));c.rotate(p.st>0?a*.3-.9:a);c.fillStyle='#7a4a24';c.fillRect(-14,-1,22,2);c.fillStyle='#d8dde8';c.beginPath();c.moveTo(8,-2.5);c.lineTo(14,0);c.lineTo(8,2.5);c.fill();c.restore()}
+  for(const p of SPR_){const a=Math.atan2(p.dy,p.dx);if(p.img&&!(p.st>0)){const f=data.gob_emperor.frames.spear,im=images['en_gob_emperor_spear'];if(f&&im){c.save();c.translate(p.x-cx,p.y-cy);c.rotate(a);c.drawImage(im,-f.size[0]/2,-f.size[1]/2,f.size[0],f.size[1]);c.restore();continue}}c.save();c.translate(p.x-cx,p.y-cy+(p.st>0?6:0));c.rotate(p.st>0?a*.3-.9:a);c.fillStyle='#7a4a24';c.fillRect(-14,-1,22,2);c.fillStyle='#d8dde8';c.beginPath();c.moveTo(8,-2.5);c.lineTo(14,0);c.lineTo(8,2.5);c.fill();c.restore()}
   for(const L of lobs){if(L.t<0)continue;const k=L.t/L.d;c.save();c.globalAlpha=.25+.35*k;c.fillStyle=L.k==='fire'?'#a040ff':'#3a2a20';c.beginPath();c.ellipse(L.x-cx,L.y-cy,L.r*k,L.r*.8*k,0,0,6.3);c.fill();c.restore();
    const im=FX[L.k==='fire'?'lob_fire':'lob_rock'],x=L.x0+(L.x-L.x0)*k,y=L.y0+(L.y-L.y0)*k-Math.sin(k*Math.PI)*(L.k==='rock'?60:25);if(im.complete&&im.width){const w=L.k==='rock'?12:16,h=im.height*w/im.width;c.drawImage(im,x-cx-w/2,y-cy-h/2,w,h)}}
   for(const b of booms){const im=FX['boom'+Math.min(3,Math.floor(b.t/.1))];if(im.complete&&im.width){const w=b.r*2.2,h=im.height*w/im.width;c.drawImage(im,b.x-cx-w/2,b.y-cy-h/2,w,h)}}
