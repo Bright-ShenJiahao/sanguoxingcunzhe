@@ -26,12 +26,14 @@ function danger(ux,uy,sp){const g=G(),h=g.hero,E=EP();let d=0,proj=0;
    if(e.state==='bash'&&dd<36)d+=25*w;
    // 6) 普通接触：怪会往主角走，按预测距离给连续惩罚
    const reach=(14+(e.sc||1)*6)+t*35;if(dd<reach+26)d+=(reach+26-dd)/(reach+26)*(8*big)*w;
+   if(e.boss||e.elite){const R=((e.boss?40:34)*(e.sc||1))+22+t*30;if(dd<R)d+=(R-dd)/R*(e.boss?70:30)*w}   // Boss/精英：保持在它的挥砍范围外
   }}
  return {d,proj}}
 function density(ux,uy){const g=G(),h=g.hero;let s=0;for(const e of g.en){if(e.dead||e.crate)continue;const rx=e.x-h.x,ry=e.y-h.y,dd=Math.hypot(rx,ry);if(dd>360||dd<1)continue;const c=(rx*ux+ry*uy)/dd;if(c>.3)s+=(c-.3)*(e.boss?4:e.elite?2.5:1)*(1-dd/400)}return s}
 function pickTarget(){const g=G(),h=g.hero,S=g.S,hpf=(g.hp||1)/(g.maxHp||100);let best=null,bs=0;
  const cand=[...(S.gems||[]).map(o=>[o,1]),...(S.meats||[]).map(o=>[o,hpf<.5?6:hpf<.8?1.5:.2]),...(S.chests||[]).map(o=>[o,4]),...(S.mags||[]).map(o=>[o,3])];
- for(const [o,w] of cand){const dd=Math.hypot(o.x-h.x,o.y-h.y);if(dd>200)continue;if(near(o.x,o.y,45)>(w>=4?2:0))continue;const sc=w/(dd+25);if(sc>bs){bs=sc;best=o}}return best}
+ let bossNear=false;for(const e of g.en)if(!e.dead&&(e.boss)&&Math.hypot(e.x-h.x,e.y-h.y)<120)bossNear=true;
+ for(const [o,w] of cand){const dd=Math.hypot(o.x-h.x,o.y-h.y);if(dd>240)continue;if(bossNear&&w<3)continue;const nn=near(o.x,o.y,40);const sc=w/(dd+25)/(1+nn*.5);if(sc>bs){bs=sc;best=o}}return best}
 window.BOTTICK=function(dt){const g=G();if(!g||!g.S)return;const h=g.hero;T+=dt;hold-=dt;emerg-=dt;LOG.dec++;
  const sp=72*(g.moveMul||1);
  // 受击日志
@@ -39,8 +41,8 @@ window.BOTTICK=function(dt){const g=G();if(!g||!g.S)return;const h=g.hero;T+=dt;
  if(Math.floor(T/60)>LOG.tele.length-1)LOG.tele.push({m:Math.floor(T/60),lv:g.S.lv,en:g.en.filter(e=>!e.dead).length,hp});
  // 局势
  const n80=near(h.x,h.y,80),n140=near(h.x,h.y,140);
- mode=n80>=6?'break':n140>=3?'kite':'collect';LOG.modes[mode]=(LOG.modes[mode]||0)+dt;
- const tgt=mode==='collect'||(mode==='kite'&&n80<2)?pickTarget():null;
+ mode=n80>=6?'break':n140>=5?'kite':'collect';LOG.modes[mode]=(LOG.modes[mode]||0)+dt;
+ const tgt=mode!=='break'?pickTarget():null;
  // 怪群质心（绕圈用）
  let cx=0,cy=0,cn=0;for(const e of g.en){if(e.dead||e.crate)continue;const dd=Math.hypot(e.x-h.x,e.y-h.y);if(dd<260){cx+=e.x;cy+=e.y;cn++}}
  if(cn){cx/=cn;cy/=cn}
