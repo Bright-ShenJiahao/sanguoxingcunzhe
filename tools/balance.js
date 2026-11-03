@@ -28,7 +28,7 @@ const CLOCK=()=>{let v=0;performance.now=()=>v;const T=window.setTimeout.bind(wi
 function rng(seed){return()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff}}
 async function cardList(b){const p=await b.newPage();await p.goto(URL+'?debug');await p.waitForFunction(()=>window.G?.run?.dbg?.WEAPONS,null,{timeout:60000});
  const ks=await p.evaluate(()=>{const W=G.run.dbg.WEAPONS;return Object.keys(W).filter(k=>!W[k].own)});await p.close();return ks}
-async function one(b,cards){const p=await b.newPage({viewport:{width:480,height:270}});await p.addInitScript(CLOCK);
+async function one(b,cards){const p=await b.newPage({viewport:{width:480,height:270}});await p.addInitScript(CLOCK);await p.addInitScript(()=>{try{localStorage.setItem('sanguo.playerName','bot');localStorage.setItem('unl',JSON.stringify({c:['greatsword','rapier','gsword','whip','fist','trap','treant','wolf','mgun','wedge','hawk','orb','keg','flamestep','pouch','waterel','fireel','hwall','sigil','fairy','bmist','dcoil','vortex','undead','thunder'],p:[],best:0,boss:{},runs3:0}))}catch(e){}});
  await p.goto(URL+'?cards='+cards.join(','));await p.waitForFunction(()=>[...document.querySelectorAll('button')].some(x=>x.textContent.includes('开始游戏')&&x.offsetParent),null,{timeout:120000});
  await p.waitForTimeout(500);await p.getByText('开始游戏').first().click();await p.waitForTimeout(300);
  for(const t of ['下一步','出发']){await p.getByText(t).first().click();await p.waitForTimeout(300)}

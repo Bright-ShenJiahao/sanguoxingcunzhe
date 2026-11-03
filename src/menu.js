@@ -1,4 +1,4 @@
-import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC,fixDeck,DECKN,KIND} from './run.js?v=11031930';
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC,fixDeck,DECKN,KIND} from './run.js?v=11031940';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -24,6 +24,9 @@ body{--fg:#edf4fa;--muted:#b2c1d0;--line:#566879;background:#101921;color:#edf4f
 .menu-panel button{cursor:pointer;font:inherit;color:inherit}
 .menu-start{display:flex;align-items:center;justify-content:space-between;width:100%;text-align:left;padding:17px 18px;margin-bottom:22px;border:1px solid #a2cbff88;border-radius:7px;background:#72a9f62b;font-size:23px!important;font-weight:700!important}
 .menu-start:hover{background:#8bbcff40}
+.menu-start.off{opacity:.45}
+.menu-name input.need{outline:2px solid #ff6b6b;animation:nshake .35s}
+@keyframes nshake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
 .menu-start small{display:block;font-size:12px;font-weight:400;letter-spacing:.04em;color:#d4e4fc;margin-top:5px}
 .menu-section{font-size:15px;letter-spacing:.15em;margin:0 0 13px}
 #main-menu #cs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -96,7 +99,7 @@ export function createMenu(game){
  const cs=document.getElementById('cs');
  const input=root.querySelector('input'),caption=root.querySelector('.menu-character');
  try{input.value=localStorage.getItem('sanguo.playerName')||''}catch{/* 隐私模式仍可游玩。 */}
- input.addEventListener('input',()=>{try{localStorage.setItem('sanguo.playerName',input.value)}catch{}});
+ const syncSt=()=>root.querySelector('.menu-start')?.classList.toggle('off',!input.value.trim());input.addEventListener('input',()=>{try{localStorage.setItem('sanguo.playerName',input.value)}catch{}syncSt();input.classList.remove('need')});setTimeout(syncSt,0);
  // 阻断名字输入与菜单点击进入原来的全局移动按键处理。
  root.addEventListener('keydown',e=>e.stopPropagation());root.addEventListener('keyup',e=>e.stopPropagation());
  const preview=root.querySelector('canvas').getContext('2d');
@@ -169,7 +172,7 @@ export function createMenu(game){
  prep.querySelector('.pp-next').onclick=()=>{if(deck.c.length<Math.min(DECKN,POOL.c.length)){prep.querySelector('.pp-tabs [data-t=gear]').click();prep.querySelectorAll('.dk .warn').forEach(w=>w.textContent=`技能卡要选满 ${DECKN} 张才能出发`);return}try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}step('stage')};
  prep.querySelector('[data-s=stage] .pp-back').onclick=()=>step('prep');
  const info=prep.querySelector('.pp-info'),ipv=info.querySelector('canvas').getContext('2d');
- root.querySelector('.menu-start').onclick=()=>{root.hidden=true;prep.hidden=false;step('prep');prep.querySelector('.pp-next').focus()};
+ root.querySelector('.menu-start').onclick=()=>{const ni=root.querySelector('.menu-name input');if(!ni.value.trim()){ni.placeholder='请先输入名字';ni.classList.remove('need');void ni.offsetWidth;ni.classList.add('need');ni.focus();return}root.hidden=true;prep.hidden=false;step('prep');prep.querySelector('.pp-next').focus()};
  prep.querySelector('.pp-go').onclick=async()=>{
   if(starting)return;starting=true;prep.hidden=true;
   try{await game.ready?.()}catch{/* 加载失败也进入游戏 */}
