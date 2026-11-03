@@ -1,6 +1,6 @@
-import * as UNL from './unlock.js?v=11040345';window.UNL=UNL;
-import {install as installLM} from './landmarks.js?v=11040345';
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11040345';
+import * as UNL from './unlock.js?v=11040350';window.UNL=UNL;
+import {install as installLM} from './landmarks.js?v=11040350';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11040350';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -329,7 +329,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
   if(S.texts.length>90)S.texts.splice(0,S.texts.length-90);if(S.fx.length>140)S.fx.splice(0,S.fx.length-140);
   if(S.gems?.length>220){const g=S.gems,keep=[];g.sort((a,b)=>a.x-b.x);for(const q of g){const l=keep[keep.length-1];if(l&&Math.abs(l.x-q.x)<24&&Math.abs(l.y-q.y)<24){l.v+=q.v}else keep.push(q)}S.gems=keep}
   if(S.coins.length>160){const g=S.coins,keep=[];for(const q of g){const l=keep[keep.length-1];if(l&&!q.bag&&!l.bag&&Math.abs(l.x-q.x)<30&&Math.abs(l.y-q.y)<30){l.v+=q.v}else keep.push(q)}S.coins=keep}
-  S.t+=dt;S.spT=(S.spT||0)+dt;if(S.bpool){for(const q of S.bpool){q.t+=dt;if((hero.x-q.x)**2+((hero.y-q.y)*1.25)**2<q.r*q.r){q.hT=(q.hT||0)-dt;window.HSLOW=performance.now()+300;if(q.hT<=0){q.hT=.5;window.CUR_E='血池';survival?.damage?.(4+S.t/120)}}}S.bpool=S.bpool.filter(q=>q.t<q.d)}{const mv=Math.hypot(hero.x-(S.stX??hero.x),hero.y-(S.stY??hero.y));S.stX=hero.x;S.stY=hero.y;if(mv>.3*dt*60)S.still=0;else S.still=(S.still||0)+dt;if(S.still>=4&&S.t>20&&!window.DBG?.noMob&&survival?.playing){S.still=0;S.banner={v:'别站着不动！狼骑来了',t:2};window.HURT=performance.now()-80;for(let i=0;i<3+Math.min(4,Math.floor(S.t/120));i++)window.SUMMON?.('gob_wolf')}}if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}if(!window.DBG?.noMob){events();camp(dt);tribe(dt);crates(dt)}if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
+  S.t+=dt;S.spT=(S.spT||0)+dt;if(S.bpool){for(const q of S.bpool){q.t+=dt;if((hero.x-q.x)**2+((hero.y-q.y)*1.25)**2<q.r*q.r){q.hT=(q.hT||0)-dt;window.HSLOW=performance.now()+300;if(q.hT<=0){q.hT=.5;window.CUR_E='血池';survival?.damage?.(4+S.t/120)}}}S.bpool=S.bpool.filter(q=>q.t<q.d)}{const mv=Math.hypot(hero.x-(S.stX??hero.x),hero.y-(S.stY??hero.y));S.stX=hero.x;S.stY=hero.y;if(mv>.3*dt*60)S.still=0;else S.still=(S.still||0)+dt;if(S.still>=6&&S.t>120&&!S.stillWarn&&!window.DBG?.noMob&&survival?.playing){S.stillWarn=1;S.banner={v:'别站着不动！',t:2}}if(S.still<6)S.stillWarn=0;if(S.still>=8&&S.t>120&&!window.DBG?.noMob&&survival?.playing){S.still=0;S.stillWarn=0;S.banner={v:'狼骑来了！',t:2};window.HURT=performance.now()-80;for(let i=0;i<3+Math.min(4,Math.floor(S.t/120));i++)window.SUMMON?.('gob_wolf')}}if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}if(!window.DBG?.noMob){events();camp(dt);tribe(dt);crates(dt)}if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
   for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0){S.src=k;S.cd[k]=FIRE[k](OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd)}}
   C2.update(dt);LM.update(dt);
   if(S.comboT>0){S.comboT-=dt;if(S.comboT<=0&&!(S.ocT>0))S.combo=0}if(S.ocT>0)S.ocT-=dt;if(S.ocCd>0)S.ocCd-=dt;
