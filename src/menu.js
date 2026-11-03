@@ -1,4 +1,4 @@
-import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC,fixDeck,DECKN,KIND} from './run.js?v=11040350';
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC,fixDeck,DECKN,KIND} from './run.js?v=11040420';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -88,7 +88,7 @@ export function createMenu(game){
  let visible=true;
  const root=document.createElement('main');root.id='main-menu';root.setAttribute('aria-label','游戏主界面');
  root.innerHTML=`<section class="menu-profile" aria-label="当前角色">
-  <div class="menu-eyebrow">无名之辈 · 外传</div><h1 class="menu-title">异世界幸存者</h1>
+  <div class="menu-eyebrow">Isekai Survivors: RUN!</div><h1 class="menu-title">异世界幸存者<span style="color:#ff8a5a">：跑！</span></h1>
   <div class="menu-card"><canvas width="200" height="160" aria-label="当前角色待机动画"></canvas></div>
   <div class="menu-character" hidden></div><label class="menu-name" aria-label="你的名字"><input maxlength="8" placeholder="输入你的名字" autocomplete="nickname"></label>
  </section><nav class="menu-panel" aria-label="主菜单">
