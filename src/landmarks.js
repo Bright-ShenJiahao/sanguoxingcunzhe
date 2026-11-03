@@ -16,10 +16,11 @@ fetch('data/palisade.json?v=1').then(r=>r.json()).then(Ls=>{let seed=7;const rnd
  for(const L of Ls)for(let i=0;i<L.length-1;i++){const [x0,y0]=L[i],[x1,y1]=L[i+1],len=Math.hypot(x1-x0,y1-y0);for(let t=0;t<len;t+=5){const x=x0+(x1-x0)*t/len,y=y0+(y1-y0)*t/len;
   POSTS.push({k:'post'+[0,1,1,2][Math.floor(rnd()*4)],x:x+(rnd()-.5)*1.5,y:y+(rnd()-.5)*1.5,h:.85+rnd()*.3})}}}).catch(()=>{});   // 地标在游戏里的高度
 // 哥布林瞭望塔（用户圈点 11/03）：射程内放箭，前期伤害高；可被打掉，碎了这局不再出现
-const TW=[[88,628],[224,640],[341,617],[206,816],[420,788]];
+const TW=[[224,640],[341,617],[206,816],[420,788]];
 const DEC=[['brazier',489,725],['brazier',463,801],['brazier',126,542],['brazier',199,538],['banner',320,836],['skulls',298,524],['skulls',284,533],['skulls',312,533],['skulls',292,544],['skulls',306,546],['skulls',298,536],['banner',298,550]];
 // 拒马（用户画线 11/03）：沿线每 16px 一组，尖头朝外（背向山顶中心）
 const SPK=[[[505,725],[505,752]],[[502,779],[495,803]],[[532,726],[534,756]],[[531,782],[525,809]],[[559,728],[558,756]],[[559,790],[553,810]],[[487,820],[468,842]],[[523,828],[494,857]],[[546,838],[526,865]]];
+const CASTLE={x:135,y:792,w:169,h:170};{const i=new Image();i.src='assets/map/fort/castle_big.png?v=1';IM.f_castle=i}
 for(const k of ['tower','banner','skulls','brazier','spikes']){const i=new Image();i.src=`assets/map/fort/${k}.png?v=1`;IM['f_'+k]=i}
 const FH={tower:55,banner:34,skulls:16,brazier:26,spikes:22};
 export function install(X){
@@ -66,6 +67,7 @@ export function install(X){
   c.restore()}
  function sprites(items,cx,cy,c,now){if(!L)return;const VW_=(window.CAM?.VW||640),VH_=(window.CAM?.VH||400),S_=X.S;
   const dimg=(k,x,y,fl)=>{const I=IM['f_'+k];if(!I?.complete||!I.width)return;const h=FH[k],w=I.width*h/I.height;c.save();c.translate(x,y);if(fl)c.scale(-1,1);c.drawImage(I,-w/2,-h+2,w,h);c.restore()};
+  {const C=CASTLE,I=IM.f_castle,x=C.x-cx,y=C.y-cy;if(I?.complete&&I.width&&x>-120&&x<VW_+120&&y>-20&&y<VH_+C.h+20)items.push({y:C.y-8,f:()=>{c.save();c.imageSmoothingEnabled=true;c.drawImage(I,x-C.w/2,y-C.h,C.w,C.h);c.restore()}})}
   for(const d of DEC){const x=d[1]-cx,y=d[2]-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+70)continue;items.push({y:d[2],f:()=>{dimg(d[0],x,y,d[3]&&d[1]>380);if(d[0]==='brazier'){c.save();c.globalAlpha=.25+.1*Math.sin(now/120);c.fillStyle='#ffb040';c.beginPath();c.arc(x,y-20,9,0,6.3);c.fill();c.restore()}}})}
   for(const [[x0,y0],[x1,y1]] of SPK){const mx=(x0+x1)/2,my=(y0+y1)/2,fl=mx<250;for(const dx of [-7,7]){const x=mx+dx-cx,y=my-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+60)continue;items.push({y:my,f:()=>dimg('spikes',x,y+4,fl)})}}
   if(S_?.tw)for(const T of S_.tw){if(T.dead)continue;const x=T.x-cx,y=T.y-cy;if(x<-40||y<-10||x>VW_+40||y>VH_+80)continue;const e=T.e;items.push({y:T.y,f:()=>{c.save();if(e?.flash>0)c.filter='brightness(1.8)';dimg('tower',x,y);c.restore();
