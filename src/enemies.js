@@ -153,6 +153,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.state==='bash'){const k=Math.min(1,e.timer),a0=(e.bx||1)>0?-Math.PI/2:Math.PI/2;c.save();c.globalAlpha=.2+.45*k;c.fillStyle='#ff3a2a';c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.ellipse(e.x-cx,e.y-cy,32*k,22*k,0,a0,a0+Math.PI);c.closePath();c.fill();c.restore()}
   const sc=(e.sc||1)*SPR;c.save();c.translate(Math.round(e.x-cx)+(e.state==='aim'&&e.timer>(e.aimT||.5)*.6?(Math.floor(now/40)%2?1:-1):0),Math.round(e.y-cy));if(e.rc>0){e.rc-=1/60;if(!e.boss&&!e.dead)c.translate(Math.round((e.rcd||0)*(e.elite?1:2.5)*e.rc/.09),0)}c.scale(e.face*sc,sc);c.globalAlpha=e.alpha??1;c.imageSmoothingEnabled=false;
   if(!e.dead){c.fillStyle='rgba(10,20,10,.32)';c.beginPath();c.ellipse(0,0,6,2.2,0,0,6.3);c.fill()}   // 脚下阴影：雨雾天也看得清
+  if(window.SKINADJ&&window.SKINADJ.k===e.k)c.filter=`brightness(${1-window.SKINADJ.dark/100}) saturate(${1-window.SKINADJ.sat/100})`;   // 调试：预览皮肤暗沉
   if(e.flash>0){e.flash-=1/60;c.filter=e.flash>.03?'brightness(0) invert(1)':'brightness(2.2)'}if(e.state==='fall'&&e.timer<.4)c.scale(1-.3*e.timer/.4,1-.3*e.timer/.4);
   if(data[e.k].ghost)c.globalAlpha*=e.phT>0?.25:.75;
   if(e.hop)c.translate(0,-e.hop/sc);
