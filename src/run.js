@@ -1,6 +1,6 @@
-import * as UNL from './unlock.js?v=11032050';window.UNL=UNL;
-import {install as installLM} from './landmarks.js?v=11032050';
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11032050';
+import * as UNL from './unlock.js?v=11032100';window.UNL=UNL;
+import {install as installLM} from './landmarks.js?v=11032100';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11032100';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -245,9 +245,9 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    return L>=5?1.2:1.6},
   _gb(){},
   gb(L){if(L>=8&&(S.combo||0)>=30&&!(S.ocT>0)&&!(S.ocCd>0)){S.ocT=3;S.ocCd=10;S.texts.push({x:hero.x,y:hero.y-46,v:'超频！',t:1.2,c:'#7df9ff',big:1});const t=nearest(200);if(t)S.shots.push({k:'tet',x:t.x,y:t.y,t:0,d:.45,r:34,dm:dmg(5)})}
-   const oc=S.ocT>0,n=(L>=6?3:L>=3?2:1)+AMT()+(oc?2:0),dm=dmg(1.2+.35*(L-1)),pierce=(L>=4?1:0)+(L>=7?1:0)+(oc?2:0),bounce=1+(L>=5?1:0)+(L>=8?1:0),b=AIM(260);window.SFX?.shoot();
+   const oc=S.ocT>0,n=(L>=6?3:L>=3?2:1)+AMT()+(oc?2:0),dm=dmg(1.2+.35*(L-1)),pierce=(L>=4?1:0)+(L>=7?1:0)+(oc?2:0),bounce=(L>=3?1:0)+(L>=5?1:0)+(L>=8?1:0),b=AIM(260);window.SFX?.shoot();
    for(let i=0;i<n;i++){const a=b+(i-(n-1)/2)*.15;S.shots.push({k:'pix',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:210,life:1,dm,pierce,bounce,hit:new Set()})}
-   return L>=5?.6:.85},
+   return L>=5?.6:L>=3?.85:1},
   hp(L){const M=Math.floor(S.t/10)%3,MN=['摇滚','电音','抒情'];if(S.hpMode!==M){const first=S.hpMode===undefined;S.hpMode=M;S.texts.push({x:hero.x,y:hero.y-46,v:'♪ '+MN[M],t:1.2,c:['#ff8a5a','#7df9ff','#ffb3e6'][M],big:1});
     if(!first&&L>=8){const dm0=dmg(1+.35*(L-1));S.fx.push({k:'ring',x:hero.x,y:hero.y,r:110,t:0,d:.4});
      if(M===0){for(const e of en)if(!e.dead&&(e.x-hero.x)**2+((e.y-hero.y)*1.2)**2<110*110){strike(e,dm0*2,Math.sign(e.x-hero.x)||1);if(!e.boss)knock(e,18)}}
@@ -323,7 +323,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(S.texts.length>90)S.texts.splice(0,S.texts.length-90);if(S.fx.length>140)S.fx.splice(0,S.fx.length-140);
   if(S.gems?.length>220){const g=S.gems,keep=[];g.sort((a,b)=>a.x-b.x);for(const q of g){const l=keep[keep.length-1];if(l&&Math.abs(l.x-q.x)<24&&Math.abs(l.y-q.y)<24){l.v+=q.v}else keep.push(q)}S.gems=keep}
   if(S.coins.length>160){const g=S.coins,keep=[];for(const q of g){const l=keep[keep.length-1];if(l&&!q.bag&&!l.bag&&Math.abs(l.x-q.x)<30&&Math.abs(l.y-q.y)<30){l.v+=q.v}else keep.push(q)}S.coins=keep}
-  S.t+=dt;S.spT=(S.spT||0)+dt;if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}if(!window.DBG?.noMob){events();camp(dt);tribe(dt);crates(dt)}if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
+  S.t+=dt;S.spT=(S.spT||0)+dt;{const mv=Math.hypot(hero.x-(S.stX??hero.x),hero.y-(S.stY??hero.y));S.stX=hero.x;S.stY=hero.y;if(mv>.3*dt*60)S.still=0;else S.still=(S.still||0)+dt;if(S.still>=4&&S.t>20&&!window.DBG?.noMob&&survival?.playing){S.still=0;S.banner={v:'别站着不动！狼骑来了',t:2};window.HURT=performance.now()-80;for(let i=0;i<3+Math.min(4,Math.floor(S.t/120));i++)window.SUMMON?.('gob_wolf')}}if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}if(!window.DBG?.noMob){events();camp(dt);tribe(dt);crates(dt)}if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
   for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0){S.src=k;S.cd[k]=FIRE[k](OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd)}}
   C2.update(dt);LM.update(dt);
   if(S.comboT>0){S.comboT-=dt;if(S.comboT<=0&&!(S.ocT>0))S.combo=0}if(S.ocT>0)S.ocT-=dt;if(S.ocCd>0)S.ocCd-=dt;

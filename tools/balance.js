@@ -32,7 +32,7 @@ async function one(b,cards){const p=await b.newPage({viewport:{width:480,height:
  await p.goto(URL+'?cards='+cards.join(','));await p.waitForFunction(()=>[...document.querySelectorAll('button')].some(x=>x.textContent.includes('开始游戏')&&x.offsetParent),null,{timeout:120000});
  await p.waitForTimeout(500);await p.getByText('开始游戏').first().click();await p.waitForTimeout(300);
  for(const t of ['下一步','出发']){await p.getByText(t).first().click();await p.waitForTimeout(300)}
- await p.evaluate(BOTV!=='v1'?BRAIN2:BRAIN);const w0=Date.now();
+ await p.evaluate(BOTV!=='v1'?BRAIN2:BRAIN);if(BOTV==='still')await p.evaluate(()=>{window.BOTTICK=()=>{window.BOTDIR=[0,0]}});const w0=Date.now();
  while(true){await p.waitForTimeout(2000);const st=await p.evaluate(()=>({dead:!!document.querySelector('.survival-dialog')?.open,t:window.__G?.S?.t||0}));if(st.dead||st.t>=MAXT||Date.now()-w0>40*60e3)break}
  const r=await p.evaluate(()=>{const S=__G.S,L=JSON.parse(localStorage.getItem('deathlog')||'[]'),d=L[L.length-1];
   return {t:Math.round(S.t),died:!!document.querySelector('.survival-dialog')?.open,by:d?.by,kills:d?.kills,lv:S.lv,lvAt:S.lvAt,fullAt:S.fullAt??null,w:S.w,p:Object.fromEntries(Object.entries(S.p).filter(([,v])=>v>0)),dmg:Object.fromEntries(Object.entries(S.dmgBy||{}).map(([k,v])=>[k,Math.round(v)])),log:window.BOTLOG?{hits:BOTLOG.hits.slice(-60),nh:BOTLOG.hits.length,tele:BOTLOG.tele,modes:BOTLOG.modes}:null}});

@@ -20,23 +20,38 @@
    "main": [
     "goblin"
    ],
-   "min": 30,
-   "iv": 0.7,
-   "ev": []
+   "min": 38,
+   "iv": 0.55,
+   "ev": [
+    [
+     "ring",
+     1,
+     1,
+     0
+    ]
+   ]
   },
   {
    "t": 1,
    "main": [
-    "goblin"
+    "goblin",
+    "goblin",
+    "gob_archer"
    ],
-   "min": 45,
-   "iv": 0.6,
+   "min": 52,
+   "iv": 0.5,
    "ev": [
     [
      "kids",
      0.5,
      1,
      0
+    ],
+    [
+     "ring",
+     1,
+     2,
+     30
     ]
    ]
   },
@@ -44,10 +59,12 @@
    "t": 2,
    "main": [
     "gob_blade",
-    "goblin"
+    "goblin",
+    "goblin",
+    "gob_wolf"
    ],
-   "min": 55,
-   "iv": 0.5,
+   "min": 62,
+   "iv": 0.4,
    "ev": [
     [
      "kids",
@@ -63,7 +80,7 @@
     "gob_shield",
     "goblin"
    ],
-   "min": 40,
+   "min": 60,
    "iv": 0.5,
    "ev": [
     [
