@@ -48,7 +48,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    if(e.dazeT>0){e.dazeT-=dt;e.moving=false;continue}
    if(stats.leap&&!e.boss){e.tgT=(e.tgT??3)-dt;   // 巨型哥布林：抓小怪扔、半血怒吼、践踏
     if(!e.enr&&e.hpMax&&e.hp<e.hpMax*.5){e.enr=1;e.chain=3;e.bcd=0;window.onRoar?.(e)}
-    if(e.moving){e.stT=(e.stT??.6)-dt;if(e.stT<=0){e.stT=.6;if(Math.random()<.3){e.stFx=.3;if(d<30)window.HSLOW=performance.now()+800;window.SHAKE?.(1)}}}
+    if(e.moving){e.stT=(e.stT??.6)-dt;if(e.stT<=0){e.stT=.6;if(Math.random()<.2){e.stFx=.3;if(d<30)window.HSLOW=performance.now()+800}}}
     if(e.tgT<=0&&d>50&&d<200&&e.state!=='leap'){e.tgT=5;let b=null,bd=40*40;for(const o of en){if(o===e||o.dead||o.elite||o.boss||o.drum||o.thrown)continue;const q=(o.x-e.x)**2+(o.y-e.y)**2;if(q<bd){bd=q;b=o}}if(b){b.thrown={x0:b.x,y0:b.y,x1:hero.x,y1:hero.y,t:0,d:.9,dm:BD*1.5};b.state='move';e.flash=.15}}}
    if(e.k==='gob_mage'&&!e.boss){e.blCd=(e.blCd??0)-dt;e.rnCd=(e.rnCd??4)-dt;   // 法师：闪现（冷却 6 秒）、火雨（念咒 2 秒）
     if(e.rain>0){e.rain-=dt;e.moving=false;if(e.rain<=0){for(let i=0;i<5;i++){const a=Math.random()*6.28,r=Math.random()*70;lobs.push({k:'fire',x0:e.x,y0:e.y-30,x:hero.x+Math.cos(a)*r,y:hero.y+Math.sin(a)*r*.8,t:-i*.15,d:.9,r:20,dm:BD*1.3})}}continue}
