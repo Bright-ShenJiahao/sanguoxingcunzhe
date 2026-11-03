@@ -14,7 +14,6 @@ export function createDebug(g){
  el.innerHTML=`<h4>🔧 开发者（点标题收起）</h4>
  <b>召唤（出现在身边）</b><div class="r">${[['gob_hero','哥布林英雄'],['gob_troll','血咒巨魔'],['gob_king','哥布林大王'],['gob_chief','哥布林酋长'],['gob_paladin','哥布林圣骑士'],['gob_giant','巨型哥布林'],['gob_shaman','萨满精英']].map(([k,n])=>`<button data-sum="${k}">${n}</button>`).join('')}</div>
  <b>主角</b><div class="r"><button data-a="god">无敌</button><button data-a="nomob">没有怪物</button><button data-a="heal">回满血</button><button data-a="lv">升一级</button><button data-a="max">全武器满级</button><button data-a="unlall">全部解锁</button></div>
- <b>剑士皮肤预览</b><div class="r" style="font-size:11px">暗 <input type="range" id="sk-d" min="0" max="40" value="0" style="width:70px"> <span id="sk-dv">0%</span>　灰 <input type="range" id="sk-s" min="0" max="40" value="0" style="width:70px"> <span id="sk-sv">0%</span></div>
  <b>木头人（只有你和木头人）</b><div class="r"><button data-a="dummy">木头人模式</button><button data-a="dclear">清空技能</button></div>
  <div class="r cards" style="max-height:180px;overflow:auto"></div><div class="dps" style="font-size:11px;color:#ffe9a8"></div>
  <b>时间（跳过）</b><div class="r"><button data-a="t60">+1 分</button><button data-a="t300">+5 分</button><button data-a="boss">到 Boss 前</button><button data-a="kill">清屏</button></div>
