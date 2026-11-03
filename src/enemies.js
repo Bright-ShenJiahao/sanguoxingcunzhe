@@ -45,6 +45,10 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    if(e.sweep){const sp=stats.speed*(stats.charge?3:1.8)*dt*speed;e.x+=e.sweep[0]*sp;e.y+=e.sweep[1]*sp;e.face=e.sweep[0]>=0?1:-1;e.moving=true;e.state='move';continue}   // 过场：直线冲过去
    if(e.state==='aim'){if(e.timer>=(e.aimT||.5)){e.state='dash';e.timer=0;e.dashHit=0}continue}
    if(e.dazeT>0){e.dazeT-=dt;e.moving=false;continue}
+   if(e.k==='gob_mage'&&!e.boss){e.blCd=(e.blCd??0)-dt;e.rnCd=(e.rnCd??4)-dt;   // 法师：闪现（冷却 6 秒）、火雨（念咒 2 秒）
+    if(e.rain>0){e.rain-=dt;e.moving=false;if(e.rain<=0){for(let i=0;i<5;i++){const a=Math.random()*6.28,r=Math.random()*70;lobs.push({k:'fire',x0:e.x,y0:e.y-30,x:hero.x+Math.cos(a)*r,y:hero.y+Math.sin(a)*r*.8,t:-i*.15,d:.9,r:20,dm:BD*1.3})}}continue}
+    if(d<40&&e.blCd<=0){for(let k=0;k<10;k++){const a=Math.random()*6.28,nx=hero.x+Math.cos(a)*110,ny=hero.y+Math.sin(a)*80;if(ok(nx,ny)){window.onBlink?.(e.x,e.y);e.x=nx;e.y=ny;e.blCd=6;break}}continue}
+    if(e.rnCd<=0&&d<200){e.rain=2;e.rnCd=8;continue}}
    if(e.k==='gob_rock'&&!e.boss&&(e.shed||0)<3){e.thCd=(e.thCd??2)-dt;   // 岩甲：扒下自己的石甲扔出去，共 3 次
     if(e.thT>0){e.thT-=dt;e.moving=false;if(e.thT<=0){e.shed=(e.shed||0)+1;e.spdMul=1+.4*e.shed;e.sc=(e.sc||1)*.94;lobs.push({k:'rock',x0:e.x,y0:e.y-16,x:hero.x,y:hero.y,t:0,d:.9,r:24,dm:BD*1.6});window.onShed?.(e)}continue}
     if(e.thCd<=0&&d<170){e.thT=.6;e.thCd=4;e.face=ax>=0?1:-1;e.flash=.1;continue}}
@@ -159,6 +163,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.state==='windup'&&(e.boss||e.elite)&&!e.dead&&!data[e.k].ranged){const k=Math.min(1,e.timer/.45),R=((data[e.k].reach||30)+5)*(e.sc||1);c.save();c.globalAlpha=.15+.35*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(e.x-cx,e.y-cy,R,R*.75,0,0,6.3);c.fill();c.globalAlpha=.8;c.strokeStyle='#ff3a2a';c.lineWidth=1.5;c.beginPath();c.ellipse(e.x-cx,e.y-cy,R,R*.75,0,0,6.3);c.stroke();c.restore()}   // Boss/精英挥砍预警
   if(e.state==='fuse'&&e.timer<.5&&!e.dead){const k=e.timer/.5,L_=150,N=10,ux=e.fx,uy=e.fy,px=-uy,py=ux;c.save();c.lineWidth=1.6;c.lineCap='round';for(let i=1;i<=N;i++){const t=i/(N+1),x=e.x-cx+ux*L_*t,y=e.y-cy+uy*L_*t,s_=3.2,on=t<=k;c.strokeStyle=on?'rgba(255,150,40,.95)':'rgba(255,255,255,.3)';c.beginPath();c.moveTo(x-ux*s_+px*s_,y-uy*s_+py*s_);c.lineTo(x+ux*s_,y+uy*s_);c.lineTo(x-ux*s_-px*s_,y-uy*s_-py*s_);c.stroke()}c.restore()}
   if(e.dazeT>0&&!e.dead){const x=e.x-cx,y=e.y-cy-30*(e.sc||1);c.save();c.fillStyle='#ffe066';for(let i=0;i<3;i++){const a=now/180+i*2.09;c.fillRect(Math.round(x+Math.cos(a)*9)-1.5,Math.round(y+Math.sin(a)*3)-1.5,3,3)}c.restore()}
+  if(e.rain>0&&!e.dead){const k=1-e.rain/2,x=e.x-cx,y=e.y-cy;c.save();c.globalAlpha=.4+.4*k;c.strokeStyle='#ff8a3a';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y,18,11,0,0,6.3);c.stroke();for(let i=0;i<5;i++){const a=now/200+i*1.257;c.fillStyle='#ffd27a';c.fillRect(x+Math.cos(a)*14-1,y-26-k*6+Math.sin(a)*4-1,2,2)}c.restore()}
   if(e.rit>0&&!e.dead){const k=1-e.rit/1.5,x=e.x-cx,y=e.y-cy,R=24;c.save();c.globalAlpha=.35+.45*k;c.strokeStyle='#7df9ff';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y,R,R*.6,0,0,6.3);c.stroke();c.beginPath();c.ellipse(x,y,R*k,R*.6*k,0,0,6.3);c.stroke();for(let i=0;i<6;i++){const a=now/300+i*1.047;c.fillStyle='#bff7ff';c.fillRect(x+Math.cos(a)*R*.8-1,y+Math.sin(a)*R*.48-1,2,2)}c.restore()}   // 萨满召唤法阵
   if(e.state==='bash'){const k=Math.min(1,e.timer),a0=(e.bx||1)>0?-Math.PI/2:Math.PI/2;c.save();c.globalAlpha=.2+.45*k;c.fillStyle='#ff3a2a';c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.ellipse(e.x-cx,e.y-cy,32*k,22*k,0,a0,a0+Math.PI);c.closePath();c.fill();c.restore()}
   const sc=(e.sc||1)*SPR;c.save();c.translate(Math.round(e.x-cx)+(e.state==='aim'&&e.timer>(e.aimT||.5)*.6?(Math.floor(now/40)%2?1:-1):0),Math.round(e.y-cy));if(e.rc>0){e.rc-=1/60;if(!e.boss&&!e.dead)c.translate(Math.round((e.rcd||0)*(e.elite?1:2.5)*e.rc/.09),0)}c.scale(e.face*sc,sc);c.globalAlpha=e.alpha??1;c.imageSmoothingEnabled=false;
@@ -170,7 +175,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if((e.elite||e.boss)&&!e.dead&&e.hpMax){const w=e.boss?40:20,x=Math.round(e.x-cx-w/2),y=Math.round(e.y-cy-f.anchor[1]*sc-4);c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x,y,w,2.5);c.fillStyle=e.boss?'#ff5a4a':'#c77dff';c.fillRect(x,y,w*Math.max(0,e.hp/e.hpMax),2.5)}
  }
  function drawArrows(c,cx,cy){
-  for(const L of lobs){const k=L.t/L.d;c.save();c.globalAlpha=.25+.35*k;c.fillStyle=L.k==='fire'?'#a040ff':'#3a2a20';c.beginPath();c.ellipse(L.x-cx,L.y-cy,L.r*k,L.r*.8*k,0,0,6.3);c.fill();c.restore();
+  for(const L of lobs){if(L.t<0)continue;const k=L.t/L.d;c.save();c.globalAlpha=.25+.35*k;c.fillStyle=L.k==='fire'?'#a040ff':'#3a2a20';c.beginPath();c.ellipse(L.x-cx,L.y-cy,L.r*k,L.r*.8*k,0,0,6.3);c.fill();c.restore();
    const im=FX[L.k==='fire'?'lob_fire':'lob_rock'],x=L.x0+(L.x-L.x0)*k,y=L.y0+(L.y-L.y0)*k-Math.sin(k*Math.PI)*(L.k==='rock'?60:25);if(im.complete&&im.width){const w=L.k==='rock'?12:16,h=im.height*w/im.width;c.drawImage(im,x-cx-w/2,y-cy-h/2,w,h)}}
   for(const b of booms){const im=FX['boom'+Math.min(3,Math.floor(b.t/.1))];if(im.complete&&im.width){const w=b.r*2.2,h=im.height*w/im.width;c.drawImage(im,b.x-cx-w/2,b.y-cy-h/2,w,h)}}
   for(const p of arrows){const f=data[p.k].frames.arrow,im=images['en_'+p.k+'_arrow'];c.save();c.translate(p.x-cx,p.y-cy);
