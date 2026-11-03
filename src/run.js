@@ -1,6 +1,6 @@
-import * as UNL from './unlock.js?v=11040145';window.UNL=UNL;
-import {install as installLM} from './landmarks.js?v=11040145';
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11040145';
+import * as UNL from './unlock.js?v=11040150';window.UNL=UNL;
+import {install as installLM} from './landmarks.js?v=11040150';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11040150';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -453,6 +453,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   c.textAlign='start'}
  window.HUDTIP=k=>{const W=WEAPONS[k],L=S.w[k]||0;if(!W)return null;return {n:W.name,L,max:MAXL,d:(W.desc||[]).slice(0,Math.min(L,(W.desc||[]).length)).join('；'),kind:KIND[k]||''}};
  window.onDismount=e=>{const m=makeEnemy(e.x+(e.face||1)*12,e.y,'wolf_free');if(!m)return;onSpawnBase(m);m.noChest=1;m.lifeT=10;m.hp=m.hpMax=Math.max(1,Math.ceil(e.hpMax*.3));m.dmgMul=(e.dmgMul||1)*.6;en.push(m);S.texts.push({x:e.x,y:e.y-34,v:'落马！',t:.8,c:'#d8d8d8'})};
+ window.onHorn=e=>{S.banner={v:'大王吹响号角！小弟们来了',t:2.5};window.SFX?.boss?.();for(let i=0;i<10;i++){const a=i/10*6.283,x=hero.x+Math.cos(a)*150,y=hero.y+Math.sin(a)*110;if(!ok(x,y))continue;const m=makeEnemy(x,y,'goblin');if(!m)continue;onSpawnBase(m);m.noChest=1;en.push(m)}};
  window.onVolley=e=>{S.texts.push({x:e.x,y:e.y-34,v:'齐射！',t:.8,c:'#ffb14a',big:1})};
  window.onRoar=e=>{S.texts.push({x:e.x,y:e.y-50,v:'怒吼！',t:1.2,c:'#ff5a3a',big:1});window.SFX?.boss?.()};
  window.onDrain=(e,b)=>{S.fx.push({k:'bolt',x0:b.x,y0:b.y-10,x1:e.x,y1:e.y-14,t:0,d:.4});S.texts.push({x:e.x,y:e.y-36,v:'献祭',t:.7,c:'#7dff8a'})};window.onStomp=o=>{S.fx.push({k:'ring',x:o.x,y:o.y,r:12,t:0,d:.25});S.texts.push({x:o.x,y:o.y-20,v:'踩碎',t:.5,c:'#b8ffd0'})};

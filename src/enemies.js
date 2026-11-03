@@ -104,6 +104,10 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
       else if(r<.65&&d>40){e.state='aim';e.timer=0;e.aimT=1;e.dx=ax/d;e.dy=ay/d;e.dsp=300;e.dlen=(d+100)/300;e.dcdN=0;e.alen=d+100;continue}
       else if(r<.85){e.state='judge';e.timer=0;e.jx=hero.x;e.jy=hero.y;continue}
       else{e.state='howl';e.timer=0;continue}}}
+    if(e.boss&&e.name==='哥布林大王'){   // 大王：70%/40% 吹号召小弟；旋风斩
+     for(const th of [.7,.4])if(!e['hn'+th]&&e.hp<e.hpMax*th){e['hn'+th]=1;window.onHorn?.(e)}
+     if(e.wwPre>0){e.wwPre-=dt;e.moving=false;if(e.wwPre<=0){e.wwT=2;e.wwS=.6}continue}
+     e.skT=(e.skT??4)-dt;if(e.skT<=0&&d<90&&!(e.wwT>0)){e.skT=6;e.wwPre=.6;continue}}
     if(e.boss&&e.k==='gob_chief'){e.skT=(e.skT??3)-dt;if(e.skT<=0){e.skT=4;const r=Math.random();if(r<.45&&d<60){e.state='smash';e.timer=0;e.sr=55;e.st=1.2;e.bx=ax;continue}else if(r<.75){e.wwT=3}else{for(const o of en)if(!o.dead)o.buffT=10;e.cryFx=1}}}
     if(e.k==='gob_blade'&&!e.elite&&!e.boss&&d<70&&d>22&&e.dcd<=0){e.state='aim';e.timer=0;e.dx=ax/d;e.dy=ay/d;continue}   // 剑士：冲刺斩
     if(e.k==='gob_shield'&&!e.elite&&!e.boss&&d<26&&e.bcd<=0){e.state='bash';e.timer=0;e.bx=ax;continue}   // 盾卫：盾击
@@ -124,7 +128,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      const k_=Math.min(1,dt*7);e.vx=(e.vx??tx)+(tx-(e.vx??tx))*k_;e.vy=(e.vy??ty)+(ty-(e.vy??ty))*k_;   // 转向限速：方向逐渐转过去
      const vl=Math.hypot(e.vx,e.vy)||1,ux=e.vx/vl,uy=e.vy/vl;
      if(e.slowT>0)e.slowT-=dt;if(e.buffT>0)e.buffT-=dt;if(e.chgT>0)e.chgT-=dt;if(e.wwT>0){e.wwT-=dt;e.wwc=(e.wwc||0)-dt;if(d<34&&e.wwc<=0){e.wwc=.3;onHit(BD*.5)}}if(stats.ghost){e.phC=(e.phC??6)-dt;if(e.phC<=0){e.phC=6;e.phT=1.5}if(e.phT>0)e.phT-=dt}
-     const oldx=e.x,oldy=e.y,dist=(e.buffT>0?1.3:1)*(e.chgT>0?1.8:1)*(e.wwT>0?1.3:1)*((e.slowT>0&&!stats.heavy)?.5:1)*(e.boss?.8:1)*(e.spdMul||1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
+     const oldx=e.x,oldy=e.y,dist=(e.buffT>0?1.3:1)*(e.chgT>0?1.8:1)*(e.wwT>0?(e.wwS||1.3):1)*((e.slowT>0&&!stats.heavy)?.5:1)*(e.boss?.8:1)*(e.spdMul||1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
      if(stats.ghost){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}
      else if(ok(e.x-my*1.6,e.y+mx*1.6)){e.x-=my*1.6;e.y+=mx*1.6}
      e.moving=e.x!==oldx||e.y!==oldy;
@@ -181,6 +185,8 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.dazeT>0&&!e.dead){const x=e.x-cx,y=e.y-cy-30*(e.sc||1);c.save();c.fillStyle='#ffe066';for(let i=0;i<3;i++){const a=now/180+i*2.09;c.fillRect(Math.round(x+Math.cos(a)*9)-1.5,Math.round(y+Math.sin(a)*3)-1.5,3,3)}c.restore()}
   if(e.state==='combo'&&!e.dead){const H=[.45,.9,1.5],R_=[30,30,44];const i=e.cmb||0;if(i<3){const k=Math.max(0,1-(H[i]-e.timer)/.45),x=e.x-cx+e.face*10,y=e.y-cy;c.save();c.globalAlpha=.15+.4*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(x,y,R_[i],R_[i]*.8,0,0,6.3);c.fill();c.globalAlpha=.8;c.strokeStyle='#ff3a2a';c.lineWidth=1;c.beginPath();c.ellipse(x,y,R_[i]*k,R_[i]*.8*k,0,0,6.3);c.stroke();c.restore()}}
   if(e.swFx>0&&!e.dead){e.swFx-=1/60;const x=e.x-cx+e.face*10,y=e.y-cy-12;c.save();c.globalAlpha=e.swFx*4;c.strokeStyle='#fff';c.lineWidth=2.5;c.beginPath();c.arc(x,y,18,e.face>0?-1.2:Math.PI-1.2,e.face>0?1.2:Math.PI+1.2);c.stroke();c.restore()}
+  if(e.wwPre>0&&!e.dead){const k=1-e.wwPre/.6,R=34;c.save();c.globalAlpha=.2+.4*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(e.x-cx,e.y-cy,R,R*.75,0,0,6.3);c.fill();c.globalAlpha=.8;c.strokeStyle='#ff3a2a';c.lineWidth=1.5;c.beginPath();c.ellipse(e.x-cx,e.y-cy,R*k,R*.75*k,0,0,6.3);c.stroke();c.restore()}
+  if(e.wwT>0&&e.wwS&&!e.dead){const x=e.x-cx,y=e.y-cy-10;c.save();c.strokeStyle='rgba(255,255,255,.85)';c.lineWidth=2.5;for(let i=0;i<3;i++){const a=now/70+i*2.09;c.beginPath();c.ellipse(x,y,34,22,0,a,a+1.2);c.stroke()}c.restore()}
   if(e.thrown){const T=e.thrown,k=Math.min(1,T.t/T.d);c.save();c.globalAlpha=.25+.5*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(T.x1-cx,T.y1-cy,24,19,0,0,6.3);c.fill();c.restore()}
   if(e.stFx>0&&!e.dead){e.stFx-=1/60;c.save();c.globalAlpha=e.stFx*2;c.strokeStyle='#c9b38a';c.lineWidth=1.5;c.beginPath();c.ellipse(e.x-cx,e.y-cy,30*(1-e.stFx),18*(1-e.stFx),0,0,6.3);c.stroke();c.restore()}
   if(e.soulT>0){const x=e.x-cx,y=e.y-cy-6,k=1-e.soulT/1.5;c.save();for(let i=0;i<4;i++){const ph=now/90+i*1.6,h=6+k*8+Math.sin(ph)*2;c.globalAlpha=.5+.4*Math.sin(ph);c.fillStyle=i%2?'#5dff9a':'#b8ffd0';c.beginPath();c.ellipse(x+(i-1.5)*3,y-h/2,2,h/2,0,0,6.3);c.fill()}c.restore()}   // 魂火
