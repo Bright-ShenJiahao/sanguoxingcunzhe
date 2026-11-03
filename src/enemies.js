@@ -86,7 +86,8 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     if(stats.leap&&e.bcd<=0&&d<=40){e.state='smash';e.timer=0;e.sr=40;e.st=.7;e.bx=ax;continue}
     if(stats.lob&&d<=stats.reach&&e.cooldown===0){e.state='cast';e.timer=0;continue}
     if(stats.orbit&&reg){if(d<100&&(e.orT??-1)<0&&e.dcd<=0)e.orT=2+Math.random();if(e.orT>0){e.orT-=dt;if(e.orT<=0){e.orT=-1;e.state='aim';e.timer=0;e.aimT=.4;e.dx=ax/d;e.dy=ay/d;e.dsp=300;e.dlen=(d+20)/300;e.dcdN=4;e.alen=d+20;continue}}}
-    if(stats.drum){e.drT=(e.drT??3)-dt;if(e.drT<=0){e.drT=8;e.drFx=.6;for(const o of near(e.x,e.y,100,en))o.buffT=5}}
+    if(stats.drum){e.drT=(e.drT??1)-dt;e.chT=(e.chT??6)-dt;if(e.drT<=0){e.drT=e.rollT>0?.25:2;e.drFx=.6;window.SFX?.drum?.(e.rollT>0);for(const o of near(e.x,e.y,110,en))o.buffT=2.5}   // 鼓手：每 2 秒一下鼓点，鼓舞周围
+     if(e.rollT>0)e.rollT-=dt;if(e.chT<=0){e.chT=11;e.rollT=1.2;window.onDrumRoll?.(e);for(const o of near(e.x,e.y,170,en))if(!o.boss&&o!==e)o.chgT=3}}   // 战鼓冲锋：急促鼓点，周围怪一起冲 3 秒
     if(stats.necro){e.nkT=(e.nkT??3)-dt;if(e.nkT<=0){e.nkT=6;let n=0;for(const o of en){if(n>=4)break;if(o.dead&&!o.raised&&!o.boss&&o.k!=='skeleton'&&(o.x-e.x)**2+(o.y-e.y)**2<130*130){o.raised=1;o.expired=true;window.SPAWN?.('skeleton',o.x,o.y);n++}}}}
     if(e.boss&&e.k==='gob_paladin'){e.skT=(e.skT??2.5)-dt;if(e.skT<=0){e.skT=3.5;const r=Math.random();
       if(d<60&&r<.4){e.state='smash';e.timer=0;e.sr=55;e.st=.8;e.bx=ax;continue}
@@ -107,8 +108,8 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      if(stats.lob&&d<stats.reach*.8){tx=-tx;ty=-ty}   // 远程投掷：保持距离   // 隔着河/崖时沿寻路图走（会绕到桥/浅滩）
      const k_=Math.min(1,dt*7);e.vx=(e.vx??tx)+(tx-(e.vx??tx))*k_;e.vy=(e.vy??ty)+(ty-(e.vy??ty))*k_;   // 转向限速：方向逐渐转过去
      const vl=Math.hypot(e.vx,e.vy)||1,ux=e.vx/vl,uy=e.vy/vl;
-     if(e.slowT>0)e.slowT-=dt;if(e.buffT>0)e.buffT-=dt;if(e.wwT>0){e.wwT-=dt;e.wwc=(e.wwc||0)-dt;if(d<34&&e.wwc<=0){e.wwc=.3;onHit(BD*.5)}}if(stats.ghost){e.phC=(e.phC??6)-dt;if(e.phC<=0){e.phC=6;e.phT=1.5}if(e.phT>0)e.phT-=dt}
-     const oldx=e.x,oldy=e.y,dist=(e.buffT>0?1.3:1)*(e.wwT>0?1.3:1)*((e.slowT>0&&!stats.heavy)?.5:1)*(e.boss?.8:1)*(e.spdMul||1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
+     if(e.slowT>0)e.slowT-=dt;if(e.buffT>0)e.buffT-=dt;if(e.chgT>0)e.chgT-=dt;if(e.wwT>0){e.wwT-=dt;e.wwc=(e.wwc||0)-dt;if(d<34&&e.wwc<=0){e.wwc=.3;onHit(BD*.5)}}if(stats.ghost){e.phC=(e.phC??6)-dt;if(e.phC<=0){e.phC=6;e.phT=1.5}if(e.phT>0)e.phT-=dt}
+     const oldx=e.x,oldy=e.y,dist=(e.buffT>0?1.3:1)*(e.chgT>0?1.8:1)*(e.wwT>0?1.3:1)*((e.slowT>0&&!stats.heavy)?.5:1)*(e.boss?.8:1)*(e.spdMul||1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
      if(stats.ghost){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}
      else if(ok(e.x-my*1.6,e.y+mx*1.6)){e.x-=my*1.6;e.y+=mx*1.6}
      e.moving=e.x!==oldx||e.y!==oldy;
@@ -154,7 +155,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.state==='howl'||e.hwFx>0){if(e.hwFx>0)e.hwFx-=1/60;const k=e.state==='howl'?e.timer:1-e.hwFx/.6;c.save();c.globalAlpha=.5*(1-k*.5);c.strokeStyle='#cfefff';c.lineWidth=2;c.beginPath();c.ellipse(e.x-cx,e.y-cy,80*k,64*k,0,0,6.3);c.stroke();c.restore()}
   if(e.aegT>0&&!e.dead){c.save();c.globalAlpha=.25+.1*Math.sin(now/120);c.fillStyle='#ffe27a';c.beginPath();c.ellipse(e.x-cx,e.y-cy-18*(e.sc||1),30,30,0,0,6.3);c.fill();c.restore()}
   if(e.drFx>0){e.drFx-=1/60;c.save();c.globalAlpha=e.drFx;c.strokeStyle='#ff6a3a';c.lineWidth=2;c.beginPath();c.ellipse(e.x-cx,e.y-cy,100*(1-e.drFx),80*(1-e.drFx),0,0,6.3);c.stroke();c.restore()}
-  if(e.buffT>0&&!e.dead){c.save();c.globalAlpha=.5;c.strokeStyle='#ff5a3a';c.lineWidth=1;c.beginPath();c.ellipse(e.x-cx,e.y-cy,7,2.6,0,0,6.3);c.stroke();c.restore()}
+  if((e.buffT>0||e.chgT>0)&&!e.dead&&!e.drum){const x=Math.round(e.x-cx),y=Math.round(e.y-cy-26*(e.sc||1)-Math.abs(Math.sin(now/150))*2);c.save();c.fillStyle=e.chgT>0?'#ff2a1a':'#ff6a3a';c.beginPath();c.moveTo(x,y-3);c.lineTo(x+3,y+1);c.lineTo(x+1,y+1);c.lineTo(x+1,y+3);c.lineTo(x-1,y+3);c.lineTo(x-1,y+1);c.lineTo(x-3,y+1);c.closePath();c.fill();c.globalAlpha=.55;c.strokeStyle='#ff5a3a';c.beginPath();c.ellipse(e.x-cx,e.y-cy,7,2.6,0,0,6.3);c.stroke();c.restore()}   // 被鼓舞：头上红箭头
   if(e.state==='aim'&&e.k==='gob_paladin'){const k=e.timer/(e.aimT||.5),L_=e.alen||80;c.save();c.globalAlpha=.25+.5*k;c.strokeStyle='#ffd23f';c.lineWidth=2;c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.lineTo(e.x-cx+e.dx*L_,e.y-cy+e.dy*L_);c.stroke();c.restore()}
   else if(e.state==='aim'){const k=Math.min(1,e.timer/(e.aimT||.5)),L_=e.alen||80,N=Math.max(4,Math.round(L_/12)),hot=data[e.k].charge?'255,150,40':'255,60,40',ux=e.dx,uy=e.dy,px=-uy,py=ux;c.save();c.lineWidth=1.6;c.lineCap='round';
    for(let i=1;i<=N;i++){const t=i/(N+1),x=e.x-cx+ux*L_*t,y=e.y-cy+uy*L_*t,s=3.2,on=t<=k;c.strokeStyle=on?`rgba(${hot},.95)`:'rgba(255,255,255,.3)';if(on){c.shadowColor=`rgba(${hot},.8)`;c.shadowBlur=4}else c.shadowBlur=0;c.beginPath();c.moveTo(x-ux*s+px*s,y-uy*s+py*s);c.lineTo(x+ux*s,y+uy*s);c.lineTo(x-ux*s-px*s,y-uy*s-py*s);c.stroke()}c.restore()}   // 蓄力箭头：从脚下逐个点亮
