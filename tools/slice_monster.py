@@ -31,6 +31,8 @@ def segs(y0,y1,gap=15):
 crops={}
 for (y0,y1),N in zip(B,rows):
   S=segs(y0,y1)
+  while len(S)>len(N) and len(S)>1:   # 多出来的（飞出的箭、掉落的武器）并进最近的一帧
+    i=min(range(len(S)-1),key=lambda i:S[i+1][0]-S[i][1]);S[i:i+2]=[(S[i][0],S[i+1][1])]
   if len(S)!=len(N):sys.exit(f'{N[0]} 这一行帧数不对：图里 {len(S)}，要求 {len(N)}')
   for (x0,x1),nm in zip(S,N):
     c=rgba[y0:y1,x0:x1].copy();cr,cg,cb=[c[...,k].astype(int) for k in range(3)]
