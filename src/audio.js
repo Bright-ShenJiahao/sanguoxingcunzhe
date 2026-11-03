@@ -44,6 +44,7 @@ export function createAudio(){
   wave(){if(!ac||!ok('wv',150))return;const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(70,t+.3);g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.connect(g);g.connect(sfxBus);o.start(t);o.stop(t+.4)},
   boom(){if(!ac||!ok('bm',90))return;noise(ac.currentTime,.35,{vol:.25,lp:700})},
   zap(){if(!ac||!ok('zp',90))return;const t=ac.currentTime;for(let i=0;i<4;i++)tone(t+i*.02,96-i*5,.03,{type:'sawtooth',vol:.04,bus:sfxBus,rel:.02})},
+  holy(){if(!ac||!ok('hl',120))return;const t=ac.currentTime;tone(t,96,.35,{type:'sine',vol:.08,bus:sfxBus,rel:.5});tone(t+.04,103,.3,{type:'sine',vol:.05,bus:sfxBus,rel:.5});tone(t,84,.2,{type:'triangle',vol:.05,bus:sfxBus,rel:.3})},
   hit(){if(!ac||!ok('hit',45))return;noise(ac.currentTime,.05,{vol:.1,lp:1500})},
   kill(){if(!ac||!ok('kl',60))return;const t=ac.currentTime;tone(t,60,.06,{type:'square',vol:.05,bus:sfxBus,rel:.05,lp:900})},
   gem(){if(!ac||!ok('gm',40))return;const t=ac.currentTime;tone(t,93+Math.floor(Math.random()*3)*2,.05,{type:'sine',vol:.07,bus:sfxBus,rel:.08})},
