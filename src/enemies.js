@@ -3,7 +3,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  const kinds=['goblin','gob_blade','gob_archer','gob_shield'],arrows=[],lobs=[],booms=[];window.__EP={arrows,lobs,booms};   // 测试机器人读取敌方飞行物
  const FX={};for(const n of ['lob_fire','lob_rock','boom0','boom1','boom2','boom3']){const im=new Image();im.src='assets/characters/enemies/fx/'+n+'.png';FX[n]=im}
  const near=(x,y,r,en)=>en.filter(o=>!o.dead&&(o.x-x)**2+((o.y-y)*1.25)**2<r*r);
- let EN=[];
+ let EN=[];const PH={};
  let bag=[];
  function nextKind(){
   if(!bag.length){bag=[...kinds];for(let i=bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]]}}
@@ -26,7 +26,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
  function explode(x,y,r,dm,hurtEn){booms.push({x,y,t:0,r});window.SHAKE?.(2);if(Math.hypot(hero.x-x,(hero.y-y)*1.25)<r)onHit(dm);if(hurtEn)for(const o of near(x,y,r,EN))if(!o.boomed)hit(o,dm*.6);window.SFX?.boom?.()}
  function reset(){arrows.length=0;lobs.length=0;booms.length=0}
  let CT=[];
- function update(en,dt,speed){EN=en;
+ function update(en,dt,speed){EN=en;if(dt>0){const hx=(hero.x-(PH.x??hero.x))/dt,hy=(hero.y-(PH.y??hero.y))/dt;PH.vx=(PH.vx||0)*.85+hx*.15;PH.vy=(PH.vy||0)*.85+hy*.15}PH.x=hero.x;PH.y=hero.y;
   for(const e of en){window.CUR_E=e.k+(e.boss?'·Boss':e.elite?'·精英':'');
    const stats=data[e.k];e.timer+=dt;e.moving=false;
    if(e.dead){if(e.crate){e.expired=true;continue}if(e.drum)continue;
@@ -77,6 +77,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      if(stats.ranged){
       const len=Math.hypot(ax,ay)||1;
       arrows.push({k:e.k,x:e.x,y:e.y-10,dx:ax/len,dy:ay/len,life:1.6,dm:stats.damage*(e.dmgMul||1)*(e.elite?1.3:1)});
+      if(e.k==='gob_archer'&&!(e.vlT>performance.now())){const g=en.filter(o=>o!==e&&o.k==='gob_archer'&&!o.dead&&(o.x-e.x)**2+(o.y-e.y)**2<60*60);if(g.length>=2){window.onVolley?.(e);for(const o of g){o.vlT=performance.now()+2500;o.cooldown=Math.max(o.cooldown||0,1.5);arrows.push({k:o.k,x:o.x,y:o.y-10,dx:ax/len,dy:ay/len,life:1.6,dm:stats.damage*(o.dmgMul||1)})}e.vlT=performance.now()+2500}}   // 弓手齐射：同一方向一排箭
      }else if((e.elite||e.boss)&&d<=(stats.reach+5)*(e.sc||1)){onHit(BD)}   // 普通怪挥砍只是动画，伤害靠碰撞
     }
    }else if(e.state==='strike'){
@@ -109,11 +110,15 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     const plain=!e.elite&&!e.boss&&!stats.ranged&&!stats.lob&&!stats.bomb;   // 普通近战小怪：边走边砍（动作只是表现，伤害靠碰撞）
     if(e.swT>0)e.swT-=dt;
     if(plain){if(d<=stats.reach*(e.sc||1)*1.2&&e.cooldown===0){e.swT=.9;e.cooldown=.9+Math.random()*.15}}
+    if(e.k==='gob_archer'){if(d<50&&!(e.fleeT>0)&&!(e.fleeCd>0)){e.fleeT=1;e.fleeCd=3}if(e.fleeCd>0)e.fleeCd-=dt;if(e.fleeT>0){e.fleeT-=dt;const sp=stats.speed*1.6*dt*speed,nx=e.x-ax/d*sp,ny=e.y-ay/d*sp;if(ok(nx,ny)){e.x=nx;e.y=ny}e.face=ax>=0?-1:1;e.moving=true;continue}   // 弓手：被贴脸转身逃
+     }
+    if(plain||(e.k==='gob_archer'&&(Math.abs(ax)>230||Math.abs(ay)>140))){}
     else if(e.k==='gob_hero'&&d<=stats.reach*(e.sc||1)*1.2&&e.cooldown===0){e.state='combo';e.timer=0;e.cmb=0;continue}
     else if(d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
     if(d>(plain?6:stats.reach*(e.sc||1)*.85)){
      e.losT=(e.losT||0)-dt;if(e.losT<=0){e.losT=.25+Math.random()*.1;e.los=true;const n=Math.ceil(d/6);for(let k=1;k<n;k++){if(water(e.x+ax*k/n,e.y+ay*k/n)===1){e.los=false;break}}}   // 中间没有河/崖就直线走
      const fd=d>28&&!e.los&&!stats.ghost&&window.PATHDIR?.(e.x,e.y);let tx=fd?fd[0]:ax/d,ty=fd?fd[1]:ay/d;
+     if(e.k==='gob_kid'&&!fd&&d>25){const lead=Math.min(1.2,d/90),px_=ax+(PH.vx||0)*lead,py_=ay+(PH.vy||0)*lead,pl=Math.hypot(px_,py_)||1;tx=px_/pl;ty=py_/pl}   // 崽：往主角预计要到的位置跑
      if(e.orT>0){const sg=e.ph>4.5?1:-1,rad=(d-70)/40;tx=-ay/d*sg+ax/d*rad;ty=ax/d*sg+ay/d*rad}
      if(stats.lob&&d<stats.reach*.8){tx=-tx;ty=-ty}   // 远程投掷：保持距离   // 隔着河/崖时沿寻路图走（会绕到桥/浅滩）
      const k_=Math.min(1,dt*7);e.vx=(e.vx??tx)+(tx-(e.vx??tx))*k_;e.vy=(e.vy??ty)+(ty-(e.vy??ty))*k_;   // 转向限速：方向逐渐转过去
