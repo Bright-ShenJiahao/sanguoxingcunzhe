@@ -19,7 +19,7 @@ export function createDebug(g){
  <b>时间（跳过）</b><div class="r"><button data-a="t60">+1 分</button><button data-a="t300">+5 分</button><button data-a="boss">到 Boss 前</button><button data-a="kill">清屏</button></div>
  <b>传送</b><div class="r">${places.map((p,i)=>`<button data-p="${i}">${p[0]}</button>`).join('')}</div>
  <b>天气</b><div class="r">${WK.map(k=>`<button data-w="${k}">${{auto:'随机',clear:'晴',lightrain:'小雨',heavyrain:'大雨',lightsnow:'小雪',heavysnow:'大雪',blizzard:'暴雪',fog:'雾',overcast:'阴'}[k]}</button>`).join('')}</div>
- <b>地图（点小地图也能瞬移）</b><div class="r"><button data-t="tp">点地图瞬移</button><button data-t="pen">画笔</button><button data-c="#ff3040" class="on">红</button><button data-c="#20d060">绿</button><button data-c="#9040ff">紫</button><button data-a="undo">撤销</button><button data-a="clr">清除</button><button data-a="copy">复制线条坐标</button><button data-a="full">全图（可画线）</button></div>
+ <b>地图（点小地图也能瞬移）</b><div class="r"><button data-t="tp">点地图瞬移</button><button data-t="drag">拖动建筑</button><button data-a="dragcopy">复制建筑坐标</button><button data-a="dragreset">还原建筑</button><button data-t="pen">画笔</button><button data-c="#ff3040" class="on">红</button><button data-c="#20d060">绿</button><button data-c="#9040ff">紫</button><button data-a="undo">撤销</button><button data-a="clr">清除</button><button data-a="copy">复制线条坐标</button><button data-a="full">全图（可画线）</button></div>
  <b>死亡记录</b><div class="r"><button data-a="dlog">查看</button><button data-a="dclr">清空</button></div><div class="dlog" style="font-size:11px;line-height:1.5"></div>
  <b>时间</b><div class="r">${g.weather.SC.map(s=>`<button data-h="${s}">${s}</button>`).join('')}</div>`;
  el.addEventListener('keydown',e=>e.stopPropagation());
@@ -55,9 +55,9 @@ export function createDebug(g){
  const toW=e=>{const r=cv.getBoundingClientRect(),C=window.CAM||{cx:0,cy:0,SC:1};return[Math.round(C.cx+(e.clientX-r.left)*cv.width/r.width/C.SC),Math.round(C.cy+(e.clientY-r.top)*cv.height/r.height/C.SC)]};
  const go=(x,y)=>{g.hero.x=Math.max(5,Math.min(W.WW-5,x));g.hero.y=Math.max(5,Math.min(W.WH-5,y))};
  const grab=e=>{if(!mode)return;e.preventDefault();e.stopPropagation()};
- cv.addEventListener('pointerdown',e=>{if(!mode)return;grab(e);const p=toW(e);if(mode==='tp')go(p[0],p[1]);else{cur={c:col,p:[p]};lines.push(cur);cv.setPointerCapture(e.pointerId)}},true);
- cv.addEventListener('pointermove',e=>{if(mode!=='pen'||!cur)return;grab(e);const p=toW(e),q=cur.p[cur.p.length-1];if(Math.hypot(p[0]-q[0],p[1]-q[1])>=3)cur.p.push(p)},true);
- cv.addEventListener('pointerup',e=>{if(cur){cur=null;save()}},true);
+ cv.addEventListener('pointerdown',e=>{if(!mode)return;grab(e);const p=toW(e);if(mode==='drag'){const L=window.LMEDIT?.items(g.run.dbg?.S)||[];let best=null,bd=40;for(const it of L){let d;if(it.k==='城堡'){d=(Math.abs(p[0]-it.x)<80&&p[1]<it.y+5&&p[1]>it.y-165)?1:999}else d=Math.hypot(it.x-p[0],it.y-12-p[1]);if(d<bd){bd=d;best=it}}if(best){cur={drag:best,off:[best.x-p[0],best.y-p[1]]};cv.setPointerCapture(e.pointerId)}return}if(mode==='tp')go(p[0],p[1]);else{cur={c:col,p:[p]};lines.push(cur);cv.setPointerCapture(e.pointerId)}},true);
+ cv.addEventListener('pointermove',e=>{if(mode==='drag'&&cur?.drag){grab(e);const p=toW(e);cur.drag.set(Math.round(p[0]+cur.off[0]),Math.round(p[1]+cur.off[1]));return}if(mode!=='pen'||!cur)return;grab(e);const p=toW(e),q=cur.p[cur.p.length-1];if(Math.hypot(p[0]-q[0],p[1]-q[1])>=3)cur.p.push(p)},true);
+ cv.addEventListener('pointerup',e=>{if(cur?.drag){cur=null;window.LMEDIT?.save();return}if(cur){cur=null;save()}},true);
  for(const t of ['mousedown','click','touchstart'])cv.addEventListener(t,grab,true);
  mm.addEventListener('pointerdown',e=>{const r=mm.getBoundingClientRect();go((e.clientX-r.left)/r.width*W.WW,(e.clientY-r.top)/r.height*W.WH);e.stopPropagation()});
  mm.style.cursor='crosshair';
@@ -70,6 +70,8 @@ export function createDebug(g){
    const by={};for(const r of L)by[r.by]=(by[r.by]||0)+1;const top=Object.entries(by).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([k,n])=>k+'×'+n).join('，');
    box.innerHTML=`共 ${L.length} 局（真人 ${L.filter(r=>!r.bot).length} · AI ${L.filter(r=>r.bot).length}）<br>平均 ${f(avg)} · 中位 ${f(med)} · 最短 ${f(ts[0])} · 最长 ${f(ts[ts.length-1])}<br>死因：${top}<br>`+L.slice(-10).reverse().map(r=>`${r.bot?'🤖':'🙂'} ${f(r.t)} · Lv${r.lv} · ${r.kills}杀 · ${r.by}`).join('<br>');return}
   if(b.dataset.a==='full')openFull();
+  if(b.dataset.a==='dragcopy'){const t=JSON.stringify(window.LMEDIT?.dump());navigator.clipboard?.writeText(t).then(()=>{b.textContent='已复制';setTimeout(()=>b.textContent='复制建筑坐标',1200)},()=>prompt('复制：',t))}
+  if(b.dataset.a==='dragreset')window.LMEDIT?.reset();
   if(b.dataset.a==='undo'){lines.pop();save()}
   if(b.dataset.a==='clr'){lines=[];save()}
   if(b.dataset.a==='copy'){const t=JSON.stringify(lines.map(l=>l.w?{颜色:l.c,涂抹宽:l.w,点:l.p}:{颜色:l.c,点:l.p}));navigator.clipboard?.writeText(t).then(()=>{b.textContent='已复制';setTimeout(()=>b.textContent='复制线条坐标',1200)},()=>prompt('复制：',t))}});

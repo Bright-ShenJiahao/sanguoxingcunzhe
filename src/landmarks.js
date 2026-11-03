@@ -20,7 +20,15 @@ const TW=[[224,640],[341,617],[206,816],[420,788]];
 const DEC=[['brazier',489,725],['brazier',463,801],['brazier',126,542],['brazier',199,538],['banner',320,836],['skulls',298,524],['skulls',284,533],['skulls',312,533],['skulls',292,544],['skulls',306,546],['skulls',298,536],['banner',298,550]];
 // 拒马（用户画线 11/03）：沿线每 16px 一组，尖头朝外（背向山顶中心）
 const SPK=[[[505,725],[505,752]],[[502,779],[495,803]],[[532,726],[534,756]],[[531,782],[525,809]],[[559,728],[558,756]],[[559,790],[553,810]],[[487,820],[468,842]],[[523,828],[494,857]],[[546,838],[526,865]]];
-const CASTLE={x:135,y:792,w:169,h:170};{const i=new Image();i.src='assets/map/fort/castle_big.png?v=1';IM.f_castle=i}
+const CASTLE={x:135,y:792,w:169,h:170};
+// 开发者拖动摆放：读取浏览器里保存的位置，供调试面板拖动
+try{const E=JSON.parse(localStorage.getItem('lmEdit')||'null');if(E){if(E.castle){CASTLE.x=E.castle[0];CASTLE.y=E.castle[1]}if(E.tw)E.tw.forEach((p,i)=>{if(TW[i])TW[i]=p});if(E.dec)E.dec.forEach((p,i)=>{if(DEC[i]){DEC[i][1]=p[0];DEC[i][2]=p[1]}})}}catch(_){}
+window.LMEDIT={items(S){const L=[{k:'城堡',get x(){return CASTLE.x},get y(){return CASTLE.y},set(x,y){CASTLE.x=x;CASTLE.y=y}}];
+  TW.forEach((p,i)=>L.push({k:'瞭望塔',get x(){return TW[i][0]},get y(){return TW[i][1]},set(x,y){TW[i]=[x,y];const T=S?.tw?.[i];if(T){T.x=x;T.y=y}}}));
+  DEC.forEach(d=>L.push({k:d[0],get x(){return d[1]},get y(){return d[2]},set(x,y){d[1]=x;d[2]=y}}));return L},
+ save(){try{localStorage.setItem('lmEdit',JSON.stringify(this.dump()))}catch(_){}},
+ dump(){return {castle:[CASTLE.x,CASTLE.y],tw:TW.map(p=>[Math.round(p[0]),Math.round(p[1])]),dec:DEC.map(d=>[Math.round(d[1]),Math.round(d[2])]),decKinds:DEC.map(d=>d[0])}},
+ reset(){try{localStorage.removeItem('lmEdit')}catch(_){}location.reload()}};{const i=new Image();i.src='assets/map/fort/castle_big.png?v=1';IM.f_castle=i}
 for(const k of ['tower','banner','skulls','brazier','spikes']){const i=new Image();i.src=`assets/map/fort/${k}.png?v=1`;IM['f_'+k]=i}
 const FH={tower:55,banner:34,skulls:16,brazier:26,spikes:22};
 export function install(X){
