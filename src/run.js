@@ -1,6 +1,6 @@
-import * as UNL from './unlock.js?v=11031900';window.UNL=UNL;
-import {install as installLM} from './landmarks.js?v=11031900';
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11031900';
+import * as UNL from './unlock.js?v=11031910';window.UNL=UNL;
+import {install as installLM} from './landmarks.js?v=11031910';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11031910';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -412,7 +412,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
    if(f.k==='arc'){c.save();c.translate(px,py);c.strokeStyle=`rgba(${f.c},${.85*(1-k)})`;c.lineWidth=3*(1-k)+1;c.beginPath();c.arc(0,0,f.r*.82,f.a-f.w/2,f.a-f.w/2+f.w*Math.min(1,k*2));c.stroke();
     const im=wImg[f.img];if(im&&im.complete){const aa=f.a-f.w/2+f.w*Math.min(1,k*2);c.rotate(aa);c.translate(f.r*.55,0);c.rotate(Math.PI/2);c.globalAlpha=1-k*.6;c.rotate(-Math.PI/2);DW(c,im,9)}c.restore()}
    else if(f.k==='thrust'){c.save();c.translate(px,py+4);c.rotate(f.a);c.globalAlpha=1-k;c.fillStyle='#e9eef5';c.fillRect(6,-1,f.len*Math.min(1,k*3)-6,2);c.fillStyle='#c0402e';c.fillRect(f.len*Math.min(1,k*3)-4,-2,5,4);c.restore()}
-   else if(f.k==='anim'){DA(c,UI[f.a+Math.min(3,Math.floor(k*4))],f.x-cx,f.y-cy,f.w)}
+   else if(f.k==='anim'){if(f.a==='fx_thunder_'){c.save();c.filter='saturate(0) brightness(1.8)'}DA(c,UI[f.a+Math.min(3,Math.floor(k*4))],f.x-cx,f.y-cy,f.w);if(f.a==='fx_thunder_')c.restore()}
    else if(f.k==='boom'&&UI.fx_fire_0.complete){DA(c,UI['fx_fire_'+Math.min(3,Math.floor(k*4))],f.x-cx,f.y-cy,f.r*2.4)}
    else if(f.k==='boom'){const r=f.r*(.5+.5*k);c.save();c.globalAlpha=1-k;c.fillStyle='rgba(255,120,30,.45)';c.beginPath();c.ellipse(f.x-cx,f.y-cy,r,r*.7,0,0,6.3);c.fill();c.fillStyle='rgba(255,220,120,.7)';c.beginPath();c.ellipse(f.x-cx,f.y-cy,r*.5,r*.35,0,0,6.3);c.fill();c.restore()}
    else if(f.k==='bolt'){c.save();c.globalAlpha=1-k;c.strokeStyle='#cfe6ff';c.lineWidth=1.4;c.beginPath();c.moveTo(f.x0-cx,f.y0-cy);for(let i=1;i<5;i++){const t=i/5;c.lineTo(f.x0+(f.x1-f.x0)*t-cx+R(-3,3),f.y0+(f.y1-f.y0)*t-cy+R(-3,3))}c.lineTo(f.x1-cx,f.y1-cy);c.stroke();c.restore()}
