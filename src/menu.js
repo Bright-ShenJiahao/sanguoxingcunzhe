@@ -1,4 +1,4 @@
-import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC,fixDeck,DECKN,KIND} from './run.js?v=11032000';
+import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC,fixDeck,DECKN,KIND} from './run.js?v=11032010';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -120,7 +120,8 @@ export function createMenu(game){
  document.body.append(prep);
  prep.addEventListener('keydown',e=>e.stopPropagation());
  // ---------- 键盘操作：方向键在按钮间移动，回车/空格确认，Esc 返回 ----------
- function navKeys(e){const box=!prep.hidden?prep:!root.hidden?root:document.getElementById('lvup')?.hidden===false?document.getElementById('lvup'):null;if(!box)return;
+ function navKeys(e){const box=!prep.hidden?prep:!root.hidden?root:document.getElementById('lvup')?.hidden===false?document.getElementById('lvup'):null;if(!box)return;if(/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)&&e.key!=='Escape'&&!/^Arrow(Up|Down)$/.test(e.key))return;   // 打字时 WASD、左右键留给输入框
+ 
   const K={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],w:[0,-1],s:[0,1],a:[-1,0],d:[1,0]}[e.key];
   if(e.key==='Escape'&&box===prep){const b=[...prep.querySelectorAll('.pp-back')].find(x=>x.offsetParent);if(b){b.click();e.preventDefault()}return}
   const bsAll=[...box.querySelectorAll('button:not([disabled])')].filter(b=>b.offsetParent);
