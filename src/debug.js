@@ -22,7 +22,7 @@ export function createDebug(g){
  <b>地图（点小地图也能瞬移）</b><div class="r"><button data-t="tp">点地图瞬移</button><button data-t="drag">拖动建筑</button><button data-a="dragcopy">复制建筑坐标</button><button data-a="dragreset">还原建筑</button><button data-t="pen">画笔</button><button data-c="#ff3040" class="on">红</button><button data-c="#20d060">绿</button><button data-c="#9040ff">紫</button><button data-a="undo">撤销</button><button data-a="clr">清除</button><button data-a="copy">复制线条坐标</button><button data-a="full">全图（可画线）</button></div>
  <b>死亡记录</b><div class="r"><button data-a="dlog">查看</button><button data-a="dclr">清空</button></div><div class="dlog" style="font-size:11px;line-height:1.5"></div>
  <b>时间</b><div class="r">${g.weather.SC.map(s=>`<button data-h="${s}">${s}</button>`).join('')}</div>`;
- el.addEventListener('keydown',e=>e.stopPropagation());el.addEventListener('input',e=>{if(!/^sk-/.test(e.target.id))return;const d=+el.querySelector('#sk-d').value,sa=+el.querySelector('#sk-s').value;el.querySelector('#sk-dv').textContent=d+'%';el.querySelector('#sk-sv').textContent=sa+'%';window.SKINADJ={k:'gob_blade',dark:d,sat:sa}});
+ el.addEventListener('keydown',e=>e.stopPropagation());
  el.querySelector('h4').onclick=()=>el.classList.toggle('min');
  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.sum){window.SUMMON?.(b.dataset.sum);return}const R=g.run.dbg,a=b.dataset.a;
   if(a==='god'){D.god=!D.god;b.classList.toggle('on',D.god)}
