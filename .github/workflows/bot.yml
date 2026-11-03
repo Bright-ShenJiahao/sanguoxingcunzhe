@@ -1,0 +1,41 @@
+name: 机器人验收
+on:
+  push:
+    branches: [bot-test]
+  workflow_dispatch:
+    inputs:
+      cards:
+        description: '固定卡组（逗号分隔）'
+        default: 'fireball,xbow,hshield,holyorb,hammer'
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 200
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [0,1,2,3,4,5,6,7,8,9]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: nohup python3 -m http.server 8765 >/dev/null 2>&1 &
+      - name: 新机器人 v2（6 局）
+        env: { MAXT: "1200", PAGES: "2", BOT: "v2", CARDS: "${{ inputs.cards || 'fireball,xbow,hshield,holyorb,hammer' }}" }
+        run: node tools/balance.js fixed ${{ matrix.part }} 10 6 v2-${{ matrix.part }}.json
+      - name: 旧机器人 v1 对照（3 局）
+        env: { MAXT: "1200", PAGES: "2", BOT: "v1", CARDS: "${{ inputs.cards || 'fireball,xbow,hshield,holyorb,hammer' }}" }
+        run: node tools/balance.js fixed ${{ matrix.part }} 10 3 v1-${{ matrix.part }}.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: 'bot-${{ matrix.part }}', path: 'v*-[0-9]*.json', if-no-files-found: ignore }
+  report:
+    needs: run
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: results }
+      - run: node tools/bot_report.js results report

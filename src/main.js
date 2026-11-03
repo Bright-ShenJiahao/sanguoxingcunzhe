@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11030850';
-import {createSurvival} from './survival.js?v=11030850';
-import {createEnemies} from './enemies.js?v=11030850';
-import {createAudio} from './audio.js?v=11030850';
-import {createMeta} from './meta.js?v=11030850';
+import {createMenu} from './menu.js?v=11030860';
+import {createSurvival} from './survival.js?v=11030860';
+import {createEnemies} from './enemies.js?v=11030860';
+import {createAudio} from './audio.js?v=11030860';
+import {createMeta} from './meta.js?v=11030860';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11030850';
+import {createPathing} from './pathing.js?v=11030860';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11030850';
-import {createRun} from './run.js?v=11030850';
-import {createDebug} from './debug.js?v=11030850';
+import {createWeather} from './weather.js?v=11030860';
+import {createRun} from './run.js?v=11030860';
+import {createDebug} from './debug.js?v=11030860';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -112,7 +112,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
  survival=createSurvival({hero,enemies:en,get kills(){return kills},iframe:()=>run?.iframe,level:()=>run?.dbg?.S?.lv,build:()=>{const S=run?.dbg?.S;return S?{cards:Object.entries(S.w).map(([k,v])=>k+':'+v),bless:Object.entries(S.p).filter(([,v])=>v>0).map(([k,v])=>k+':'+v),role:CS[0]==='f'?'f':'m'}:{}},bosses:()=>run?.dbg?.S?.bosses||0,
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
   reset(){run.reset(CS[0]==='f'?'hp':'gb');hero.x=WW*AT[0];hero.y=WH*AT[1];hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm=CS[0]==='f'?'hp':'gb';joy=null;for(const k in keys)keys[k]=0}
- });run=createRun({hero,en,images:IM,survival,ok,makeEnemy:(x,y,k)=>enemySystem.make(x,y,k),hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});window.__G={hero,en,ok,WW,WH,get S(){return run?.dbg?.S}};dbg=createDebug({world:D,hero,en,run,survival,weather,hit:(e,v)=>hitEnemy(e,performance.now(),1,v)});dbg?.show(false);requestAnimationFrame(loop)}
+ });run=createRun({hero,en,images:IM,survival,ok,makeEnemy:(x,y,k)=>enemySystem.make(x,y,k),hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});window.__G={hero,en,ok,WW,WH,get S(){return run?.dbg?.S},get R(){return run?.dbg},get hp(){return survival?.hp},get maxHp(){return survival?.max},get moveMul(){return run?.moveMul||1},water};dbg=createDebug({world:D,hero,en,run,survival,weather,hit:(e,v)=>hitEnemy(e,performance.now(),1,v)});dbg?.show(false);requestAnimationFrame(loop)}
 function drawGroundRaw(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const T=D.tiles.T,z=dw/sw;for(const k of D.gt){const x0=+k[1]*T,y0=+k[2]*T,a=Math.max(sx,x0),b=Math.min(sx+sw,x0+T,WW),c0=Math.max(sy,y0),c1=Math.min(sy+sh,y0+T,WH);if(b<=a||c1<=c0)continue;const ex=b<sx+sw&&b<WW?.5:0,ey=c1<sy+sh&&c1<WH?.5:0;ctx.drawImage(IM[k],(a-x0)*HD,(c0-y0)*HD,(b-a+ex)*HD,(c1-c0+ey)*HD,dx+(a-sx)*z,dy+(c0-sy)*z,(b-a+ex)*z,(c1-c0+ey)*z)}}
 // 地面缓存：按当前屏幕缩放把地面切成 256 格的小块，各缩放一次存起来，之后每帧原样贴（画面不变，省显卡）
 const GC=new Map(),GCH=256;
@@ -139,7 +139,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  c.setTransform(SC,0,0,SC,0,0);
  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
  if(joy){const L=Math.hypot(joy.dx,joy.dy);if(L>8){dx=joy.dx/L;dy=joy.dy/L}}
- if(window.BOTDIR&&!pz){dx=window.BOTDIR[0];dy=window.BOTDIR[1]}
+ if(window.BOTTICK&&!pz&&survival?.playing)window.BOTTICK(gdt);if(window.BOTDIR&&!pz){dx=window.BOTDIR[0];dy=window.BOTDIR[1]}
  if(pz){dx=0;dy=0}
  const L=Math.hypot(dx,dy),moving=L>0;if(moving){dx/=L;dy/=L;if(dx)hero.face=dx>0?1:-1;hero.mx=dx;hero.my=dy}
  const wg=water(hero.x,hero.y),inSh=wg===2;

@@ -5,7 +5,7 @@
 const {chromium}=require('playwright');const fs=require('fs');
 const [MODE='mix',PART='0',PARTS='1',REPS='2',OUT='result.json',URL='http://localhost:8765/index.html']=process.argv.slice(2);
 const MAXT=+process.env.MAXT||1500;   // 一局最多跑多少秒（游戏时间）
-const PAGES=+process.env.PAGES||2;
+const PAGES=+process.env.PAGES||2,BOTV=process.env.BOT||'v1',BRAIN2=fs.readFileSync(__dirname+'/bot_brain.js','utf8'),FIXED=(process.env.CARDS||'fireball,xbow,hshield,holyorb,hammer').split(',');
 const BRAIN=`(()=>{window.BOT=true;let last=[0,0],stuck=0,wander=Math.random()*6.28;
 setInterval(()=>{const G=window.__G;if(!G||!G.S)return;const h=G.hero,S=G.S;
  const lv=document.getElementById('lvup');if(lv&&!lv.hidden){const c=[...lv.querySelectorAll('button.card')];if(c.length)c[Math.floor(Math.random()*c.length)].click();else lv.querySelector('[data-a=skip]')?.click();return}
@@ -32,13 +32,14 @@ async function one(b,cards){const p=await b.newPage({viewport:{width:480,height:
  await p.goto(URL+'?cards='+cards.join(','));await p.waitForFunction(()=>[...document.querySelectorAll('button')].some(x=>x.textContent.includes('开始游戏')&&x.offsetParent),null,{timeout:120000});
  await p.waitForTimeout(500);await p.getByText('开始游戏').first().click();await p.waitForTimeout(300);
  for(const t of ['下一步','出发']){await p.getByText(t).first().click();await p.waitForTimeout(300)}
- await p.evaluate(BRAIN);const w0=Date.now();
+ await p.evaluate(BOTV==='v2'?BRAIN2:BRAIN);const w0=Date.now();
  while(true){await p.waitForTimeout(2000);const st=await p.evaluate(()=>({dead:!!document.querySelector('.survival-dialog')?.open,t:window.__G?.S?.t||0}));if(st.dead||st.t>=MAXT||Date.now()-w0>40*60e3)break}
  const r=await p.evaluate(()=>{const S=__G.S,L=JSON.parse(localStorage.getItem('deathlog')||'[]'),d=L[L.length-1];
-  return {t:Math.round(S.t),died:!!document.querySelector('.survival-dialog')?.open,by:d?.by,kills:d?.kills,lv:S.lv,lvAt:S.lvAt,fullAt:S.fullAt??null,w:S.w,p:Object.fromEntries(Object.entries(S.p).filter(([,v])=>v>0)),dmg:Object.fromEntries(Object.entries(S.dmgBy||{}).map(([k,v])=>[k,Math.round(v)]))}});
- r.cards=cards;r.wall=Math.round((Date.now()-w0)/1000);await p.close();return r}
+  return {t:Math.round(S.t),died:!!document.querySelector('.survival-dialog')?.open,by:d?.by,kills:d?.kills,lv:S.lv,lvAt:S.lvAt,fullAt:S.fullAt??null,w:S.w,p:Object.fromEntries(Object.entries(S.p).filter(([,v])=>v>0)),dmg:Object.fromEntries(Object.entries(S.dmgBy||{}).map(([k,v])=>[k,Math.round(v)])),log:window.BOTLOG?{hits:BOTLOG.hits.slice(-60),nh:BOTLOG.hits.length,tele:BOTLOG.tele,modes:BOTLOG.modes}:null}});
+ r.cards=cards;r.bot=BOTV;r.wall=Math.round((Date.now()-w0)/1000);await p.close();return r}
 (async()=>{const b=await chromium.launch({args:['--disable-gpu']});const all=await cardList(b);const jobs=[];
- if(MODE==='solo'){all.forEach((k,i)=>{if(i%+PARTS===+PART)for(let r=0;r<+REPS;r++)jobs.push([k])})}
+ if(MODE==='fixed'){for(let r=0;r<+REPS;r++)jobs.push(FIXED)}
+ else if(MODE==='solo'){all.forEach((k,i)=>{if(i%+PARTS===+PART)for(let r=0;r<+REPS;r++)jobs.push([k])})}
  else{const R=rng(1000+ +PART*7919);for(let i=0;i<+REPS;i++){const s=[...all];for(let j=s.length-1;j>0;j--){const q=Math.floor(R()*(j+1));[s[j],s[q]]=[s[q],s[j]]}jobs.push(s.slice(0,5))}}
  const res=[];let k=0;
  await Promise.all(Array.from({length:PAGES},async()=>{while(k<jobs.length){const c=jobs[k++];const r=await one(b,c).catch(e=>({cards:c,err:String(e.message).slice(0,200)}));res.push(r);console.log(JSON.stringify(r));fs.writeFileSync(OUT,JSON.stringify(res))}}));
