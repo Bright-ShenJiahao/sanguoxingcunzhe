@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11032010';
-import {createSurvival} from './survival.js?v=11032010';
-import {createEnemies} from './enemies.js?v=11032010';
-import {createAudio} from './audio.js?v=11032010';
-import {createMeta} from './meta.js?v=11032010';
+import {createMenu} from './menu.js?v=11032040';
+import {createSurvival} from './survival.js?v=11032040';
+import {createEnemies} from './enemies.js?v=11032040';
+import {createAudio} from './audio.js?v=11032040';
+import {createMeta} from './meta.js?v=11032040';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11032010';
+import {createPathing} from './pathing.js?v=11032040';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11032010';
-import {createRun} from './run.js?v=11032010';
-import {createDebug} from './debug.js?v=11032010';
+import {createWeather} from './weather.js?v=11032040';
+import {createRun} from './run.js?v=11032040';
+import {createDebug} from './debug.js?v=11032040';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -64,6 +64,12 @@ window.HS=0;window.SHK=0;let hsLast=0;const PARTS=[];
 window.HITSTOP=s=>{const n=performance.now();if(n-hsLast<160)return;hsLast=n;window.HS=Math.max(window.HS,s)};
 window.SHAKE=a=>{try{if(localStorage.getItem('noShake'))return}catch(_){}window.SHK=Math.max(window.SHK,a)};
 function burst(e){const n=e.boss?18:e.elite?10:6,col=e.k==='skeleton'||e.k==='gob_ghost'?['#e8e2d0','#b8b2a0']:['#7fae3a','#4f7a24','#8a2a20'];for(let i=0;i<n;i++){const a=Math.random()*6.28,v=40+Math.random()*70;PARTS.push({x:e.x,y:e.y-8*(e.sc||1),vx:Math.cos(a)*v,vy:Math.sin(a)*v-50,t:0,d:.45+Math.random()*.2,c:col[i%col.length],s:1+Math.random()*1.5})}if(PARTS.length>300)PARTS.splice(0,PARTS.length-300)}
+// 顶部技能图标：悬停 / 点击看说明
+{const tip=document.createElement('div');tip.id='hudtip';tip.hidden=true;tip.style.cssText='position:fixed;z-index:60;max-width:260px;padding:8px 10px;border-radius:8px;background:#0b1530ee;border:1px solid #8fbbef;color:#e8f1ff;font:12px/1.5 "PingFang SC","Microsoft YaHei",sans-serif;pointer-events:none';document.body.append(tip);
+ const find=ev=>{const cv=$('cv'),r=cv.getBoundingClientRect(),x=(ev.clientX-r.left)/r.width*VW,y=(ev.clientY-r.top)/r.height*VH;if(y<7||y>24)return null;for(const [ix,k] of window.HUDI||[])if(x>=ix&&x<ix+13)return k;return null};
+ const show=(ev,k)=>{const d=window.HUDTIP?.(k);if(!d){tip.hidden=true;return}tip.innerHTML=`<b style="color:#ffd166">${d.n}</b> Lv ${d.L}/${d.max} <small style="color:#9fb4d4">${d.kind}</small><br>${d.d}`;tip.hidden=false;tip.style.left=Math.min(innerWidth-270,ev.clientX+10)+'px';tip.style.top=(ev.clientY+14)+'px'};
+ addEventListener('pointermove',ev=>{if(ev.pointerType!=='mouse')return;const k=find(ev);if(k)show(ev,k);else tip.hidden=true},true);
+ addEventListener('pointerdown',ev=>{const k=find(ev);if(k){show(ev,k);ev.stopPropagation();ev.preventDefault();clearTimeout(tip._t);tip._t=setTimeout(()=>tip.hidden=true,2500)}},true)}
 const PZ={on:false};{const st=document.createElement('style');st.textContent=`#pzb{position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));z-index:40;width:40px;height:40px;border-radius:8px;border:1px solid #8fbbef;background:#0b1530d0;color:#fff;font-size:18px;cursor:pointer}
 #pzm{position:fixed;inset:0;z-index:45;background:#0008;display:grid;place-items:center}#pzm[hidden],#pzb[hidden]{display:none}#pzm>div{background:#0b1530f0;border:1px solid #8fbbef;border-radius:12px;padding:22px 28px;display:grid;gap:12px;min-width:200px;text-align:center;color:#f7d987;font:900 22px "PingFang SC","Microsoft YaHei",sans-serif}
 #pzm button{font:700 16px "PingFang SC","Microsoft YaHei",sans-serif;padding:10px 18px;border-radius:8px;border:1px solid #f0dc9c;background:#1e3a72;color:#fff;cursor:pointer}`;document.head.append(st);
@@ -106,8 +112,8 @@ let last=0,mm,rip=[],fp=[],fpl={x:0,y:0},fpside=1,cloud;
 function mkCloud(){const n=96,g=[];for(let i=0;i<64;i++)g.push(Math.random());const v=(x,y)=>{const fx=x/n*8,fy=y/n*8,x0=Math.floor(fx),y0=Math.floor(fy),tx=fx-x0,ty=fy-y0,s=t=>t*t*(3-2*t),q=(a,b)=>g[((b%8+8)%8)*8+((a%8+8)%8)];const a=q(x0,y0)*(1-s(tx))+q(x0+1,y0)*s(tx),b=q(x0,y0+1)*(1-s(tx))+q(x0+1,y0+1)*s(tx);return a*(1-s(ty))+b*s(ty)};
  cloud=document.createElement('canvas');cloud.width=n;cloud.height=n;const x=cloud.getContext('2d'),im=x.createImageData(n,n);for(let j=0;j<n;j++)for(let i=0;i<n;i++){const val=v(i,j)*.7+v(i*2,j*2)*.3,a=Math.max(0,Math.min(1,(val-.5)/.22))*.26;const k=(j*n+i)*4;im.data[k]=18;im.data[k+1]=40;im.data[k+2]=28;im.data[k+3]=a*255}x.putImageData(im,0,0)}
 function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH;const x=t.getContext('2d');x.drawImage(IM.coll,0,0);CM=x.getImageData(0,0,WW,WH).data;
- {const mm=$('mm');mm.height=Math.round(84*WH/WW);mm.style.setProperty('--mma',WW/WH)}
- mmc=document.createElement('canvas');mmc.width=84;mmc.height=Math.round(84*WH/WW);{const g=mmc.getContext('2d');const T=D.tiles.T,s=mmc.width/WW;for(const k of D.gt){const im=IM[k];g.drawImage(im,+k[1]*T*s,+k[2]*T*s,im.width/HD*s,im.height/HD*s)}}
+ {const mm=$('mm');mm.width=420;mm.height=Math.round(420*WH/WW);mm.style.setProperty('--mma',WW/WH)}
+ mmc=document.createElement('canvas');mmc.width=420;mmc.height=Math.round(420*WH/WW);{const g=mmc.getContext('2d');const T=D.tiles.T,s=mmc.width/WW;for(const k of D.gt){const im=IM[k];g.drawImage(im,+k[1]*T*s,+k[2]*T*s,im.width/HD*s,im.height/HD*s)}}
  document.querySelectorAll('#cs button').forEach(b=>{b.setAttribute('aria-pressed',b.dataset.c===CS);b.onclick=()=>{if(b.disabled)return;CS=b.dataset.c;try{localStorage.setItem('sex',CS[0])}catch(e){}if(needLoad())loadSet(CS);document.querySelectorAll('#cs button').forEach(x=>x.setAttribute('aria-pressed',x===b))}});if(CS!=='m'&&needLoad())loadSet(CS);
  mkCloud();
  menu=createMenu({c,images:IM,data:D,drawGround,objects:objs,enemies:ED,
@@ -206,6 +212,6 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  fx=fx.filter(f=>now-f.t<220);for(const f of fx){const k=(now-f.t)/220;c.strokeStyle=`rgba(255,255,245,${1-k})`;c.lineWidth=1;c.beginPath();c.arc(f.x-cx+f.dx*k*10,f.y-cy-10,3+k*9,0,6.3);c.stroke()}
  window.CAM={cx,cy,SC,VW,VH};dbg?.draw?.(c,cx,cy);
  run.drawUI(c,VW,VH);
- const m=$('mm').getContext('2d'),k=84/WW;m.drawImage(mmc,0,0);m.strokeStyle='#fff';m.strokeRect(cx*k,cy*k,VW*k,VH*k);if(D.camp){const on=window.CAMPON!==false,x=D.camp.x*k,y=D.camp.y*k;m.fillStyle=on?'#ff5a3a':'#7a7f8a';m.beginPath();m.moveTo(x,y-3.5);m.lineTo(x+3,y+2.5);m.lineTo(x-3,y+2.5);m.closePath();m.fill();m.strokeStyle='#000a';m.lineWidth=.6;m.stroke()}run?.mini?.(m,k,now);m.fillStyle='#fff';m.fillRect(hero.x*k-1.5,hero.y*k-1.5,3,3);
+ const m=$('mm').getContext('2d'),k=84/WW;m.setTransform(1,0,0,1,0,0);m.imageSmoothingEnabled=true;m.drawImage(mmc,0,0);m.setTransform(420/84,0,0,420/84,0,0);m.strokeStyle='#fff';m.strokeRect(cx*k,cy*k,VW*k,VH*k);if(D.camp){const on=window.CAMPON!==false,x=D.camp.x*k,y=D.camp.y*k;m.fillStyle=on?'#ff5a3a':'#7a7f8a';m.beginPath();m.moveTo(x,y-3.5);m.lineTo(x+3,y+2.5);m.lineTo(x-3,y+2.5);m.closePath();m.fill();m.strokeStyle='#000a';m.lineWidth=.6;m.stroke()}run?.mini?.(m,k,now);m.fillStyle='#fff';m.fillRect(hero.x*k-1.5,hero.y*k-1.5,3,3);
  if($('pos'))$('pos').textContent='位置 '+Math.round(hero.x)+', '+Math.round(hero.y)+(inSh?' · 正在涉水（速度×0.55）':'')+' · 逻辑画布 480×300，输出 960×600，主角高约 25 像素';
  requestAnimationFrame(loop)}

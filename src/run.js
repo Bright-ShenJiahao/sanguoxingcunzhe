@@ -1,6 +1,6 @@
-import * as UNL from './unlock.js?v=11032010';window.UNL=UNL;
-import {install as installLM} from './landmarks.js?v=11032010';
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11032010';
+import * as UNL from './unlock.js?v=11032040';window.UNL=UNL;
+import {install as installLM} from './landmarks.js?v=11032040';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11032040';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -436,8 +436,9 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   if(window.HOUR!=null){const h=window.HOUR,t=String(Math.floor(h)).padStart(2,'0')+':00',ic='';const ti=UI[window.NIGHT?'t_night':h<8?'t_dawn':h<17?'t_noon':'t_dusk'];if(ti?.complete)c.drawImage(ti,4,VH-19,13,13);c.save();c.font='bold 8px "PingFang SC",sans-serif';c.textAlign='left';c.lineWidth=2;c.strokeStyle='rgba(0,0,0,.7)';c.fillStyle=window.NIGHT?'#a9c4ff':'#ffe08a';const s_=t+(window.NIGHT?'  夜晚 敌人+30%':'');c.strokeText(s_,20,VH-9);c.fillText(s_,20,VH-9);c.restore()}
   c.fillStyle='rgba(8,14,30,.75)';c.fillRect(0,0,VW,5);c.fillStyle='#5ab0ff';c.fillRect(0,0,VW*Math.min(1,S.xp/S.need),5);
   let x=VW/2-((Object.keys(S.w).length)*15)/2;c.font='bold 8px "PingFang SC","Microsoft YaHei",sans-serif';c.textAlign='right';c.lineWidth=2;c.strokeStyle='rgba(0,0,0,.7)';c.strokeText('Lv '+S.lv,x-4,18);c.fillStyle='#fff';c.fillText('Lv '+S.lv,x-4,18);c.textAlign='left';
-  for(const k in S.w){c.fillStyle='rgba(8,14,30,.6)';c.fillRect(x,8,13,15);const im=HI[k]||wImg[k];if(!im){c.fillStyle='#ffd166';c.font='bold 8px "PingFang SC",sans-serif';c.fillText(WEAPONS[k].name[0],x+2.5,19)}else if(im.complete){const s=Math.min(11/im.width,13/im.height);c.drawImage(im,x+6.5-im.width*s/2,9,im.width*s,im.height*s)}c.fillStyle='#ffd166';c.font='6px monospace';c.fillText(S.w[k],x+9,22);x+=15}
-  if(S.banner){c.save();c.globalAlpha=Math.min(1,S.banner.t*2);c.textAlign='center';c.font='bold 11px "PingFang SC","Microsoft YaHei",sans-serif';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.75)';c.strokeText(S.banner.v,VW/2,48);c.fillStyle='#ffd166';c.fillText(S.banner.v,VW/2,48);c.restore()}
+  window.HUDI=[];for(const k in S.w){window.HUDI.push([x,k]);c.fillStyle='rgba(8,14,30,.6)';c.fillRect(x,8,13,15);const im=HI[k]||wImg[k];if(!im){c.fillStyle='#ffd166';c.font='bold 8px "PingFang SC",sans-serif';c.fillText(WEAPONS[k].name[0],x+2.5,19)}else if(im.complete){const s=Math.min(11/im.width,13/im.height);c.drawImage(im,x+6.5-im.width*s/2,9,im.width*s,im.height*s)}c.fillStyle='#ffd166';c.font='6px monospace';c.fillText(S.w[k],x+9,22);x+=15}
+  if(S.banner){c.save();c.globalAlpha=Math.min(1,S.banner.t*2);c.textAlign='center';c.font='bold 11px "PingFang SC","Microsoft YaHei",sans-serif';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.75)';c.strokeText(S.banner.v,VW/2,62);c.fillStyle='#ffd166';c.fillText(S.banner.v,VW/2,62);c.restore()}
   c.textAlign='start'}
+ window.HUDTIP=k=>{const W=WEAPONS[k],L=S.w[k]||0;if(!W)return null;return {n:W.name,L,max:MAXL,d:(W.desc||[]).slice(0,Math.min(L,(W.desc||[]).length)).join('；'),kind:KIND[k]||''}};
  return {dbg:{get S(){return S},WEAPONS,PASSIVES,levelUp(){S.xp=S.need;S.lastLv=-9},maxAll(){for(const k of Object.keys(S.w).concat(S.deck))S.w[k]=MAXL;for(const k in PASSIVES)S.p[k]=PASSIVES[k].max},skip(sec){S.t+=sec},MAXL,KIND},reset,update,onSpawn,onKill,drawWorld,drawUI,absorb:v=>S?C2.absorb(v):v,ground:(c,cx,cy,now)=>{if(S){LM.ground(c,cx,cy,now);C2.ground(c,cx,cy,now)}},sprites:(it,cx,cy,c,now)=>{if(S){C2.sprites(it,cx,cy,c,now);LM.sprites(it,cx,cy,c,now)}},mini:(m,k,now)=>S&&LM.mini(m,k,now),want:()=>S?want():16,get paused(){return !!S&&S.paused},get armor(){return S?S.p.armor+(S.B.arm||0):0},pickKind:()=>S?pickKind():'goblin',get spawnR(){return S&&S.t<45?.75:1},get armPct(){return 0},dodge(){if(S&&S.p.dodge&&Math.random()<.05*S.p.dodge){S.texts.push({x:hero.x,y:hero.y-30,v:'闪避',t:.7,c:'#bfe6ff'});return true}return false},get iframe(){return S?.1*S.p.tough:0},useRevive(){if(S&&S.rev>0){S.rev--;S.banner={v:'复活！',t:2.5};return true}return false},get moveMul(){return S?(window.HSLOW>performance.now()?.5:1)*(1+.08*S.p.spd+S.B.spd)*(S.buf?.spd>0?1.3:1):1}};
 }

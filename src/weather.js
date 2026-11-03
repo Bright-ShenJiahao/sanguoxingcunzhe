@@ -103,7 +103,7 @@ export function createWeather(){
   else if(gi>.01&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
   drawTime(c,VW,VH,clock(now));window.NIGHT=isNight(now);window.HOUR=hourOf(now);
   // 进入新地区时的名字提示
-  const a=now-ztime;if(a<3000){const al=a<300?a/300:a>2300?(3000-a)/700:1;c.globalAlpha=al;c.font='bold 11px "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(8,14,24,.85)';c.strokeText(zname,VW/2,30);c.fillStyle='#f7e3a6';c.fillText(zname,VW/2,30)}
+  const a=now-ztime;if(a<3000){const al=a<300?a/300:a>2300?(3000-a)/700:1;c.globalAlpha=al;c.font='bold 11px "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(8,14,24,.85)';c.strokeText(zname,VW/2,44);c.fillStyle='#f7e3a6';c.fillText(zname,VW/2,44)}
   c.restore()}
  return {draw,get kind(){return kind},get intensity(){return inten},shichen(now){const h=hourOf(now);return String(Math.floor(h)).padStart(2,'0')+':00'},reset(){H0=3;T0b=performance.now()},
   force(k){if(k==='auto'){forced=null;kind='clear';inten=0;target=0;next=null}else{forced=k;kind=k;target=1;inten=1}},
