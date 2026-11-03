@@ -49,9 +49,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     if(e.rain>0){e.rain-=dt;e.moving=false;if(e.rain<=0){for(let i=0;i<5;i++){const a=Math.random()*6.28,r=Math.random()*70;lobs.push({k:'fire',x0:e.x,y0:e.y-30,x:hero.x+Math.cos(a)*r,y:hero.y+Math.sin(a)*r*.8,t:-i*.15,d:.9,r:20,dm:BD*1.3})}}continue}
     if(d<40&&e.blCd<=0){for(let k=0;k<10;k++){const a=Math.random()*6.28,nx=hero.x+Math.cos(a)*110,ny=hero.y+Math.sin(a)*80;if(ok(nx,ny)){window.onBlink?.(e.x,e.y);e.x=nx;e.y=ny;e.blCd=6;break}}continue}
     if(e.rnCd<=0&&d<200){e.rain=2;e.rnCd=8;continue}}
-   if(e.k==='gob_rock'&&!e.boss&&(e.shed||0)<3){e.thCd=(e.thCd??2)-dt;   // 岩甲：扒下自己的石甲扔出去，共 3 次
-    if(e.thT>0){e.thT-=dt;e.moving=false;if(e.thT<=0){e.shed=(e.shed||0)+1;e.spdMul=1+.4*e.shed;e.sc=(e.sc||1)*.94;lobs.push({k:'rock',x0:e.x,y0:e.y-16,x:hero.x,y:hero.y,t:0,d:.9,r:24,dm:BD*1.6});window.onShed?.(e)}continue}
-    if(e.thCd<=0&&d<170){e.thT=.6;e.thCd=4;e.face=ax>=0?1:-1;e.flash=.1;continue}}
+   if(e.k==='gob_rock'&&!e.boss&&(e.shed||0)<3&&e.hpMax&&e.hp<e.hpMax*(1-.25*((e.shed||0)+1))){e.shed=(e.shed||0)+1;e.spdMul=1+.4*e.shed;e.sc=(e.sc||1)*.94;window.onShed?.(e)}   // 岩甲：血掉到 75/50/25% 各剥一层石甲
    if(e.state==='dash'){const st=(e.dsp||320)*dt,nx=e.x+e.dx*st,ny=e.y+e.dy*st;if(ok(nx,ny)){e.x=nx;e.y=ny}else if(stats.charge){e.state='move';e.timer=0;e.dcd=e.dcdN||4;e.dazeT=2;window.SHAKE?.(2);window.onDaze?.(e);continue}e.moving=true;
     if(stats.charge){for(const o of EN){if(o===e||o.dead||o.boss||o.drum||o.k==='gob_boar')continue;const qx=o.x-e.x,qy=o.y-e.y,q=Math.hypot(qx,qy);if(q<14&&q>0){const sd=(-e.dy*qx+e.dx*qy)>=0?1:-1,nx2=o.x-e.dy*sd*10,ny2=o.y+e.dx*sd*10;if(ok(nx2,ny2)){o.x=nx2;o.y=ny2}}}}   // 野猪冲锋：把沿途的小怪撞到两边
     if(!e.dashHit&&Math.hypot(hero.x-e.x,hero.y-e.y)<12){e.dashHit=1;onHit(BD);if(stats.charge){for(let i=8;i>=1;i--){const k=40*i/8,hx=hero.x+e.dx*k,hy=hero.y+e.dy*k;if(ok(hx,hy)){hero.x=hx;hero.y=hy;break}}window.SHAKE?.(3)}}if(e.timer>=(e.dlen||.25)){e.state='recover';e.timer=0;if(data[e.k].frames.tired){e.tiredT=1;e.slowT=Math.max(e.slowT||0,1)}e.dcd=e.dcdN||4;e.dsp=e.dlen=0}continue}
@@ -61,9 +59,9 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    if(e.state==='howl'){if(e.timer>=1){e.state='recover';e.timer=0;if(d<80)window.HSLOW=performance.now()+2000;e.hwFx=.6}continue}
    if(e.state==='fuse'){if(e.timer>=.5){const sp=170*dt,nx=e.x+e.fx*sp,ny=e.y+e.fy*sp;if(ok(nx,ny)){e.x=nx;e.y=ny}e.moving=true;e.face=e.fx>=0?1:-1}   // 点燃 0.5 秒后推着炸弹直线冲
     if(e.timer>=1.5||(e.timer>=.5&&Math.hypot(hero.x-e.x,hero.y-e.y)<14)){e.boomed=1;explode(e.x,e.y,40,BD*3,true);e.hp=0;e.dead=true;e.state='fall';e.timer=0;e.alpha=1}continue}
-   if(e.state==='smash'){const R_=e.sr||35;if(e.timer>=(e.st||1.2)){e.state='strike';e.timer=0;explode(e.x+(e.bx>0?8:-8),e.y,R_,BD*3,false);e.bcd=e.boss?3:6}continue}
+   if(e.state==='smash'){const R_=e.sr||35;if(e.timer>=(e.st||1.2)){e.state='strike';e.timer=0;explode(e.x+(e.bx>0?8:e.bx<0?-8:0),e.y,R_,BD*(e.k==='gob_rock'?2:3),false);if(e.k==='gob_rock'){if(Math.hypot(hero.x-e.x,(hero.y-e.y)*1.25)<R_)window.HSLOW=performance.now()+1200;window.SHAKE?.(2)}e.bcd=e.boss?3:e.k==='gob_rock'?4:6}continue}
    if(e.state==='leap'){if(e.timer<1){continue}const k=Math.min(1,(e.timer-1)/.45);e.x=e.lx0+(e.lx1-e.lx0)*k;e.y=e.ly0+(e.ly1-e.ly0)*k;e.hop=Math.sin(k*Math.PI)*40;if(k>=1){e.hop=0;e.state='strike';e.timer=0;explode(e.x,e.y,50,BD*3,false);e.bcd=4}continue}
-   if(e.state==='cast'){if(e.timer>=(stats.lob==='rock'?1:.8)){e.state='strike';e.timer=0;lobs.push({k:stats.lob,x0:e.x,y0:e.y-14,x:hero.x,y:hero.y,t:0,d:stats.lob==='rock'?1:.8,r:stats.lob==='rock'?22:25,dm:BD*(stats.lob==='rock'?2.5:2)});e.cooldown=stats.lob==='rock'?3:4}continue}
+   if(e.state==='cast'){if(e.timer>=(stats.lob==='rock'?1:.8)){e.state='strike';e.timer=0;if(e.k==='gob_thrower'&&Math.random()<.35){const vol={n:0},a=Math.random()*6.28;for(let i=0;i<3;i++){const o=40*(2-i)/2;lobs.push({k:'rock',x0:e.x,y0:e.y-14,x:hero.x+Math.cos(a)*o,y:hero.y+Math.sin(a)*o*.8,t:-i*.35,d:1,r:22,dm:BD*2.5,vol})}}else lobs.push({k:stats.lob,x0:e.x,y0:e.y-14,x:hero.x,y:hero.y,t:0,d:stats.lob==='rock'?1:.8,r:stats.lob==='rock'?22:25,dm:BD*(stats.lob==='rock'?2.5:2)});e.cooldown=stats.lob==='rock'?3:4}continue}
    if(e.state==='bash'){if(e.timer>=1){e.state='strike';e.timer=0;const fr=Math.sign(ax)===Math.sign(e.bx||1);if(d<32&&fr){onHit(BD);const nx=hero.x+ax/d*22,ny=hero.y+ay/d*22;if(ok(nx,ny)){hero.x=nx;hero.y=ny}}e.bcd=5}continue}
    if(e.state==='hurt'){if(e.timer>=.25){e.state='move';e.timer=0}continue}
    if(e.state==='windup'){
@@ -83,7 +81,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     const reg=!e.elite&&!e.boss;
     if(stats.bomb&&reg&&d<90){e.state='fuse';e.timer=0;e.fx=ax/d;e.fy=ay/d;continue}
     if(stats.charge&&reg&&d<150&&d>30&&e.dcd<=0){e.state='aim';e.timer=0;e.aimT=.8;e.dx=ax/d;e.dy=ay/d;e.dsp=260;e.dlen=(d+100)/260;e.dcdN=5;e.alen=d+100;continue}
-    if(stats.heavy&&reg&&d<28&&e.bcd<=0){e.state='smash';e.timer=0;e.sr=35;e.st=1.2;e.bx=ax;continue}
+    if(stats.heavy&&reg&&d<(e.k==='gob_rock'?60:28)&&e.bcd<=0){e.state='smash';e.timer=0;e.sr=e.k==='gob_rock'?55:35;e.st=e.k==='gob_rock'?1:1.2;e.bx=e.k==='gob_rock'?0:ax;continue}   // 岩甲地震拳：以自己为中心
     if(stats.leap&&e.bcd<=0&&d<170&&d>40){e.state='leap';e.timer=0;e.lx0=e.x;e.ly0=e.y;e.lx1=hero.x;e.ly1=hero.y;continue}
     if(stats.leap&&e.bcd<=0&&d<=40){e.state='smash';e.timer=0;e.sr=40;e.st=.7;e.bx=ax;continue}
     if(stats.lob&&d<=stats.reach&&e.cooldown===0){e.state='cast';e.timer=0;continue}
@@ -123,7 +121,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     }
    }
   }
-  for(let i=lobs.length-1;i>=0;i--){const L=lobs[i];L.t+=dt;if(L.t>=L.d){explode(L.x,L.y,L.r,L.dm,false);lobs.splice(i,1)}}
+  for(let i=lobs.length-1;i>=0;i--){const L=lobs[i];L.t+=dt;if(L.t>=L.d){let dm=L.dm;if(L.vol){dm*=[1,.6,.35][Math.min(2,L.vol.n)];if(Math.hypot(hero.x-L.x,(hero.y-L.y)*1.25)<L.r)L.vol.n++}explode(L.x,L.y,L.r,dm,false);lobs.splice(i,1)}}
   for(let i=booms.length-1;i>=0;i--){booms[i].t+=dt;if(booms[i].t>.4)booms.splice(i,1)}
   for(let i=arrows.length-1;i>=0;i--){
    const p=arrows[i],oldx=p.x,oldy=p.y;p.x+=p.dx*145*dt;p.y+=p.dy*145*dt;p.life-=dt;
