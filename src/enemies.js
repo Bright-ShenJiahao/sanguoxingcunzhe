@@ -45,6 +45,9 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    if(e.sweep){const sp=stats.speed*(stats.charge?3:1.8)*dt*speed;e.x+=e.sweep[0]*sp;e.y+=e.sweep[1]*sp;e.face=e.sweep[0]>=0?1:-1;e.moving=true;e.state='move';continue}   // 过场：直线冲过去
    if(e.state==='aim'){if(e.timer>=(e.aimT||.5)){e.state='dash';e.timer=0;e.dashHit=0}continue}
    if(e.dazeT>0){e.dazeT-=dt;e.moving=false;continue}
+   if(e.k==='gob_rock'&&!e.boss&&(e.shed||0)<3){e.thCd=(e.thCd??2)-dt;   // 岩甲：扒下自己的石甲扔出去，共 3 次
+    if(e.thT>0){e.thT-=dt;e.moving=false;if(e.thT<=0){e.shed=(e.shed||0)+1;e.spdMul=1+.4*e.shed;e.sc=(e.sc||1)*.94;lobs.push({k:'rock',x0:e.x,y0:e.y-16,x:hero.x,y:hero.y,t:0,d:.9,r:24,dm:BD*1.6});window.onShed?.(e)}continue}
+    if(e.thCd<=0&&d<170){e.thT=.6;e.thCd=4;e.face=ax>=0?1:-1;e.flash=.1;continue}}
    if(e.state==='dash'){const st=(e.dsp||320)*dt,nx=e.x+e.dx*st,ny=e.y+e.dy*st;if(ok(nx,ny)){e.x=nx;e.y=ny}else if(stats.charge){e.state='move';e.timer=0;e.dcd=e.dcdN||4;e.dazeT=2;window.SHAKE?.(2);window.onDaze?.(e);continue}e.moving=true;
     if(stats.charge){for(const o of EN){if(o===e||o.dead||o.boss||o.drum||o.k==='gob_boar')continue;const qx=o.x-e.x,qy=o.y-e.y,q=Math.hypot(qx,qy);if(q<14&&q>0){const sd=(-e.dy*qx+e.dx*qy)>=0?1:-1,nx2=o.x-e.dy*sd*10,ny2=o.y+e.dx*sd*10;if(ok(nx2,ny2)){o.x=nx2;o.y=ny2}}}}   // 野猪冲锋：把沿途的小怪撞到两边
     if(!e.dashHit&&Math.hypot(hero.x-e.x,hero.y-e.y)<12){e.dashHit=1;onHit(BD);if(stats.charge){for(let i=8;i>=1;i--){const k=40*i/8,hx=hero.x+e.dx*k,hy=hero.y+e.dy*k;if(ok(hx,hy)){hero.x=hx;hero.y=hy;break}}window.SHAKE?.(3)}}if(e.timer>=(e.dlen||.25)){e.state='recover';e.timer=0;if(data[e.k].frames.tired){e.tiredT=1;e.slowT=Math.max(e.slowT||0,1)}e.dcd=e.dcdN||4;e.dsp=e.dlen=0}continue}
