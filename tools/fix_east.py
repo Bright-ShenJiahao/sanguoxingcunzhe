@@ -7,7 +7,16 @@ b=np.array(Image.open('assets/map/g10.jpg').convert('RGB')).astype(np.float32)
 M=np.concatenate([a,b],1);H,W=M.shape[:2]
 coll=np.array(Image.open('assets/map/coll.png'))[...,0]
 sea=cv2.resize((coll==1).astype(np.uint8),(W,H),interpolation=cv2.INTER_NEAREST).astype(bool)
-sea[:, :3000]=False                                     # 只处理东边的海
+sea[:, :3000]=False
+# 只要从右边界一路连过来的海（不碰河道和悬崖：悬崖在 coll 里也是 1）
+blue=(M[...,2]>M[...,0]+60)&(M[...,2]>M[...,1]+15)
+ok=cv2.morphologyEx((sea&blue).astype(np.uint8),cv2.MORPH_CLOSE,np.ones((3,13),np.uint8)).astype(bool);east=np.zeros_like(ok)
+for y in range(H):
+  row=ok[y];x=W-1
+  while x>=3000 and row[x]:x-=1
+  east[y,x+1:]=True
+east=cv2.morphologyEx(east.astype(np.uint8),cv2.MORPH_CLOSE,np.ones((15,15),np.uint8)).astype(bool)&sea
+sea=east
 # 1) 草地竖条：用左边 70px 处的草纹替换，羽化
 y0,y1,x0,x1=1700,2020,3350,3415
 src=M[y0:y1,x0-80:x1-80].copy()
@@ -42,11 +51,11 @@ m=cv2.erode(sea.astype(np.uint8),np.ones((7,7),np.uint8)).astype(np.float32)
 m=cv2.GaussianBlur(m,(0,0),2.5)[...,None]
 M=M*(1-m)+new*m
 # 3) 东部草地加明暗起伏
-land=~cv2.resize((coll==1).astype(np.uint8),(W,H),interpolation=cv2.INTER_NEAREST).astype(bool)
+land=cv2.GaussianBlur(np.clip((M[...,1]-M[...,2]-15)/30,0,1).astype(np.float32),(0,0),3)
 nz=cv2.resize(rng.random((H//160+2,W//160+2)).astype(np.float32),(W,H),interpolation=cv2.INTER_CUBIC)
 nz=cv2.GaussianBlur(nz,(0,0),60);nz=(nz-nz.mean())/(nz.std()+1e-6)
 ramp=np.clip((np.arange(W)-2300)/300,0,1)[None,:]
-k=(1+.07*nz*ramp)[...,None]*land[...,None]+(~land[...,None])
+k=(1+.07*nz*ramp*land)[...,None]
 M=np.clip(M*k,0,255).astype(np.uint8)
 Image.fromarray(M[:, :3200]).save('assets/map/g00.jpg',quality=90)
 Image.fromarray(M[:, 3200:]).save('assets/map/g10.jpg',quality=90)
