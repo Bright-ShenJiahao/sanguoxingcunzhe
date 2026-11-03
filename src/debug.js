@@ -29,7 +29,7 @@ export function createDebug(g){
   else if(a==='nomob'){D.noMob=!D.noMob;b.classList.toggle('on',D.noMob);if(D.noMob)for(const e of g.en)e.dead=e.expired=true}
   else if(a==='heal')g.survival.heal(9999);
   else if(a==='dummy'){D.dummy=!D.dummy;b.classList.toggle('on',D.dummy);D.noMob=D.dummy;el.querySelector('[data-a=nomob]').classList.toggle('on',D.noMob);for(const e of g.en)e.dead=e.expired=true;if(D.dummy)mkDummy();cardList()}
-  else if(a==='dclear'){const S=R.S;if(S)for(const k of Object.keys(S.w))if(!R.WEAPONS[k]?.own)delete S.w[k];cardList()}
+  else if(a==='dclear'){const S=R.S;if(S)for(const k of Object.keys(S.w))delete S.w[k];cardList()}
   else if(a==='unlall'){window.UNL?.unlockAll();b.textContent='已全部解锁'}
   else if(a==='lv')R.levelUp();
   else if(a==='max')R.maxAll();
@@ -43,7 +43,7 @@ export function createDebug(g){
  // ---------- 木头人：站桩不动、不攻击、血打不完；点技能卡加 1 级，满级后再点移除 ----------
  function mkDummy(){const h=g.hero;[[-70,0],[70,0],[0,-55],[0,55],[110,40]].forEach(([dx,dy],i)=>{window.SUMMON?.('goblin');const e=g.en[g.en.length-1];if(!e)return;e.x=h.x+dx;e.y=h.y+dy;e.dummy=1;e.boss=false;e.elite=false;e.hp=e.hpMax=1e9;e.res='';e.armor=0;e.name='木头人';e.dmgT=0;})}
  function cardList(){const R=g.run.dbg,box=el.querySelector('.cards'),S=R.S;if(!D.dummy||!S){box.innerHTML='';return}
-  box.innerHTML=Object.keys(R.WEAPONS).filter(k=>!R.WEAPONS[k].own).map(k=>{const l=S.w[k]||0;return `<button data-card="${k}" class="${l?'on':''}" title="${R.KIND[k]||''}">${R.WEAPONS[k].name}${l?' '+l:''}</button>`}).join('')}
+  box.innerHTML=Object.keys(R.WEAPONS).sort((a,b)=>!!R.WEAPONS[b].own-!!R.WEAPONS[a].own).map(k=>{const l=S.w[k]||0;return `<button data-card="${k}" class="${l?'on':''}" title="${R.KIND[k]||''}">${R.WEAPONS[k].own?'【专属】':''}${R.WEAPONS[k].name}${l?' '+l:''}</button>`}).join('')}
  el.addEventListener('click',e=>{const b=e.target.closest('[data-card]');if(!b)return;const R=g.run.dbg,S=R.S,k=b.dataset.card;if(!S)return;const l=(S.w[k]||0)+1;if(l>R.MAXL)delete S.w[k];else S.w[k]=l;cardList()});
  let hp0=new Map(),acc=0;
  setInterval(()=>{if(!D.dummy)return;let tot=0;for(const e of g.en)if(e.dummy&&!e.dead){e.stunT=Math.max(e.stunT||0,.2);const d=1e9-e.hp;tot+=d;e.hp=1e9;e.dead=false}acc=acc*.9+tot;const dp=el.querySelector('.dps');if(dp)dp.textContent='木头人受到伤害（约每秒）：'+Math.round(acc)}
