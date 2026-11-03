@@ -35,7 +35,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     continue;
    }
    if(e.drum){if(e.flash>0)e.flash-=dt;continue}
-   const ax=hero.x-e.x,ay=hero.y-e.y,d=Math.hypot(ax,ay)||1;if(e.state!=='dash')e.face=ax>=0?1:-1;
+   const ax=hero.x-e.x,ay=hero.y-e.y,d=Math.hypot(ax,ay)||1;if(e.state!=='dash'){if(e.k==='gob_shield'&&!e.shBrk){e.turnT=(e.turnT||0)-dt;const want=ax>=0?1:-1;if(want!==e.face&&e.turnT<=0){e.face=want;e.turnT=1.2}}else e.face=ax>=0?1:-1}
    if(e.stunT>0){e.stunT-=dt;e.moving=false;continue}   // 圣印定身：不动、不打、不碰撞伤害
    const BD=stats.damage*(e.dmgMul||1)*(e.boss?1.3:e.elite?1.4:1);
    // 碰撞伤害：同一只怪每 0.5 秒最多一次
@@ -100,7 +100,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      const k_=Math.min(1,dt*7);e.vx=(e.vx??tx)+(tx-(e.vx??tx))*k_;e.vy=(e.vy??ty)+(ty-(e.vy??ty))*k_;   // 转向限速：方向逐渐转过去
      const vl=Math.hypot(e.vx,e.vy)||1,ux=e.vx/vl,uy=e.vy/vl;
      if(e.slowT>0)e.slowT-=dt;if(e.buffT>0)e.buffT-=dt;if(e.wwT>0){e.wwT-=dt;e.wwc=(e.wwc||0)-dt;if(d<34&&e.wwc<=0){e.wwc=.3;onHit(BD*.5)}}if(stats.ghost){e.phC=(e.phC??6)-dt;if(e.phC<=0){e.phC=6;e.phT=1.5}if(e.phT>0)e.phT-=dt}
-     const oldx=e.x,oldy=e.y,dist=(e.buffT>0?1.3:1)*(e.wwT>0?1.3:1)*((e.slowT>0&&!stats.heavy)?.5:1)*(e.boss?.8:1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
+     const oldx=e.x,oldy=e.y,dist=(e.buffT>0?1.3:1)*(e.wwT>0?1.3:1)*((e.slowT>0&&!stats.heavy)?.5:1)*(e.boss?.8:1)*(e.spdMul||1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
      if(stats.ghost){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}
      else if(ok(e.x-my*1.6,e.y+mx*1.6)){e.x-=my*1.6;e.y+=mx*1.6}
      e.moving=e.x!==oldx||e.y!==oldy;
@@ -131,7 +131,8 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(name==='move')name=e.moving?'walk'+(Math.floor(now/110+e.ph)%(data[e.k].nw||6)):'idle'+(Math.floor(now/650)%2);
   if(name==='recover'&&!data[e.k].frames.recover)name='idle0';
   if(name==='windup'&&data[e.k].frames.draw&&e.timer>.22)name='draw';
-  return data[e.k].frames[name]||data[e.k].frames.idle0;
+  const FF=data[e.k].frames;if(e.shBrk){if(e.brkFx>0&&FF.brk){e.brkFx-=1/60;return FF.brk}if(FF['n_'+name])return FF['n_'+name];if(name==='idle0'&&FF.n_idle0)return FF.n_idle0}
+  return FF[name]||FF.idle0;
  }
  function getFrame(e,now){const f=frame(e,now),name=Object.keys(data[e.k].frames).find(key=>data[e.k].frames[key]===f);return {f,im:images['en_'+e.k+'_'+name]}}
  function draw(e,c,cx,cy,now){const SPR=1.07;   // 人物、怪物整体放大一点
