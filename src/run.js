@@ -1,5 +1,6 @@
-import {install as installLM} from './landmarks.js?v=11030890';
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11030890';
+import * as UNL from './unlock.js?v=11030900';window.UNL=UNL;
+import {install as installLM} from './landmarks.js?v=11030900';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11030900';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -44,7 +45,7 @@ const MAXL=5,OL=[0,1,3,5,6,8];   // 5 级制：新等级 → 旧数值档位
 const WIC={sword:'ic_sword',hammer:'ic_hammer',axe:'icons_3',thunder:'ic_thunder',bow:'ic_bow',xbow:'ic_xbow',gb:'icons_0',hp:'icons_1',missile:'icons_2',axe:'icons_3',fireball:'icons_4',frost:'icons_5',chain:'icons_6',holy:'icons_7'};Object.assign(WIC,CARD_IC);
 const PIC={atk:'b_atk',arc:'p_arc',hp:'icons_10',spd:'icons_9',cd:'b_cd',area:'b_area',amt:'b_amt',regen:'b_regen',armor:'b_armor',luck:'b_luck',crit:'p_crit',critd:'p_critd',wis:'icons_12',dur:'b_dur',pspd:'b_pspd',vamp:'b_vamp',greed:'icons_11',curse:'b_curse',dodge:'p_dodge',tough:'p_tough',svamp:'p_svamp',rev:'p_rev',berserk:'p_berserk',exec:'p_exec',hunt:'p_hunt',knock:'p_knock',boom:'p_boom',mag:'p_mag',gamble:'p_gamble'};
 const isSp=k=>WEAPONS[k].cat==='spell',isOwn=k=>!!WEAPONS[k].own;
-export function fixDeck(d){d=d&&typeof d==='object'?d:{};let c=Array.isArray(d.c)?d.c:[...(d.w||[]),...(d.s||[])];c=[...new Set(c)].filter(k=>POOL.c.includes(k));for(const k of ['sword','hammer','axe','bow','xbow','fireball','chain','frost','missile','thunder',...POOL.c])if(c.length<Math.min(DECKN,POOL.c.length)&&POOL.c.includes(k)&&!c.includes(k))c.push(k);d.c=c.slice(0,DECKN);delete d.w;delete d.s;d.lock=(d.lock||[]).filter(k=>PASS_KEYS.includes(k));d.ban=d.ban||[];return d}
+export function fixDeck(d){d=d&&typeof d==='object'?d:{};let c=Array.isArray(d.c)?d.c:[...(d.w||[]),...(d.s||[])];c=[...new Set(c)].filter(k=>POOL.c.includes(k)&&UNL.okC(k));for(const k of ['sword','hammer','axe','bow','xbow','fireball','chain','frost','missile','thunder',...POOL.c])if(c.length<Math.min(DECKN,POOL.c.length)&&POOL.c.includes(k)&&UNL.okC(k)&&!c.includes(k))c.push(k);d.c=c.slice(0,DECKN);delete d.w;delete d.s;d.lock=(d.lock||[]).filter(k=>PASS_KEYS.includes(k));d.ban=d.ban||[];return d}
 function loadDeck(){let d=null;try{d=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
  d=fixDeck(d);d.lock=(d.lock||[]).slice(0,4);d.ban=(d.ban||[]).filter(k=>PASS_KEYS.includes(k)&&!d.lock.includes(k)).slice(0,8);return d}
 export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
@@ -95,7 +96,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  function reset(start='sword'){
   S={B:window.META?.bonus()||{hp:0,atk:0,spd:0,cd:0,arm:0,reg:0,mag:0,wis:0,crit:0,rr:0,rev:0},coins:[],chests:[],seen:{},ev:{},calm:0,t:+(new URLSearchParams(location.search).get('t')||0),lv:1,xp:0,need:5,queue:0,lastLv:-9,rerolls:0,w:{[start]:1},cd:{},p:Object.fromEntries(PASS_KEYS.map(k=>[k,0])),gems:[],shots:[],fx:[],texts:[],eliteT:Math.max(180,+(new URLSearchParams(location.search).get('t')||0)+60),bossDone:{},paused:false,maxHp:100};
   {const P=Array.prototype.push;S.shots.push=function(...a){for(const x of a)if(!x.src)x.src=S.src;return P.apply(this,a)}}
-  {const d=loadDeck();S.deck=d.c.slice();const ban=d.ban||[];const rest=PASS_KEYS.filter(k=>!ban.includes(k)&&!d.lock.includes(k)).sort(()=>Math.random()-.5);S.pp=[...d.lock,...rest.slice(0,12-d.lock.length)]}
+  {const d=loadDeck();S.deck=d.c.slice();const ban=d.ban||[];const rest=PASS_KEYS.filter(k=>!ban.includes(k)&&!d.lock.includes(k)&&UNL.okP(k)).sort(()=>Math.random()-.5);S.pp=[...d.lock,...rest.slice(0,12-d.lock.length)]}
   {const QC=new URLSearchParams(location.search).get('cards');if(QC){const L=QC.split(',').filter(k=>WEAPONS[k]&&!WEAPONS[k].own);S.deck=L.slice();for(const k of L)S.w[k]=1}}   // 平衡测试：指定开局卡组
   S.maxHp=100+S.B.hp;S.rerolls=S.B.rr;S.rev=S.B.rev;survival?.setMax?.(S.maxHp,S.B.hp);ui.hidden=true;
  }
@@ -375,7 +376,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   const pool=GOT.length?GOT:[{g:'❤️'}];   // 转轮只转这次真的会给的东西
   if(window.META){S.paused=true;window.META.slot(big?'Boss 宝箱 ×'+n:'宝箱 ×'+n,GOT,pool,()=>{S.paused=false})}else S.banner={v:'宝箱：'+GOT.map(o=>o.t).join('、'),t:4,snd:1}}
  const HARD=new Set(['gob_shield','gob_rock','gob_boar','gob_wolf','gob_mage']);
- function onKill(e){if(e.crate){crateDrop(e);return}C2.onKill(e);LM.onKill(e);if(e.boss)S.bosses=(S.bosses||0)+1;if(S.p.boom&&!e.drum&&Math.random()<.04*S.p.boom){S.fx.push({k:'ring',x:e.x,y:e.y,t:0,r:30});const o=S.src;S.src='boom';for(const t of en)if(!t.dead&&t!==e&&(t.x-e.x)**2+((t.y-e.y)*1.2)**2<30*30)strike(t,dmg(4),0);S.src=o}if((e.elite||e.boss)&&!e.drum&&!e.totem)leaderDown(e);window.SFX?.kill();window.META?.kill(e.k);{const c=e.boss?25:e.elite?5:Math.random()<.12*(1+.2*S.p.luck)?1:0;if(c)S.coins.push({x:e.x+R(-4,4),y:e.y-3,v:c});if(e.boss)window.META?.addTickets(1)}if(!e.boss&&Math.random()<.004*(1+.2*S.p.luck))(S.mags=S.mags||[]).push({x:e.x,y:e.y-3});if((e.boss||e.elite)&&!e.totem&&!e.noChest)S.chests.push({x:e.x,y:e.y,big:!!e.boss,silver:S.t>=600});const v=e.boss?60:e.elite?12:(e.sweep||e.k==='skeleton')?0:HARD.has(e.k)?3:1;if(v)S.gems.push({x:e.x+R(-3,3),y:e.y-4+R(-3,3),v:v+(window.NIGHT&&Math.random()<.3?Math.max(1,Math.round(v*.3)):0)});if(e.boss)S.texts.push({x:e.x,y:e.y-50,v:'击败 '+e.name+'！',t:2.5,c:'#ffd166',big:1})}
+ function onKill(e){if(e.crate){crateDrop(e);return}C2.onKill(e);LM.onKill(e);if(e.boss){S.bosses=(S.bosses||0)+1;(S.bossNames=S.bossNames||[]).push(e.name)}if(S.p.boom&&!e.drum&&Math.random()<.04*S.p.boom){S.fx.push({k:'ring',x:e.x,y:e.y,t:0,r:30});const o=S.src;S.src='boom';for(const t of en)if(!t.dead&&t!==e&&(t.x-e.x)**2+((t.y-e.y)*1.2)**2<30*30)strike(t,dmg(4),0);S.src=o}if((e.elite||e.boss)&&!e.drum&&!e.totem)leaderDown(e);window.SFX?.kill();window.META?.kill(e.k);{const c=e.boss?25:e.elite?5:Math.random()<.12*(1+.2*S.p.luck)?1:0;if(c)S.coins.push({x:e.x+R(-4,4),y:e.y-3,v:c});if(e.boss)window.META?.addTickets(1)}if(!e.boss&&Math.random()<.004*(1+.2*S.p.luck))(S.mags=S.mags||[]).push({x:e.x,y:e.y-3});if((e.boss||e.elite)&&!e.totem&&!e.noChest)S.chests.push({x:e.x,y:e.y,big:!!e.boss,silver:S.t>=600});const v=e.boss?60:e.elite?12:(e.sweep||e.k==='skeleton')?0:HARD.has(e.k)?3:1;if(v)S.gems.push({x:e.x+R(-3,3),y:e.y-4+R(-3,3),v:v+(window.NIGHT&&Math.random()<.3?Math.max(1,Math.round(v*.3)):0)});if(e.boss)S.texts.push({x:e.x,y:e.y-50,v:'击败 '+e.name+'！',t:2.5,c:'#ffd166',big:1})}
  // ---------- 绘制 ----------
  function drawWorld(c,cx,cy,now){
   for(const e of en){if(e.dead||e.drum||e.tower||(e.alpha??1)<.3)continue;const x=e.x-cx,y=e.y-cy-({gob_troll:74,gob_hero:50,gob_giant:50,gob_paladin:56}[e.k]||26)*(e.sc||1);if(e.vet)DA(c,UI.m_anger,x,y+2,8);else if(e.elite||e.boss)DA(c,UI.m_crown,x,y+2,11);}

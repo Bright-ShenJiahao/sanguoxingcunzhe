@@ -37,7 +37,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    if(e.drum){if(e.flash>0)e.flash-=dt;continue}
    const ax=hero.x-e.x,ay=hero.y-e.y,d=Math.hypot(ax,ay)||1;if(e.state!=='dash')e.face=ax>=0?1:-1;
    if(e.stunT>0){e.stunT-=dt;e.moving=false;continue}   // 圣印定身：不动、不打、不碰撞伤害
-   const BD=stats.damage*(e.dmgMul||1)*(e.boss?2:e.elite?1.4:1);
+   const BD=stats.damage*(e.dmgMul||1)*(e.boss?1.3:e.elite?1.4:1);
    // 碰撞伤害：同一只怪每 0.5 秒最多一次
    e.cc=(e.cc||0)-dt;if(!stats.ranged&&!stats.bomb&&e.cc<=0&&Math.hypot(ax,(ay+2)*1.2)<Math.max(13+5*(e.sc||1),stats.reach*(e.sc||1)*.9)){e.cc=.5;const tn=performance.now();CT=CT.filter(t=>tn-t<500);if(CT.length<4){CT.push(tn);onHit(BD*.5)}}   // 被围也最多算 4 只的碰撞
    if(e.lifeT!=null){e.lifeT-=dt;if(e.lifeT<=0){if(e.k==='gob_kid'&&Math.random()<.5&&Math.hypot(ax,ay)<420){e.lifeT=null;e.sweep=null;e.k='goblin';e.grown=1;e.hp=e.hpMax=Math.ceil(e.hpMax*2.5);window.onGrow?.(e)}else{e.expired=true;continue}}}
@@ -146,6 +146,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.drFx>0){e.drFx-=1/60;c.save();c.globalAlpha=e.drFx;c.strokeStyle='#ff6a3a';c.lineWidth=2;c.beginPath();c.ellipse(e.x-cx,e.y-cy,100*(1-e.drFx),80*(1-e.drFx),0,0,6.3);c.stroke();c.restore()}
   if(e.buffT>0&&!e.dead){c.save();c.globalAlpha=.5;c.strokeStyle='#ff5a3a';c.lineWidth=1;c.beginPath();c.ellipse(e.x-cx,e.y-cy,7,2.6,0,0,6.3);c.stroke();c.restore()}
   if(e.state==='aim'){const k=e.timer/(e.aimT||.5),L_=e.alen||80;c.save();c.globalAlpha=.25+.5*k;c.strokeStyle=e.k==='gob_paladin'?'#ffd23f':'#ff3a2a';c.lineWidth=2;c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.lineTo(e.x-cx+e.dx*L_,e.y-cy+e.dy*L_);c.stroke();c.restore()}
+  if(e.state==='windup'&&(e.boss||e.elite)&&!e.dead&&!data[e.k].ranged){const k=Math.min(1,e.timer/.45),R=((data[e.k].reach||30)+5)*(e.sc||1);c.save();c.globalAlpha=.15+.35*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(e.x-cx,e.y-cy,R,R*.75,0,0,6.3);c.fill();c.globalAlpha=.8;c.strokeStyle='#ff3a2a';c.lineWidth=1.5;c.beginPath();c.ellipse(e.x-cx,e.y-cy,R,R*.75,0,0,6.3);c.stroke();c.restore()}   // Boss/精英挥砍预警
   if(e.state==='bash'){const k=Math.min(1,e.timer),a0=(e.bx||1)>0?-Math.PI/2:Math.PI/2;c.save();c.globalAlpha=.2+.45*k;c.fillStyle='#ff3a2a';c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.ellipse(e.x-cx,e.y-cy,32*k,22*k,0,a0,a0+Math.PI);c.closePath();c.fill();c.restore()}
   const sc=(e.sc||1)*SPR;c.save();c.translate(Math.round(e.x-cx),Math.round(e.y-cy));c.scale(e.face*sc,sc);c.globalAlpha=e.alpha??1;c.imageSmoothingEnabled=false;
   if(!e.dead){c.fillStyle='rgba(10,20,10,.32)';c.beginPath();c.ellipse(0,0,6,2.2,0,0,6.3);c.fill()}   // 脚下阴影：雨雾天也看得清
