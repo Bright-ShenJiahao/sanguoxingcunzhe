@@ -16,7 +16,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.aegT>0){e.flash=.08;return true}
   if(e.k==='gob_paladin'&&e.hpMax){for(const th of [.5,.25])if(!e['ag'+th]&&e.hp-dmg<e.hpMax*th){e['ag'+th]=1;e.state='aegis';e.timer=0;e.aegT=4;for(const o of near(e.x,e.y,120,EN))if(o!==e&&o.hpMax)o.hp=Math.min(o.hpMax,o.hp+o.hpMax*.3)}}
   if(e.ward)dmg*=.5;
-  if(e.k==='gob_wolf'&&!e.dism&&e.hp-dmg<e.hpMax*.5&&e.hp-dmg>0){e.dism=1;e.k='goblin';e.sc0=data.goblin.sc;e.sc=data.goblin.sc||1;e.fell=.6}
+  if(e.k==='gob_wolf'&&!e.dism&&e.hp-dmg<e.hpMax*.5&&e.hp-dmg>0){e.dism=1;window.onDismount?.(e);e.k='goblin';e.sc0=data.goblin.sc;e.sc=data.goblin.sc||1;e.fell=.6}
   e.flash=Math.max(e.flash||0,.07);e.hp-=dmg;
   if(e.hp<=0&&data[e.k].bomb&&!e.boomed&&e.state==='fuse'){e.boomed=1;explode(e.x,e.y,40,data[e.k].damage*(e.dmgMul||1)*3,true)}
   if(e.hp<=0){e.dead=true;e.state='fall';e.timer=0;e.alpha=1}

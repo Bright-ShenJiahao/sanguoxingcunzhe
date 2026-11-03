@@ -5,7 +5,7 @@ import sys,json,glob,numpy as np
 from PIL import Image
 from scipy import ndimage as nd
 sys.path.insert(0,'tools');from outline import outline
-src,key,H0,rows=sys.argv[1],sys.argv[2],float(sys.argv[3]),json.loads(sys.argv[4]);pre=sys.argv[5] if len(sys.argv)>5 else ''
+src,key,H0,rows=sys.argv[1],sys.argv[2],float(sys.argv[3]),json.loads(sys.argv[4]);pre=sys.argv[5] if len(sys.argv)>5 else '';NOSKIN='--noskin' in sys.argv
 im=np.array(Image.open(src).convert('RGB')).astype(int);r,g,b=im[...,0],im[...,1],im[...,2]
 white=(r>200)&(b>200)&(g>130);im[white]=[245,245,250]                       # 刀光、汗滴：被洋红染粉的白色救回来
 mag=(r>150)&(b>150)&(g<120)&~white;m=nd.binary_opening(~mag,iterations=1)|white
@@ -53,7 +53,7 @@ Q=np.sort(np.concatenate([o[skinmask(o)][:,:3] for n,o in out.items() if n!='por
 d=json.load(open('data/enemies.json'));F=d[key]['frames'];D=f'assets/characters/enemies/{key}/'
 for nm,a in out.items():
   mk=skinmask(a)
-  if mk.any():
+  if mk.any() and not NOSKIN:
     l=a[mk][:,:3].astype(float)@[.3,.59,.11];idx=np.clip((np.searchsorted(Q,l)/len(Q)*len(P)).astype(int),0,len(P)-1);a[mk,:3]=P[idx].astype(np.uint8)
     h=np.array(Image.fromarray(a[...,:3]).convert('HSV')).astype(float);h[mk,1]*=.90;h[mk,2]*=.96
     a[...,:3]=np.array(Image.fromarray(np.clip(h,0,255).astype(np.uint8),'HSV').convert('RGB'))
