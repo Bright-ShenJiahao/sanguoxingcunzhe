@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11031940';
-import {createSurvival} from './survival.js?v=11031940';
-import {createEnemies} from './enemies.js?v=11031940';
-import {createAudio} from './audio.js?v=11031940';
-import {createMeta} from './meta.js?v=11031940';
+import {createMenu} from './menu.js?v=11032000';
+import {createSurvival} from './survival.js?v=11032000';
+import {createEnemies} from './enemies.js?v=11032000';
+import {createAudio} from './audio.js?v=11032000';
+import {createMeta} from './meta.js?v=11032000';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11031940';
+import {createPathing} from './pathing.js?v=11032000';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11031940';
-import {createRun} from './run.js?v=11031940';
-import {createDebug} from './debug.js?v=11031940';
+import {createWeather} from './weather.js?v=11032000';
+import {createRun} from './run.js?v=11032000';
+import {createDebug} from './debug.js?v=11032000';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -59,14 +59,19 @@ const QP=new URLSearchParams(location.search);const AT=QP.get('x')?[+QP.get('x')
 const region=()=>'翠绿平原',region0=(x,y)=>{const [gw,gh]=D.rgrid||[64,64],i=D.rmap[Math.min(gh-1,Math.max(0,Math.floor(y/D.WH*gh)))*gw+Math.min(gw-1,Math.max(0,Math.floor(x/D.WW*gw)))];return D.rnames[i]};
 const hero={x:WW*AT[0],y:WH*AT[1],face:1};
 // 暂停：右下角按钮或 Esc / P；可以继续或回主界面
+// 打击感：顿帧 / 震屏 / 死亡碎片
+window.HS=0;window.SHK=0;let hsLast=0;const PARTS=[];
+window.HITSTOP=s=>{const n=performance.now();if(n-hsLast<160)return;hsLast=n;window.HS=Math.max(window.HS,s)};
+window.SHAKE=a=>{try{if(localStorage.getItem('noShake'))return}catch(_){}window.SHK=Math.max(window.SHK,a)};
+function burst(e){const n=e.boss?18:e.elite?10:6,col=e.k==='skeleton'||e.k==='gob_ghost'?['#e8e2d0','#b8b2a0']:['#7fae3a','#4f7a24','#8a2a20'];for(let i=0;i<n;i++){const a=Math.random()*6.28,v=40+Math.random()*70;PARTS.push({x:e.x,y:e.y-8*(e.sc||1),vx:Math.cos(a)*v,vy:Math.sin(a)*v-50,t:0,d:.45+Math.random()*.2,c:col[i%col.length],s:1+Math.random()*1.5})}if(PARTS.length>300)PARTS.splice(0,PARTS.length-300)}
 const PZ={on:false};{const st=document.createElement('style');st.textContent=`#pzb{position:fixed;right:max(10px,env(safe-area-inset-right));bottom:max(10px,env(safe-area-inset-bottom));z-index:40;width:40px;height:40px;border-radius:8px;border:1px solid #8fbbef;background:#0b1530d0;color:#fff;font-size:18px;cursor:pointer}
 #pzm{position:fixed;inset:0;z-index:45;background:#0008;display:grid;place-items:center}#pzm[hidden],#pzb[hidden]{display:none}#pzm>div{background:#0b1530f0;border:1px solid #8fbbef;border-radius:12px;padding:22px 28px;display:grid;gap:12px;min-width:200px;text-align:center;color:#f7d987;font:900 22px "PingFang SC","Microsoft YaHei",sans-serif}
 #pzm button{font:700 16px "PingFang SC","Microsoft YaHei",sans-serif;padding:10px 18px;border-radius:8px;border:1px solid #f0dc9c;background:#1e3a72;color:#fff;cursor:pointer}`;document.head.append(st);
  PZ.btn=document.createElement('button');PZ.btn.id='pzb';PZ.btn.textContent='⏸';PZ.btn.hidden=true;document.body.append(PZ.btn);
- PZ.m=document.createElement('div');PZ.m.id='pzm';PZ.m.hidden=true;PZ.m.innerHTML='<div>暂停<button data-z="go">继续游戏</button><button data-z="home">结束本局，回主界面</button></div>';document.body.append(PZ.m);
+ PZ.m=document.createElement('div');PZ.m.id='pzm';PZ.m.hidden=true;PZ.m.innerHTML='<div>暂停<button data-z="go">继续游戏</button><button data-z="shk">震屏：开</button><button data-z="home">结束本局，回主界面</button></div>';document.body.append(PZ.m);
  PZ.set=v=>{PZ.on=v;PZ.m.hidden=!v;if(v)survival?.game?.clearInput?.()};
  PZ.btn.onclick=()=>{PZ.btn.blur();PZ.set(true)};
- PZ.m.onclick=e=>{const z=e.target.dataset?.z;if(z==='go')PZ.set(false);if(z==='home'){PZ.set(false);PZ.btn.hidden=true;joy=null;for(const k in keys)keys[k]=0;survival.stop();menu.show()}};
+ PZ.m.onclick=e=>{const z=e.target.dataset?.z;if(z==='go')PZ.set(false);if(z==='shk'){let off=false;try{off=!localStorage.getItem('noShake');off?localStorage.setItem('noShake','1'):localStorage.removeItem('noShake')}catch(_){}e.target.textContent='震屏：'+(off?'关':'开')}if(z==='home'){PZ.set(false);PZ.btn.hidden=true;joy=null;for(const k in keys)keys[k]=0;survival.stop();menu.show()}};
  addEventListener('keydown',e=>{if((e.key==='Escape'||e.key==='p'||e.key==='P')&&survival?.playing&&!run?.paused){PZ.set(!PZ.on);e.preventDefault()}})}const CO=objs.filter(o=>o.r);
 window.SETC=(x,y,v)=>{x=Math.round(x);y=Math.round(y);if(CM&&x>=0&&y>=0&&x<WW&&y<WH)CM[(y*WW+x)*4]=v};   // 运行时改碰撞（城堡城墙/城门）
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WH)return 1;return CM[(y*WW+x)*4]}
@@ -76,7 +81,7 @@ function blocked(x,y){
 const ok=(x,y)=>!blocked(x,y);
 const HK=+(new URLSearchParams(location.search).get('hk')||1);let nextAtk=0;
 function drawHero(px,py,moving,now){
- const ST=SETS[CS],f=moving?ST.walk[Math.floor(now/105)%ST.walk.length]:Math.floor(now/650)%2,im=IM[(hairG&&ST.gpre?ST.gpre:ST.pre)+f],[w,h]=ST.size;c.save();c.translate(px,py);c.scale(hero.face*HK*1.07,HK*1.07);c.imageSmoothingEnabled=false;
+ const ST=SETS[CS],f=moving?ST.walk[Math.floor(now/105)%ST.walk.length]:Math.floor(now/650)%2,im=IM[(hairG&&ST.gpre?ST.gpre:ST.pre)+f],[w,h]=ST.size;c.save();if(now-(window.HURT||-1e9)<500&&Math.floor(now/70)%2)c.globalAlpha=.35;c.translate(px,py);c.scale(hero.face*HK*1.07,HK*1.07);c.imageSmoothingEnabled=false;
  const RH=ST.grip.front,FH=ST.grip.front,tl=p=>[(p[0]-ST.size[0])/2,(p[1]-ST.size[1]*2)/2];
  const wi=IM['wp_'+wpm],T=weaponAttack?Math.min(1,(now-weaponAttack.t0)/weaponAttack.dur):0,sw=Math.min(1,T*1.25);
  if(wpm=='long'&&!weaponAttack){c.save();c.translate(-3,-12);c.rotate(-.5);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
@@ -91,7 +96,7 @@ function drawHero(px,py,moving,now){
  c.restore()}
 const en=[];let kills=0,fx=[];
 const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{if(run?.dodge?.())return;SFX.hurt();let v=Math.max(1,(amount-(run?.armor||0))*(1-(run?.armPct||0)));v=run?.absorb?run.absorb(v):v;if(v<=0)return;if(survival&&survival.hp-v<=0&&run?.useRevive()){survival.heal(survival.max*.5);return}survival?.damage(v)}});
-function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg)){fx.push({x:e.x,y:e.y,t:now,dx});const kb=(window.KB||1)-1;if(kb>0&&!e.boss&&!e.drum&&!e.dead){const ax=e.x-hero.x,ay=e.y-hero.y,d=Math.hypot(ax,ay)||1,nx=e.x+ax/d*kb*8,ny=e.y+ay/d*kb*8;if(ok(nx,ny)){e.x=nx;e.y=ny}}}}
+function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg)){e.rc=.09;e.rcd=dx||0;fx.push({x:e.x,y:e.y,t:now,dx});const kb=(window.KB||1)-1;if(kb>0&&!e.boss&&!e.drum&&!e.dead){const ax=e.x-hero.x,ay=e.y-hero.y,d=Math.hypot(ax,ay)||1,nx=e.x+ax/d*kb*8,ny=e.y+ay/d*kb*8;if(ok(nx,ny)){e.x=nx;e.y=ny}}}}
 function spawn(){if(window.DBG?.noMob)return;let fb=null;for(let n=0;n<40;n++){const a=Math.random()*6.28,r=(n<28?(Math.hypot(VW,VH)/2+20+Math.random()*90):(140+Math.random()*160))*(run?.spawnR||1),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
  if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;
  {const pd=window.PATHAT?.(x,y)??0;if(pd<0)continue;if(pd*8>r*1.5+40&&n<39){fb=fb||[x,y];continue}}   // 只在不用绕远路就能走到主角的地方刷，避免怪全挤在山口排队
@@ -135,7 +140,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  if(menu?.visible){menu.draw(now);requestAnimationFrame(loop);return}
  if(CM){PATH??=createPathing(WW,WH,ok);PATH.update(hero.x,hero.y,now)}
  if(survival?.finished){requestAnimationFrame(loop);return}
- const pz=run?.paused||PZ.on,gdt=pz?0:dt;PZ.btn.hidden=!survival?.playing;
+ const pz=run?.paused||PZ.on,hsOn=!pz&&window.HS>0;if(hsOn)window.HS-=dt;const gdt=pz||hsOn?0:dt;PZ.btn.hidden=!survival?.playing;
  c.setTransform(SC,0,0,SC,0,0);
  let dx=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0),dy=(keys.s||keys.arrowdown?1:0)-(keys.w||keys.arrowup?1:0);
  if(joy){const L=Math.hypot(joy.dx,joy.dy);if(L>8){dx=joy.dx/L;dy=joy.dy/L}}
@@ -157,11 +162,11 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
    if(el>DUR){weaponAttack=null;nextAtk=now+140}}
   for(const p of pj){p.x+=p.dx*p.v*dt;p.y+=p.dy*p.v*dt;p.life-=dt;for(const e of en){if(!e.dead&&Math.abs(e.x-p.x)<7&&Math.abs(e.y-p.y)<9){hitEnemy(e,now,p.dx>0?1:-1);p.life=0;break}}}
   pj=pj.filter(p=>p.life>0&&ok(p.x,p.y))}
- for(let i=en.length-1;i>=0;i--){const e=en[i];if(e.dead&&!e.counted){e.counted=true;if(!e.crate)kills++;run.onKill(e)}if(e.expired)en.splice(i,1)}
+ for(let i=en.length-1;i>=0;i--){const e=en[i];if(e.dead&&!e.counted){e.counted=true;if(!e.crate&&!e.drum)burst(e);if(!e.crate)kills++;run.onKill(e)}if(e.expired)en.splice(i,1)}
  if(!pz&&!(portal&&now-portal.t<3500)){const w=run.want();for(let n=0;n<4&&en.filter(e=>!e.dead).length<w;n++)spawn()}
  survival?.update(gdt);
  $('kc').textContent='斩敌 '+kills;
- const cx=Math.round(Math.min(WW-VW,Math.max(0,hero.x-VW/2))),cy=Math.round(Math.min(WH-VH,Math.max(0,hero.y-VH/2)));
+ let cx=Math.round(Math.min(WW-VW,Math.max(0,hero.x-VW/2))),cy=Math.round(Math.min(WH-VH,Math.max(0,hero.y-VH/2)));if(window.SHK>0){const s=window.SHK;cx+=Math.round((Math.random()-.5)*2*s);cy+=Math.round((Math.random()-.5)*2*s);window.SHK=Math.max(0,s-dt*22)}
  c.imageSmoothingEnabled=true;
  drawGround(c,cx,cy,VW,VH,0,0,VW,VH);
  const px=Math.round(hero.x-cx),py=Math.round(hero.y-cy);
@@ -197,6 +202,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  c.imageSmoothingEnabled=true;
  if(ov.cld){c.save();const T=640,dr=now*.011;const ox0=(((-cx+dr)%T)+T)%T,oy0=(((-cy+dr*.45)%T)+T)%T;for(let x=ox0-T;x<VW;x+=T)for(let y=oy0-T;y<VH;y+=T)c.drawImage(cloud,x,y,T,T);c.restore()}
  weather.draw(c,now,dt,VW,VH,hero.x,hero.y,WW,WH,region(hero.x,hero.y));
+ for(const p of PARTS){p.t+=gdt;p.x+=p.vx*gdt;p.y+=p.vy*gdt;p.vy+=260*gdt}for(let i=PARTS.length-1;i>=0;i--)if(PARTS[i].t>=PARTS[i].d)PARTS.splice(i,1);for(const p of PARTS){c.globalAlpha=Math.min(1,(p.d-p.t)*4);c.fillStyle=p.c;c.fillRect(Math.round(p.x-cx),Math.round(p.y-cy),p.s,p.s)}c.globalAlpha=1;
  fx=fx.filter(f=>now-f.t<220);for(const f of fx){const k=(now-f.t)/220;c.strokeStyle=`rgba(255,255,245,${1-k})`;c.lineWidth=1;c.beginPath();c.arc(f.x-cx+f.dx*k*10,f.y-cy-10,3+k*9,0,6.3);c.stroke()}
  window.CAM={cx,cy,SC,VW,VH};dbg?.draw?.(c,cx,cy);
  run.drawUI(c,VW,VH);

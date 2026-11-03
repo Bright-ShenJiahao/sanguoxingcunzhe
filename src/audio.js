@@ -45,9 +45,17 @@ export function createAudio(){
   boom(){if(!ac||!ok('bm',90))return;noise(ac.currentTime,.35,{vol:.25,lp:700})},
   zap(){if(!ac||!ok('zp',90))return;const t=ac.currentTime;for(let i=0;i<4;i++)tone(t+i*.02,96-i*5,.03,{type:'sawtooth',vol:.04,bus:sfxBus,rel:.02})},
   holy(){if(!ac||!ok('hl',120))return;const t=ac.currentTime;tone(t,96,.35,{type:'sine',vol:.03,bus:sfxBus,rel:.5});tone(t+.04,103,.3,{type:'sine',vol:.02,bus:sfxBus,rel:.5});tone(t,84,.2,{type:'triangle',vol:.02,bus:sfxBus,rel:.3})},
-  hit(){if(!ac||!ok('hit',45))return;noise(ac.currentTime,.05,{vol:.1,lp:1500})},
+  hit(k='rng'){if(!ac)return;const t=ac.currentTime;if(!k||!ok('h'+k,k==='mel'?60:50))return;
+   if(k==='mel'){noise(t,.07,{vol:.14,lp:900});tone(t,45,.06,{type:'square',vol:.05,bus:sfxBus,rel:.05,lp:500})}
+   else if(k==='rng')noise(t,.04,{vol:.09,hp:1800})
+   else if(k==='fire')noise(t,.12,{vol:.1,lp:1400})
+   else if(k==='zap'){for(let i=0;i<3;i++)tone(t+i*.015,100-i*6,.025,{type:'sawtooth',vol:.03,bus:sfxBus,rel:.02})}
+   else if(k==='ice')tone(t,100+Math.floor(Math.random()*3),.05,{type:'sine',vol:.04,bus:sfxBus,rel:.12})
+   else if(k==='holy')tone(t,98,.06,{type:'sine',vol:.04,bus:sfxBus,rel:.15})
+   else if(k==='dark')tone(t,40,.1,{type:'triangle',vol:.07,bus:sfxBus,rel:.12})
+   else noise(t,.05,{vol:.1,lp:1500})},
   kill(){if(!ac||!ok('kl',60))return;const t=ac.currentTime;tone(t,60,.06,{type:'square',vol:.05,bus:sfxBus,rel:.05,lp:900})},
-  gem(){if(!ac||!ok('gm',40))return;const t=ac.currentTime;tone(t,93+Math.floor(Math.random()*3)*2,.05,{type:'sine',vol:.07,bus:sfxBus,rel:.08})},
+  gem(n=0){if(!ac||!ok('gm',40))return;const t=ac.currentTime;tone(t,84+Math.min(24,n*.5|0),.05,{type:'sine',vol:.07,bus:sfxBus,rel:.08})},
   hurt(){if(!ac||!ok('hu',250))return;const t=ac.currentTime;tone(t,52,.12,{type:'sawtooth',vol:.12,bus:sfxBus,rel:.1,lp:600})},
   level(){if(!ac)return;const t=ac.currentTime;[74,78,81,86].forEach((m,i)=>tone(t+i*.07,m,.12,{type:'triangle',vol:.12,bus:sfxBus,rel:.3}))},
   boss(){if(!ac)return;const t=ac.currentTime;[38,38,41,38].forEach((m,i)=>tone(t+i*.35,m,.3,{type:'sawtooth',vol:.14,bus:sfxBus,rel:.4,lp:700}))},
