@@ -1,19 +1,19 @@
-import {t as tr,onLanguageChange} from './i18n.js?v=11041700';
+import {t as tr,onLanguageChange} from './i18n.js?v=11041730';
 // 局外系统：金币 / 抽奖券、永久强化（男女通用）、怪物图鉴、主界面顶部状态栏、老虎机动画（宝箱用，以后抽卡复用）。
 // 存档在 localStorage 'meta'。
 const UP=[
- {k:'hp',ic:'<img src="assets/ui/u_hp.png?v=11041700" alt="">',get nm(){return tr('ui.up.hp.nm')},get fx(){return tr('ui.up.hp.fx')},max:10,base:60},
- {k:'atk',ic:'<img src="assets/ui/b_atk.png?v=11041700" alt="">',get nm(){return tr('ui.up.atk.nm')},get fx(){return tr('ui.up.atk.fx')},max:10,base:80},{k:'arc',ic:'<img src="assets/ui/p_arc.png?v=11041700" alt="">',get nm(){return tr('ui.up.arc.nm')},get fx(){return tr('ui.up.arc.fx')},max:10,base:80},
- {k:'spd',ic:'<img src="assets/ui/u_spd.png?v=11041700" alt="">',get nm(){return tr('ui.up.spd.nm')},get fx(){return tr('ui.up.spd.fx')},max:8,base:70},
- {k:'cd',ic:'<img src="assets/ui/u_cd.png?v=11041700" alt="">',get nm(){return tr('ui.up.cd.nm')},get fx(){return tr('ui.up.cd.fx')},max:8,base:90},
- {k:'arm',ic:'<img src="assets/ui/b_armor.png?v=11041700" alt="">',get nm(){return tr('ui.up.arm.nm')},get fx(){return tr('ui.up.arm.fx')},max:5,base:120},
- {k:'reg',ic:'<img src="assets/ui/b_regen.png?v=11041700" alt="">',get nm(){return tr('ui.up.reg.nm')},get fx(){return tr('ui.up.reg.fx')},max:5,base:120},
- {k:'mag',ic:'<img src="assets/ui/p_mag.png?v=11041700" alt="">',get nm(){return tr('ui.up.mag.nm')},get fx(){return tr('ui.up.mag.fx')},max:5,base:50},
- {k:'wis',ic:'<img src="assets/ui/icons_12.png?v=11041700" alt="">',get nm(){return tr('ui.up.wis.nm')},get fx(){return tr('ui.up.wis.fx')},max:5,base:100},
- {k:'gold',ic:'<img src="assets/ui/u_gold.png?v=11041700" alt="">',get nm(){return tr('ui.up.gold.nm')},get fx(){return tr('ui.up.gold.fx')},max:5,base:120},
- {k:'crit',ic:'<img src="assets/ui/p_crit.png?v=11041700" alt="">',get nm(){return tr('ui.up.crit.nm')},get fx(){return tr('ui.up.crit.fx')},max:8,base:90},
- {k:'area',ic:'<img src="assets/ui/b_area.png?v=11041700" alt="">',get nm(){return tr('ui.up.area.nm')},get fx(){return tr('ui.up.area.fx')},max:5,base:100},{k:'dur',ic:'<img src="assets/ui/u_dur.png?v=11041700" alt="">',get nm(){return tr('ui.up.dur.nm')},get fx(){return tr('ui.up.dur.fx')},max:5,base:90},{k:'pspd',ic:'<img src="assets/ui/b_pspd.png?v=11041700" alt="">',get nm(){return tr('ui.up.pspd.nm')},get fx(){return tr('ui.up.pspd.fx')},max:5,base:80},{k:'amt',ic:'<img src="assets/ui/u_amt.png?v=11041700" alt="">',get nm(){return tr('ui.up.amt.nm')},get fx(){return tr('ui.up.amt.fx')},max:1,base:2000},{k:'rr',ic:'<img src="assets/ui/u_rr.png?v=11041700" alt="">',get nm(){return tr('ui.up.rr.nm')},get fx(){return tr('ui.up.rr.fx')},max:3,base:150},
- {k:'rev',ic:'<img src="assets/ui/u_revive.png?v=11041700" alt="">',get nm(){return tr('ui.up.rev.nm')},get fx(){return tr('ui.up.rev.fx')},max:1,base:1500}];
+ {k:'hp',ic:'<img src="assets/ui/u_hp.png?v=11041730" alt="">',get nm(){return tr('ui.up.hp.nm')},get fx(){return tr('ui.up.hp.fx')},max:10,base:60},
+ {k:'atk',ic:'<img src="assets/ui/b_atk.png?v=11041730" alt="">',get nm(){return tr('ui.up.atk.nm')},get fx(){return tr('ui.up.atk.fx')},max:10,base:80},{k:'arc',ic:'<img src="assets/ui/p_arc.png?v=11041730" alt="">',get nm(){return tr('ui.up.arc.nm')},get fx(){return tr('ui.up.arc.fx')},max:10,base:80},
+ {k:'spd',ic:'<img src="assets/ui/u_spd.png?v=11041730" alt="">',get nm(){return tr('ui.up.spd.nm')},get fx(){return tr('ui.up.spd.fx')},max:8,base:70},
+ {k:'cd',ic:'<img src="assets/ui/u_cd.png?v=11041730" alt="">',get nm(){return tr('ui.up.cd.nm')},get fx(){return tr('ui.up.cd.fx')},max:8,base:90},
+ {k:'arm',ic:'<img src="assets/ui/b_armor.png?v=11041730" alt="">',get nm(){return tr('ui.up.arm.nm')},get fx(){return tr('ui.up.arm.fx')},max:5,base:120},
+ {k:'reg',ic:'<img src="assets/ui/b_regen.png?v=11041730" alt="">',get nm(){return tr('ui.up.reg.nm')},get fx(){return tr('ui.up.reg.fx')},max:5,base:120},
+ {k:'mag',ic:'<img src="assets/ui/p_mag.png?v=11041730" alt="">',get nm(){return tr('ui.up.mag.nm')},get fx(){return tr('ui.up.mag.fx')},max:5,base:50},
+ {k:'wis',ic:'<img src="assets/ui/icons_12.png?v=11041730" alt="">',get nm(){return tr('ui.up.wis.nm')},get fx(){return tr('ui.up.wis.fx')},max:5,base:100},
+ {k:'gold',ic:'<img src="assets/ui/u_gold.png?v=11041730" alt="">',get nm(){return tr('ui.up.gold.nm')},get fx(){return tr('ui.up.gold.fx')},max:5,base:120},
+ {k:'crit',ic:'<img src="assets/ui/p_crit.png?v=11041730" alt="">',get nm(){return tr('ui.up.crit.nm')},get fx(){return tr('ui.up.crit.fx')},max:8,base:90},
+ {k:'area',ic:'<img src="assets/ui/b_area.png?v=11041730" alt="">',get nm(){return tr('ui.up.area.nm')},get fx(){return tr('ui.up.area.fx')},max:5,base:100},{k:'dur',ic:'<img src="assets/ui/u_dur.png?v=11041730" alt="">',get nm(){return tr('ui.up.dur.nm')},get fx(){return tr('ui.up.dur.fx')},max:5,base:90},{k:'pspd',ic:'<img src="assets/ui/b_pspd.png?v=11041730" alt="">',get nm(){return tr('ui.up.pspd.nm')},get fx(){return tr('ui.up.pspd.fx')},max:5,base:80},{k:'amt',ic:'<img src="assets/ui/u_amt.png?v=11041730" alt="">',get nm(){return tr('ui.up.amt.nm')},get fx(){return tr('ui.up.amt.fx')},max:1,base:2000},{k:'rr',ic:'<img src="assets/ui/u_rr.png?v=11041730" alt="">',get nm(){return tr('ui.up.rr.nm')},get fx(){return tr('ui.up.rr.fx')},max:3,base:150},
+ {k:'rev',ic:'<img src="assets/ui/u_revive.png?v=11041730" alt="">',get nm(){return tr('ui.up.rev.nm')},get fx(){return tr('ui.up.rev.fx')},max:1,base:1500}];
 const price=(u,L)=>Math.round(u.base*Math.pow(1.35,L)/5)*5;
 export const ENEMY_NAMES={};for(const k of ["goblin", "gob_kid", "gob_blade", "gob_archer", "gob_shield", "gob_shaman", "gob_bomb", "gob_boar", "gob_rock", "gob_mage", "gob_ghost", "gob_wolf", "wolf_free", "gob_thrower", "gob_drum", "gob_necro", "gob_giant", "skeleton", "gob_king", "gob_emperor", "gob_chief", "gob_paladin", "gob_hero", "gob_troll"])Object.defineProperty(ENEMY_NAMES,k,{enumerable:true,get:()=>tr('ui.enemy.'+k)});
 const RD={};for(const k of ["gob_shield", "gob_rock", "gob_wolf", "gob_boar", "gob_ghost", "gob_mage", "gob_shaman", "skeleton", "gob_necro", "gob_giant", "gob_paladin", "gob_hero", "gob_troll"])Object.defineProperty(RD,k,{enumerable:true,get:()=>tr('ui.rd.'+k)});
@@ -51,23 +51,23 @@ export function createMeta(){
  .bcard img{max-height:56px;image-rendering:pixelated}.bcard.unk img{filter:brightness(0) opacity(.55)}.bcard .nm{margin-top:4px;font-weight:700}.bcard .k{color:#ffd23f;font-size:13px}
  #slot{position:fixed;inset:0;z-index:45;display:flex;align-items:center;justify-content:center;background:#04081099;font:600 15px "PingFang SC","Microsoft YaHei",sans-serif}
  #slot[hidden]{display:none}
- #slot .m{position:relative;width:min(380px,74vw);aspect-ratio:760/544;margin-top:40px;background:url(assets/ui/slot_body.png?v=11041700) center/100% 100% no-repeat;image-rendering:pixelated}
-#slot .sign{position:absolute;left:-2%;right:-2%;top:-15%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_sign.png?v=11041700) center/100% 100% no-repeat;color:#ffd96a;font-size:18px;letter-spacing:3px;text-shadow:0 2px 0 #000}
+ #slot .m{position:relative;width:min(380px,74vw);aspect-ratio:760/544;margin-top:40px;background:url(assets/ui/slot_body.png?v=11041730) center/100% 100% no-repeat;image-rendering:pixelated}
+#slot .sign{position:absolute;left:-2%;right:-2%;top:-15%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_sign.png?v=11041730) center/100% 100% no-repeat;color:#ffd96a;font-size:18px;letter-spacing:3px;text-shadow:0 2px 0 #000}
 #slot .reels{position:absolute;left:15.5%;width:69%;top:40%;height:34%;display:flex;gap:4px;padding:4px}
-#slot .reel{flex:1;overflow:hidden;background:url(assets/ui/slot_cell.png?v=11041700) center/100% 100% no-repeat;position:relative}
+#slot .reel{flex:1;overflow:hidden;background:url(assets/ui/slot_cell.png?v=11041730) center/100% 100% no-repeat;position:relative}
 #slot .strip{position:absolute;left:0;right:0;top:0}
 #slot .cell{height:var(--h);box-sizing:border-box;padding:12% 16% 10%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#3a2410;font-size:12px;font-weight:700;text-align:center;line-height:1.2}
 #slot .cell .g{font-size:30px;line-height:36px}#slot .cell img{height:44%;max-width:64%;object-fit:contain;margin-bottom:2px;image-rendering:pixelated}
-#slot .scr{position:absolute;left:0;right:0;bottom:-24%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_bar.png?v=11041700) center/100% 100% no-repeat;color:#ffe9a8;font-size:15px;text-shadow:0 2px 0 #000;padding:0 8%}#slot .scr.many{height:auto;min-height:19%;bottom:auto;top:104%;flex-wrap:wrap;gap:2px 12px;font-size:13px;line-height:1.35;padding:6px 9%}#slot .scr span{white-space:nowrap}
-#slot .lever{position:absolute;right:-15%;top:12%;width:13%;height:62%;background:url(assets/ui/slot_lever_up.png?v=11041700) center/contain no-repeat}
-#slot .lever.dn{background-image:url(assets/ui/slot_lever_dn.png?v=11041700);top:30%}
+#slot .scr{position:absolute;left:0;right:0;bottom:-24%;height:19%;display:flex;align-items:center;justify-content:center;background:url(assets/ui/slot_bar.png?v=11041730) center/100% 100% no-repeat;color:#ffe9a8;font-size:15px;text-shadow:0 2px 0 #000;padding:0 8%}#slot .scr.many{height:auto;min-height:19%;bottom:auto;top:104%;flex-wrap:wrap;gap:2px 12px;font-size:13px;line-height:1.35;padding:6px 9%}#slot .scr span{white-space:nowrap}
+#slot .lever{position:absolute;right:-15%;top:12%;width:13%;height:62%;background:url(assets/ui/slot_lever_up.png?v=11041730) center/contain no-repeat}
+#slot .lever.dn{background-image:url(assets/ui/slot_lever_dn.png?v=11041730);top:30%}
 #slot .fx{position:absolute;pointer-events:none;width:32%;aspect-ratio:1;background:center/contain no-repeat;animation:sfx 1s ease-out forwards}
 @keyframes sfx{0%{opacity:0;transform:scale(.4) translateY(20px)}30%{opacity:1}100%{opacity:0;transform:scale(1.2) translateY(-30px)}}
 #slot .tip{position:absolute;left:0;right:0;bottom:-48%;color:#ffe9b0;text-align:center;font-size:12px}`;
  document.head.append(st);
  // ---------- 顶部状态栏 ----------
  const bar=document.createElement('div');bar.id='mbar';document.body.append(bar);
- function drawBar(){bar.innerHTML=`<span class="pill" title="${tr('ui.gold')}"><img src="assets/ui/misc_0.png?v=11041700" alt="">${M.gold}</span><span class="pill" title="${tr('ui.tickets')}"><img src="assets/ui/misc_1.png?v=11041700" alt="">${M.tickets}</span><button class="pill" data-p="dex" title="${tr('ui.dex.title')}"><img src="assets/ui/misc_2.png?v=11041700" alt=""><span class="lb">${tr('ui.dex.short')}</span></button><button class="pill" data-p="snd" title="${tr('ui.mute')}"><img src="assets/ui/misc_${window.SFX?.muted?9:8}.png?v=11041700" alt=""></button>`;
+ function drawBar(){bar.innerHTML=`<span class="pill" title="${tr('ui.gold')}"><img src="assets/ui/misc_0.png?v=11041730" alt="">${M.gold}</span><span class="pill" title="${tr('ui.tickets')}"><img src="assets/ui/misc_1.png?v=11041730" alt="">${M.tickets}</span><button class="pill" data-p="dex" title="${tr('ui.dex.title')}"><img src="assets/ui/misc_2.png?v=11041730" alt=""><span class="lb">${tr('ui.dex.short')}</span></button><button class="pill" data-p="snd" title="${tr('ui.mute')}"><img src="assets/ui/misc_${window.SFX?.muted?9:8}.png?v=11041730" alt=""></button>`;
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.p==='dex')openDex();else{dispatchEvent(new KeyboardEvent('keydown',{key:'m'}));setTimeout(drawBar,50)}})}
  drawBar();onLanguageChange(()=>drawBar());
  // ---------- 面板 ----------
@@ -83,7 +83,7 @@ export function createMeta(){
   pan.querySelectorAll('.buy').forEach(b=>b.onclick=()=>{const u=UP.find(x=>x.k===b.dataset.k),l=L(u.k),p=price(u,l);if(l>=u.max||M.gold<p)return;M.gold-=p;M.up[u.k]=l+1;save();openUp();pan.querySelector(`[data-k=${u.k}]`)?.focus()})}
  function openDex(){
   const ORD=['goblin','gob_blade','gob_shield','gob_archer','gob_bomb','gob_mage','gob_wolf','gob_ghost','gob_rock','gob_thrower','gob_boar','gob_shaman','gob_drum','gob_necro','skeleton','gob_giant','gob_hero','gob_troll','gob_king','gob_chief','gob_paladin','gob_emperor'],ks=[...ORD.filter(k=>ENEMY_NAMES[k]),...Object.keys(ENEMY_NAMES).filter(k=>!ORD.includes(k))],found=ks.filter(k=>M.kills[k]).length,tot=Object.values(M.kills).reduce((a,b)=>a+b,0);
-  const body=`<div class="bgrid">${ks.map((k,i)=>{const n=M.kills[k]||0;return `<div class="bcard ${n?'':'unk'}"><span class="no">${String(i+1).padStart(3,'0')}</span><div class="im"><img src="assets/characters/enemies/${k}/portrait.png?v=11041700" alt="" style="${n?'':'filter:brightness(0);opacity:.55'}" onerror="const f=+(this.dataset.f||0);this.dataset.f=f+1;if(f===0)this.src='assets/characters/enemies/${k}/idle0.png?v=11041700';else if(f===1)this.src='assets/characters/enemies/${k}/walk0.png?v=11041700'"></div><div class="nm">${n?ENEMY_NAMES[k]:tr('ui.dex.unknown')}</div><div class="k">${n?tr('ui.dex.kills',{n}):tr('ui.dex.undiscovered')}</div>${n&&RD[k]?`<div class="k" style="color:#ffcf8a">${RD[k]}</div>`:''}</div>`}).join('')}</div>`;
+  const body=`<div class="bgrid">${ks.map((k,i)=>{const n=M.kills[k]||0;return `<div class="bcard ${n?'':'unk'}"><span class="no">${String(i+1).padStart(3,'0')}</span><div class="im"><img src="assets/characters/enemies/${k}/portrait.png?v=11041730" alt="" style="${n?'':'filter:brightness(0);opacity:.55'}" onerror="const f=+(this.dataset.f||0);this.dataset.f=f+1;if(f===0)this.src='assets/characters/enemies/${k}/idle0.png?v=11041730';else if(f===1)this.src='assets/characters/enemies/${k}/walk0.png?v=11041730'"></div><div class="nm">${n?ENEMY_NAMES[k]:tr('ui.dex.unknown')}</div><div class="k">${n?tr('ui.dex.kills',{n}):tr('ui.dex.undiscovered')}</div>${n&&RD[k]?`<div class="k" style="color:#ffcf8a">${RD[k]}</div>`:''}</div>`}).join('')}</div>`;
   shell(tr('ui.dex.title'),tr('ui.dex.sub',{found,total:ks.length,tot}),body)}
  // ---------- 老虎机 ----------
  const sl=document.createElement('div');sl.id='slot';sl.hidden=true;document.body.append(sl);
@@ -96,7 +96,7 @@ export function createMeta(){
    s.animate([{transform:'translateY(0)'},{transform:`translateY(${-N*H}px)`}],{duration:durs[i],easing:'cubic-bezier(.2,.6,.3,1)',fill:'forwards'})});
   let t2=setTimeout(fin,1900);
   function fin(){if(finished)return;finished=true;clearTimeout(t2);reels.forEach(s=>{s.getAnimations().forEach(a=>a.finish())});
-   {const sc=sl.querySelector('.scr');sc.classList.toggle('many',results.length>1);sc.innerHTML=results.map(r=>`<span>${r.t}</span>`).join('')}window.SFX?.level();const M2=sl.querySelector('.m');[['coins',30,10],['spark',-5,5],['spark',65,0]].forEach(([n,l,t])=>{const d=document.createElement('div');d.className='fx';d.style.cssText=`left:${l}%;top:${t}%;background-image:url(assets/ui/slot_${n}.png?v=11041700)`;M2.append(d)});setTimeout(()=>{sl.onclick=close;addEventListener('keydown',kd,true)},250)}
+   {const sc=sl.querySelector('.scr');sc.classList.toggle('many',results.length>1);sc.innerHTML=results.map(r=>`<span>${r.t}</span>`).join('')}window.SFX?.level();const M2=sl.querySelector('.m');[['coins',30,10],['spark',-5,5],['spark',65,0]].forEach(([n,l,t])=>{const d=document.createElement('div');d.className='fx';d.style.cssText=`left:${l}%;top:${t}%;background-image:url(assets/ui/slot_${n}.png?v=11041730)`;M2.append(d)});setTimeout(()=>{sl.onclick=close;addEventListener('keydown',kd,true)},250)}
   function close(){sl.hidden=true;sl.onclick=null;removeEventListener('keydown',kd,true);done&&done()}
   function kd(e){if(e.key===' '||e.key==='Enter'||e.key==='Escape'){e.preventDefault();e.stopPropagation();close()}}
   const skip=e=>{if(!finished&&(e.type==='click'||e.key===' '||e.key==='Enter')){e.preventDefault();e.stopPropagation();fin()}};

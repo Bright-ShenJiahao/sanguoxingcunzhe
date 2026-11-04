@@ -1,4 +1,4 @@
-import {t as tr} from './i18n.js?v=11041700';
+import {t as tr} from './i18n.js?v=11041730';
 // 全局天气：晴 / 阴 / 小雨 / 大雨 / 小雪 / 大雪 / 雾，随时间渐变轮换。
 // 测试用网址：?weather=lightrain | heavyrain | lightsnow | heavysnow | fog | overcast
 const R=(a,b)=>a+Math.random()*(b-a);

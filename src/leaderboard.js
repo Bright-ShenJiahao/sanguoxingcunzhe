@@ -1,4 +1,4 @@
-import {t,onLanguageChange} from './i18n.js?v=11041700';
+import {t,onLanguageChange} from './i18n.js?v=11041730';
 // 同源 Netlify Functions 接口；超时/断网均由调用方显示提示，不影响游戏。
 export const formatTime = seconds => Math.floor(seconds/60)+':'+String(Math.floor(seconds%60)).padStart(2,'0');
 async function request(options={}){
