@@ -1,6 +1,6 @@
 // 第二批技能卡（28 张）：定义 + 发射逻辑 + 弹道/区域/召唤物 + 绘制。设计见在线文档「卡池定稿（第三版）」。
 // run.js 合并 DEFS 进 WEAPONS，并在 createRun 里 install(ctx) 拿到 update / draw / sprites / absorb / onKill / mul。
-import {t} from './i18n.js?v=11041640';
+import {t} from './i18n.js?v=11041700';
 const T=(k,dt,cat,n)=>[k,{get name(){return t('card.'+k+'.name')},cat,img:null,dt,get desc(){return Array.from({length:n},(_,i)=>t('card.'+k+'.d'+i))}}];
 export const DEFS=Object.fromEntries([
  T('greatsword','mel','blade',5),
@@ -40,9 +40,9 @@ const IMG={};const ld=(k,p)=>{const im=new Image();im.src=p;IMG[k]=im};
 for(const k of 'slash crack whip fistwave trap rock buck wedge orb keg jet holyorb hwall sigil bubble skull mist dcoil vortex rise'.split(' '))ld('fx_'+k,'assets/fx/skill/'+k+'.png');
 for(const k of 'golem treant wolf waterel fireel firelet hawk fairy'.split(' '))for(const f of ['idle','walk','atk'])ld(k+'_'+f,`assets/characters/summons/${k}/${f}.png`);
 for(const f of ['walk0','walk1','walk2','walk3','strike'])ld('sk_'+f,'assets/characters/enemies/skeleton/'+f+'.png');
-for(const k of 'bone0 bone1 bone2 bone3 tornado0 tornado1 tornado2 tornado3 flame0 flame1 flame2 flame3 pf0 pf1 pf2 pi0 pi1 pi2 pl0 pl1 pl2 crack0 crack1 crack2 wave0 wave1 wave2 wave3 feet0 feet1 feet2 feet3 rock0 rock1 rock2 rock3 rockhit bmist0 bmist1 bmist2 qi0 qi1 qi2 gs0 gs1 gs2 gs3'.split(' '))ld('s2_'+k,'assets/fx/skill2/'+k+'.png?v=11041640');
+for(const k of 'bone0 bone1 bone2 bone3 tornado0 tornado1 tornado2 tornado3 flame0 flame1 flame2 flame3 pf0 pf1 pf2 pi0 pi1 pi2 pl0 pl1 pl2 crack0 crack1 crack2 wave0 wave1 wave2 wave3 feet0 feet1 feet2 feet3 rock0 rock1 rock2 rock3 rockhit bmist0 bmist1 bmist2 qi0 qi1 qi2 gs0 gs1 gs2 gs3'.split(' '))ld('s2_'+k,'assets/fx/skill2/'+k+'.png?v=11041700');
 const DB=(c,im,x,y,w,alpha=1)=>{const I=IMG[im];if(!I?.complete||!I.width)return;const h=I.height*w/I.width;c.save();c.globalAlpha*=alpha;c.drawImage(I,x-w/2,y-h,w,h);c.restore()};   // 脚底对齐
-ld('swd','assets/ui/w_sword.png?v=11041640');
+ld('swd','assets/ui/w_sword.png?v=11041700');
 for(const f of ['idle','walk','walk2','atk'])ld('wolf_'+f,'assets/characters/summons/cat/'+f+'.png');   // 布偶猫用 wolf 这个卡位
 const SH={golem:104,treant:120,wolf:64,waterel:100,fireel:108,firelet:40,hawk:60,fairy:44},DH={golem:30,treant:36,wolf:16,waterel:30,fireel:32,firelet:11,hawk:15,fairy:13};   // 召唤物：站立帧原图高 → 游戏里的高
 
