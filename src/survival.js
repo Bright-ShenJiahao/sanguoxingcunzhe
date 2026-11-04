@@ -1,4 +1,5 @@
 import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11041530';
+import {t,onLanguageChange} from './i18n.js?v=11041530';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -15,31 +16,32 @@ export function createSurvival(game){
  const hud=document.createElement('div');hud.className='survival-hud';hud.hidden=true;
  hud.innerHTML='<div class="stats"><span class="time"></span><span class="kills"></span></div>';
  document.getElementById('st').append(hud);
- const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.setAttribute('aria-label','游戏结算');
- dialog.innerHTML='<h2>游戏结束</h2><p class="result-name"></p><p class="result-stats"></p><p class="upload" role="status"></p><button class="retry">再来一局</button><button class="home">回主界面</button>';
+ const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.innerHTML='<h2></h2><p class="result-name"></p><p class="result-stats"></p><p class="upload" role="status"></p><button class="retry"></button><button class="home"></button>';
  document.body.append(dialog);
  // 结算必须显式选择重开或返回；Escape 不会绕过死亡状态。
  dialog.addEventListener('cancel',e=>e.preventDefault());
- const board=createLeaderboard(),boardButton=document.createElement('button');boardButton.type='button';boardButton.className='menu-board';boardButton.textContent='排行榜';boardButton.onclick=()=>void board.open();
+ const board=createLeaderboard(),boardButton=document.createElement('button');boardButton.type='button';boardButton.className='menu-board';boardButton.onclick=()=>void board.open();
  document.querySelector('.menu-start').after(boardButton);
- function render(){hud.querySelector('.time').textContent='存活 '+formatTime(elapsed);hud.querySelector('.kills').textContent='击杀 '+game.kills}
+ function render(){hud.querySelector('.time').textContent=t('ui.hud.time',{time:formatTime(elapsed)});hud.querySelector('.kills').textContent=t('ui.hud.kills',{n:game.kills})}
+ const applyText=()=>{dialog.setAttribute('aria-label',t('ui.result.aria'));dialog.querySelector('h2').textContent=t('ui.result.title');dialog.querySelector('.retry').textContent=t('ui.result.retry');dialog.querySelector('.home').textContent=t('ui.result.home');boardButton.textContent=t('ui.board.title');render()};
+ applyText();onLanguageChange(applyText);
  function stop(){playing=false;finished=false;generation++;hud.hidden=true;document.body.classList.remove('survival-playing');if(dialog.open)dialog.close()}
  function start(){
   stop();playing=true;maxHp=100;hp=100;game.reset();elapsed=0;cooldown=0;
-  name=(document.querySelector('.menu-name input').value.trim()||'无名氏').slice(0,8);
+  name=(document.querySelector('.menu-name input').value.trim()||t('ui.defaultName')).slice(0,8);
   hud.hidden=false;document.body.classList.add('survival-playing');render();
  }
  function die(){
   finished=true;game.clearInput();render();
   const rec={name,t:Math.floor(elapsed),kills:game.kills,lv:game.level?.()||1,bosses:game.bosses?.()||0,by:String(window.LASTHIT||'?').slice(0,30),...(game.build?.()||{})},token=generation;
   try{const L=JSON.parse(localStorage.getItem('deathlog')||'[]');L.push({t:rec.t,kills:rec.kills,lv:game.level?.()||0,by:window.LASTHIT||'?',at:Date.now(),bot:!!window.BOT});localStorage.setItem('deathlog',JSON.stringify(L.slice(-100)))}catch(_){}
-  dialog.querySelector('.result-name').textContent='名字：'+name;
-  dialog.querySelector('.result-stats').textContent='存活时间：'+formatTime(rec.t)+' · 击杀数：'+rec.kills+' · 等级 '+rec.lv+' · Boss '+rec.bosses+' · 评分 '+scoreOf(rec);
-  {const r=window.META?.runEnd(rec.t,rec.kills);if(r)dialog.querySelector('.result-stats').textContent+=` · 获得 🪙${r.g}`+(r.tk?` · 🎟️${r.tk}`:'')}
-  try{const U=window.UNL;if(U){const got=U.runEnd({kills:(JSON.parse(localStorage.getItem('meta')||'{}').kills)||{}},rec.t,window.__G?.S?.bossNames||[]);if(got.length){const R=window.__G?.R,nm=g=>g.t==='c'?(R?.WEAPONS?.[g.k]?.name||g.k):(R?.PASSIVES?.[g.k]?.name||g.k);dialog.querySelector('.result-stats').textContent+=' · 新解锁：'+got.map(g=>(g.t==='c'?'技能卡「':'祝福「')+nm(g)+'」').join('、')}}}catch(_){}
-  const upload=dialog.querySelector('.upload');upload.textContent='正在提交成绩……';dialog.showModal();
+  dialog.querySelector('.result-name').textContent=t('ui.result.name',{name});
+  dialog.querySelector('.result-stats').textContent=t('ui.result.stats',{time:formatTime(rec.t),kills:rec.kills,lv:rec.lv,bosses:rec.bosses,score:scoreOf(rec)});
+  {const r=window.META?.runEnd(rec.t,rec.kills);if(r)dialog.querySelector('.result-stats').textContent+=t('ui.result.gold',{g:r.g})+(r.tk?` · 🎟️${r.tk}`:'')}
+  try{const U=window.UNL;if(U){const got=U.runEnd({kills:(JSON.parse(localStorage.getItem('meta')||'{}').kills)||{}},rec.t,window.__G?.S?.bossNames||[]);if(got.length){const R=window.__G?.R,nm=g=>g.t==='c'?(R?.WEAPONS?.[g.k]?.name||g.k):(R?.PASSIVES?.[g.k]?.name||g.k);dialog.querySelector('.result-stats').textContent+=t('ui.result.unlocked',{list:got.map(g=>t(g.t==='c'?'ui.result.unlockCard':'ui.result.unlockBless',{name:nm(g)})).join(t('run.sep'))})}}}catch(_){}
+  const upload=dialog.querySelector('.upload');upload.textContent=t('ui.result.uploading');dialog.showModal();
   // 每局仅在首次死亡时提交一次；晚到的网络响应不写入下一局界面。
-  void submitScore(rec).then(ok=>{if(generation===token)upload.textContent=ok?'成绩已提交':'暂时无法连接'});
+  void submitScore(rec).then(ok=>{if(generation===token)upload.textContent=ok?t('ui.result.uploaded'):t('ui.board.offline')});
  }
  dialog.querySelector('.retry').onclick=start;
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};

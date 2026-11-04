@@ -1,3 +1,4 @@
+import {t,onLanguageChange} from './i18n.js?v=11041530';
 // 同源 Netlify Functions 接口；超时/断网均由调用方显示提示，不影响游戏。
 export const formatTime = seconds => Math.floor(seconds/60)+':'+String(Math.floor(seconds%60)).padStart(2,'0');
 async function request(options={}){
@@ -16,13 +17,13 @@ export async function submitScore(record){
  try{await request({method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(record)});return true}catch{return false}
 }
 export function createLeaderboard(){
- const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.setAttribute('aria-label','排行榜');
- dialog.innerHTML='<section><h2>排行榜</h2><p>评分 = 存活秒数×2 + 击杀 + 等级×10 + Boss×200 · 同名只留最好一局 · 前 20 名</p><div class="board-content" role="status"></div><button type="button">关闭</button></section>';
+ const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.innerHTML='<section><h2></h2><p></p><div class="board-content" role="status"></div><button type="button"></button></section>';
+ const apply=()=>{dialog.setAttribute('aria-label',t('ui.board.title'));dialog.querySelector('h2').textContent=t('ui.board.title');dialog.querySelector('p').textContent=t('ui.board.rule');dialog.querySelector('button').textContent=t('ui.board.close')};apply();onLanguageChange(apply);
  document.body.append(dialog);
  dialog.querySelector('button').onclick=()=>dialog.close();
  const content=dialog.querySelector('.board-content');let version=0;
  return {async open(){
-  const current=++version;content.textContent='正在读取排行榜……';dialog.showModal();
+  const current=++version;content.textContent=t('ui.board.loading');dialog.showModal();
   try{
    const data=await request();
    if(current!==version)return;
@@ -30,12 +31,12 @@ export function createLeaderboard(){
    const rows=data.list.filter(r=>typeof r.name==='string'&&Number.isFinite(r.t)&&Number.isFinite(r.kills))
     .slice(0,20);
    content.replaceChildren();
-   if(!rows.length){content.textContent='暂无成绩，来打第一局吧';return}
+   if(!rows.length){content.textContent=t('ui.board.empty');return}
    const table=document.createElement('table');
-   table.innerHTML='<thead><tr><th>#</th><th>名字</th><th>评分</th><th>存活</th><th>击杀</th><th>等级</th><th>Boss</th><th>日期</th></tr></thead>';
+   table.innerHTML='<thead><tr><th>#</th><th>'+['name','score','time','kills','lv','boss','date'].map(k=>t('ui.board.col.'+k)).join('</th><th>')+'</th></tr></thead>';
    const body=document.createElement('tbody');
    rows.forEach((r,i)=>{const tr=document.createElement('tr');const d=new Date(r.at||0);for(const value of [i+1,r.name,r.score??scoreOf(r),formatTime(r.t),r.kills,r.lv??'-',r.bosses??'-',(d.getMonth()+1)+'/'+d.getDate()]){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}body.append(tr)});
    table.append(body);content.append(table);
-  }catch{if(current===version)content.textContent='暂时无法连接'}
+  }catch{if(current===version)content.textContent=t('ui.board.offline')}
  }};
 }

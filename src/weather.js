@@ -1,3 +1,4 @@
+import {t as tr} from './i18n.js?v=11041530';
 // 全局天气：晴 / 阴 / 小雨 / 大雨 / 小雪 / 大雪 / 雾，随时间渐变轮换。
 // 测试用网址：?weather=lightrain | heavyrain | lightsnow | heavysnow | fog | overcast
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -82,6 +83,7 @@ export function createWeather(){
   c.globalCompositeOperation='saturation';c.fillStyle=`rgba(128,128,128,${.5*i})`;c.fillRect(0,0,VW,VH);c.globalCompositeOperation='source-over'}
  // 区域气候：按主角在地图上的位置（北雪、南雨、西旱、东雾，中间随机天气）
  const NAMES=[['wn','北境·大雪'],['ws','南方·多雨'],['ww','西陲·干旱'],['we','东滨·海雾']];
+ const regionName=n=>{const k='world.region.'+n,v=tr(k);return v===k?n:v};   // 区域名在世界数据里是内部 id，显示时翻译
  let zname='中部',ztime=-1e9,zfirst=true;
  const ZS={wn:0,ws:0,ww:0,we:0},RK={'北境':'wn','南境':'ws','西境':'ww','东境':'we'};
  let snowBase=0;
@@ -103,7 +105,7 @@ export function createWeather(){
   else if(gi>.01&&SNOW[kind])drawSnow(c,now,dt,VW,VH,gi,SNOW[kind]);
   drawTime(c,VW,VH,clock(now));window.NIGHT=isNight(now);window.HOUR=hourOf(now);
   // 进入新地区时的名字提示
-  const a=now-ztime;if(a<3000){const al=a<300?a/300:a>2300?(3000-a)/700:1;c.globalAlpha=al;c.font='bold 11px "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(8,14,24,.85)';c.strokeText(zname,VW/2,44);c.fillStyle='#f7e3a6';c.fillText(zname,VW/2,44)}
+  const a=now-ztime;if(a<3000){const al=a<300?a/300:a>2300?(3000-a)/700:1;c.globalAlpha=al;c.font='bold 11px "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(8,14,24,.85)';const zd=regionName(zname);c.strokeText(zd,VW/2,44);c.fillStyle='#f7e3a6';c.fillText(zd,VW/2,44)}
   c.restore()}
  return {draw,get kind(){return kind},get intensity(){return inten},shichen(now){const h=hourOf(now);return String(Math.floor(h)).padStart(2,'0')+':00'},reset(){H0=3;T0b=performance.now()},
   force(k){if(k==='auto'){forced=null;kind='clear';inten=0;target=0;next=null}else{forced=k;kind=k;target=1;inten=1}},
