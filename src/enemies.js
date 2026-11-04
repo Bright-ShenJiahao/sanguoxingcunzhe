@@ -118,7 +118,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
       else if(P===2){e.skT=3.2;e.spQ=3;e.spT=.4;e.spD=[ax/d,ay/d];continue}
       else{e.skT=2.5;e.state='judge';e.timer=0;e.jx=hero.x;e.jy=hero.y;continue}}
      if(e.smT>0)e.smT-=dt/14}
-    if(e.boss&&e.name==='哥布林大王'){   // 大王：70%/40% 吹号召小弟；旋风斩
+    if(e.boss&&e.k==='gob_king'){   // 大王：70%/40% 吹号召小弟；旋风斩
      for(const th of [.7,.4])if(!e['hn'+th]&&e.hp<e.hpMax*th){e['hn'+th]=1;window.onHorn?.(e)}
      if(e.wwPre>0){e.wwPre-=dt;e.moving=false;if(e.wwPre<=0){e.wwT=2;e.wwS=.6}continue}
      e.skT=(e.skT??4)-dt;if(e.skT<=0&&d<90&&!(e.wwT>0)){e.skT=6;e.wwPre=.6;continue}}
