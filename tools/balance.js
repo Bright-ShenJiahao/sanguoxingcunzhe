@@ -1,13 +1,16 @@
 // 平衡测试机器人（GitHub Actions 上批量跑，也能本地跑）。
-// 用法：node tools/balance.js <模式 solo|mix> <第几份 0..> <共几份> <每份局数或重复数> <输出文件> [地址]
+// 用法：node tools/balance.js <模式 solo|mix|type|fixed> <第几份 0..> <共几份> <每份局数或重复数> <输出文件> [地址]
 //  solo：每张技能卡单独带（加专属），重复 reps 次
-//  mix ：随机 5 张卡组成一套，本份跑 reps 局（种子固定，可复现）
+//  mix ：随机 5 张合法卡组（物理、法术各 ≤4），本份跑 reps 局（种子固定，可复现）
+//  type：第几份＝伤害类型（0 近战 1 远程 2 元素 3 神圣 4 黑暗），每局 3 张本类型 + 2 张另一大类，跑 reps 局
+// 默认用 bot_brain.js（BOT=v3）；BOT=v1 旧规则机器人，BOT=still 站桩。卡组用 ?deck=（只限定候选，按正常升级获得）；EQUIP=1 改用 ?cards=（开局直接装备）
 const {chromium}=require('playwright');const fs=require('fs');
 const [MODE='mix',PART='0',PARTS='1',REPS='2',OUT='result.json',URL='http://localhost:8765/index.html']=process.argv.slice(2);
 const MAXT=+process.env.MAXT||1500;   // 一局最多跑多少秒（游戏时间）
-const PAGES=+process.env.PAGES||2,BOTV=process.env.BOT||'v1',BRAIN2=fs.readFileSync(__dirname+'/bot_brain.js','utf8'),FIXED=(process.env.CARDS||'fireball,xbow,hshield,holyorb,hammer').split(',');
+const PAGES=+process.env.PAGES||2,BOTV=process.env.BOT||'v3',BRAIN2=fs.readFileSync(__dirname+'/bot_brain.js','utf8'),FIXED=(process.env.CARDS||'fireball,xbow,hshield,holyorb,hammer').split(',');
 const BRAIN=`(()=>{window.BOT=true;let last=[0,0],stuck=0,wander=Math.random()*6.28;
 setInterval(()=>{const G=window.__G;if(!G||!G.S)return;const h=G.hero,S=G.S;
+ {const ju=document.getElementById('jobui');if(ju&&!ju.hidden){(ju.querySelector('[data-j]')||ju.querySelector('.no'))?.click();return}const mu=document.getElementById('mer');if(mu&&!mu.hidden){mu.querySelector('.cl')?.click();return}}
  const lv=document.getElementById('lvup');if(lv&&!lv.hidden){const c=[...lv.querySelectorAll('button.card')];if(c.length)c[Math.floor(Math.random()*c.length)].click();else lv.querySelector('[data-a=skip]')?.click();return}
  const sl=document.getElementById('slot');if(sl&&!sl.hidden){sl.click();return}
  let fx=0,fy=0;
@@ -26,21 +29,31 @@ setInterval(()=>{const G=window.__G;if(!G||!G.S)return;const h=G.hero,S=G.S;
 // 虚拟时钟：每帧固定 1/60 秒，不等显示器刷新，CPU 多快就跑多快
 const CLOCK=()=>{let v=0;performance.now=()=>v;const T=window.setTimeout.bind(window);window.requestAnimationFrame=f=>T(()=>{v+=1000/60;f(v)},0)};
 function rng(seed){return()=>{seed=(seed*1103515245+12345)&0x7fffffff;return seed/0x7fffffff}}
+let KIND={};
 async function cardList(b){const p=await b.newPage();await p.goto(URL+'?debug');await p.waitForFunction(()=>window.G?.run?.dbg?.WEAPONS,null,{timeout:60000});
- const ks=await p.evaluate(()=>{const W=G.run.dbg.WEAPONS;return Object.keys(W).filter(k=>!W[k].own)});await p.close();return ks}
-async function one(b,cards){const p=await b.newPage({viewport:{width:480,height:270}});await p.addInitScript(CLOCK);await p.addInitScript(()=>{try{localStorage.setItem('lang','zh');localStorage.setItem('tutDone','1');localStorage.setItem('bootSeen','1');localStorage.setItem('meta',JSON.stringify({gold:0,runs:1,up:{},kills:{}}));localStorage.setItem('sanguo.playerName','bot');localStorage.setItem('unl',JSON.stringify({c:['greatsword','rapier','gsword','whip','fist','trap','treant','wolf','mgun','wedge','hawk','orb','keg','flamestep','pouch','waterel','fireel','hwall','sigil','fairy','bmist','dcoil','vortex','undead','thunder'],p:[],best:0,boss:{},runs3:0}))}catch(e){}});
- await p.goto(URL+'?cards='+cards.join(','));await p.waitForSelector('.menu-name input',{state:'visible',timeout:120000});
+ const r=await p.evaluate(()=>{const W=G.run.dbg.WEAPONS,K=G.run.dbg.KIND_ID||{};const ks=Object.keys(W).filter(k=>!W[k].own);return {ks,K:Object.fromEntries(ks.map(k=>[k,K[k]||'rng']))}});await p.close();KIND=r.K;return r.ks}
+const PHY=k=>KIND[k]==='mel'||KIND[k]==='rng',legal=c=>c.filter(PHY).length<=4&&c.filter(k=>!PHY(k)).length<=4;
+let ALL=[];
+async function one(b,cards){const p=await b.newPage({viewport:{width:480,height:270}});const errs=[];p.on('pageerror',e=>{if(errs.length<10)errs.push(String(e.message).slice(0,160))});await p.addInitScript(CLOCK);await p.addInitScript(ALL=>{try{localStorage.setItem('lang','zh');localStorage.setItem('tutDone','1');localStorage.setItem('bootSeen','1');localStorage.setItem('meta',JSON.stringify({gold:9999,runs:1,up:{},kills:{}}));localStorage.setItem('sanguo.playerName','bot');localStorage.setItem('unl',JSON.stringify({c:ALL,p:[],best:0,boss:{},runs3:0,mig1:1}))}catch(e){}},ALL);
+ await p.goto(URL+(process.env.EQUIP?'?cards=':'?deck=')+cards.join(','));await p.waitForSelector('.menu-name input',{state:'visible',timeout:120000});
  await p.waitForTimeout(500);await p.fill('.menu-name input','bot');await p.evaluate(()=>document.querySelector('.menu-start').click());await p.waitForTimeout(400);
  await p.evaluate(()=>document.querySelector('.cfm')?.remove());await p.evaluate(()=>document.querySelector('.pp-next').click());await p.waitForTimeout(300);await p.evaluate(()=>{document.querySelector('.cfm')?.remove();document.querySelector('.pp-go').click()});await p.waitForFunction(()=>window.__G?.S,null,{timeout:30000})
  await p.evaluate(BOTV!=='v1'?BRAIN2:BRAIN);if(BOTV==='still')await p.evaluate(()=>{window.BOTTICK=()=>{window.BOTDIR=[0,0]}});const w0=Date.now();
- while(true){await p.waitForTimeout(2000);const st=await p.evaluate(()=>({dead:!!document.querySelector('.survival-dialog')?.open,t:window.__G?.S?.t||0}));if(st.dead||st.t>=MAXT||Date.now()-w0>40*60e3)break}
+ let status='timeout',lastT=-1,lastMove=Date.now();
+ while(true){await p.waitForTimeout(2000);const st=await p.evaluate(()=>({dead:!!document.querySelector('.survival-dialog')?.open,clear:!!window.__G?.S?.clear,t:window.__G?.S?.t||0}));
+  if(st.clear){status='clear';await p.waitForTimeout(1500);break}if(st.dead){status='death';break}if(st.t>=MAXT){status='cap';break}
+  if(st.t!==lastT){lastT=st.t;lastMove=Date.now()}else if(Date.now()-lastMove>90e3){status='stuck';break}
+  if(Date.now()-w0>40*60e3)break}
  const r=await p.evaluate(()=>{const S=__G.S,L=JSON.parse(localStorage.getItem('deathlog')||'[]'),d=L[L.length-1];
-  return {t:Math.round(S.t),died:!!document.querySelector('.survival-dialog')?.open,by:d?.by,kills:d?.kills,lv:S.lv,lvAt:S.lvAt,fullAt:S.fullAt??null,w:S.w,p:Object.fromEntries(Object.entries(S.p).filter(([,v])=>v>0)),dmg:Object.fromEntries(Object.entries(S.dmgBy||{}).map(([k,v])=>[k,Math.round(v)])),log:window.BOTLOG?{hits:BOTLOG.hits.slice(-60),nh:BOTLOG.hits.length,tele:BOTLOG.tele,modes:BOTLOG.modes}:null}});
- r.cards=cards;r.bot=BOTV;r.wall=Math.round((Date.now()-w0)/1000);await p.close();return r}
-(async()=>{const b=await chromium.launch({args:['--disable-gpu']});const all=await cardList(b);const jobs=[];
+  return {t:Math.round(S.t),died:!!document.querySelector('.survival-dialog')?.open&&!S.clear,clear:!!S.clear,job:S.job||null,lastHit:window.LASTHIT||null,by:d?.by,kills:d?.kills??window.__G.kills,lv:S.lv,lvAt:S.lvAt,fullAt:S.fullAt??null,w:S.w,p:Object.fromEntries(Object.entries(S.p).filter(([,v])=>v>0)),dmg:Object.fromEntries(Object.entries(S.dmgBy||{}).map(([k,v])=>[k,Math.round(v)])),log:window.BOTLOG?{hits:BOTLOG.hits.slice(-60),nh:BOTLOG.hits.length,tele:BOTLOG.tele,modes:BOTLOG.modes,ev:BOTLOG.ev}:null}});
+ r.status=status;r.errors=errs;r.cards=cards;r.bot=BOTV;r.mode=MODE;r.type=TYPE;r.wall=Math.round((Date.now()-w0)/1000);await p.close();return r}
+const TYPES=['mel','rng','ele','holy','dark'];let TYPE=null;
+(async()=>{const b=await chromium.launch({args:['--disable-gpu']});const all=await cardList(b);ALL=all;const jobs=[];
  if(MODE==='fixed'){for(let r=0;r<+REPS;r++)jobs.push(FIXED)}
  else if(MODE==='solo'){all.forEach((k,i)=>{if(i%+PARTS===+PART)for(let r=0;r<+REPS;r++)jobs.push([k])})}
- else{const R=rng(1000+ +PART*7919);for(let i=0;i<+REPS;i++){const s=[...all];for(let j=s.length-1;j>0;j--){const q=Math.floor(R()*(j+1));[s[j],s[q]]=[s[q],s[j]]}jobs.push(s.slice(0,5))}}
+ else if(MODE==='type'){TYPE=TYPES[+PART%5];const R=rng(5000+ +PART*7919),sh=a=>{a=[...a];for(let j=a.length-1;j>0;j--){const q=Math.floor(R()*(j+1));[a[j],a[q]]=[a[q],a[j]]}return a};
+  const own=all.filter(k=>KIND[k]===TYPE),phy=TYPE==='mel'||TYPE==='rng',other=all.filter(k=>PHY(k)!==phy);for(let i=0;i<+REPS;i++)jobs.push([...sh(own).slice(0,3),...sh(other).slice(0,2)])}
+ else{const R=rng(1000+ +PART*7919);for(let i=0;i<+REPS;i++){let c;do{const s=[...all];for(let j=s.length-1;j>0;j--){const q=Math.floor(R()*(j+1));[s[j],s[q]]=[s[q],s[j]]}c=s.slice(0,5)}while(!legal(c));jobs.push(c)}}
  const res=[];let k=0;
  await Promise.all(Array.from({length:PAGES},async()=>{while(k<jobs.length){const c=jobs[k++];const r=await one(b,c).catch(e=>({cards:c,err:String(e.message).slice(0,200)}));res.push(r);console.log(JSON.stringify(r));fs.writeFileSync(OUT,JSON.stringify(res))}}));
  fs.writeFileSync(OUT,JSON.stringify(res));await b.close()})();

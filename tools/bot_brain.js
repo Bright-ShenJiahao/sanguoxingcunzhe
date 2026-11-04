@@ -4,8 +4,8 @@
 (function(){
 const G=()=>window.__G,EP=()=>window.__EP||{arrows:[],lobs:[],booms:[]};
 const ND=24,DIRS=[...Array(ND)].map((_,i)=>[Math.cos(i/ND*6.2832),Math.sin(i/ND*6.2832)]);
-let T=0,cur=[1,0],hold=0,lastHp=null,stuckT=0,lastPos=null,mode='kite',orbitSign=Math.random()<.5?1:-1,emerg=0;
-const LOG=window.BOTLOG={hits:[],tele:[],modes:{},dec:0};
+let lastMer=null,lastWall=Date.now(),T=0,cur=[1,0],hold=0,lastHp=null,stuckT=0,lastPos=null,mode='kite',orbitSign=Math.random()<.5?1:-1,emerg=0;
+const LOG=window.BOTLOG={hits:[],tele:[],modes:{},dec:0,ev:{buys:[],mer:[]},fw:0,fn:0};
 const near=(x,y,r)=>{let n=0;for(const e of G().en){if(e.dead||e.crate||e.alpha===0)continue;if((e.x-x)**2+(e.y-y)**2<r*r)n++}return n};
 // 一个方向的危险分（越大越危险）；返回 {d:危险, proj:飞行物危险}
 function danger(ux,uy,sp){const g=G(),h=g.hero,E=EP();let d=0,proj=0;
@@ -38,11 +38,17 @@ window.BOTTICK=function(dt){const g=G();if(!g||!g.S)return;const h=g.hero;T+=dt;
  const sp=72*(g.moveMul||1);
  // 受击日志
  const hp=g.hp;if(lastHp!=null&&hp<lastHp){const src=String(window.CUR_E||'?');LOG.hits.push({t:+T.toFixed(1),dmg:lastHp-hp,src,proj:/远程/.test(src),mode,emerg:emerg>0,n60:near(h.x,h.y,60),n120:near(h.x,h.y,120),arrows:EP().arrows.length});if(LOG.hits.length>400)LOG.hits.shift()}lastHp=hp;
- if(Math.floor(T/60)>LOG.tele.length-1)LOG.tele.push({m:Math.floor(T/60),lv:g.S.lv,en:g.en.filter(e=>!e.dead).length,hp});
+ {const now=Date.now();LOG.fw+=now-lastWall;LOG.fn++;lastWall=now}
+ {const S=g.S,m=Math.floor(S.t/60);if(m>LOG.tele.length-1){LOG.tele.push({m,lv:S.lv,kills:g.kills,en:g.en.filter(e=>!e.dead&&!e.crate).length,hp,maxHp:g.maxHp,cards:{...S.w},ftMs:LOG.fn?Math.round(LOG.fw/LOG.fn*100)/100:null});LOG.fw=0;LOG.fn=0}
+  const E=LOG.ev,t=Math.round(S.t);if(E.first6==null){const k=Object.keys(S.w).find(k=>S.w[k]>=6);if(k)E.first6={t,card:k}}
+  if(S.alt&&E.altSpawn==null)E.altSpawn=t;if(S.alt?.on&&E.altOn==null)E.altOn=t;if(S.job&&!E.job)E.job={id:S.job,t};
+  if(S.mer&&S.mer!==lastMer){lastMer=S.mer;E.mer.push(t)}}
  // 局势
  const n80=near(h.x,h.y,80),n140=near(h.x,h.y,140);
  mode=n80>=6?'break':n140>=5?'kite':'collect';LOG.modes[mode]=(LOG.modes[mode]||0)+dt;
- const tgt=mode!=='break'?pickTarget():null;
+ let tgt=mode!=='break'?pickTarget():null;
+ {const S=g.S,W=g.R?.WEAPONS||{},hpf=(g.hp||1)/(g.maxHp||100),l6=Object.keys(S.w).filter(k=>S.w[k]>=6&&!W[k]?.own).length;
+  if(mode!=='break'){if(S.alt&&S.alt.on&&!S.job&&l6>=2)tgt=S.alt;else if(S.mer&&!S.mer.open&&hpf<.6)tgt=S.mer}}
  // 怪群质心（绕圈用）
  let cx=0,cy=0,cn=0;for(const e of g.en){if(e.dead||e.crate)continue;const dd=Math.hypot(e.x-h.x,e.y-h.y);if(dd<260){cx+=e.x;cy+=e.y;cn++}}
  if(cn){cx/=cn;cy/=cn}
@@ -66,7 +72,11 @@ window.BOTTICK=function(dt){const g=G();if(!g||!g.S)return;const h=g.hero;T+=dt;
  window.BOTDIR=cur};
 // 选卡：优先升级已有的卡，其次新卡（有空槽），再其次祝福；宝箱直接点
 const PASS=['回复','活力','迅捷','吸血','磁力','急速','力量','护甲','闪避','智慧'];
-setInterval(()=>{const g=G();if(!g||!g.S)return;const lv=document.getElementById('lvup');
+setInterval(()=>{const g=G();if(!g||!g.S)return;
+ {const ju=document.getElementById('jobui');if(ju&&!ju.hidden){const b=ju.querySelector('[data-j]');if(b)b.click();else ju.querySelector('.no')?.click();return}}
+ {const mu=document.getElementById('mer');if(mu&&!mu.hidden){const hpf=(g.hp||1)/(g.maxHp||100),want=hpf<.5?'meat':'mys',b=mu.querySelector('[data-mb='+want+']:not([disabled])');
+  if(b&&!(mu._n>=1)){b.click();mu._n=1;LOG.ev.buys.push({t:Math.round(g.S.t),k:want})}else{mu._n=0;mu.querySelector('.cl')?.click()}return}}
+ const lv=document.getElementById('lvup');
  if(lv&&!lv.hidden){const c=[...lv.querySelectorAll('button.card')];if(!c.length){lv.querySelector('[data-a=skip]')?.click();return}
   const W=g.R?.WEAPONS||{},own=Object.keys(g.S.w).map(k=>W[k]?.name).filter(Boolean);
   const sc=b=>{const t=b.textContent;if(own.some(n=>t.includes(n)))return 3+Math.random();if(/NEW/.test(t)&&Object.values(W).some(w=>t.includes(w.name)))return 2+Math.random();const i=PASS.findIndex(p=>t.includes(p));return i>=0?1+(PASS.length-i)/PASS.length:Math.random()};

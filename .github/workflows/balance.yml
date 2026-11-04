@@ -4,17 +4,43 @@ on:
     branches: [balance-test]
   workflow_dispatch:
     inputs:
-      solo_reps:
-        description: '单卡测试：每张卡跑几局（0=不跑）'
-        default: '4'
-      mix_per_job:
-        description: '随机搭配：每台机器跑几局（16 台）'
-        default: '24'
+      mode:
+        description: '测试模式：type（按 5 种伤害类型）/ solo（单卡）/ mix（随机合法搭配）/ all（三种都跑）'
+        default: 'type'
+      runs:
+        description: '每组局数（type：每种类型；solo：每张卡；mix：每台机器，共 16 台）'
+        default: '20'
       maxt:
-        description: '一局最长多少秒（游戏时间）'
-        default: '1200'
+        description: '一局最长多少秒（游戏时间，1300 可打完皇帝）'
+        default: '1300'
+concurrency:
+  group: balance-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  BOT: v3
 jobs:
+  type:
+    if: ${{ (inputs.mode || 'type') == 'type' || inputs.mode == 'all' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [0,1,2,3,4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: nohup python3 -m http.server 8765 >/dev/null 2>&1 &
+      - name: 按伤害类型
+        env: { MAXT: "${{ inputs.maxt || '1300' }}", PAGES: '2' }
+        run: node tools/balance.js type ${{ matrix.part }} 5 ${{ inputs.runs || '20' }} type-${{ matrix.part }}.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: 'type-${{ matrix.part }}', path: 'type-*.json', if-no-files-found: ignore, retention-days: 7 }
   run:
+    if: ${{ inputs.mode == 'solo' || inputs.mode == 'mix' || inputs.mode == 'all' || github.event_name == 'push' }}
     runs-on: ubuntu-latest
     timeout-minutes: 340
     strategy:
@@ -28,17 +54,18 @@ jobs:
       - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
       - run: nohup python3 -m http.server 8765 >/dev/null 2>&1 &
       - name: 单卡
-        if: ${{ (inputs.solo_reps || '4') != '0' }}
-        env: { MAXT: "${{ inputs.maxt || '1200' }}", PAGES: '2' }
-        run: node tools/balance.js solo ${{ matrix.part }} 16 ${{ inputs.solo_reps || '4' }} solo-${{ matrix.part }}.json
+        if: ${{ inputs.mode == 'solo' || inputs.mode == 'all' || github.event_name == 'push' }}
+        env: { MAXT: "${{ inputs.maxt || '1300' }}", PAGES: '2' }
+        run: node tools/balance.js solo ${{ matrix.part }} 16 ${{ inputs.runs || '4' }} solo-${{ matrix.part }}.json
       - name: 随机搭配
-        env: { MAXT: "${{ inputs.maxt || '1200' }}", PAGES: '2' }
-        run: node tools/balance.js mix ${{ matrix.part }} 16 ${{ inputs.mix_per_job || '24' }} mix-${{ matrix.part }}.json
+        if: ${{ inputs.mode == 'mix' || inputs.mode == 'all' || github.event_name == 'push' }}
+        env: { MAXT: "${{ inputs.maxt || '1300' }}", PAGES: '2' }
+        run: node tools/balance.js mix ${{ matrix.part }} 16 ${{ inputs.runs || '8' }} mix-${{ matrix.part }}.json
       - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: 'res-${{ matrix.part }}', path: '*-[0-9]*.json', if-no-files-found: ignore }
+        with: { name: 'res-${{ matrix.part }}', path: '*-[0-9]*.json', if-no-files-found: ignore, retention-days: 7 }
   report:
-    needs: run
+    needs: [type, run]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -47,4 +74,4 @@ jobs:
         with: { path: results }
       - run: node tools/balance_report.js results report && cp -r results report/raw
       - uses: actions/upload-artifact@v4
-        with: { name: balance-report, path: report }
+        with: { name: balance-report, path: report, retention-days: 14 }
