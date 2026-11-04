@@ -284,7 +284,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
  function options(){
   const pool=[],own=Object.keys(S.w),ng=own.filter(k=>!isOwn(k)).length,np=Object.keys(S.p).filter(k=>S.p[k]>0).length;
   for(const k in S.w)if(S.w[k]<MAXL-1)pool.push({t:'w',k,wt:1.2});   // 满级（第 5 级）只能开宝箱拿
-  const PH=k=>KIND_ID[k]==='mel'||KIND_ID[k]==='rng';for(const k of S.deck){if(S.w[k])continue;if(ng>=MAXG)continue;if(own.filter(x=>!isOwn(x)&&PH(x)===PH(k)).length>=3)continue;pool.push({t:'w',k,wt:1})}   // 局内物理、法术各最多 3 张
+  const PH=k=>KIND_ID[k]==='mel'||KIND_ID[k]==='rng';for(const k of S.deck){if(S.w[k])continue;if(ng>=MAXG)continue;if(own.filter(x=>!isOwn(x)&&PH(x)===PH(k)).length>=4)continue;pool.push({t:'w',k,wt:1})}   // 局内物理、法术各最多 4 张
   for(const k of S.pp){const L=S.p[k];if(L>=PASSIVES[k].max)continue;if(!L&&np>=MAXP)continue;pool.push({t:'p',k,wt:.8})}
   const out=[];while(out.length<3&&pool.length){const tot=pool.reduce((a,o)=>a+o.wt,0);let r=Math.random()*tot,i=0;while(i<pool.length-1&&r>pool[i].wt)r-=pool[i++].wt;out.push(pool.splice(i,1)[0])}
   if(!out.length)out.push({t:'heal'});return out}
