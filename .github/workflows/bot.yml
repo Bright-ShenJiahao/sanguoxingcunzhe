@@ -6,7 +6,10 @@ on:
     inputs:
       cards:
         description: '固定卡组（逗号分隔）'
-        default: 'fireball,xbow,hshield,holyorb,hammer'
+        default: 'sword,fireball,chain,hshield,holyorb'
+      games:
+        description: '每组局数（共 10 组）'
+        default: '2'
 jobs:
   run:
     runs-on: ubuntu-latest
@@ -22,10 +25,11 @@ jobs:
       - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
       - run: nohup python3 -m http.server 8765 >/dev/null 2>&1 &
       - name: 新机器人 v3（6 局）
-        env: { MAXT: "1200", PAGES: "2", BOT: "v3", CARDS: "${{ inputs.cards || 'fireball,xbow,hshield,holyorb,hammer' }}" }
-        run: node tools/balance.js fixed ${{ matrix.part }} 10 6 v3-${{ matrix.part }}.json
+        env: { MAXT: "1200", PAGES: "2", BOT: "v3", CARDS: "${{ inputs.cards || 'sword,fireball,chain,hshield,holyorb' }}" }
+        run: node tools/balance.js fixed ${{ matrix.part }} 10 ${{ inputs.games || '6' }} v3-${{ matrix.part }}.json
       - name: 站桩机器人（3 局，测站着不动会不会死）
-        env: { MAXT: "300", PAGES: "2", BOT: "still", CARDS: "${{ inputs.cards || 'fireball,xbow,hshield,holyorb,hammer' }}" }
+        if: ${{ !inputs.games }}
+        env: { MAXT: "300", PAGES: "2", BOT: "still", CARDS: "${{ inputs.cards || 'sword,fireball,chain,hshield,holyorb' }}" }
         run: node tools/balance.js fixed ${{ matrix.part }} 10 3 vs-${{ matrix.part }}.json
       - uses: actions/upload-artifact@v4
         if: always()
