@@ -4,8 +4,9 @@
 export function createAudio(){
  let ac=null,master,musicBus,sfxBus,on=true,mode='menu',inten=0,started=false,next=0,step=0;
  try{on=localStorage.getItem('mute')!=='1'}catch(e){}
+ const VOL={m:1,s:1};try{Object.assign(VOL,JSON.parse(localStorage.getItem('vol')||'{}'))}catch(e){}
  function init(){if(ac)return;ac=new (window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=on?.9:0;master.connect(ac.destination);
-  musicBus=ac.createGain();musicBus.gain.value=.32;musicBus.connect(master);sfxBus=ac.createGain();sfxBus.gain.value=.5;sfxBus.connect(master);
+  musicBus=ac.createGain();musicBus.gain.value=.32*VOL.m;musicBus.connect(master);sfxBus=ac.createGain();sfxBus.gain.value=.5*VOL.s;sfxBus.connect(master);
   const rv=ac.createConvolver(),len=ac.sampleRate*1.6,b=ac.createBuffer(2,len,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.5)}
   rv.buffer=b;const wet=ac.createGain();wet.gain.value=.22;musicBus.connect(rv);rv.connect(wet);wet.connect(master);T.rv=rv}
  const T={};
@@ -62,5 +63,5 @@ export function createAudio(){
   level(){if(!ac)return;const t=ac.currentTime;[74,78,81,86].forEach((m,i)=>tone(t+i*.07,m,.12,{type:'triangle',vol:.12,bus:sfxBus,rel:.3}))},
   boss(){if(!ac)return;const t=ac.currentTime;[38,38,41,38].forEach((m,i)=>tone(t+i*.35,m,.3,{type:'sawtooth',vol:.14,bus:sfxBus,rel:.4,lp:700}))},
   banner(){if(!ac)return;const t=ac.currentTime;tone(t,69,.1,{type:'triangle',vol:.1,bus:sfxBus});tone(t+.1,74,.18,{type:'triangle',vol:.1,bus:sfxBus})}};
- return {...S,setMode(m){mode=m},setIntensity(x){inten=Math.max(0,Math.min(1,x))},get muted(){return !on}};
+ return {...S,setMode(m){mode=m},setIntensity(x){inten=Math.max(0,Math.min(1,x))},get muted(){return !on},get vol(){return VOL},setVol(k,v){VOL[k]=Math.max(0,Math.min(1,v));try{localStorage.setItem('vol',JSON.stringify(VOL))}catch(e){}if(k==='m'&&musicBus)musicBus.gain.value=.32*VOL.m;if(k==='s'&&sfxBus)sfxBus.gain.value=.5*VOL.s}};
 }

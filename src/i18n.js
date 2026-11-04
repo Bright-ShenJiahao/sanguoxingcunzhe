@@ -1,7 +1,7 @@
-import {zh as zhCards,en as enCards,ja as jaCards} from './i18n_cards.js?v=11041900';
-import {zh as zhRun,en as enRun,ja as jaRun} from './i18n_run.js?v=11041900';
-import {zh as zhWorld,en as enWorld,ja as jaWorld} from './i18n_world.js?v=11041900';
-import {zh as zhUi,en as enUi,ja as jaUi} from './i18n_ui.js?v=11041900';
+import {zh as zhCards,en as enCards,ja as jaCards} from './i18n_cards.js?v=11042000';
+import {zh as zhRun,en as enRun,ja as jaRun} from './i18n_run.js?v=11042000';
+import {zh as zhWorld,en as enWorld,ja as jaWorld} from './i18n_world.js?v=11042000';
+import {zh as zhUi,en as enUi,ja as jaUi} from './i18n_ui.js?v=11042000';
 // Text keys are stable identifiers; saved game state must never depend on translations.
 const baseZh={
  'game.title':'异世界幸存者：跑！',
@@ -20,6 +20,13 @@ const baseZh={
  'pause.shake.on':'震屏：开',
  'pause.shake.off':'震屏：关',
  'pause.home':'结束本局，回主界面',
+ 'pause.music':'音乐',
+ 'pause.sfx':'音效',
+ 'tut.1':'拖动屏幕（电脑用 WASD）移动',
+ 'tut.2':'不用按攻击，靠近敌人会自动攻击',
+ 'tut.3':'捡起蓝色宝石，经验满了就升级',
+ 'tut.4':'升级时三选一：选新技能或强化已有技能',
+ 'tut.5':'别站着不动——一直跑，活下去！',
  'combat.dodge':'闪避',
  'combat.revive':'复活！',
  'combat.shieldBreak':'圣盾破碎！',
@@ -41,6 +48,13 @@ const baseEn={
  'pause.shake.on':'Screen shake: On',
  'pause.shake.off':'Screen shake: Off',
  'pause.home':'End run and return to menu',
+ 'pause.music':'Music',
+ 'pause.sfx':'SFX',
+ 'tut.1':'Drag the screen (WASD on PC) to move',
+ 'tut.2':'No attack button — you attack nearby enemies automatically',
+ 'tut.3':'Pick up blue gems to level up',
+ 'tut.4':'On level up, pick 1 of 3: a new skill or an upgrade',
+ 'tut.5':'Don\'t stand still — keep running and survive!',
  'combat.dodge':'Dodge',
  'combat.revive':'Revived!',
  'combat.shieldBreak':'Holy Shield broken!',
@@ -62,6 +76,13 @@ const baseJa={
  'pause.shake.on':'画面揺れ：オン',
  'pause.shake.off':'画面揺れ：オフ',
  'pause.home':'今回を終了してメニューに戻る',
+ 'pause.music':'音楽',
+ 'pause.sfx':'効果音',
+ 'tut.1':'画面をドラッグ（PCはWASD）で移動',
+ 'tut.2':'攻撃ボタンなし：近くの敵を自動で攻撃',
+ 'tut.3':'青い宝石を拾ってレベルアップ',
+ 'tut.4':'レベルアップ時は3択：新スキルか強化を選ぶ',
+ 'tut.5':'立ち止まるな——走り続けて生き残れ！',
  'combat.dodge':'回避',
  'combat.revive':'復活！',
  'combat.shieldBreak':'聖盾破壊！',
