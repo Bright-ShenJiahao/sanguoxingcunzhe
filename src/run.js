@@ -265,7 +265,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
      if(M===0){for(const e of en)if(!e.dead&&(e.x-hero.x)**2+((e.y-hero.y)*1.2)**2<110*110){strike(e,dm0*2,Math.sign(e.x-hero.x)||1);if(!e.boss)knock(e,18)}}
      else if(M===1){for(let i=0;i<8;i++){const a=i*.785;S.shots.push({k:'note',x:hero.x,y:hero.y-12,dx:Math.cos(a),dy:Math.sin(a),v:150,life:1.6,dm:dm0*1.2,pierce:1,hit:new Set(),img:'n'+(i%3)})}}
      else for(const e of en)if(!e.dead&&(e.x-hero.x)**2+((e.y-hero.y)*1.2)**2<110*110)e.slowT=Math.max(e.slowT||0,(e.boss?.8:2.5)*DUR())}}
-   if(nearest(70))window.SFX?.wave();const r=(L>=3?62:48)*[1.3,.75,1][M],dm=dmg(1+.35*(L-1)+(L>=6?.6:0))*[1.3,.6,.85][M];S.shots.push({k:'wave',t:0,d:.6,r,dm,hit:new Set(),kb:[16,5,6][M],slow:M===2});
+   if(nearest(70))window.SFX?.wave();const r=(L>=3?82:68)*[1.3,.75,1][M],dm=dmg(1+.35*(L-1)+(L>=6?.6:0))*[1.3,.6,.85][M]*.8;S.shots.push({k:'wave',t:0,d:.6,r,dm,hit:new Set(),kb:[16,5,6][M],slow:M===2});
    if(L>=5){const n=L>=7?3:2;for(let i=0;i<n;i++){const a=R(0,6.28);S.shots.push({k:'note',x:hero.x,y:hero.y-12,dx:Math.cos(a),dy:Math.sin(a),v:120,life:1.8,dm:dmg(1.2),pierce:0,hit:new Set(),img:'n'+(i%3)})}}
    return (L>=4?1.1:1.4)*[1.2,.45,1.1][M]}};
  const C2=install({get S(){return S},en,hero,strike,knock,nearest,cluster,dmg,AR,AMT,DUR,ok,burn,survival,AIM,MA,FN,ST});Object.assign(FIRE,C2.fire);
