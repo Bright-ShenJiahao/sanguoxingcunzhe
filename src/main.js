@@ -1,6 +1,6 @@
 
 import {createMenu} from './menu.js?v=11041530';
-import {t,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11041530';
+import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11041530';
 import {createSurvival} from './survival.js?v=11041530';
 import {createEnemies} from './enemies.js?v=11041530';
 import {createAudio} from './audio.js?v=11041530';
@@ -177,7 +177,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  for(let i=en.length-1;i>=0;i--){const e=en[i];if(e.dead&&!e.counted){e.counted=true;if(!e.crate&&!e.drum)burst(e);if(e.k==='gob_bomb'&&!e.boomed){for(let i=0;i<8;i++){const a=Math.random()*6.28;PARTS.push({x:e.x,y:e.y-10,vx:Math.cos(a)*20,vy:-30-Math.random()*25,t:0,d:.8,c:i%2?'#9a9a9a':'#cfcfcf',s:2.5})}run.dud?.(e)}if(!e.crate)kills++;run.onKill(e)}if(e.expired)en.splice(i,1)}
  if(!pz&&!(portal&&now-portal.t<3500)){const w=run.want();for(let n=0;n<4&&en.filter(e=>!e.dead).length<w;n++)spawn()}
  survival?.update(gdt);
- $('kc').textContent='斩敌 '+kills;
+ $('kc').textContent=tr('ui.hud.slain',{n:kills});
  let cx=Math.round(Math.min(WW-VW,Math.max(0,hero.x-VW/2))),cy=Math.round(Math.min(WH-VH,Math.max(0,hero.y-VH/2)));if(window.SHK>0){const s=window.SHK;cx+=Math.round((Math.random()-.5)*2*s);cy+=Math.round((Math.random()-.5)*2*s);window.SHK=Math.max(0,s-dt*22)}
  c.imageSmoothingEnabled=true;
  drawGround(c,cx,cy,VW,VH,0,0,VW,VH);

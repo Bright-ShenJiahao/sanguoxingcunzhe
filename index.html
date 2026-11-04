@@ -37,7 +37,7 @@ body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
 #bx::after{content:"";position:absolute;left:var(--tail,50%);bottom:-17px;margin-left:-9px;border:9px solid transparent;border-top:9px solid #f4f4f4;border-bottom:0}
 @keyframes bk{50%{opacity:0}}
 </style></head><body class="loading">
-<div id="boot"><div id="bbg"></div><div id="bx"><canvas id="bxa" width="37" height="33"></canvas><p id="bxt"></p><i>▼</i></div><div class="tx">加载中…</div><div class="bar"><i id="bootbar"></i></div></div>
+<div id="boot"><div id="bbg"></div><div id="bx"><canvas id="bxa" width="37" height="33"></canvas><p id="bxt"></p><i>▼</i></div><div class="tx" id="bootx"></div><div class="bar"><i id="bootbar"></i></div></div>
 <script>
 (function(){var b=document.getElementById('boot');if(!b)return;
 // 加载动画：卧室里打掌机 → 掌机爆光 → 房间碎成积木掉落、露出异世界草地 → 哥布林冒出、主角跑路
@@ -65,7 +65,7 @@ function scene(sc){cx.fillStyle='#4a6a3a';cx.fillRect(0,0,W,H);
 var BS=Math.round(28*K/2),blocks=[],px=cx0,py=H-hb-14*K;
 for(var y=0;y<H;y+=BS)for(var x=0;x<W;x+=BS){var d=Math.hypot(x+BS/2-px,y+BS/2-py)/Math.hypot(W,H);blocks.push({x:x,y:y,d:d*.85+Math.random()*.08,r:(Math.random()-.5)*4,vx:(x+BS/2-px)/W*120})}
 var q=document.createElement('div');q.textContent='？';q.style.cssText='position:absolute;z-index:2300;font:900 '+(18*K)+'px sans-serif;color:#fff;text-shadow:0 3px #000;opacity:0;transition:opacity .2s;left:'+(cx0-6*K)+'px;bottom:'+(hb+46*K)+'px';b.appendChild(q);
-var tp=document.getElementById('bx'),tt=document.getElementById('bxt'),T1='再打一局就睡……',T2='我刚才不是在家里打游戏吗！？',t0=performance.now()-SKIP*1000,shown='';
+var tp=document.getElementById('bx'),tt=document.getElementById('bxt'),LG=(function(){try{var s=localStorage.getItem('lang');if(s==='zh'||s==='en'||s==='ja')return s}catch(e){}var n=(navigator.language||'').toLowerCase();return n.indexOf('ja')===0?'ja':n.indexOf('zh')===0?'zh':'en'})(),BT={zh:['再打一局就睡……','我刚才不是在家里打游戏吗！？','加载中…'],en:['One more round and then I\'ll sleep…','Wait, wasn\'t I just playing games at home?!','Loading…'],ja:['もう一回だけやったら寝る……','さっきまで家でゲームしてたはずじゃ！？','読み込み中…']}[LG],T1=BT[0],T2=BT[1],tx0=(document.getElementById('bootx').textContent=BT[2]),t0=performance.now()-SKIP*1000,shown='';
 var av=new Image();av.onload=function(){var c=document.getElementById('bxa').getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(av,0,0,33,31,2,2,33,31)};av.src=P+'hero_b/w0.png';
 var bw=Math.min(440,W*.9);function place(x){var bl=Math.max(12,Math.min(x-bw/2,W-bw-12));tp.style.left=bl+'px';tp.style.bottom=(hb+50*K+26)+'px';tp.style.setProperty('--tail',(x-bl)+'px')}
 function say(s,t){if(shown!==s){shown=s;tt.textContent=''}tp.className='on';tt.textContent=s.slice(0,Math.min(s.length,Math.floor(t/.075)))}
@@ -84,8 +84,8 @@ function tick(n){if(!document.getElementById('boot'))return;var t=(n-t0)/1000,dt
  requestAnimationFrame(tick)}requestAnimationFrame(tick)})();
 </script>
 <div class="wrap">
-<div class="stage" id="st"><canvas id="cv" width="960" height="600" aria-label="写实俯瞰风野外地图，小兵挥刀斩敌"></canvas><div id="kc">斩敌 0</div><canvas id="mm" width="84" height="84"></canvas></div>
-<div class="sw" role="group" aria-label="角色" id="cs"><button data-c="m" aria-pressed="true">短发</button><button data-c="f0" aria-pressed="false">女主·长直发</button></div>
+<div class="stage" id="st"><canvas id="cv" width="960" height="600"></canvas><div id="kc"></div><canvas id="mm" width="84" height="84"></canvas></div>
+<div class="sw" role="group" id="cs"><button data-c="m" aria-pressed="true">M</button><button data-c="f0" aria-pressed="false">F</button></div>
 </div>
 
 <script type="module" src="src/main.js?v=11041530"></script>

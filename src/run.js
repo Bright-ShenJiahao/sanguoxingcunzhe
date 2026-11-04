@@ -34,6 +34,7 @@ Object.assign(WEAPONS,DEFS);   // 第二批 28 张技能卡（src/cards2.js）
 for(const k in WEAPONS){const c=WEAPONS[k].cat;if(CATS[c])CATS[c].ws.push(k)}
 export const POOL={w:Object.keys(WEAPONS).filter(k=>!['spell','own'].includes(WEAPONS[k].cat)),s:Object.keys(WEAPONS).filter(k=>WEAPONS[k].cat==='spell')};POOL.c=[...POOL.w,...POOL.s];
 export const DECKN=10;
+export const KIND_ID={...CARD_DT,sword:'mel',hammer:'mel',axe:'rng',bow:'rng',xbow:'rng',fireball:'ele',chain:'ele',frost:'ele',thunder:'ele',missile:'ele',gb:'ele',hp:'holy'};
 export const KIND={};for(const [k,d] of Object.entries({"sword": "mel", "hammer": "mel", "axe": "rng", "bow": "rng", "xbow": "rng", "fireball": "ele", "chain": "ele", "frost": "ele", "thunder": "ele", "missile": "ele", "gb": "ele", "hp": "holy"}))Object.defineProperty(KIND,k,{enumerable:true,configurable:true,get:()=>tr('card.kind.'+d)});for(const k of Object.keys(CARD_KIND))Object.defineProperty(KIND,k,{enumerable:true,configurable:true,get:()=>CARD_KIND[k]});
 // 角色专属武器（不进公共卡池）
 WEAPONS.gb={get name(){return tr('run.w.gb.name')},cat:'own',img:'gear/gb',own:1,get desc(){return [0,1,2,3,4].map(i=>tr('run.w.gb.d'+i))}};

@@ -1,21 +1,22 @@
+import {t as tr,onLanguageChange} from './i18n.js?v=11041530';
 // 局外系统：金币 / 抽奖券、永久强化（男女通用）、怪物图鉴、主界面顶部状态栏、老虎机动画（宝箱用，以后抽卡复用）。
 // 存档在 localStorage 'meta'。
 const UP=[
- {k:'hp',ic:'<img src="assets/ui/u_hp.png?v=1103a" alt="">',nm:'体魄',fx:'+8 生命',max:10,base:60},
- {k:'atk',ic:'<img src="assets/ui/b_atk.png?v=1103a" alt="">',nm:'力量',fx:'+4% 物理伤害',max:10,base:80},{k:'arc',ic:'<img src="assets/ui/p_arc.png?v=1103a" alt="">',nm:'奥义',fx:'+4% 法术伤害',max:10,base:80},
- {k:'spd',ic:'<img src="assets/ui/u_spd.png?v=1103a" alt="">',nm:'步伐',fx:'+3% 移速',max:8,base:70},
- {k:'cd',ic:'<img src="assets/ui/u_cd.png?v=1103a" alt="">',nm:'反应',fx:'−3% 攻击间隔',max:8,base:90},
- {k:'arm',ic:'<img src="assets/ui/b_armor.png?v=1103a" alt="">',nm:'护甲',fx:'+1 护甲（每次受伤少扣 1）',max:5,base:120},
- {k:'reg',ic:'<img src="assets/ui/b_regen.png?v=1103a" alt="">',nm:'再生',fx:'+0.2 每秒回血',max:5,base:120},
- {k:'mag',ic:'<img src="assets/ui/p_mag.png?v=1103a" alt="">',nm:'磁铁',fx:'+12% 拾取范围',max:5,base:50},
- {k:'wis',ic:'<img src="assets/ui/icons_12.png?v=1103a" alt="">',nm:'智慧',fx:'+5% 经验',max:5,base:100},
- {k:'gold',ic:'<img src="assets/ui/u_gold.png?v=1103a" alt="">',nm:'财运',fx:'+8% 金币',max:5,base:120},
- {k:'crit',ic:'<img src="assets/ui/p_crit.png?v=1103a" alt="">',nm:'暴击',fx:'+3% 暴击率（双倍伤害）',max:8,base:90},
- {k:'area',ic:'<img src="assets/ui/b_area.png?v=1103a" alt="">',nm:'范围',fx:'+5% 攻击范围',max:5,base:100},{k:'dur',ic:'<img src="assets/ui/u_dur.png?v=1103a" alt="">',nm:'持续',fx:'+5% 效果持续',max:5,base:90},{k:'pspd',ic:'<img src="assets/ui/b_pspd.png?v=1103a" alt="">',nm:'疾矢',fx:'+5% 投射物速度、射程',max:5,base:80},{k:'amt',ic:'<img src="assets/ui/u_amt.png?v=1103a" alt="">',nm:'多重',fx:'+1 投射物',max:1,base:2000},{k:'rr',ic:'<img src="assets/ui/u_rr.png?v=1103a" alt="">',nm:'重抽',fx:'每局 +1 次重抽',max:3,base:150},
- {k:'rev',ic:'<img src="assets/ui/u_revive.png?v=1103a" alt="">',nm:'复活',fx:'每局复活 1 次（50% 生命）',max:1,base:1500}];
+ {k:'hp',ic:'<img src="assets/ui/u_hp.png?v=1103a" alt="">',get nm(){return tr('ui.up.hp.nm')},get fx(){return tr('ui.up.hp.fx')},max:10,base:60},
+ {k:'atk',ic:'<img src="assets/ui/b_atk.png?v=1103a" alt="">',get nm(){return tr('ui.up.atk.nm')},get fx(){return tr('ui.up.atk.fx')},max:10,base:80},{k:'arc',ic:'<img src="assets/ui/p_arc.png?v=1103a" alt="">',get nm(){return tr('ui.up.arc.nm')},get fx(){return tr('ui.up.arc.fx')},max:10,base:80},
+ {k:'spd',ic:'<img src="assets/ui/u_spd.png?v=1103a" alt="">',get nm(){return tr('ui.up.spd.nm')},get fx(){return tr('ui.up.spd.fx')},max:8,base:70},
+ {k:'cd',ic:'<img src="assets/ui/u_cd.png?v=1103a" alt="">',get nm(){return tr('ui.up.cd.nm')},get fx(){return tr('ui.up.cd.fx')},max:8,base:90},
+ {k:'arm',ic:'<img src="assets/ui/b_armor.png?v=1103a" alt="">',get nm(){return tr('ui.up.arm.nm')},get fx(){return tr('ui.up.arm.fx')},max:5,base:120},
+ {k:'reg',ic:'<img src="assets/ui/b_regen.png?v=1103a" alt="">',get nm(){return tr('ui.up.reg.nm')},get fx(){return tr('ui.up.reg.fx')},max:5,base:120},
+ {k:'mag',ic:'<img src="assets/ui/p_mag.png?v=1103a" alt="">',get nm(){return tr('ui.up.mag.nm')},get fx(){return tr('ui.up.mag.fx')},max:5,base:50},
+ {k:'wis',ic:'<img src="assets/ui/icons_12.png?v=1103a" alt="">',get nm(){return tr('ui.up.wis.nm')},get fx(){return tr('ui.up.wis.fx')},max:5,base:100},
+ {k:'gold',ic:'<img src="assets/ui/u_gold.png?v=1103a" alt="">',get nm(){return tr('ui.up.gold.nm')},get fx(){return tr('ui.up.gold.fx')},max:5,base:120},
+ {k:'crit',ic:'<img src="assets/ui/p_crit.png?v=1103a" alt="">',get nm(){return tr('ui.up.crit.nm')},get fx(){return tr('ui.up.crit.fx')},max:8,base:90},
+ {k:'area',ic:'<img src="assets/ui/b_area.png?v=1103a" alt="">',get nm(){return tr('ui.up.area.nm')},get fx(){return tr('ui.up.area.fx')},max:5,base:100},{k:'dur',ic:'<img src="assets/ui/u_dur.png?v=1103a" alt="">',get nm(){return tr('ui.up.dur.nm')},get fx(){return tr('ui.up.dur.fx')},max:5,base:90},{k:'pspd',ic:'<img src="assets/ui/b_pspd.png?v=1103a" alt="">',get nm(){return tr('ui.up.pspd.nm')},get fx(){return tr('ui.up.pspd.fx')},max:5,base:80},{k:'amt',ic:'<img src="assets/ui/u_amt.png?v=1103a" alt="">',get nm(){return tr('ui.up.amt.nm')},get fx(){return tr('ui.up.amt.fx')},max:1,base:2000},{k:'rr',ic:'<img src="assets/ui/u_rr.png?v=1103a" alt="">',get nm(){return tr('ui.up.rr.nm')},get fx(){return tr('ui.up.rr.fx')},max:3,base:150},
+ {k:'rev',ic:'<img src="assets/ui/u_revive.png?v=1103a" alt="">',get nm(){return tr('ui.up.rev.nm')},get fx(){return tr('ui.up.rev.fx')},max:1,base:1500}];
 const price=(u,L)=>Math.round(u.base*Math.pow(1.35,L)/5)*5;
-export const ENEMY_NAMES={goblin:'小哥布林',gob_kid:'哥布林崽',gob_blade:'哥布林剑士',gob_archer:'哥布林弓箭手',gob_shield:'哥布林盾卫',gob_shaman:'哥布林萨满',gob_bomb:'炸弹哥布林',gob_boar:'野猪骑兵',gob_rock:'岩甲哥布林',gob_mage:'哥布林法师',gob_ghost:'幽灵哥布林',gob_wolf:'狼骑兵',wolf_free:'无主灰狼',gob_thrower:'投石哥布林',gob_drum:'哥布林鼓手',gob_necro:'哥布林死灵师',gob_giant:'巨型哥布林',skeleton:'骷髅兵',gob_king:'哥布林大王',gob_emperor:'哥布林皇帝',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士',gob_hero:'哥布林英雄',gob_troll:'血咒巨魔'};
-const RD={gob_shield:'远程被盾挡 ×0.3，靠近砍',gob_rock:'物理都只吃一半，用法术',gob_wolf:'怕远程 ×1.5',gob_boar:'皮厚，近战 ×0.7',gob_ghost:'物理打不实，怕神圣 ×2、元素 ×1.5',gob_mage:'元素只吃一半',gob_shaman:'耐黑暗',skeleton:'怕神圣 ×1.5，耐黑暗',gob_necro:'怕神圣 ×1.5，耐黑暗',gob_giant:'物理 ×0.8',gob_paladin:'耐神圣，怕黑暗 ×1.5',gob_hero:'正面举盾，远程 ×0.5',gob_troll:'物理 ×0.3，会回血；火焰止血，神圣破盾'};
+export const ENEMY_NAMES={};for(const k of ["goblin", "gob_kid", "gob_blade", "gob_archer", "gob_shield", "gob_shaman", "gob_bomb", "gob_boar", "gob_rock", "gob_mage", "gob_ghost", "gob_wolf", "wolf_free", "gob_thrower", "gob_drum", "gob_necro", "gob_giant", "skeleton", "gob_king", "gob_emperor", "gob_chief", "gob_paladin", "gob_hero", "gob_troll"])Object.defineProperty(ENEMY_NAMES,k,{enumerable:true,get:()=>tr('ui.enemy.'+k)});
+const RD={};for(const k of ["gob_shield", "gob_rock", "gob_wolf", "gob_boar", "gob_ghost", "gob_mage", "gob_shaman", "skeleton", "gob_necro", "gob_giant", "gob_paladin", "gob_hero", "gob_troll"])Object.defineProperty(RD,k,{enumerable:true,get:()=>tr('ui.rd.'+k)});
 export function createMeta(){
  let M;try{M=JSON.parse(localStorage.getItem('meta')||'null')}catch(e){}
  M=Object.assign({gold:0,tickets:0,up:{},kills:{},runs:0},M||{});
@@ -66,28 +67,28 @@ export function createMeta(){
  document.head.append(st);
  // ---------- 顶部状态栏 ----------
  const bar=document.createElement('div');bar.id='mbar';document.body.append(bar);
- function drawBar(){bar.innerHTML=`<span class="pill" title="金币"><img src="assets/ui/misc_0.png?v=1103a" alt="">${M.gold}</span><span class="pill" title="抽奖券"><img src="assets/ui/misc_1.png?v=1103a" alt="">${M.tickets}</span><button class="pill" data-p="dex" title="怪物图鉴"><img src="assets/ui/misc_2.png?v=1103a" alt=""><span class="lb">图鉴</span></button><button class="pill" data-p="snd" title="静音（M 键）"><img src="assets/ui/misc_${window.SFX?.muted?9:8}.png?v=1103a" alt=""></button>`;
+ function drawBar(){bar.innerHTML=`<span class="pill" title="${tr('ui.gold')}"><img src="assets/ui/misc_0.png?v=1103a" alt="">${M.gold}</span><span class="pill" title="${tr('ui.tickets')}"><img src="assets/ui/misc_1.png?v=1103a" alt="">${M.tickets}</span><button class="pill" data-p="dex" title="${tr('ui.dex.title')}"><img src="assets/ui/misc_2.png?v=1103a" alt=""><span class="lb">${tr('ui.dex.short')}</span></button><button class="pill" data-p="snd" title="${tr('ui.mute')}"><img src="assets/ui/misc_${window.SFX?.muted?9:8}.png?v=1103a" alt=""></button>`;
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.p==='dex')openDex();else{dispatchEvent(new KeyboardEvent('keydown',{key:'m'}));setTimeout(drawBar,50)}})}
- drawBar();
+ drawBar();onLanguageChange(()=>drawBar());
  // ---------- 面板 ----------
  const pan=document.createElement('div');pan.className='mpanel';pan.hidden=true;document.body.append(pan);
  pan.addEventListener('keydown',e=>{e.stopPropagation();if(e.key==='Escape')pan.hidden=true});
- function shell(title,sub,body,note=''){pan.innerHTML=`<div class="box"><div class="hd"><h2>${title}<small>${sub}</small></h2><button class="back">返回</button></div>${note?`<div class="note">${note}</div>`:''}${body}</div>`;pan.hidden=false;pan.querySelector('.back').onclick=()=>pan.hidden=true;setTimeout(()=>pan.querySelector('button')?.focus(),30)}
- function renderUp(el){const html=upHTML();el.innerHTML='<div class="note">所有角色通用，每次购买价格上涨。</div>'+html;bindUp(el,()=>renderUp(el))}
- function upHTML(){return `<div class="ugrid">${UP.map(u=>{const l=L(u.k),full=l>=u.max,p=price(u,l);return `<div class="ucard"><div class="ic">${u.ic}</div><div class="t"><b>${u.nm}</b><span class="fx">${u.fx}</span><div class="pips">${Array.from({length:u.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join('')}</div></div><button class="buy" data-k="${u.k}" ${full||M.gold<p?'disabled':''}>${full?'已满级':'🪙 '+p}</button></div>`}).join('')}</div>`}
+ function shell(title,sub,body,note=''){pan.innerHTML=`<div class="box"><div class="hd"><h2>${title}<small>${sub}</small></h2><button class="back">${tr('ui.back')}</button></div>${note?`<div class="note">${note}</div>`:''}${body}</div>`;pan.hidden=false;pan.querySelector('.back').onclick=()=>pan.hidden=true;setTimeout(()=>pan.querySelector('button')?.focus(),30)}
+ function renderUp(el){const html=upHTML();el.innerHTML='<div class="note">'+tr('ui.up.note')+'</div>'+html;bindUp(el,()=>renderUp(el))}
+ function upHTML(){return `<div class="ugrid">${UP.map(u=>{const l=L(u.k),full=l>=u.max,p=price(u,l);return `<div class="ucard"><div class="ic">${u.ic}</div><div class="t"><b>${u.nm}</b><span class="fx">${u.fx}</span><div class="pips">${Array.from({length:u.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join('')}</div></div><button class="buy" data-k="${u.k}" ${full||M.gold<p?'disabled':''}>${full?tr('ui.up.max'):'🪙 '+p}</button></div>`}).join('')}</div>`}
  function bindUp(el,again){el.querySelectorAll('.buy').forEach(b=>b.onclick=()=>{const u=UP.find(x=>x.k===b.dataset.k),l=L(u.k),p=price(u,l);if(l>=u.max||M.gold<p)return;M.gold-=p;M.up[u.k]=l+1;save();again();el.querySelector(`[data-k=${u.k}]`)?.focus()})}
  function openUp(){
-  const body=`<div class="ugrid">${UP.map(u=>{const l=L(u.k),full=l>=u.max,p=price(u,l);return `<div class="ucard"><div class="ic">${u.ic}</div><div class="t"><b>${u.nm}</b><span class="fx">${u.fx}</span><div class="pips">${Array.from({length:u.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join('')}</div></div><button class="buy" data-k="${u.k}" ${full||M.gold<p?'disabled':''}>${full?'已满级':'🪙 '+p}</button></div>`}).join('')}</div>`;
-  shell('永久强化','🪙 '+M.gold,body,'所有角色通用，每次购买价格上涨。');
+  const body=`<div class="ugrid">${UP.map(u=>{const l=L(u.k),full=l>=u.max,p=price(u,l);return `<div class="ucard"><div class="ic">${u.ic}</div><div class="t"><b>${u.nm}</b><span class="fx">${u.fx}</span><div class="pips">${Array.from({length:u.max},(_,i)=>`<i class="${i<l?'on':''}"></i>`).join('')}</div></div><button class="buy" data-k="${u.k}" ${full||M.gold<p?'disabled':''}>${full?tr('ui.up.max'):'🪙 '+p}</button></div>`}).join('')}</div>`;
+  shell(tr('ui.up.title'),'🪙 '+M.gold,body,tr('ui.up.note'));
   pan.querySelectorAll('.buy').forEach(b=>b.onclick=()=>{const u=UP.find(x=>x.k===b.dataset.k),l=L(u.k),p=price(u,l);if(l>=u.max||M.gold<p)return;M.gold-=p;M.up[u.k]=l+1;save();openUp();pan.querySelector(`[data-k=${u.k}]`)?.focus()})}
  function openDex(){
   const ORD=['goblin','gob_blade','gob_shield','gob_archer','gob_bomb','gob_mage','gob_wolf','gob_ghost','gob_rock','gob_thrower','gob_boar','gob_shaman','gob_drum','gob_necro','skeleton','gob_giant','gob_hero','gob_troll','gob_king','gob_chief','gob_paladin','gob_emperor'],ks=[...ORD.filter(k=>ENEMY_NAMES[k]),...Object.keys(ENEMY_NAMES).filter(k=>!ORD.includes(k))],found=ks.filter(k=>M.kills[k]).length,tot=Object.values(M.kills).reduce((a,b)=>a+b,0);
-  const body=`<div class="bgrid">${ks.map((k,i)=>{const n=M.kills[k]||0;return `<div class="bcard ${n?'':'unk'}"><span class="no">${String(i+1).padStart(3,'0')}</span><div class="im"><img src="assets/characters/enemies/${k}/portrait.png?v=4" alt="" style="${n?'':'filter:brightness(0);opacity:.55'}" onerror="const f=+(this.dataset.f||0);this.dataset.f=f+1;if(f===0)this.src='assets/characters/enemies/${k}/idle0.png?v=4';else if(f===1)this.src='assets/characters/enemies/${k}/walk0.png?v=4'"></div><div class="nm">${n?ENEMY_NAMES[k]:'？？？'}</div><div class="k">${n?'击杀 '+n:'未发现'}</div>${n&&RD[k]?`<div class="k" style="color:#ffcf8a">${RD[k]}</div>`:''}</div>`}).join('')}</div>`;
-  shell('怪物图鉴',`已发现 ${found} / ${ks.length} · 累计击杀 ${tot}`,body)}
+  const body=`<div class="bgrid">${ks.map((k,i)=>{const n=M.kills[k]||0;return `<div class="bcard ${n?'':'unk'}"><span class="no">${String(i+1).padStart(3,'0')}</span><div class="im"><img src="assets/characters/enemies/${k}/portrait.png?v=4" alt="" style="${n?'':'filter:brightness(0);opacity:.55'}" onerror="const f=+(this.dataset.f||0);this.dataset.f=f+1;if(f===0)this.src='assets/characters/enemies/${k}/idle0.png?v=4';else if(f===1)this.src='assets/characters/enemies/${k}/walk0.png?v=4'"></div><div class="nm">${n?ENEMY_NAMES[k]:tr('ui.dex.unknown')}</div><div class="k">${n?tr('ui.dex.kills',{n}):tr('ui.dex.undiscovered')}</div>${n&&RD[k]?`<div class="k" style="color:#ffcf8a">${RD[k]}</div>`:''}</div>`}).join('')}</div>`;
+  shell(tr('ui.dex.title'),tr('ui.dex.sub',{found,total:ks.length,tot}),body)}
  // ---------- 老虎机 ----------
  const sl=document.createElement('div');sl.id='slot';sl.hidden=true;document.body.append(sl);
  function slot(title,results,pool,done){
-  sl.innerHTML=`<div class="m"><div class="sign">${title}</div><div class="reels">${[0,1,2].map(()=>'<div class="reel"><div class="strip"></div></div>').join('')}</div><div class="scr">转动中……</div><div class="lever dn"></div><div class="tip">按空格 / 点击跳过</div></div>`;sl.hidden=false;
+  sl.innerHTML=`<div class="m"><div class="sign">${title}</div><div class="reels">${[0,1,2].map(()=>'<div class="reel"><div class="strip"></div></div>').join('')}</div><div class="scr">${tr('ui.slot.spin')}</div><div class="lever dn"></div><div class="tip">${tr('ui.slot.skip')}</div></div>`;sl.hidden=false;
   const cell=o=>`<div class="cell">${o.img?`<img src="${o.img}" alt="">`:`<span class="g">${o.g||'★'}</span>`}<span>${o.t||''}</span></div>`;
   const reels=[...sl.querySelectorAll('.strip')],show=results.length===1?[{g:''},results[0],{g:''}]:[results[0],results[1]||{g:''},results[2]||{g:''}];
   const N=18,durs=[900,1300,1700];let finished=false;const H=reels[0].parentNode.clientHeight||80;sl.style.setProperty('--h',H+'px');const lv=sl.querySelector('.lever');setTimeout(()=>lv.classList.remove('dn'),300);
