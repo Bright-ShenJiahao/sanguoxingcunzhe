@@ -30,7 +30,7 @@ export function createMeta(){
  #mbar .pill{white-space:nowrap}#mbar img{height:20px;width:auto}
  @media (max-width:640px){#mbar{top:6px;gap:5px;font-size:13px}#mbar .pill{padding:3px 9px;gap:4px}#mbar img{height:17px}#mbar .lb{display:none}}
  body:not(.prep-open) #mbar{display:none}
- body.prep-open #prep .pp-step{margin-top:48px;max-height:calc(100vh - 70px)}
+ body.prep-open #prep .pp-step{max-height:calc(100vh - 70px)}
  .upw .note{color:#c9d8f0;margin:0 0 10px;font-size:13px}
  .mpanel{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:#050c16b0;font:15px "PingFang SC","Microsoft YaHei",sans-serif;color:#f2f6ff}
  .mpanel[hidden]{display:none}
