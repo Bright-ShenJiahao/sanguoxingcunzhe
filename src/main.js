@@ -1,26 +1,26 @@
 
-import {createMenu} from './menu.js?v=11042490';
-import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11042490';
-import {createSurvival} from './survival.js?v=11042490';
-import {createEnemies} from './enemies.js?v=11042490';
-import {createAudio} from './audio.js?v=11042490';
-import {createMeta} from './meta.js?v=11042490';
+import {createMenu} from './menu.js?v=11042510';
+import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11042510';
+import {createSurvival} from './survival.js?v=11042510';
+import {createEnemies} from './enemies.js?v=11042510';
+import {createAudio} from './audio.js?v=11042510';
+import {createMeta} from './meta.js?v=11042510';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11042490';
+import {createPathing} from './pathing.js?v=11042510';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11042490';
-import {createRun} from './run.js?v=11042490';
-import {playEnding} from './ending.js?v=11042490';
-import {startTutorial} from './tutorial.js?v=11042490';
-import {initAchv} from './achv.js?v=11042490';
-import {initNB} from './nb.js?v=11042490';
-import {createDebug} from './debug.js?v=11042490';
+import {createWeather} from './weather.js?v=11042510';
+import {createRun} from './run.js?v=11042510';
+import {playEnding} from './ending.js?v=11042510';
+import {startTutorial} from './tutorial.js?v=11042510';
+import {initAchv} from './achv.js?v=11042510';
+import {initNB} from './nb.js?v=11042510';
+import {createDebug} from './debug.js?v=11042510';
 // 加载失败：自动重试 2 次，仍失败就在加载画面提示「点击重试」
 window.LOADFAIL=()=>{const t=document.getElementById('bootx');if(t&&!t.dataset.fail){t.dataset.fail=1;t.textContent=t_(lf());t.style.cursor='pointer';t.style.color='#ffb4a0';document.getElementById('boot')?.addEventListener('click',()=>location.reload())}};
 const lf=()=>({zh:'加载失败，点击重试',en:'Failed to load — tap to retry',ja:'読み込み失敗：タップで再試行'}),t_=o=>o[(()=>{try{return localStorage.getItem('lang')}catch(e){}})()]||o.zh;
 const fj=async(u,n=0)=>{try{const r=await fetch(u);if(!r.ok)throw 0;return await r.json()}catch(e){if(n<2){await new Promise(z=>setTimeout(z,800*(n+1)));return fj(u,n+1)}window.LOADFAIL();throw e}};
-const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042490'].map(u=>fj(u)));
+const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042510'].map(u=>fj(u)));
 const HN=await fj('data/heroine.json');
 const HM=await fj('data/hero_m.json');
 const D={...W,...CH,gt:W.tiles.list||[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),coll:'assets/map/coll.png?v='+W.ver,
@@ -46,7 +46,7 @@ const IM={};let left=0;
 let tot=0;const BAD=[];function ld(k,s,tr=0){if(!tr){left++;tot++}const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};
  i.onerror=()=>{if(tr<2){setTimeout(()=>ld(k,s,tr+1),600*(tr+1));return}BAD.push(s);console.warn('加载失败',s);if(/coll|\/map\/g/.test(s))window.LOADFAIL();const t=document.querySelector('#boot,.boot,#loading');if(t)t.setAttribute('data-err',BAD.join(' '));if(--left==0)start()};i.src=s}
 D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);for(const k of D.gt)ld(k,'assets/map/'+k+'.jpg?v='+W.ver);left++;tot++;fetch(D.coll).then(r=>{if(!r.ok)throw 0;return r.blob()}).catch(()=>fetch(D.coll+'&r=1').then(r=>r.blob())).catch(()=>{window.LOADFAIL();throw 0}).then(b=>{const i=new Image();i.onload=()=>{IM.coll=i;if(--left==0)start()};i.src=URL.createObjectURL(b)});   // 碰撞图走 blob，避免跨域污染画布（试玩网址）
-for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11042490');
+for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11042510');
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
 // 发型按需下载：选中哪一套才加载哪一套（女主 5 套×9 帧，男主 4 套×8 帧）
@@ -155,7 +155,10 @@ function drawGround(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const m=ctx.getTransform(),s=+(
 let menu,survival,run,dbg,portal=null;
 window.onGameClear=()=>{const S=run?.dbg?.S;if(S)S.paused=true;playEnding(CS[0]==='f',()=>{if(S)S.paused=false;survival.win()})};const weather=createWeather();
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
-let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimationFrame(loop);return}flT=now;   // 锁帧：游戏 60、菜单 30
+/* 防卡死：画圆半径为负数时浏览器会报错，统一夹到 0；主循环出任何错都继续下一帧，不让游戏冻住 */
+{const P=CanvasRenderingContext2D.prototype,A=P.arc,E=P.ellipse;P.arc=function(x,y,r,...a){return A.call(this,x,y,r>0?r:0,...a)};P.ellipse=function(x,y,rx,ry,...a){return E.call(this,x,y,rx>0?rx:0,ry>0?ry:0,...a)}}
+let LOOPERR=0;const loop=now=>{try{loopInner(now)}catch(e){if(LOOPERR++<5)console.error(e);requestAnimationFrame(loop)}};
+let flT=0;function loopInner(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimationFrame(loop);return}flT=now;   // 锁帧：游戏 60、菜单 30
 
  const dt=Math.min(.05,(now-last)/1000||0);last=now;
  dbg?.show(!menu?.visible);
@@ -227,7 +230,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  if(ov.cld){c.save();const T=640,dr=now*.011;const ox0=(((-cx+dr)%T)+T)%T,oy0=(((-cy+dr*.45)%T)+T)%T;for(let x=ox0-T;x<VW;x+=T)for(let y=oy0-T;y<VH;y+=T)c.drawImage(cloud,x,y,T,T);c.restore()}
  weather.draw(c,now,dt,VW,VH,hero.x,hero.y,WW,WH,region(hero.x,hero.y));
  for(const p of PARTS){p.t+=gdt;p.x+=p.vx*gdt;p.y+=p.vy*gdt;p.vy+=260*gdt}for(let i=PARTS.length-1;i>=0;i--)if(PARTS[i].t>=PARTS[i].d)PARTS.splice(i,1);for(const p of PARTS){c.globalAlpha=Math.min(1,(p.d-p.t)*4);c.fillStyle=p.c;c.fillRect(Math.round(p.x-cx),Math.round(p.y-cy),p.s,p.s)}c.globalAlpha=1;
- fx=fx.filter(f=>now-f.t<220);for(const f of fx){const k=(now-f.t)/220;c.strokeStyle=`rgba(255,255,245,${1-k})`;c.lineWidth=1;c.beginPath();c.arc(f.x-cx+f.dx*k*10,f.y-cy-10,3+k*9,0,6.3);c.stroke()}
+ fx=fx.filter(f=>now-f.t<220);for(const f of fx){const k=Math.max(0,(now-f.t)/220);c.strokeStyle=`rgba(255,255,245,${1-k})`;c.lineWidth=1;c.beginPath();c.arc(f.x-cx+f.dx*k*10,f.y-cy-10,3+k*9,0,6.3);c.stroke()}
  window.CAM={cx,cy,SC,VW,VH};dbg?.draw?.(c,cx,cy);
  run.drawUI(c,VW,VH);
  const m=$('mm').getContext('2d'),k=84/WW;m.setTransform(1,0,0,1,0,0);m.imageSmoothingEnabled=true;m.drawImage(mmc,0,0);m.setTransform(MMR/84,0,0,MMR/84,0,0);m.strokeStyle='#fff';m.strokeRect(cx*k,cy*k,VW*k,VH*k);if(D.camp){const on=window.CAMPON!==false,x=D.camp.x*k,y=D.camp.y*k;m.fillStyle=on?'#ff5a3a':'#7a7f8a';m.beginPath();m.moveTo(x,y-3.5);m.lineTo(x+3,y+2.5);m.lineTo(x-3,y+2.5);m.closePath();m.fill();m.strokeStyle='#000a';m.lineWidth=.6;m.stroke()}run?.mini?.(m,k,now);m.fillStyle='#fff';m.fillRect(hero.x*k-1.5,hero.y*k-1.5,3,3);
