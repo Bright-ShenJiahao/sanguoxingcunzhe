@@ -32,8 +32,8 @@ export default async function handler(req,context){
   if(req.method==='GET'){
    const all=await readAll(store);
    if(ADMIN&&new URL(req.url).searchParams.get('admin')===ADMIN)return json({ok:true,rows:all});
-   const best=new Map();
-   for(const r of all){if(r.cheat)continue;r.score=scoreOf(r);const p=best.get(r.name);if(!p||compare(r,p)<0)best.set(r.name,r)}
+   const want=new URL(req.url).searchParams.get('mode')==='rage'?'rage':'';const best=new Map();
+   for(const r of all){if(r.cheat)continue;const md=String(r.mode||'');if(want==='rage'?!md.includes('rage'):md!=='')continue;r.score=scoreOf(r);const p=best.get(r.name);if(!p||compare(r,p)<0)best.set(r.name,r)}
    const list=[...best.values()].sort(compare).slice(0,TOP_N).map(({name,t,kills,lv,bosses,score,at,clear})=>({name,t,kills,lv,bosses,score,at,clear:clear?1:0}));
    return json({ok:true,season:SEASON,total:best.size,list});
   }
@@ -53,8 +53,9 @@ export default async function handler(req,context){
   const ip=context?.ip||req.headers.get('x-nf-client-connection-ip')||'unknown',now=Date.now();
   if((await readAll(store)).filter(r=>r.ip===ip&&now-r.at<RATE_WINDOW*1000).length>=RATE_MAX)return json({ok:false,error:'too many'},429);
   const tags=a=>Array.isArray(a)?a.slice(0,12).map(x=>String(x).replace(/[^a-z_0-9:]/gi,'').slice(0,16)):[];   // 平衡分析用：带了哪些卡、祝福、被什么打死
-  const clear=body?.clear&&t>=1200&&bosses>=4?1:0;
-  const rec={name:cleanName(body.name),t,kills,lv,bosses,clear,at:now,season:SEASON,ip,cheat:0,by:String(body.by||'').slice(0,30),cards:tags(body.cards),bless:tags(body.bless),role:body.role==='f'?'f':'m'};
+  const mode=String(body?.mode||'').split(',').filter(x=>['rage','fast','endless'].includes(x)).join(',');
+  const clear=body?.clear&&t>=1200&&bosses>=4&&!/fast|endless/.test(mode)?1:0;   // 急速、无尽不算通关
+  const rec={name:cleanName(body.name),t,kills,lv,bosses,clear,mode,at:now,season:SEASON,ip,cheat:0,by:String(body.by||'').slice(0,30),cards:tags(body.cards),bless:tags(body.bless),role:body.role==='f'?'f':'m'};
   await store.set('run-'+randomUUID(),JSON.stringify(rec));
   return json({ok:true,score:scoreOf(rec)});
  }catch{return json({ok:false,error:'temporarily unavailable'},503)}

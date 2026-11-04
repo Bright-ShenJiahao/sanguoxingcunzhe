@@ -1,12 +1,12 @@
-import {t,onLanguageChange} from './i18n.js?v=11042300';
+import {t,onLanguageChange} from './i18n.js?v=11042310';
 // 同源 Netlify Functions 接口；超时/断网均由调用方显示提示，不影响游戏。
 export const formatTime = seconds => Math.floor(seconds/60)+':'+String(Math.floor(seconds%60)).padStart(2,'0');
-async function request(options={}){
+async function request(options={},q=''){
  // README 中的 Python 静态服务不运行 Netlify Functions，直接进入离线提示。
  if(['localhost','127.0.0.1','[::1]'].includes(location.hostname)&&location.port==='8000')throw new Error('static server');
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
  try{
-  const response=await fetch('/api/scores',{...options,cache:'no-store',signal:controller.signal});
+  const response=await fetch('/api/scores'+q,{...options,cache:'no-store',signal:controller.signal});
   if(!response.ok)throw new Error('unavailable');
   const data=await response.json();if(!data?.ok)throw new Error('unavailable');return data;
  }finally{clearTimeout(timer)}
@@ -18,15 +18,15 @@ export async function submitScore(record){
  try{await request({method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(record)});return true}catch{return false}
 }
 export function createLeaderboard(){
- const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.innerHTML='<section><h2></h2><p></p><div class="board-content" role="status"></div><button type="button"></button></section>';
- const apply=()=>{dialog.setAttribute('aria-label',t('ui.board.title'));dialog.querySelector('h2').textContent=t('ui.board.title');dialog.querySelector('p').textContent=t('ui.board.rule');dialog.querySelector('button').textContent=t('ui.board.close')};apply();onLanguageChange(apply);
+ const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.innerHTML='<section><h2></h2><p></p><div class="btabs"><button type="button" data-bm=""></button><button type="button" data-bm="rage"></button></div><div class="board-content" role="status"></div><button type="button" class="bclose"></button></section><style>.btabs{display:flex;gap:6px;justify-content:center}.btabs button{margin:0!important;padding:6px 14px!important}.btabs button.on{background:#e2cb87!important;color:#2a1c00!important;border-color:#ffe9a8!important}</style>';
+ const apply=()=>{dialog.setAttribute('aria-label',t('ui.board.title'));dialog.querySelector('h2').textContent=t('ui.board.title');dialog.querySelector('p').textContent=t('ui.board.rule');dialog.querySelector('.bclose').textContent=t('ui.board.close');dialog.querySelector('[data-bm=""]').textContent=t('ui.board.normal');dialog.querySelector('[data-bm=rage]').textContent=t('ui.board.other')};apply();onLanguageChange(apply);
  document.body.append(dialog);
- dialog.querySelector('button').onclick=()=>dialog.close();
+ dialog.querySelector('.bclose').onclick=()=>dialog.close();let BM='';dialog.querySelectorAll('[data-bm]').forEach(b=>b.onclick=()=>{BM=b.dataset.bm;api.open()});
  const content=dialog.querySelector('.board-content');let version=0;
- return {async open(){
-  const current=++version;content.textContent=t('ui.board.loading');dialog.showModal();
+ const api={async open(){
+  const current=++version;content.textContent=t('ui.board.loading');if(!dialog.open)dialog.showModal();dialog.querySelectorAll('[data-bm]').forEach(b=>b.classList.toggle('on',b.dataset.bm===BM));dialog.querySelector('p').textContent=t(BM?'ui.board.ruleRage':'ui.board.rule');
   try{
-   const data=await request();
+   const data=await request({},BM?'?mode='+BM:'');
    if(current!==version)return;
    if(!Array.isArray(data.list))throw new Error('invalid list');
    const rows=data.list.filter(r=>typeof r.name==='string'&&Number.isFinite(r.t)&&Number.isFinite(r.kills))
@@ -39,5 +39,5 @@ export function createLeaderboard(){
    rows.forEach((r,i)=>{const tr=document.createElement('tr');const d=new Date(r.at||0);for(const value of [i+1,r.name,r.score??scoreOf(r),formatTime(r.t),r.kills,r.lv??'-',r.bosses??'-',(d.getMonth()+1)+'/'+d.getDate()]){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}body.append(tr)});
    table.append(body);content.append(table);
   }catch{if(current===version)content.textContent=t('ui.board.offline')}
- }};
+ }};return api;
 }

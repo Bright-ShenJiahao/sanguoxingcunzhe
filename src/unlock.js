@@ -2,7 +2,7 @@
 // 进度存在 localStorage 'unl'：{c:[已解锁卡],p:[已解锁祝福],best:最长存活秒,boss:{名字:次数},runs3:活过3分钟的局数}
 export const START_C=['sword','bow','axe','hammer','fireball','chain','frost','missile','holyorb','hshield'];   // 开局正好 10 张，全部自动带入
 export const START_P=['atk','hp','spd','cd','regen','armor','crit','wis','vamp','dodge','mag','area'];
-import {t as tr} from './i18n.js?v=11042300';
+import {t as tr} from './i18n.js?v=11042310';
 export const BUY_C=300,BUY_P=200;
 const P=(f,p)=>Object.assign(f,{p}),SUM=m=>Object.values(m.kills||{}).reduce((a,b)=>a+b,0);   // p：成就页显示进度 [当前, 目标]
 const K=(k,n)=>P(m=>(m.kills[k]||0)>=n,(m)=>[m.kills?.[k]||0,n]),TOT=n=>P(m=>SUM(m)>=n,m=>[SUM(m),n]),BEST=s=>P((m,u)=>u.best>=s,(m,u)=>[Math.min(s,Math.floor(u.best))/60|0,s/60]),BOSS=nm=>P((m,u)=>(u.boss[nm]||0)>0,(m,u)=>[(u.boss[nm]||0)>0?1:0,1]),RUNS=n=>P((m,u)=>u.runs3>=n,(m,u)=>[Math.min(n,u.runs3),n]);
