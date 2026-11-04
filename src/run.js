@@ -51,7 +51,7 @@ const WIC={sword:'ic_sword',hammer:'ic_hammer',axe:'icons_3',thunder:'ic_thunder
 const PIC={atk:'b_atk',arc:'p_arc',hp:'icons_10',spd:'icons_9',cd:'b_cd',area:'b_area',amt:'b_amt',regen:'b_regen',armor:'b_armor',luck:'b_luck',crit:'p_crit',critd:'p_critd',wis:'icons_12',dur:'b_dur',pspd:'b_pspd',vamp:'b_vamp',greed:'icons_11',curse:'b_curse',dodge:'p_dodge',tough:'p_tough',svamp:'p_svamp',rev:'p_rev',berserk:'p_berserk',exec:'p_exec',hunt:'p_hunt',knock:'p_knock',boom:'p_boom',mag:'p_mag',gamble:'p_gamble'};
 const isSp=k=>WEAPONS[k]?.cat==='spell',isOwn=k=>!!WEAPONS[k]?.own;
 const FLM=[0,1,2,3].map(i=>{const im=new Image();im.src='assets/fx/skill2/flame'+i+'.png?v=11042550';return im});
-export function fixDeck(d){d=d&&typeof d==='object'?d:{};let c=Array.isArray(d.c)?d.c:[...(d.w||[]),...(d.s||[])];c=[...new Set(c)].filter(k=>POOL.c.includes(k)&&UNL.okC(k));for(const k of ['sword','hammer','axe','bow','fireball','chain','frost','missile','holyorb','hshield',...POOL.c])if(c.length<Math.min(DECKN,POOL.c.length)&&POOL.c.includes(k)&&UNL.okC(k)&&!c.includes(k))c.push(k);d.c=c.slice(0,DECKN);delete d.w;delete d.s;d.lock=(d.lock||[]).filter(k=>PASS_KEYS.includes(k));d.ban=d.ban||[];return d}
+export function fixDeck(d){d=d&&typeof d==='object'?d:{};let c=Array.isArray(d.c)?d.c:[...(d.w||[]),...(d.s||[])];c=[...new Set(c)].filter(k=>POOL.c.includes(k)&&UNL.okC(k));const PH=k=>KIND_ID[k]==='mel'||KIND_ID[k]==='rng',CAP=k=>c.filter(x=>PH(x)===PH(k)).length<5;{const out=[];for(const k of c){if(out.length<DECKN&&out.filter(x=>PH(x)===PH(k)).length<5)out.push(k)}c=out}for(const k of ['sword','hammer','axe','bow','fireball','chain','frost','missile','whip','hshield',...POOL.c])if(c.length<Math.min(DECKN,POOL.c.length)&&POOL.c.includes(k)&&UNL.okC(k)&&!c.includes(k)&&CAP(k))c.push(k);d.c=c.slice(0,DECKN);delete d.w;delete d.s;d.lock=(d.lock||[]).filter(k=>PASS_KEYS.includes(k));d.ban=d.ban||[];return d}
 function loadDeck(){let d=null;try{d=JSON.parse(localStorage.getItem('deck')||'null')}catch(e){}
  d=fixDeck(d);d.lock=(d.lock||[]).slice(0,4);d.ban=(d.ban||[]).filter(k=>PASS_KEYS.includes(k)&&!d.lock.includes(k)).slice(0,8);return d}
 export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
@@ -284,7 +284,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
  function options(){
   const pool=[],own=Object.keys(S.w),ng=own.filter(k=>!isOwn(k)).length,np=Object.keys(S.p).filter(k=>S.p[k]>0).length;
   for(const k in S.w)if(S.w[k]<MAXL-1)pool.push({t:'w',k,wt:1.2});   // 满级（第 5 级）只能开宝箱拿
-  for(const k of S.deck){if(S.w[k])continue;if(ng>=MAXG)continue;pool.push({t:'w',k,wt:1})}
+  const PH=k=>KIND_ID[k]==='mel'||KIND_ID[k]==='rng';for(const k of S.deck){if(S.w[k])continue;if(ng>=MAXG)continue;if(own.filter(x=>!isOwn(x)&&PH(x)===PH(k)).length>=3)continue;pool.push({t:'w',k,wt:1})}   // 局内物理、法术各最多 3 张
   for(const k of S.pp){const L=S.p[k];if(L>=PASSIVES[k].max)continue;if(!L&&np>=MAXP)continue;pool.push({t:'p',k,wt:.8})}
   const out=[];while(out.length<3&&pool.length){const tot=pool.reduce((a,o)=>a+o.wt,0);let r=Math.random()*tot,i=0;while(i<pool.length-1&&r>pool[i].wt)r-=pool[i++].wt;out.push(pool.splice(i,1)[0])}
   if(!out.length)out.push({t:'heal'});return out}

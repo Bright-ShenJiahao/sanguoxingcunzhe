@@ -1,5 +1,7 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.deck.cap":"同一类最多带 5 张（物理 5 + 法术 5）",
+ "ui.deck.cnt":"物理 {a}/5 · 法术 {b}/5",
  "ui.shop.gacha":"抽卡",
  "ui.shop.gachaD":"随机解锁 1 张未解锁的技能卡或祝福（不会重复）",
  "ui.shop.gachaGot":"抽到了！",
@@ -209,7 +211,7 @@ export const zh={
  "ui.f.dark":"黑暗",
  "ui.f.own":"只看已解锁",
  "ui.lockedTip":"未解锁：{cond}（或花 🪙{p} 购买）",
- "ui.deck.tip":"带 {n} 张进局当候选，局内最多同时装备 5 张",
+ "ui.deck.tip":"带 {n} 张进局，局内最多装备 5 张（物理、法术各最多 3 张）",
  "ui.deck.warn":"技能卡要选满 {n} 张才能出发",
  "ui.grp.atk":"攻击",
  "ui.grp.def":"防御",
@@ -255,6 +257,8 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.deck.cap":"Max 5 per type (5 physical + 5 spell)",
+ "ui.deck.cnt":"Physical {a}/5 · Spell {b}/5",
  "ui.shop.gacha":"Gacha",
  "ui.shop.gachaD":"Unlock 1 random locked skill card or blessing (no duplicates)",
  "ui.shop.gachaGot":"You got it!",
@@ -464,7 +468,7 @@ export const en={
  "ui.f.dark":"Dark",
  "ui.f.own":"Unlocked only",
  "ui.lockedTip":"Locked: {cond} (or buy for 🪙{p})",
- "ui.deck.tip":"Bring {n} as candidates; up to 5 can be equipped in a run",
+ "ui.deck.tip":"Bring {n}; equip up to 5 in a run (max 3 physical, 3 spell)",
  "ui.deck.warn":"Select all {n} skill cards before departing",
  "ui.grp.atk":"Offense",
  "ui.grp.def":"Defense",
@@ -510,6 +514,8 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.deck.cap":"同じ種類は最大 5 枚（物理 5＋魔法 5）",
+ "ui.deck.cnt":"物理 {a}/5 · 魔法 {b}/5",
  "ui.shop.gacha":"ガチャ",
  "ui.shop.gachaD":"未解放のスキルか祝福を 1 つランダム解放（重複なし）",
  "ui.shop.gachaGot":"ゲット！",
@@ -719,7 +725,7 @@ export const ja={
  "ui.f.dark":"暗黒",
  "ui.f.own":"解放済みのみ",
  "ui.lockedTip":"未解放：{cond}（または🪙{p}で購入）",
- "ui.deck.tip":"{n}枚を候補として持ち込み、ラン中は最大5枚まで装備",
+ "ui.deck.tip":"{n}枚持ち込み、ラン中は最大5枚装備（物理・魔法 各最大3枚）",
  "ui.deck.warn":"出発前にスキルカードを{n}枚すべて選んでください",
  "ui.grp.atk":"攻撃",
  "ui.grp.def":"防御",
