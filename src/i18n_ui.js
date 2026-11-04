@@ -1,5 +1,6 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.firstLock":"完成第一局后开放",
  "ui.cg.inDeck":"卡组中",
  "ui.cg.avail":"可用（未带入）",
  "ui.cg.locked":"未解锁",
@@ -235,6 +236,7 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.firstLock":"Opens after your first run",
  "ui.cg.inDeck":"In deck",
  "ui.cg.avail":"Available",
  "ui.cg.locked":"Locked",
@@ -470,6 +472,7 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.firstLock":"初回プレイ後に解放",
  "ui.cg.inDeck":"デッキ",
  "ui.cg.avail":"使用可能",
  "ui.cg.locked":"未解放",
