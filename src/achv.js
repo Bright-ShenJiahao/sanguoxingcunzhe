@@ -6,7 +6,7 @@ const BOSS={gob_king:'哥布林大王',gob_hero:'哥布林英雄',gob_chief:'哥
 const BNAME={gob_king:{zh:'哥布林大王',en:'Goblin King',ja:'ゴブリンキング'},gob_hero:{zh:'哥布林英雄',en:'Goblin Hero',ja:'ゴブリン勇者'},gob_chief:{zh:'哥布林酋长',en:'Goblin Chief',ja:'ゴブリン族長'},gob_paladin:{zh:'哥布林圣骑士',en:'Goblin Paladin',ja:'ゴブリン聖騎士'},gob_emperor:{zh:'哥布林皇帝',en:'Goblin Emperor',ja:'ゴブリン皇帝'}};
 const T={
  title:{zh:'成就',en:'Achievements',ja:'実績'},done:{zh:'已完成',en:'Completed',ja:'達成'},hide:{zh:'隐藏已完成',en:'Hide completed',ja:'達成済みを隠す'},
- close:{zh:'关闭',en:'Close',ja:'閉じる'},claim:{zh:'领取',en:'Claim',ja:'受取'},claimAll:{zh:'全部领取',en:'Claim all',ja:'すべて受取'},ready:{zh:'可领取，去成就页领取奖励',en:'ready — claim rewards in Achievements',ja:'受取可能（実績画面で受け取ろう）'},reward:{zh:'奖励',en:'Reward',ja:'報酬'},got:{zh:'达成成就',en:'Achievement',ja:'実績達成'},
+ close:{zh:'关闭',en:'Close',ja:'閉じる'},claim:{zh:'领取',en:'Claim',ja:'受取'},claimAll:{zh:'全部领取',en:'Claim all',ja:'すべて受取'},ready:{zh:'去成就页领取奖励',en:'claim rewards in Achievements',ja:'実績画面で報酬を受け取ろう'},reward:{zh:'奖励',en:'Reward',ja:'報酬'},got:{zh:'达成成就',en:'Achievement',ja:'実績達成'},
  g_surv:{zh:'生存',en:'Survival',ja:'生存'},g_grow:{zh:'成长',en:'Growth',ja:'成長'},g_kill:{zh:'战斗',en:'Combat',ja:'戦闘'},g_boss:{zh:'Boss',en:'Bosses',ja:'ボス'},
  g_card:{zh:'技能卡收集',en:'Skill Cards',ja:'スキル収集'},g_bless:{zh:'祝福收集',en:'Blessings',ja:'祝福収集'},
  rCard:{zh:'解锁技能卡「{n}」',en:'Unlock skill card "{n}"',ja:'スキル「{n}」解放'},rBless:{zh:'解锁祝福「{n}」',en:'Unlock blessing "{n}"',ja:'祝福「{n}」解放'},rGold:{zh:'{n} 金币',en:'{n} gold',ja:'金貨 {n}'}};
@@ -46,7 +46,7 @@ export function achvRunEnd(rec){
  if(rec.t>=300&&(window.FHT==null||window.FHT>=300))st.nohit5=1;
  save(a);
  a.ntf=a.ntf||{};const got=[];for(const x of list()){if(x.cl&&!a.ntf[x.id]){a.ntf[x.id]=1;got.push(x.d)}}
- save(a);if(got.length)got.push(L(T.ready));window.META?.drawBar?.();return got}
+ save(a);if(got.length)got[got.length-1]+='（'+L(T.ready)+'）';window.META?.drawBar?.();return got}
 function claim(ids){const a=store();let g=0;for(const x of list())if(x.cl&&ids.includes(x.id)){a.done[x.id]=1;g+=x.gold}save(a);if(g){window.META?.spend?.(-g);window.SFX?.coin?.()}window.META?.drawBar?.();return g}
 export const achvTitle=()=>L(T.got);
 // 成就页

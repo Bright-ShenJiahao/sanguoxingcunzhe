@@ -59,7 +59,7 @@ export function install(X){
    T.cd-=dt;const d=Math.hypot(hero.x-T.x,(hero.y-T.y));if(T.cd<=0&&d<115){T.cd=1.5;const dx=hero.x-T.x,dy=hero.y-8-(T.y-40),L=Math.hypot(dx,dy)||1;S.arrows.push({x:T.x,y:T.y-40,dx:dx/L,dy:dy/L,t:0});window.SFX?.shoot?.()}}
   for(let i=S.arrows.length-1;i>=0;i--){const A=S.arrows[i];A.t+=dt;A.x+=A.dx*150*dt;A.y+=A.dy*150*dt;
    if(Math.hypot(A.x-hero.x,A.y-(hero.y-8))<7){survival?.damage?.(9);window.LASTHIT='哥布林瞭望塔';S.arrows.splice(i,1);continue}
-   if(A.t>1.4||(A.t>.25&&!ok(A.x,A.y+40)))S.arrows.splice(i,1)}}
+   if(A.t>1.4)S.arrows.splice(i,1)   /* 箭可飞越障碍 */}}
  function spawnTG(S){for(let i=0;i<30;i++){const a=R(0,6.28),r=R(200,280),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r*.8;if(!ok(x,y))continue;const m=makeEnemy(x,y,'goblin');if(!m)continue;
    X.onSpawnBase?.(m);m.tg=1;m.tgL=25;m.hp=m.hpMax=Math.round(25+S.t/5);m.name=tr('world.tg.name');m.armor=0;m.res='';m.sc=1.15;en.push(m);S.banner={v:tr('world.tg.appear'),t:3.5};window.SFX?.banner?.();return}}
  function onKill(e){const S=X.S;if(!S)return;if(e.tower){S.twKills=(S.twKills||0)+1;for(let i=0;i<8;i++)S.coins.push({x:e.x+R(-12,12),y:e.y+R(-8,8),v:6,bag:i<2});S.gems.push({x:e.x,y:e.y-4,v:30});if(S.twKills===1)S.chests.push({x:e.x+10,y:e.y+6,big:false});S.banner={v:tr('world.tower.down'),t:2};return}if(!e.tg)return;for(let i=0;i<14;i++)S.coins.push({x:e.x+R(-14,14),y:e.y+R(-10,10),v:6,bag:i<3});S.gems.push({x:e.x,y:e.y-4,v:60});S.chests.push({x:e.x,y:e.y,big:false});S.banner={v:tr('world.tg.down'),t:2.5}}
