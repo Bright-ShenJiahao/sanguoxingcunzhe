@@ -1,4 +1,4 @@
-import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11040420';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11041530';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -13,7 +13,7 @@ export function createSurvival(game){
  .menu-board{display:block;width:100%;box-sizing:border-box;margin:0 0 18px;text-align:left}.board-content{margin:18px 0;min-height:30px}
  `;document.head.append(style);
  const hud=document.createElement('div');hud.className='survival-hud';hud.hidden=true;
- hud.innerHTML='<div class="stats"><span class="time"></span><span class="kills"></span></div><label>生命 <span class="hp"></span><progress max="100" value="100" aria-label="主角血量"></progress></label>';
+ hud.innerHTML='<div class="stats"><span class="time"></span><span class="kills"></span></div>';
  document.getElementById('st').append(hud);
  const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.setAttribute('aria-label','游戏结算');
  dialog.innerHTML='<h2>游戏结束</h2><p class="result-name"></p><p class="result-stats"></p><p class="upload" role="status"></p><button class="retry">再来一局</button><button class="home">回主界面</button>';
@@ -22,7 +22,7 @@ export function createSurvival(game){
  dialog.addEventListener('cancel',e=>e.preventDefault());
  const board=createLeaderboard(),boardButton=document.createElement('button');boardButton.type='button';boardButton.className='menu-board';boardButton.textContent='排行榜';boardButton.onclick=()=>void board.open();
  document.querySelector('.menu-start').after(boardButton);
- function render(){hud.querySelector('.time').textContent='存活 '+formatTime(elapsed);hud.querySelector('.kills').textContent='击杀 '+game.kills;hud.querySelector('.hp').textContent=Math.ceil(hp)+'/'+maxHp;const pg=hud.querySelector('progress');pg.max=maxHp;pg.value=hp}
+ function render(){hud.querySelector('.time').textContent='存活 '+formatTime(elapsed);hud.querySelector('.kills').textContent='击杀 '+game.kills}
  function stop(){playing=false;finished=false;generation++;hud.hidden=true;document.body.classList.remove('survival-playing');if(dialog.open)dialog.close()}
  function start(){
   stop();playing=true;maxHp=100;hp=100;game.reset();elapsed=0;cooldown=0;
@@ -45,7 +45,7 @@ export function createSurvival(game){
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};
  return {start,stop,get playing(){return playing&&!finished},get hp(){return hp},get max(){return maxHp},get finished(){return finished},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
   if(!playing||finished||cooldown>0||window.DBG?.god)return;
-  window.LASTHIT=window.CUR_E;const big=amount>=maxHp*.12;hp=Math.max(0,hp-Math.round(amount));cooldown=Math.max(game.iframe?.()??0,big?.6:.3);window.SHAKE?.(big?3:1.5);window.HURT=performance.now();render();if(hp===0)die();
+  window.LASTHIT=window.CUR_E;const big=amount>=maxHp*.12;hp=Math.max(0,hp-Math.round(amount));cooldown=Math.max(game.iframe?.()??0,big?.25:.08);window.SHAKE?.(big?3:1.5);window.HURT=performance.now();render();if(hp===0)die();
  },update(dt){
   if(!playing||finished)return;
   elapsed+=dt;if(dt>0)cooldown=Math.max(0,cooldown-dt);

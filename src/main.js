@@ -1,16 +1,16 @@
 
-import {createMenu} from './menu.js?v=11040420';
-import {createSurvival} from './survival.js?v=11040420';
-import {createEnemies} from './enemies.js?v=11040420';
-import {createAudio} from './audio.js?v=11040420';
-import {createMeta} from './meta.js?v=11040420';
+import {createMenu} from './menu.js?v=11041530';
+import {createSurvival} from './survival.js?v=11041530';
+import {createEnemies} from './enemies.js?v=11041530';
+import {createAudio} from './audio.js?v=11041530';
+import {createMeta} from './meta.js?v=11041530';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11040420';
+import {createPathing} from './pathing.js?v=11041530';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11040420';
-import {createRun} from './run.js?v=11040420';
-import {createDebug} from './debug.js?v=11040420';
+import {createWeather} from './weather.js?v=11041530';
+import {createRun} from './run.js?v=11041530';
+import {createDebug} from './debug.js?v=11041530';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -87,7 +87,7 @@ function blocked(x,y){
 const ok=(x,y)=>!blocked(x,y);
 const HK=+(new URLSearchParams(location.search).get('hk')||1);let nextAtk=0;
 function drawHero(px,py,moving,now){
- const ST=SETS[CS],f=moving?ST.walk[Math.floor(now/105)%ST.walk.length]:Math.floor(now/650)%2,im=IM[(hairG&&ST.gpre?ST.gpre:ST.pre)+f],[w,h]=ST.size;c.save();if(now-(window.HURT||-1e9)<500&&Math.floor(now/70)%2)c.globalAlpha=.35;c.translate(px,py);c.scale(hero.face*HK*1.07,HK*1.07);c.imageSmoothingEnabled=false;
+ const ST=SETS[CS],f=moving?ST.walk[Math.floor(now/105)%ST.walk.length]:Math.floor(now/650)%2,im=IM[(hairG&&ST.gpre?ST.gpre:ST.pre)+f],[w,h]=ST.size;c.save();if(now-(window.HURT||-1e9)<360&&Math.floor(now/90)%2===0)c.filter='sepia(1) saturate(9) hue-rotate(-45deg) brightness(1.15)';c.translate(px,py);c.scale(hero.face*HK*1.07,HK*1.07);c.imageSmoothingEnabled=false;
  const RH=ST.grip.front,FH=ST.grip.front,tl=p=>[(p[0]-ST.size[0])/2,(p[1]-ST.size[1]*2)/2];
  const wi=IM['wp_'+wpm],T=weaponAttack?Math.min(1,(now-weaponAttack.t0)/weaponAttack.dur):0,sw=Math.min(1,T*1.25);
  if(wpm=='long'&&!weaponAttack){c.save();c.translate(-3,-12);c.rotate(-.5);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
@@ -99,7 +99,9 @@ function drawHero(px,py,moving,now){
   if(weaponAttack&&T<.62){const pull=Math.min(1,T/.5)*5;c.strokeStyle='#e8dcc0';c.lineWidth=.8;c.beginPath();c.moveTo(-pull,0);c.lineTo(8-pull,0);c.stroke();c.fillStyle='#bbb';c.fillRect(8-pull,-.6,1.6,1.2)}c.restore()}
  if(wpm=='xbow'){const p=tl(FH[f]),rc=weaponAttack?Math.max(0,.3-Math.abs(T-.5))*-6:0;c.save();c.translate(p[0]+2+rc,p[1]-1);c.rotate(1.57);c.scale(.5,.5);c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
  if(wpm=='magic'){const bob=Math.sin(now/380)*1.3;c.save();c.translate(-11,-19+bob);c.scale(.5,.5);c.globalAlpha=.97;c.drawImage(wi,-wi.width/2,-wi.height/2);c.restore()}
- c.restore()}
+ c.restore();
+ if(survival?.playing){const mx=survival.max,hp=survival.hp,W=22,X=px-W/2,Y=py+5;window.HPLAG=Math.max(hp,(window.HPLAG??hp)-mx*.006);if(window.HPLAG>mx)window.HPLAG=mx;
+  c.fillStyle='rgba(0,0,0,.6)';c.fillRect(X-1,Y-1,W+2,4);c.fillStyle='#fff';c.fillRect(X,Y,W*window.HPLAG/mx,2);c.fillStyle=hp/mx<.3?'#ff4b4b':'#e83a3a';c.fillRect(X,Y,W*hp/mx,2)}}
 const en=[];let kills=0,fx=[];
 const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{if(run?.dodge?.())return;SFX.hurt();let v=Math.max(1,(amount-(run?.armor||0))*(1-(run?.armPct||0)));v=run?.absorb?run.absorb(v):v;if(v<=0)return;if(survival&&survival.hp-v<=0&&run?.useRevive()){survival.heal(survival.max*.5);return}survival?.damage(v)}});
 function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg)){e.rc=.09;e.rcd=dx||0;fx.push({x:e.x,y:e.y,t:now,dx});const kb=(window.KB||1)-1;if(kb>0&&!e.boss&&!e.drum&&!e.dead){const ax=e.x-hero.x,ay=e.y-hero.y,d=Math.hypot(ax,ay)||1,nx=e.x+ax/d*kb*8,ny=e.y+ay/d*kb*8;if(ok(nx,ny)){e.x=nx;e.y=ny}}}}

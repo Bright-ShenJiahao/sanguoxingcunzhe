@@ -57,7 +57,8 @@ export function createAudio(){
    else noise(t,.05,{vol:.1,lp:1500})},
   kill(){if(!ac||!ok('kl',60))return;const t=ac.currentTime;tone(t,60,.06,{type:'square',vol:.05,bus:sfxBus,rel:.05,lp:900})},
   gem(n=0){if(!ac||!ok('gm',40))return;const t=ac.currentTime;tone(t,84+Math.min(24,n*.5|0),.05,{type:'sine',vol:.07,bus:sfxBus,rel:.08})},
-  hurt(){if(!ac||!ok('hu',250))return;const t=ac.currentTime;tone(t,52,.12,{type:'sawtooth',vol:.12,bus:sfxBus,rel:.1,lp:600})},
+  hurt(){if(!ac||!ok('hu',110))return;const t=ac.currentTime;noise(t,.06,{vol:.16,lp:1200});tone(t,57,.05,{type:'square',vol:.09,bus:sfxBus,rel:.05,lp:900});tone(t+.04,50,.1,{type:'sawtooth',vol:.1,bus:sfxBus,rel:.1,lp:700})},
+  heart(){if(!ac||!ok('hb',700))return;const t=ac.currentTime;tone(t,31,.08,{type:'sine',vol:.22,bus:sfxBus,rel:.1});tone(t+.16,29,.08,{type:'sine',vol:.16,bus:sfxBus,rel:.12})},
   level(){if(!ac)return;const t=ac.currentTime;[74,78,81,86].forEach((m,i)=>tone(t+i*.07,m,.12,{type:'triangle',vol:.12,bus:sfxBus,rel:.3}))},
   boss(){if(!ac)return;const t=ac.currentTime;[38,38,41,38].forEach((m,i)=>tone(t+i*.35,m,.3,{type:'sawtooth',vol:.14,bus:sfxBus,rel:.4,lp:700}))},
   banner(){if(!ac)return;const t=ac.currentTime;tone(t,69,.1,{type:'triangle',vol:.1,bus:sfxBus});tone(t+.1,74,.18,{type:'triangle',vol:.1,bus:sfxBus})}};

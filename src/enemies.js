@@ -39,7 +39,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    if(e.stunT>0){e.stunT-=dt;e.moving=false;continue}   // 圣印定身：不动、不打、不碰撞伤害
    const BD=stats.damage*(e.dmgMul||1)*(e.boss?1.3:e.elite?1.4:1);
    // 碰撞伤害：同一只怪每 0.5 秒最多一次
-   e.cc=(e.cc||0)-dt;if(!stats.ranged&&!stats.bomb&&e.cc<=0&&Math.hypot(ax,(ay+2)*1.2)<Math.max(13+5*(e.sc||1),stats.reach*(e.sc||1)*.9)){e.cc=.5;const tn=performance.now();CT=CT.filter(t=>tn-t<500);if(CT.length<4){CT.push(tn);onHit(BD*.5)}}   // 被围也最多算 4 只的碰撞
+   e.cc=(e.cc||0)-dt;if(!stats.ranged&&!stats.bomb&&e.cc<=0&&Math.hypot(ax,(ay+2)*1.2)<Math.max(13+5*(e.sc||1),stats.reach*(e.sc||1)*.9)){e.cc=.5;const tn=performance.now();CT=CT.filter(t=>tn-t<500);if(CT.length<8){CT.push(tn);onHit(BD*.4)}}   // 被围也最多算 4 只的碰撞
    if(e.lifeT!=null){e.lifeT-=dt;if(e.lifeT<=0){if(e.k==='gob_kid'&&Math.random()<.5&&Math.hypot(ax,ay)<420){e.lifeT=null;e.sweep=null;e.k='goblin';e.grown=1;e.hp=e.hpMax=Math.ceil(e.hpMax*2.5);window.onGrow?.(e)}else{e.expired=true;continue}}}
    if(e.fearT>0){e.fearT-=dt;const sp=stats.speed*1.2*dt*speed,nx=e.x-ax/d*sp,ny=e.y-ay/d*sp;if(ok(nx,ny)){e.x=nx;e.y=ny}e.face=ax>=0?-1:1;e.moving=true;e.state='move';continue}
    if(e.sweep){const sp=stats.speed*(stats.charge?3:1.8)*dt*speed;e.x+=e.sweep[0]*sp;e.y+=e.sweep[1]*sp;e.face=e.sweep[0]>=0?1:-1;e.moving=true;e.state='move';continue}   // 过场：直线冲过去

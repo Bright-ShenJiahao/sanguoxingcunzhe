@@ -1,6 +1,6 @@
-import * as UNL from './unlock.js?v=11040420';window.UNL=UNL;
-import {install as installLM} from './landmarks.js?v=11040420';
-import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11040420';
+import * as UNL from './unlock.js?v=11041530';window.UNL=UNL;
+import {install as installLM} from './landmarks.js?v=11041530';
+import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11041530';
 // 局内成长（最小可玩版）：经验珠 → 升级三选一（大类卡点开再选）→ 多把武器自动攻击；被动；刷怪节奏；精英与 Boss。
 // 设计见 docs/GAME_DESIGN.md。伤害单位 = 敌人血量单位（棍兵基础 2 点）。
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -451,6 +451,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
   c.restore();S.texts=S.texts.filter(t=>t.t>0);
  }
  function drawUI(c,VW,VH){
+  {const sv=survival;if(sv?.playing&&sv.hp/sv.max<.3){const n=performance.now(),p=.5+.5*Math.sin(n/140);const g=c.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.35,VW/2,VH/2,Math.max(VW,VH)*.72);g.addColorStop(0,'rgba(180,0,0,0)');g.addColorStop(1,`rgba(200,10,10,${.22+.12*p})`);c.fillStyle=g;c.fillRect(0,0,VW,VH);if(!S.paused)window.SFX?.heart?.()}}
   {const k=1-(performance.now()-(window.HURT||0))/220;if(k>0){const g=c.createRadialGradient(VW/2,VH/2,Math.min(VW,VH)*.3,VW/2,VH/2,Math.max(VW,VH)*.7);g.addColorStop(0,'rgba(200,0,0,0)');g.addColorStop(1,`rgba(220,20,20,${.45*k})`);c.fillStyle=g;c.fillRect(0,0,VW,VH)}}
   if(window.HOUR!=null){const h=window.HOUR,t=String(Math.floor(h)).padStart(2,'0')+':00',ic='';const ti=UI[window.NIGHT?'t_night':h<8?'t_dawn':h<17?'t_noon':'t_dusk'];if(ti?.complete)c.drawImage(ti,4,VH-19,13,13);c.save();c.font='bold 8px "PingFang SC",sans-serif';c.textAlign='left';c.lineWidth=2;c.strokeStyle='rgba(0,0,0,.7)';c.fillStyle=window.NIGHT?'#a9c4ff':'#ffe08a';const s_=t+(window.NIGHT?'  夜晚 敌人+30%':'');c.strokeText(s_,20,VH-9);c.fillText(s_,20,VH-9);c.restore()}
   c.fillStyle='rgba(8,14,30,.75)';c.fillRect(0,0,VW,5);c.fillStyle='#5ab0ff';c.fillRect(0,0,VW*Math.min(1,S.xp/S.need),5);
