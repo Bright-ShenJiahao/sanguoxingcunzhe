@@ -275,7 +275,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
  function tryLevel(){
   if(S.paused||S.t-S.lastLv<3)return;
   if(S.xp<S.need)return;
-  S.xp-=S.need;S.lv++;S.fx.push({k:'ring',x:hero.x,y:hero.y,r:110,t:0,d:.5});S.fx.push({k:'ring',x:hero.x,y:hero.y,r:70,t:0,d:.35});for(const e of en){if(e.dead||e.boss||e.drum||e.crate)continue;const dx=e.x-hero.x,dy=e.y-hero.y,d=Math.hypot(dx,dy);if(d<90&&d>0){const k=(e.elite?14:34)*(1-d/90)+6,nx=e.x+dx/d*k,ny=e.y+dy/d*k;if(ok(nx,ny)){e.x=nx;e.y=ny}}}S.need=Math.round((5+8*(S.lv-1))*(S.lv>=20?1.08**(S.lv-19):1));S.lastLv=S.t;
+  S.xp-=S.need;S.lv++;S.fx.push({k:'ring',x:hero.x,y:hero.y,r:110,t:0,d:.5});S.fx.push({k:'ring',x:hero.x,y:hero.y,r:70,t:0,d:.35});for(const e of en){if(e.dead||e.boss||e.drum||e.crate)continue;const dx=e.x-hero.x,dy=e.y-hero.y,d=Math.hypot(dx,dy);if(d<90&&d>0){const k=(e.elite?14:34)*(1-d/90)+6,nx=e.x+dx/d*k,ny=e.y+dy/d*k;if(ok(nx,ny)){e.x=nx;e.y=ny}}}S.need=Math.round((5+8*(S.lv-1))*(S.lv>=10?1.07**(S.lv-9):1));S.lastLv=S.t;
   if(S.lv%3===0)S.rerolls=Math.min(2+(S.B.rr||0),S.rerolls+1);
   window.SFX?.level();openLevel();
  }
