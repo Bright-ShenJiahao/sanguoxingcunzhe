@@ -1,9 +1,9 @@
 // 成就收藏：卡牌解锁 + 祝福解锁 + 金币成就。进度存在本机 localStorage 'ach'。
-import {getLanguage} from './i18n.js?v=11042350';
-import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042350';
+import {getLanguage} from './i18n.js?v=11042360';
+import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042360';
 const L=o=>o[getLanguage()]||o.zh;
 const BOSS={gob_king:'哥布林大王',gob_hero:'哥布林英雄',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士',gob_emperor:'哥布林皇帝'};
-const BNAME={gob_king:{zh:'哥布林大王',en:'Goblin King',ja:'ゴブリンキング'},gob_hero:{zh:'哥布林英雄',en:'Goblin Hero',ja:'ゴブリンヒーロー'},gob_chief:{zh:'哥布林酋长',en:'Goblin Chief',ja:'ゴブリン族長'},gob_paladin:{zh:'哥布林圣骑士',en:'Goblin Paladin',ja:'ゴブリン聖騎士'},gob_emperor:{zh:'哥布林皇帝',en:'Goblin Emperor',ja:'ゴブリン皇帝'}};
+const BNAME={gob_king:{zh:'哥布林大王',en:'Goblin King',ja:'ゴブリンキング'},gob_hero:{zh:'哥布林英雄',en:'Goblin Hero',ja:'ゴブリン勇者'},gob_chief:{zh:'哥布林酋长',en:'Goblin Chief',ja:'ゴブリン族長'},gob_paladin:{zh:'哥布林圣骑士',en:'Goblin Paladin',ja:'ゴブリン聖騎士'},gob_emperor:{zh:'哥布林皇帝',en:'Goblin Emperor',ja:'ゴブリン皇帝'}};
 const T={
  title:{zh:'成就',en:'Achievements',ja:'実績'},done:{zh:'已完成',en:'Completed',ja:'達成'},hide:{zh:'隐藏已完成',en:'Hide completed',ja:'達成済みを隠す'},
  close:{zh:'关闭',en:'Close',ja:'閉じる'},reward:{zh:'奖励',en:'Reward',ja:'報酬'},got:{zh:'达成成就',en:'Achievement',ja:'実績達成'},
@@ -26,7 +26,7 @@ const G=[
  ...[[10,30],[20,60],[30,100],[40,150]].map(([n,g])=>['lv'+n,'grow','ach_up',{zh:`单局升到 ${n} 级`,en:`Reach Lv ${n} in one run`,ja:`1回でLv${n}に到達`},c=>[Math.min(n,c.st.lv||0),n],g]),
  ['l5','grow','ach_book',{zh:'把一张技能升到第 5 级',en:'Raise a skill to Lv 5',ja:'スキルをLv5まで強化'},c=>[c.st.l5?1:0,1],50],
  ['full5','grow','ach_sword',{zh:'技能栏装满 5 张',en:'Fill all 5 skill slots',ja:'スキル枠を5つ埋める'},c=>[c.st.full5?1:0,1],50],
- ['combo100','grow','ach_fist',{zh:'掌机连击达到 100',en:'Reach a 100-hit combo with the handheld',ja:'携帯ゲーム機で100コンボ'},c=>[Math.min(100,c.st.combo||0),100],80],
+ ['combo100','grow','ach_fist',{zh:'掌机连击达到 100',en:'Reach a 100-hit combo with the handheld',ja:'ゲーム機で100コンボ'},c=>[Math.min(100,c.st.combo||0),100],80],
  ...[[500,40],[1000,80],[2000,150]].map(([n,g])=>['k'+n,'kill','ach_sword',{zh:`单局击杀 ${n}`,en:`Defeat ${n} in one run`,ja:`1回で${n}体撃破`},c=>[Math.min(n,c.st.kills||0),n],g]),
  ...[[10000,100],[50000,300]].map(([n,g])=>['t'+n,'kill','ach_helms',{zh:`累计击杀 ${n}`,en:`Defeat ${n} in total`,ja:`累計${n}体撃破`},c=>[Math.min(n,SUM(c.m)),n],g]),
  ...[['gob_king',50],['gob_hero',60],['gob_chief',80],['gob_paladin',100],['gob_emperor',200]].map(([k,g])=>['b_'+k,'boss','ach_skull',{zh:`打倒${BNAME[k].zh}`,en:`Defeat the ${BNAME[k].en}`,ja:`${BNAME[k].ja}を倒す`},c=>[(c.u.boss?.[BOSS[k]]||0)>0?1:0,1],g]),

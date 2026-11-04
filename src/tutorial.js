@@ -1,5 +1,5 @@
 // 新手引导：第一次进局时，屏幕下方依次弹出 5 条短提示（看过就不再出现）
-import {t} from './i18n.js?v=11042350';
+import {t} from './i18n.js?v=11042360';
 export function startTutorial(){
  try{if(localStorage.getItem('tutDone'))return}catch(_){return}
  const b=document.createElement('div');b.id='tut';
