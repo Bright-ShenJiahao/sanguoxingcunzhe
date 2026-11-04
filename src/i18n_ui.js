@@ -1,5 +1,8 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.rh.t":"💡 用金币让自己变强！",
+ "ui.rh.b":"你有 {g} 金币。回到备战界面：「强化」可以永久提升生命、攻击等属性，「技能卡」可以买新技能。",
+ "ui.rh.go":"去强化 →",
  "ui.mode.normal":"普通",
  "ui.mode.normal.d":"标准难度 · 可通关",
  "ui.hud.slain":"击杀 {n}",
@@ -241,6 +244,9 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.rh.t":"💡 Spend gold to get stronger!",
+ "ui.rh.b":"You have {g} gold. In Preparation: \"Upgrades\" boost HP, damage and more permanently; \"Skills\" lets you buy new skill cards.",
+ "ui.rh.go":"Go to Upgrades →",
  "ui.mode.normal":"Normal",
  "ui.mode.normal.d":"Standard · Clearable",
  "ui.hud.slain":"Kills {n}",
@@ -482,6 +488,9 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.rh.t":"💡 金貨で強くなろう！",
+ "ui.rh.b":"金貨 {g} 枚。出撃準備の「強化」で体力や攻撃力を永久アップ、「スキル」で新しいスキルを買えます。",
+ "ui.rh.go":"強化へ →",
  "ui.mode.normal":"通常",
  "ui.mode.normal.d":"標準・クリア可",
  "ui.hud.slain":"撃破 {n}",

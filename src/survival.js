@@ -1,7 +1,7 @@
-import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042540';
-import {t,onLanguageChange} from './i18n.js?v=11042540';
-import {resetRunGlobals} from './runstate.js?v=11042540';
-import {achvRunEnd,achvTitle,clearPick} from './achv.js?v=11042540';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042550';
+import {t,onLanguageChange} from './i18n.js?v=11042550';
+import {resetRunGlobals} from './runstate.js?v=11042550';
+import {achvRunEnd,achvTitle,clearPick} from './achv.js?v=11042550';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -18,7 +18,7 @@ export function createSurvival(game){
  const hud=document.createElement('div');hud.className='survival-hud';hud.hidden=true;
  hud.innerHTML='<div class="stats"><span class="time"></span><span class="kills"></span></div>';
  document.getElementById('st').append(hud);
- const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.innerHTML='<h2></h2><p class="result-name"></p><p class="result-stats"></p><p class="upload" role="status"></p><button class="retry"></button><button class="home"></button>';
+ const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.innerHTML='<h2></h2><p class="result-name"></p><p class="result-stats"></p><p class="upload" role="status"></p><div class="rhint" hidden><b></b><span></span><button class="goup"></button></div><button class="retry"></button><button class="home"></button><style>.rhint{margin:12px 0;padding:12px 14px;border:2px solid #e2cb87;border-radius:10px;background:#e2cb8722;text-align:left;animation:rh 1.2s ease-in-out infinite alternate}.rhint b{display:block;color:#f6db94;font-size:16px;margin-bottom:4px}.rhint span{display:block;font-size:14px;color:#eef3ff;line-height:1.5}.rhint .goup{display:block;width:100%;margin:10px 0 0!important;background:linear-gradient(180deg,#f3d27a,#c99a3a)!important;color:#2a1a06!important;font-weight:800;border-color:#ffe9a8!important}@keyframes rh{to{box-shadow:0 0 14px #e2cb8788}}</style>';
  document.body.append(dialog);
  // 结算必须显式选择重开或返回；Escape 不会绕过死亡状态。
  dialog.addEventListener('cancel',e=>e.preventDefault());
@@ -44,11 +44,13 @@ function die(win){
   try{const got=achvRunEnd(rec);if(got.length)dialog.querySelector('.result-stats').textContent+=' · 🏆 '+achvTitle()+'：'+got.join('、')}catch(_){}
   if(rec.clear){try{localStorage.setItem('clrPend',String((+localStorage.getItem('clrPend')||0)+1))}catch(_){}}
   if(rec.clear)setTimeout(()=>clearPick(t,x=>{if(!x)return;dialog.querySelector('.result-stats').textContent+=x.gold?t('ui.clr.gold'):t('ui.clr.got',{nm:x.nm})}),400);
+  {const h=dialog.querySelector('.rhint'),M=window.META,runs=(()=>{try{return JSON.parse(localStorage.getItem('meta')||'{}').runs||0}catch(_){return 0}})();h.hidden=!(M&&runs<=3&&M.gold>=50);if(!h.hidden){h.querySelector('b').textContent=t('ui.rh.t');h.querySelector('span').textContent=t('ui.rh.b',{g:M.gold});h.querySelector('.goup').textContent=t('ui.rh.go')}}
   const upload=dialog.querySelector('.upload');upload.textContent=t('ui.result.uploading');dialog.showModal();
   // 每局仅在首次死亡时提交一次；晚到的网络响应不写入下一局界面。
   void submitScore(rec).then(ok=>{if(generation===token)upload.textContent=ok==='taken'?t('ui.board.taken'):ok?t('ui.result.uploaded'):t('ui.board.offline')});
  }
  dialog.querySelector('.retry').onclick=start;
+ dialog.querySelector('.goup').onclick=()=>{dialog.querySelector('.home').click();setTimeout(()=>{document.querySelector('.menu-start')?.click();setTimeout(()=>document.querySelector('.pp-tabs button[data-t=up]')?.click(),250)},150)};
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};
  return {start,stop,get playing(){return playing&&!finished},get hp(){return hp},get max(){return maxHp},get finished(){return finished},win(){if(playing&&!finished)die(true)},get canHit(){return playing&&!finished&&cooldown<=0&&!window.DBG?.god&&!window.CLEARED},guard(s){cooldown=Math.max(cooldown,s)},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
   if(!playing||finished||cooldown>0||window.DBG?.god||window.CLEARED)return;
