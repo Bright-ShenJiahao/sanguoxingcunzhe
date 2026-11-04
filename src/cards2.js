@@ -50,7 +50,7 @@ const SH={treant:120,wolf:64,waterel:100,fireel:108,firelet:40,hawk:60,fairy:44}
 export function install(X){
  const {en,hero,strike,knock,nearest,cluster,dmg,AR,AMT,DUR,ok,burn,survival,AIM,MA,FN}=X,R=(a,b)=>a+Math.random()*(b-a);
  const dmK=(k,b)=>{const s=X.S,o=s.src;s.src=k;const v=dmg(b);s.src=o;return v};
- const S=()=>X.S,lv=k=>X.S.w[k]||0,LV=L=>({1:1,3:2,5:3,6:4,8:5})[L]||1;
+ const S=()=>X.S,lv=k=>[0,1,1,2,3,4,5][X.S.w[k]||0]||0,LV=L=>({1:1,3:2,5:3,6:4,8:5})[L]||1;
  const st=()=>{const s=X.S;if(!s.c2)s.c2={P:[],Z:[],M:[],F:[],tr:[]};return s.c2};
  const alive=e=>e&&!e.dead&&!e.drum&&!e.totem;
  const d2=(a,b)=>(a.x-b.x)**2+(a.y-b.y)**2;
