@@ -1,6 +1,6 @@
-import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042400';
-import {t,onLanguageChange} from './i18n.js?v=11042400';
-import {achvRunEnd,achvTitle,clearPick} from './achv.js?v=11042400';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042410';
+import {t,onLanguageChange} from './i18n.js?v=11042410';
+import {achvRunEnd,achvTitle,clearPick} from './achv.js?v=11042410';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;

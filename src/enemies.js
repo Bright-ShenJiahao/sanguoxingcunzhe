@@ -85,7 +85,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    }else if(e.state==='recover'){
     if(e.timer>=.45){e.state='move';e.timer=0;e.cooldown=stats.ranged?1.4+Math.random()*.5:.55+Math.random()*.35}   // 弓手一轮约 2.5–3 秒
    }else{
-    e.cooldown=Math.max(0,e.cooldown-dt);e.dcd=(e.dcd||0)-dt;e.bcd=(e.bcd||0)-dt;
+    e.cooldown=Math.max(0,e.cooldown-dt*speed);e.dcd=(e.dcd||0)-dt;e.bcd=(e.bcd||0)-dt;
     const reg=!e.elite&&!e.boss;
     if(stats.bomb&&reg&&d<90){e.state='fuse';e.timer=0;e.fx=ax/d;e.fy=ay/d;continue}
     if(stats.charge&&reg&&d<150&&d>30&&e.dcd<=0){e.state='aim';e.timer=0;e.aimT=.8;e.dx=ax/d;e.dy=ay/d;e.dsp=260;e.dlen=(d+100)/260;e.dcdN=5;e.alen=d+100;continue}
