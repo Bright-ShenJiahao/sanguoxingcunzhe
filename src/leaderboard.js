@@ -1,4 +1,4 @@
-import {t,onLanguageChange} from './i18n.js?v=11041730';
+import {t,onLanguageChange} from './i18n.js?v=11041800';
 // 同源 Netlify Functions 接口；超时/断网均由调用方显示提示，不影响游戏。
 export const formatTime = seconds => Math.floor(seconds/60)+':'+String(Math.floor(seconds%60)).padStart(2,'0');
 async function request(options={}){
@@ -12,7 +12,7 @@ async function request(options={}){
  }finally{clearTimeout(timer)}
 }
 // 评分（与服务器一致）：存活每秒 2 分 + 击杀 1 分 + 等级 10 分 + 每个 Boss 200 分
-export const scoreOf=r=>Math.round((r.t||0)*2+(r.kills||0)+(r.lv||0)*10+(r.bosses||0)*200);
+export const scoreOf=r=>(r.clear?20000:0)+Math.round((r.t||0)*2+(r.kills||0)+(r.lv||0)*10+(r.bosses||0)*200);
 export async function submitScore(record){
  try{await request({method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(record)});return true}catch{return false}
 }
