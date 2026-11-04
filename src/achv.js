@@ -1,6 +1,6 @@
 // 成就收藏：卡牌解锁 + 祝福解锁 + 金币成就。进度存在本机 localStorage 'ach'。
-import {getLanguage} from './i18n.js?v=11042210';
-import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042210';
+import {getLanguage} from './i18n.js?v=11042300';
+import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042300';
 const L=o=>o[getLanguage()]||o.zh;
 const BOSS={gob_king:'哥布林大王',gob_hero:'哥布林英雄',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士',gob_emperor:'哥布林皇帝'};
 const BNAME={gob_king:{zh:'哥布林大王',en:'Goblin King',ja:'ゴブリンキング'},gob_hero:{zh:'哥布林英雄',en:'Goblin Hero',ja:'ゴブリンヒーロー'},gob_chief:{zh:'哥布林酋长',en:'Goblin Chief',ja:'ゴブリン族長'},gob_paladin:{zh:'哥布林圣骑士',en:'Goblin Paladin',ja:'ゴブリン聖騎士'},gob_emperor:{zh:'哥布林皇帝',en:'Goblin Emperor',ja:'ゴブリン皇帝'}};
@@ -17,20 +17,20 @@ const meta=()=>{try{return JSON.parse(localStorage.getItem('meta')||'{}')}catch(
 const SUM=m=>Object.values(m.kills||{}).reduce((a,b)=>a+(+b||0),0);
 // 金币成就：[id, 组, 图标, 说明, (ctx)=>[当前,目标], 金币]
 const G=[
- ...[[1,20],[3,30],[5,50],[10,100],[15,150]].map(([m,g])=>['s'+m,'surv','t_noon',{zh:`单局存活 ${m} 分钟`,en:`Survive ${m} min in one run`,ja:`1回で${m}分生き残る`},c=>[Math.min(m,Math.floor(c.u.best/60)),m],g]),
- ['clear1','surv','m_crown',{zh:'通关一次（打倒皇帝并回家）',en:'Clear the game once',ja:'1回クリアする'},c=>[Math.min(1,c.st.clears||0),1],300],
- ['clear5','surv','m_crown',{zh:'通关 5 次',en:'Clear the game 5 times',ja:'5回クリアする'},c=>[Math.min(5,c.st.clears||0),5],500],
- ['clearM','surv','rank_1',{zh:'用男主通关',en:'Clear as the boy',ja:'男主人公でクリア'},c=>[c.st.clearM?1:0,1],200],
- ['clearF','surv','rank_2',{zh:'用女主通关',en:'Clear as the girl',ja:'女主人公でクリア'},c=>[c.st.clearF?1:0,1],200],
- ['nohit5','surv','p_dodge',{zh:'前 5 分钟一次伤害都没受',en:'Take no damage for the first 5 min',ja:'最初の5分間ノーダメージ'},c=>[c.st.nohit5?1:0,1],150],
- ...[[10,30],[20,60],[30,100],[40,150]].map(([n,g])=>['lv'+n,'grow','rank_'+Math.min(9,n/10+2),{zh:`单局升到 ${n} 级`,en:`Reach Lv ${n} in one run`,ja:`1回でLv${n}に到達`},c=>[Math.min(n,c.st.lv||0),n],g]),
- ['l5','grow','p_arc',{zh:'把一张技能升到第 5 级',en:'Raise a skill to Lv 5',ja:'スキルをLv5まで強化'},c=>[c.st.l5?1:0,1],50],
- ['full5','grow','b_amt',{zh:'技能栏装满 5 张',en:'Fill all 5 skill slots',ja:'スキル枠を5つ埋める'},c=>[c.st.full5?1:0,1],50],
- ['combo100','grow','ic_gun',{zh:'掌机连击达到 100',en:'Reach a 100-hit combo with the handheld',ja:'携帯ゲーム機で100コンボ'},c=>[Math.min(100,c.st.combo||0),100],80],
- ...[[500,40],[1000,80],[2000,150]].map(([n,g])=>['k'+n,'kill','b_atk',{zh:`单局击杀 ${n}`,en:`Defeat ${n} in one run`,ja:`1回で${n}体撃破`},c=>[Math.min(n,c.st.kills||0),n],g]),
- ...[[10000,100],[50000,300]].map(([n,g])=>['t'+n,'kill','p_exec',{zh:`累计击杀 ${n}`,en:`Defeat ${n} in total`,ja:`累計${n}体撃破`},c=>[Math.min(n,SUM(c.m)),n],g]),
- ...[['gob_king',50],['gob_hero',60],['gob_chief',80],['gob_paladin',100],['gob_emperor',200]].map(([k,g])=>['b_'+k,'boss','m_anger',{zh:`打倒${BNAME[k].zh}`,en:`Defeat the ${BNAME[k].en}`,ja:`${BNAME[k].ja}を倒す`},c=>[(c.u.boss?.[BOSS[k]]||0)>0?1:0,1],g]),
- ['boss4','boss','m_blood',{zh:'一局打倒 4 个 Boss',en:'Defeat 4 bosses in one run',ja:'1回でボスを4体倒す'},c=>[Math.min(4,c.st.bosses||0),4],150]];
+ ...[[1,20],[3,30],[5,50],[10,100],[15,150]].map(([m,g])=>['s'+m,'surv','ach_clock',{zh:`单局存活 ${m} 分钟`,en:`Survive ${m} min in one run`,ja:`1回で${m}分生き残る`},c=>[Math.min(m,Math.floor(c.u.best/60)),m],g]),
+ ['clear1','surv','ach_trophy',{zh:'通关一次（打倒皇帝并回家）',en:'Clear the game once',ja:'1回クリアする'},c=>[Math.min(1,c.st.clears||0),1],300],
+ ['clear5','surv','ach_trophy',{zh:'通关 5 次',en:'Clear the game 5 times',ja:'5回クリアする'},c=>[Math.min(5,c.st.clears||0),5],500],
+ ['clearM','surv','ach_crown',{zh:'用男主通关',en:'Clear as the boy',ja:'男主人公でクリア'},c=>[c.st.clearM?1:0,1],200],
+ ['clearF','surv','ach_crown',{zh:'用女主通关',en:'Clear as the girl',ja:'女主人公でクリア'},c=>[c.st.clearF?1:0,1],200],
+ ['nohit5','surv','ach_heart',{zh:'前 5 分钟一次伤害都没受',en:'Take no damage for the first 5 min',ja:'最初の5分間ノーダメージ'},c=>[c.st.nohit5?1:0,1],150],
+ ...[[10,30],[20,60],[30,100],[40,150]].map(([n,g])=>['lv'+n,'grow','ach_up',{zh:`单局升到 ${n} 级`,en:`Reach Lv ${n} in one run`,ja:`1回でLv${n}に到達`},c=>[Math.min(n,c.st.lv||0),n],g]),
+ ['l5','grow','ach_book',{zh:'把一张技能升到第 5 级',en:'Raise a skill to Lv 5',ja:'スキルをLv5まで強化'},c=>[c.st.l5?1:0,1],50],
+ ['full5','grow','ach_sword',{zh:'技能栏装满 5 张',en:'Fill all 5 skill slots',ja:'スキル枠を5つ埋める'},c=>[c.st.full5?1:0,1],50],
+ ['combo100','grow','ach_fist',{zh:'掌机连击达到 100',en:'Reach a 100-hit combo with the handheld',ja:'携帯ゲーム機で100コンボ'},c=>[Math.min(100,c.st.combo||0),100],80],
+ ...[[500,40],[1000,80],[2000,150]].map(([n,g])=>['k'+n,'kill','ach_sword',{zh:`单局击杀 ${n}`,en:`Defeat ${n} in one run`,ja:`1回で${n}体撃破`},c=>[Math.min(n,c.st.kills||0),n],g]),
+ ...[[10000,100],[50000,300]].map(([n,g])=>['t'+n,'kill','ach_helms',{zh:`累计击杀 ${n}`,en:`Defeat ${n} in total`,ja:`累計${n}体撃破`},c=>[Math.min(n,SUM(c.m)),n],g]),
+ ...[['gob_king',50],['gob_hero',60],['gob_chief',80],['gob_paladin',100],['gob_emperor',200]].map(([k,g])=>['b_'+k,'boss','ach_skull',{zh:`打倒${BNAME[k].zh}`,en:`Defeat the ${BNAME[k].en}`,ja:`${BNAME[k].ja}を倒す`},c=>[(c.u.boss?.[BOSS[k]]||0)>0?1:0,1],g]),
+ ['boss4','boss','ach_trophy',{zh:'一局打倒 4 个 Boss',en:'Defeat 4 bosses in one run',ja:'1回でボスを4体倒す'},c=>[Math.min(4,c.st.bosses||0),4],150]];
 function list(){
  const U=window.UNL,u=U?.load?.()||{best:0,boss:{},runs3:0,c:[],p:[]},m=meta(),a=store(),ctx={u,m,st:a.st},out=[];
  for(const [id,g,ic,d,p,gold] of G){const [cur,goal]=p(ctx);out.push({id,g,ic:`assets/ui/${ic}.png`,d:L(d),cur,goal,done:!!a.done[id]||cur>=goal,rw:f(T.rGold,{n:gold}),gold})}

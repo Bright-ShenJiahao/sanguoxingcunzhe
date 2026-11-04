@@ -1,5 +1,14 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.mode.title":"难度模式",
+ "ui.mode.sub":"可多选，金币奖励更多",
+ "ui.mode.lock":"通关一次后开启",
+ "ui.mode.rage":"狂暴",
+ "ui.mode.rage.d":"怪更多更快 · 金币 +50%",
+ "ui.mode.fast":"急速",
+ "ui.mode.fast.d":"时间 1.5 倍速 · 金币 +20%",
+ "ui.mode.endless":"无尽",
+ "ui.mode.endless.d":"打倒皇帝后继续 · 金币 +20%",
  "ui.nc.t":"解锁了新技能卡！",
  "ui.nc.b":"「{nm}」已解锁。要放进卡组吗？",
  "ui.nc.ok":"放进卡组",
@@ -219,6 +228,15 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.mode.title":"Challenge Modes",
+ "ui.mode.sub":"Stackable; more gold",
+ "ui.mode.lock":"Unlocks after your first clear",
+ "ui.mode.rage":"Frenzy",
+ "ui.mode.rage.d":"More, faster enemies · Gold +50%",
+ "ui.mode.fast":"Hurry",
+ "ui.mode.fast.d":"Time runs 1.5× · Gold +20%",
+ "ui.mode.endless":"Endless",
+ "ui.mode.endless.d":"Keep going after the Emperor · Gold +20%",
  "ui.nc.t":"New skill card unlocked!",
  "ui.nc.b":"\"{nm}\" is unlocked. Add it to your deck?",
  "ui.nc.ok":"Add to deck",
@@ -438,6 +456,15 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.mode.title":"チャレンジモード",
+ "ui.mode.sub":"重ねがけ可・金貨アップ",
+ "ui.mode.lock":"初クリアで解放",
+ "ui.mode.rage":"狂乱",
+ "ui.mode.rage.d":"敵が多く速い・金貨+50%",
+ "ui.mode.fast":"急速",
+ "ui.mode.fast.d":"時間1.5倍速・金貨+20%",
+ "ui.mode.endless":"無限",
+ "ui.mode.endless.d":"皇帝撃破後も続く・金貨+20%",
  "ui.nc.t":"新しいスキルを解放！",
  "ui.nc.b":"「{nm}」が解放されました。デッキに入れますか？",
  "ui.nc.ok":"デッキに入れる",

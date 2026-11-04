@@ -1,26 +1,26 @@
 
-import {createMenu} from './menu.js?v=11042210';
-import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11042210';
-import {createSurvival} from './survival.js?v=11042210';
-import {createEnemies} from './enemies.js?v=11042210';
-import {createAudio} from './audio.js?v=11042210';
-import {createMeta} from './meta.js?v=11042210';
+import {createMenu} from './menu.js?v=11042300';
+import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11042300';
+import {createSurvival} from './survival.js?v=11042300';
+import {createEnemies} from './enemies.js?v=11042300';
+import {createAudio} from './audio.js?v=11042300';
+import {createMeta} from './meta.js?v=11042300';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11042210';
+import {createPathing} from './pathing.js?v=11042300';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11042210';
-import {createRun} from './run.js?v=11042210';
-import {playEnding} from './ending.js?v=11042210';
-import {startTutorial} from './tutorial.js?v=11042210';
-import {initAchv} from './achv.js?v=11042210';
-import {initNB} from './nb.js?v=11042210';
-import {createDebug} from './debug.js?v=11042210';
+import {createWeather} from './weather.js?v=11042300';
+import {createRun} from './run.js?v=11042300';
+import {playEnding} from './ending.js?v=11042300';
+import {startTutorial} from './tutorial.js?v=11042300';
+import {initAchv} from './achv.js?v=11042300';
+import {initNB} from './nb.js?v=11042300';
+import {createDebug} from './debug.js?v=11042300';
 // 加载失败：自动重试 2 次，仍失败就在加载画面提示「点击重试」
 window.LOADFAIL=()=>{const t=document.getElementById('bootx');if(t&&!t.dataset.fail){t.dataset.fail=1;t.textContent=t_(lf());t.style.cursor='pointer';t.style.color='#ffb4a0';document.getElementById('boot')?.addEventListener('click',()=>location.reload())}};
 const lf=()=>({zh:'加载失败，点击重试',en:'Failed to load — tap to retry',ja:'読み込み失敗：タップで再試行'}),t_=o=>o[(()=>{try{return localStorage.getItem('lang')}catch(e){}})()]||o[(navigator.language||'').slice(0,2)]||o.en;
 const fj=async(u,n=0)=>{try{const r=await fetch(u);if(!r.ok)throw 0;return await r.json()}catch(e){if(n<2){await new Promise(z=>setTimeout(z,800*(n+1)));return fj(u,n+1)}window.LOADFAIL();throw e}};
-const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042210'].map(u=>fj(u)));
+const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042300'].map(u=>fj(u)));
 const HN=await fj('data/heroine.json');
 const HM=await fj('data/hero_m.json');
 const D={...W,...CH,gt:W.tiles.list||[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),coll:'assets/map/coll.png?v='+W.ver,
@@ -46,7 +46,7 @@ const IM={};let left=0;
 let tot=0;const BAD=[];function ld(k,s,tr=0){if(!tr){left++;tot++}const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};
  i.onerror=()=>{if(tr<2){setTimeout(()=>ld(k,s,tr+1),600*(tr+1));return}BAD.push(s);console.warn('加载失败',s);if(/coll|\/map\/g/.test(s))window.LOADFAIL();const t=document.querySelector('#boot,.boot,#loading');if(t)t.setAttribute('data-err',BAD.join(' '));if(--left==0)start()};i.src=s}
 D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);for(const k of D.gt)ld(k,'assets/map/'+k+'.jpg?v='+W.ver);left++;tot++;fetch(D.coll).then(r=>{if(!r.ok)throw 0;return r.blob()}).catch(()=>fetch(D.coll+'&r=1').then(r=>r.blob())).catch(()=>{window.LOADFAIL();throw 0}).then(b=>{const i=new Image();i.onload=()=>{IM.coll=i;if(--left==0)start()};i.src=URL.createObjectURL(b)});   // 碰撞图走 blob，避免跨域污染画布（试玩网址）
-for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11042210');
+for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11042300');
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
 // 发型按需下载：选中哪一套才加载哪一套（女主 5 套×9 帧，男主 4 套×8 帧）
@@ -174,7 +174,7 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  const sp=72*gdt*(run?.moveMul||1)*(inSh?.55:wg===3?.6:1);let nx=Math.min(WW-14,Math.max(14,hero.x+dx*sp)),ny=Math.min(WH-10,Math.max(14,hero.y+dy*sp));
  if(ok(nx,hero.y))hero.x=nx;if(ok(hero.x,ny))hero.y=ny;
  if(inSh&&moving&&Math.random()<dt*7)rip.push({x:hero.x,y:hero.y,t:now});
- enemySystem.update(en,gdt,1);
+ enemySystem.update(en,window.FREEZE>performance.now()?0:gdt,window.MODES?.rage?1.25:1);
  {const G=new Map();for(const e of en){if(e.dead||e.drum)continue;const key=((e.x/10)|0)*4096+((e.y/10)|0);let L=G.get(key);if(!L)G.set(key,L=[]);L.push(e)}   // 空间网格：只和相邻格子里的怪比较
   for(const [key,L] of G){const gx=Math.floor(key/4096),gy=key-gx*4096;for(let ox=0;ox<=1;ox++)for(let oy=-1;oy<=1;oy++){if(ox===0&&oy<0)continue;const M=ox===0&&oy===0?L:G.get((gx+ox)*4096+gy+oy);if(!M)continue;for(let i=0;i<L.length;i++)for(let j=M===L?i+1:0;j<M.length;j++){const a=L[i],b=M[j];const ddx=b.x-a.x,ddy=b.y-a.y;if(ddx*ddx+ddy*ddy>=100)continue;const d=Math.hypot(ddx,ddy);if(d>0&&d<10){const f=(10-d)/24;if(ok(a.x-ddx/d*f,a.y-ddy/d*f)){a.x-=ddx/d*f;a.y-=ddy/d*f}if(ok(b.x+ddx/d*f,b.y+ddy/d*f)){b.x+=ddx/d*f;b.y+=ddy/d*f}}}}}}
  run.update(gdt);
