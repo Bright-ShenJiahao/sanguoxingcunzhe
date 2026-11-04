@@ -1,6 +1,6 @@
 // 开发者面板：网址加 ?debug 才出现（仅测试用，玩家看不到）。
 export function createDebug(g){
- if(!new URLSearchParams(location.search).has('debug'))return null;
+ if(!new URLSearchParams(location.search).has('debug')||/(^|\.)isekaisurvivors\.netlify\.app$/.test(location.hostname))return null;   // 正式网站不开开发者面板
  const D=window.DBG={god:false};window.G=g;
  const st=document.createElement('style');st.textContent=`
  #dbg{position:fixed;left:8px;bottom:8px;z-index:50;width:220px;max-height:80vh;overflow:auto;font:12px "PingFang SC","Microsoft YaHei",sans-serif;color:#eaf2ff;background:#0b1530e8;border:1px solid #8fbbef;border-radius:8px;padding:8px}

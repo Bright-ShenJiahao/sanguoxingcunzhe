@@ -1,3 +1,4 @@
+window.PROD=/(^|\.)isekaisurvivors\.netlify\.app$/.test(location.hostname);   /* 正式网站：禁用 ?debug / ?t / ?cards */
 const TINTC=new WeakMap();function tinted(I,flt){if(!I?.width)return I;let m=TINTC.get(I);if(!m)TINTC.set(I,m={});let w=m[flt];if(!w){w=document.createElement('canvas');w.width=I.width;w.height=I.height;const x=w.getContext('2d');x.filter=flt;x.drawImage(I,0,0);w.complete=true;m[flt]=w}return w}
 import * as UNL from './unlock.js?v=11042550';window.UNL=UNL;
 import {t,t as tr} from './i18n.js?v=11042550';
@@ -99,10 +100,10 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
  const DW=(c,im,h)=>{const w=im.width*h/im.height;c.drawImage(im,-w/2,-h/2,w,h)},DA=(c,im,x,y,w)=>{if(!im||!im.complete||!im.width)return;const h=im.height*w/im.width;c.drawImage(im,x-w/2,y-h/2,w,h)};
  const GX={};for(const k of ['b0','b1','b2','b3','x0','x1','x2','x3','tet','w0','w1','w2','w3','n0','n1','n2','bass']){const im=new Image();im.src='assets/weapons/gear/'+k+'.png';GX[k]=im}
  function reset(start='sword'){
-  S={B:window.META?.bonus()||{hp:0,atk:0,spd:0,cd:0,arm:0,reg:0,mag:0,wis:0,crit:0,rr:0,rev:0},coins:[],chests:[],seen:{},ev:{},calm:0,t:+(new URLSearchParams(location.search).get('t')||0),lv:1,xp:0,need:5,queue:0,lastLv:-9,rerolls:0,w:{[start]:1},cd:{},p:Object.fromEntries(PASS_KEYS.map(k=>[k,0])),gems:[],shots:[],fx:[],texts:[],eliteT:Math.max(180,+(new URLSearchParams(location.search).get('t')||0)+60),bossDone:{},paused:false,maxHp:100};
+  S={B:window.META?.bonus()||{hp:0,atk:0,spd:0,cd:0,arm:0,reg:0,mag:0,wis:0,crit:0,rr:0,rev:0},coins:[],chests:[],seen:{},ev:{},calm:0,t:+((window.PROD?0:new URLSearchParams(location.search).get('t'))||0),lv:1,xp:0,need:5,queue:0,lastLv:-9,rerolls:0,w:{[start]:1},cd:{},p:Object.fromEntries(PASS_KEYS.map(k=>[k,0])),gems:[],shots:[],fx:[],texts:[],eliteT:Math.max(180,+((window.PROD?0:new URLSearchParams(location.search).get('t'))||0)+60),bossDone:{},paused:false,maxHp:100};
   {const P=Array.prototype.push;S.shots.push=function(...a){for(const x of a)if(!x.src)x.src=S.src;return P.apply(this,a)}}
   {const d=loadDeck();S.deck=d.c.slice();const ban=d.ban||[];const rest=PASS_KEYS.filter(k=>!ban.includes(k)&&!d.lock.includes(k)&&UNL.okP(k)).sort(()=>Math.random()-.5);S.pp=[...d.lock,...rest.slice(0,12-d.lock.length)]}
-  {const QC=new URLSearchParams(location.search).get('cards');if(QC){const L=QC.split(',').filter(k=>WEAPONS[k]&&!WEAPONS[k].own);S.deck=L.slice();for(const k of L)S.w[k]=1}}   // 平衡测试：指定开局卡组
+  {const QC=window.PROD?null:new URLSearchParams(location.search).get('cards');if(QC){const L=QC.split(',').filter(k=>WEAPONS[k]&&!WEAPONS[k].own);S.deck=L.slice();for(const k of L)S.w[k]=1}}   // 平衡测试：指定开局卡组
   try{const hc=localStorage.getItem('headC');if(hc){localStorage.removeItem('headC');if(S.deck.includes(hc)&&WEAPONS[hc])S.w[hc]=2}}catch(_){}
   S.maxHp=100+S.B.hp;S.rerolls=S.B.rr;S.rev=S.B.rev;survival?.setMax?.(S.maxHp,S.B.hp);ui.hidden=true;
  }
