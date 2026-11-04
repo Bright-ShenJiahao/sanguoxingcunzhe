@@ -1,4 +1,4 @@
-import {t as tr} from './i18n.js?v=11042110';
+import {t as tr} from './i18n.js?v=11042210';
 // 地图地标（4 个神龛：碰一下给短时增益，用完冷却）+ 限时事件「宝箱哥布林」。
 // 美术先用代码画的占位图；GPT 图到了以后放进 assets/map/landmarks/ 再换。
 const LM_DEF=[
@@ -13,7 +13,7 @@ const LH={atk:26,spd:30,heal:24,gold:20};
 // 山顶木栅（用户画线 11/03，data/palisade.json）：沿线每 5px 一根营地木桩；碰撞已烘进 coll.png
 for(const k of ['post0','post1','post2']){const i=new Image();i.src=`assets/map/sprites/camp_${k}.png`;IM['p_'+k]=i}
 const PH={post0:31,post1:24,post2:19};let POSTS=[];
-fetch('data/palisade.json?v=11042110').then(r=>r.json()).then(Ls=>{let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+fetch('data/palisade.json?v=11042210').then(r=>r.json()).then(Ls=>{let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
  for(const L of Ls)for(let i=0;i<L.length-1;i++){const [x0,y0]=L[i],[x1,y1]=L[i+1],len=Math.hypot(x1-x0,y1-y0);for(let t=0;t<len;t+=5){const x=x0+(x1-x0)*t/len,y=y0+(y1-y0)*t/len;
   POSTS.push({k:'post'+[0,1,1,2][Math.floor(rnd()*4)],x:x+(rnd()-.5)*1.5,y:y+(rnd()-.5)*1.5,h:.85+rnd()*.3})}}}).catch(()=>{});   // 地标在游戏里的高度
 // 哥布林瞭望塔（用户圈点 11/03）：射程内放箭，前期伤害高；可被打掉，碎了这局不再出现
@@ -29,8 +29,8 @@ window.LMEDIT={items(S){const L=[{k:'城堡',get x(){return CASTLE.x},get y(){re
   DEC.forEach(d=>L.push({k:d[0],get x(){return d[1]},get y(){return d[2]},set(x,y){d[1]=x;d[2]=y}}));return L},
  save(){try{localStorage.setItem('lmEdit2',JSON.stringify(this.dump()))}catch(_){}},
  dump(){return {castle:[CASTLE.x,CASTLE.y],tw:TW.map(p=>[Math.round(p[0]),Math.round(p[1])]),dec:DEC.map(d=>[Math.round(d[1]),Math.round(d[2])]),decKinds:DEC.map(d=>d[0])}},
- reset(){try{localStorage.removeItem('lmEdit2')}catch(_){}location.reload()}};{const i=new Image();i.src='assets/map/fort/castle_big.png?v=11042110';IM.f_castle=i}
-for(const k of ['tower','banner','skulls','brazier','spikes']){const i=new Image();i.src=`assets/map/fort/${k}.png?v=11042110`;IM['f_'+k]=i}
+ reset(){try{localStorage.removeItem('lmEdit2')}catch(_){}location.reload()}};{const i=new Image();i.src='assets/map/fort/castle_big.png?v=11042210';IM.f_castle=i}
+for(const k of ['tower','banner','skulls','brazier','spikes']){const i=new Image();i.src=`assets/map/fort/${k}.png?v=11042210`;IM['f_'+k]=i}
 const FH={tower:55,banner:34,skulls:16,brazier:26,spikes:22};
 export function install(X){
  const {hero,en,ok,makeEnemy,survival}=X,R=(a,b)=>a+Math.random()*(b-a);

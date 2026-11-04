@@ -1,6 +1,6 @@
 // 成就收藏：卡牌解锁 + 祝福解锁 + 金币成就。进度存在本机 localStorage 'ach'。
-import {getLanguage} from './i18n.js?v=11042110';
-import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042110';
+import {getLanguage} from './i18n.js?v=11042210';
+import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042210';
 const L=o=>o[getLanguage()]||o.zh;
 const BOSS={gob_king:'哥布林大王',gob_hero:'哥布林英雄',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士',gob_emperor:'哥布林皇帝'};
 const BNAME={gob_king:{zh:'哥布林大王',en:'Goblin King',ja:'ゴブリンキング'},gob_hero:{zh:'哥布林英雄',en:'Goblin Hero',ja:'ゴブリンヒーロー'},gob_chief:{zh:'哥布林酋长',en:'Goblin Chief',ja:'ゴブリン族長'},gob_paladin:{zh:'哥布林圣骑士',en:'Goblin Paladin',ja:'ゴブリン聖騎士'},gob_emperor:{zh:'哥布林皇帝',en:'Goblin Emperor',ja:'ゴブリン皇帝'}};
@@ -72,4 +72,15 @@ export function initAchv(){
  const b=document.createElement('button');b.type='button';b.className='menu-board';b.dataset.achv=1;
  const lab=()=>{b.textContent='🏆 '+L(T.title)};lab();b.onclick=()=>{draw();o.hidden=false};
  window.ACHV_OPEN=()=>{draw();o.hidden=false};window.ACHV_NAME=()=>L(T.title);window.ACHV_LABEL=()=>window.META?.drawBar?.();window.META?.drawBar?.();
+}
+// 通关奖励：任选一张未解锁的技能卡或祝福免费解锁；全部解锁后改为 +1000 金币
+export function clearPick(tr,done){
+ const U=window.UNL;if(!U){done(null);return}
+ const items=[...(U.CU||[]).map(x=>x[0]).filter(k=>!U.okC(k)&&WEAPONS[k]).map(k=>({t:'c',k,nm:WEAPONS[k].name,ic:WIC[k]})),...(U.PU||[]).filter(k=>!U.okP(k)&&PASSIVES[k]).map(k=>({t:'p',k,nm:PASSIVES[k].name,ic:PIC[k]}))];
+ if(!items.length){window.META?.spend?.(-1000);done({gold:1});return}
+ const o=document.createElement('div');o.id='clrpick';
+ o.innerHTML=`<style>#clrpick{position:fixed;inset:0;z-index:70;background:#06101ce6;display:grid;place-items:center;padding:16px}#clrpick .b{width:min(620px,96vw);max-height:86vh;display:flex;flex-direction:column;background:linear-gradient(145deg,#234e89,#101f3f);border:2px solid #e2cb87;border-radius:12px;color:#eef3ff;font:14px "PingFang SC","Hiragino Sans",sans-serif;overflow:hidden}#clrpick h2{margin:14px 16px 2px;color:#f6db94}#clrpick p{margin:0 16px 10px;color:#c9d8f0}#clrpick .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;padding:0 14px 16px;overflow:auto}#clrpick button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid #8fbbef88;border-radius:8px;background:#0c225a99;color:#fff;font:inherit;font-size:12px;cursor:pointer}#clrpick button:hover{border-color:#e2cb87}#clrpick img{width:40px;height:40px;image-rendering:pixelated;object-fit:contain}#clrpick i{font-style:normal;font-size:10px;color:#e2cb87}</style>
+<div class="b"><h2>🏆 ${tr('ui.clr.t')}</h2><p>${tr('ui.clr.b')}</p><div class="g">${items.map((x,i)=>`<button data-i="${i}">${x.ic?`<img src="assets/ui/${x.ic}.png" alt="">`:''}<span>${x.nm}</span><i>${x.t==='c'?L(T.g_card):L(T.g_bless)}</i></button>`).join('')}</div></div>`;
+ document.body.append(o);
+ o.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const x=items[+b.dataset.i];U.buy(x.t,x.k);o.remove();done(x)});
 }

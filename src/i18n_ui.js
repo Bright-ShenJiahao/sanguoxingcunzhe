@@ -1,5 +1,14 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.nc.t":"解锁了新技能卡！",
+ "ui.nc.b":"「{nm}」已解锁。要放进卡组吗？",
+ "ui.nc.ok":"放进卡组",
+ "ui.nc.swap":"卡组已满：点一张卡，换成「{nm}」",
+ "ui.clr.t":"通关奖励",
+ "ui.clr.b":"任选一张免费解锁",
+ "ui.clr.got":" · 通关奖励：解锁「{nm}」",
+ "ui.clr.gold":" · 通关奖励：+1000 金币",
+ "ui.unl.boss2":"打倒 2 次{name}",
  "ui.board.title":"排行榜",
  "ui.board.rule":"评分 = 存活秒数×2 + 击杀 + 等级×10 + Boss×200 · 同名只留最好一局 · 前 20 名",
  "ui.board.close":"关闭",
@@ -210,6 +219,15 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.nc.t":"New skill card unlocked!",
+ "ui.nc.b":"\"{nm}\" is unlocked. Add it to your deck?",
+ "ui.nc.ok":"Add to deck",
+ "ui.nc.swap":"Deck full: tap a card to swap it for \"{nm}\"",
+ "ui.clr.t":"Clear Reward",
+ "ui.clr.b":"Pick one to unlock for free",
+ "ui.clr.got":" · Clear reward: unlocked \"{nm}\"",
+ "ui.clr.gold":" · Clear reward: +1000 gold",
+ "ui.unl.boss2":"Defeat the {name} twice",
  "ui.board.title":"Leaderboard",
  "ui.board.rule":"Score = survival seconds ×2 + kills + level ×10 + Bosses ×200 · Only the best run per name · Top 20",
  "ui.board.close":"Close",
@@ -420,6 +438,15 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.nc.t":"新しいスキルを解放！",
+ "ui.nc.b":"「{nm}」が解放されました。デッキに入れますか？",
+ "ui.nc.ok":"デッキに入れる",
+ "ui.nc.swap":"デッキが満杯：入れ替えるカードをタップ（「{nm}」と交換）",
+ "ui.clr.t":"クリア報酬",
+ "ui.clr.b":"好きなものを1つ無料で解放",
+ "ui.clr.got":" · クリア報酬：「{nm}」を解放",
+ "ui.clr.gold":" · クリア報酬：金貨+1000",
+ "ui.unl.boss2":"{name}を2回倒す",
  "ui.board.title":"ランキング",
  "ui.board.rule":"スコア = 生存秒数×2 + 撃破数 + レベル×10 + ボス×200 · 同名は最高記録のみ · 上位20名",
  "ui.board.close":"閉じる",

@@ -1,25 +1,26 @@
 
-import {createMenu} from './menu.js?v=11042110';
-import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11042110';
-import {createSurvival} from './survival.js?v=11042110';
-import {createEnemies} from './enemies.js?v=11042110';
-import {createAudio} from './audio.js?v=11042110';
-import {createMeta} from './meta.js?v=11042110';
+import {createMenu} from './menu.js?v=11042210';
+import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11042210';
+import {createSurvival} from './survival.js?v=11042210';
+import {createEnemies} from './enemies.js?v=11042210';
+import {createAudio} from './audio.js?v=11042210';
+import {createMeta} from './meta.js?v=11042210';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11042110';
+import {createPathing} from './pathing.js?v=11042210';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11042110';
-import {createRun} from './run.js?v=11042110';
-import {playEnding} from './ending.js?v=11042110';
-import {startTutorial} from './tutorial.js?v=11042110';
-import {initAchv} from './achv.js?v=11042110';
-import {createDebug} from './debug.js?v=11042110';
+import {createWeather} from './weather.js?v=11042210';
+import {createRun} from './run.js?v=11042210';
+import {playEnding} from './ending.js?v=11042210';
+import {startTutorial} from './tutorial.js?v=11042210';
+import {initAchv} from './achv.js?v=11042210';
+import {initNB} from './nb.js?v=11042210';
+import {createDebug} from './debug.js?v=11042210';
 // 加载失败：自动重试 2 次，仍失败就在加载画面提示「点击重试」
 window.LOADFAIL=()=>{const t=document.getElementById('bootx');if(t&&!t.dataset.fail){t.dataset.fail=1;t.textContent=t_(lf());t.style.cursor='pointer';t.style.color='#ffb4a0';document.getElementById('boot')?.addEventListener('click',()=>location.reload())}};
 const lf=()=>({zh:'加载失败，点击重试',en:'Failed to load — tap to retry',ja:'読み込み失敗：タップで再試行'}),t_=o=>o[(()=>{try{return localStorage.getItem('lang')}catch(e){}})()]||o[(navigator.language||'').slice(0,2)]||o.en;
 const fj=async(u,n=0)=>{try{const r=await fetch(u);if(!r.ok)throw 0;return await r.json()}catch(e){if(n<2){await new Promise(z=>setTimeout(z,800*(n+1)));return fj(u,n+1)}window.LOADFAIL();throw e}};
-const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042110'].map(u=>fj(u)));
+const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042210'].map(u=>fj(u)));
 const HN=await fj('data/heroine.json');
 const HM=await fj('data/hero_m.json');
 const D={...W,...CH,gt:W.tiles.list||[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),coll:'assets/map/coll.png?v='+W.ver,
@@ -45,7 +46,7 @@ const IM={};let left=0;
 let tot=0;const BAD=[];function ld(k,s,tr=0){if(!tr){left++;tot++}const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};
  i.onerror=()=>{if(tr<2){setTimeout(()=>ld(k,s,tr+1),600*(tr+1));return}BAD.push(s);console.warn('加载失败',s);if(/coll|\/map\/g/.test(s))window.LOADFAIL();const t=document.querySelector('#boot,.boot,#loading');if(t)t.setAttribute('data-err',BAD.join(' '));if(--left==0)start()};i.src=s}
 D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);for(const k of D.gt)ld(k,'assets/map/'+k+'.jpg?v='+W.ver);left++;tot++;fetch(D.coll).then(r=>{if(!r.ok)throw 0;return r.blob()}).catch(()=>fetch(D.coll+'&r=1').then(r=>r.blob())).catch(()=>{window.LOADFAIL();throw 0}).then(b=>{const i=new Image();i.onload=()=>{IM.coll=i;if(--left==0)start()};i.src=URL.createObjectURL(b)});   // 碰撞图走 blob，避免跨域污染画布（试玩网址）
-for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11042110');
+for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11042210');
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
 // 发型按需下载：选中哪一套才加载哪一套（女主 5 套×9 帧，男主 4 套×8 帧）
@@ -138,7 +139,7 @@ function start(){const t=document.createElement('canvas');t.width=WW;t.height=WH
  survival=createSurvival({hero,enemies:en,get kills(){return kills},iframe:()=>run?.iframe,level:()=>run?.dbg?.S?.lv,build:()=>{const S=run?.dbg?.S;return S?{cards:Object.entries(S.w).map(([k,v])=>k+':'+v),bless:Object.entries(S.p).filter(([,v])=>v>0).map(([k,v])=>k+':'+v),role:CS[0]==='f'?'f':'m'}:{}},bosses:()=>run?.dbg?.S?.bosses||0,
   clearInput(){joy=null;for(const k in keys)keys[k]=0},home(){menu.show()},
   reset(){run.reset(CS[0]==='f'?'hp':'gb');hero.x=WW*AT[0];hero.y=WH*AT[1];hero.face=1;kills=0;en.length=0;enemySystem.reset();weaponAttack=null;pj=[];fx=[];rip=[];fp=[];nextAtk=0;wpm=CS[0]==='f'?'hp':'gb';joy=null;for(const k in keys)keys[k]=0}
- });initAchv();onLanguageChange(()=>window.ACHV_LABEL?.());run=createRun({hero,en,images:IM,survival,ok,makeEnemy:(x,y,k)=>enemySystem.make(x,y,k),hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});window.__G={hero,en,ok,WW,WH,get S(){return run?.dbg?.S},get R(){return run?.dbg},get hp(){return survival?.hp},get maxHp(){return survival?.max},get moveMul(){return run?.moveMul||1},water};dbg=createDebug({world:D,hero,en,run,survival,weather,hit:(e,v)=>hitEnemy(e,performance.now(),1,v)});dbg?.show(false);requestAnimationFrame(loop)}
+ });initAchv();initNB();window.NB_TERMS=()=>[...Object.values(run?.dbg?.WEAPONS||{}).map(w=>w.name),...Object.values(run?.dbg?.PASSIVES||{}).map(p=>p.name),...['翠绿之地','像素光弹','声波圈','哥布林','翠緑の地','ピクセル光弾','音波リング','ゴブリン','携帯ゲーム機','ヘッドホン']];onLanguageChange(()=>window.ACHV_LABEL?.());run=createRun({hero,en,images:IM,survival,ok,makeEnemy:(x,y,k)=>enemySystem.make(x,y,k),hitEnemy:(e,v,dir)=>hitEnemy(e,performance.now(),dir,v)});window.__G={hero,en,ok,WW,WH,get S(){return run?.dbg?.S},get R(){return run?.dbg},get hp(){return survival?.hp},get maxHp(){return survival?.max},get moveMul(){return run?.moveMul||1},water};dbg=createDebug({world:D,hero,en,run,survival,weather,hit:(e,v)=>hitEnemy(e,performance.now(),1,v)});dbg?.show(false);requestAnimationFrame(loop)}
 function drawGroundRaw(ctx,sx,sy,sw,sh,dx,dy,dw,dh){const T=D.tiles.T,z=dw/sw;for(const k of D.gt){const x0=+k[1]*T,y0=+k[2]*T,a=Math.max(sx,x0),b=Math.min(sx+sw,x0+T,WW),c0=Math.max(sy,y0),c1=Math.min(sy+sh,y0+T,WH);if(b<=a||c1<=c0)continue;const ex=b<sx+sw&&b<WW?.5:0,ey=c1<sy+sh&&c1<WH?.5:0;ctx.drawImage(IM[k],(a-x0)*HD,(c0-y0)*HD,(b-a+ex)*HD,(c1-c0+ey)*HD,dx+(a-sx)*z,dy+(c0-sy)*z,(b-a+ex)*z,(c1-c0+ey)*z)}}
 // 地面缓存：按当前屏幕缩放把地面切成 256 格的小块，各缩放一次存起来，之后每帧原样贴（画面不变，省显卡）
 const GC=new Map(),GCH=256;

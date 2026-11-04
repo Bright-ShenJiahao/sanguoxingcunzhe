@@ -1,6 +1,6 @@
-import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042110';
-import {t,onLanguageChange} from './i18n.js?v=11042110';
-import {achvRunEnd,achvTitle} from './achv.js?v=11042110';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042210';
+import {t,onLanguageChange} from './i18n.js?v=11042210';
+import {achvRunEnd,achvTitle,clearPick} from './achv.js?v=11042210';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -38,9 +38,10 @@ function die(win){
   try{const L=JSON.parse(localStorage.getItem('deathlog')||'[]');L.push({t:rec.t,kills:rec.kills,lv:game.level?.()||0,by:window.LASTHIT||'?',at:Date.now(),bot:!!window.BOT});localStorage.setItem('deathlog',JSON.stringify(L.slice(-100)))}catch(_){}
   dialog.querySelector('.result-name').textContent=t('ui.result.name',{name});
   dialog.querySelector('.result-stats').textContent=t('ui.result.stats',{time:formatTime(rec.t),kills:rec.kills,lv:rec.lv,bosses:rec.bosses,score:scoreOf(rec)});
-  {const r=window.META?.runEnd(rec.t,rec.kills);if(r&&win){window.META.spend(-r.g);r.g*=2;try{const u=JSON.parse(localStorage.getItem('unl')||'{}');u.clears=(u.clears||0)+1;localStorage.setItem('unl',JSON.stringify(u))}catch(_){}}if(r)dialog.querySelector('.result-stats').textContent+=t('ui.result.gold',{g:r.g})+(r.tk?` · 🎟️${r.tk}`:'')}
+  {const r=window.META?.runEnd(rec.t,rec.kills);if(r&&win){window.META.spend(-r.g);r.g*=2;try{const u=JSON.parse(localStorage.getItem('unl')||'{}');u.clears=(u.clears||0)+1;localStorage.setItem('unl',JSON.stringify(u))}catch(_){}}if(r)dialog.querySelector('.result-stats').textContent+=t('ui.result.gold',{g:r.g})}
   try{const U=window.UNL;if(U){const got=U.runEnd({kills:(JSON.parse(localStorage.getItem('meta')||'{}').kills)||{}},rec.t,window.__G?.S?.bossNames||[]);if(got.length){const R=window.__G?.R,nm=g=>g.t==='c'?(R?.WEAPONS?.[g.k]?.name||g.k):(R?.PASSIVES?.[g.k]?.name||g.k);dialog.querySelector('.result-stats').textContent+=t('ui.result.unlocked',{list:got.map(g=>t(g.t==='c'?'ui.result.unlockCard':'ui.result.unlockBless',{name:nm(g)})).join(t('run.sep'))})}}}catch(_){}
   try{const got=achvRunEnd(rec);if(got.length)dialog.querySelector('.result-stats').textContent+=' · 🏆 '+achvTitle()+'：'+got.join('、')}catch(_){}
+  if(win)setTimeout(()=>clearPick(t,x=>{if(!x)return;dialog.querySelector('.result-stats').textContent+=x.gold?t('ui.clr.gold'):t('ui.clr.got',{nm:x.nm})}),400);
   const upload=dialog.querySelector('.upload');upload.textContent=t('ui.result.uploading');dialog.showModal();
   // 每局仅在首次死亡时提交一次；晚到的网络响应不写入下一局界面。
   void submitScore(rec).then(ok=>{if(generation===token)upload.textContent=ok?t('ui.result.uploaded'):t('ui.board.offline')});

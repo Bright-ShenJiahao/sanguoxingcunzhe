@@ -1,5 +1,5 @@
 // 结局过场：黑屏 → 插图淡入 → 逐行打字 → 点击进入通关结算
-import {t} from './i18n.js?v=11042110';
+import {t} from './i18n.js?v=11042210';
 export function playEnding(female,done){
  const k=female?'f':'m',lines=[1,2,3,4,5].map(i=>t(`end.${k}.${i}`)).filter(s=>s&&!s.startsWith('end.'));
  const o=document.createElement('div');o.id='ending';
