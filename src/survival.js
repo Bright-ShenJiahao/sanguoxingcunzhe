@@ -1,6 +1,6 @@
-import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042310';
-import {t,onLanguageChange} from './i18n.js?v=11042310';
-import {achvRunEnd,achvTitle,clearPick} from './achv.js?v=11042310';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042320';
+import {t,onLanguageChange} from './i18n.js?v=11042320';
+import {achvRunEnd,achvTitle,clearPick} from './achv.js?v=11042320';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -44,7 +44,7 @@ function die(win){
   if(rec.clear)setTimeout(()=>clearPick(t,x=>{if(!x)return;dialog.querySelector('.result-stats').textContent+=x.gold?t('ui.clr.gold'):t('ui.clr.got',{nm:x.nm})}),400);
   const upload=dialog.querySelector('.upload');upload.textContent=t('ui.result.uploading');dialog.showModal();
   // 每局仅在首次死亡时提交一次；晚到的网络响应不写入下一局界面。
-  void submitScore(rec).then(ok=>{if(generation===token)upload.textContent=ok?t('ui.result.uploaded'):t('ui.board.offline')});
+  void submitScore(rec).then(ok=>{if(generation===token)upload.textContent=ok==='taken'?t('ui.board.taken'):ok?t('ui.result.uploaded'):t('ui.board.offline')});
  }
  dialog.querySelector('.retry').onclick=start;
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};

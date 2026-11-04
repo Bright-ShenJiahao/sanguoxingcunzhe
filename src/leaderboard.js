@@ -1,4 +1,4 @@
-import {t,onLanguageChange} from './i18n.js?v=11042310';
+import {t,onLanguageChange} from './i18n.js?v=11042320';
 // 同源 Netlify Functions 接口；超时/断网均由调用方显示提示，不影响游戏。
 export const formatTime = seconds => Math.floor(seconds/60)+':'+String(Math.floor(seconds%60)).padStart(2,'0');
 async function request(options={},q=''){
@@ -7,6 +7,7 @@ async function request(options={},q=''){
  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),5000);
  try{
   const response=await fetch('/api/scores'+q,{...options,cache:'no-store',signal:controller.signal});
+  if(response.status===403){const d=await response.json().catch(()=>({}));if(d.error==='name taken')throw new Error('taken')}
   if(!response.ok)throw new Error('unavailable');
   const data=await response.json();if(!data?.ok)throw new Error('unavailable');return data;
  }finally{clearTimeout(timer)}
@@ -15,10 +16,11 @@ async function request(options={},q=''){
 export const scoreOf=r=>(r.clear?20000:0)+Math.round((r.t||0)*2+(r.kills||0)+(r.lv||0)*10+(r.bosses||0)*200);
 export async function submitScore(record){
  {const q=new URLSearchParams(location.search);if(window.BOT||q.has('debug')||q.has('t')||q.has('cards'))return false}   // 调试/机器人/跳关的局不上榜
- try{await request({method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(record)});return true}catch{return false}
+ let pin='';try{pin=localStorage.getItem('pin')||''}catch(_){}
+ try{await request({method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...record,pin})});return true}catch(e){return e?.message==='taken'?'taken':false}
 }
 export function createLeaderboard(){
- const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.innerHTML='<section><h2></h2><p></p><div class="btabs"><button type="button" data-bm=""></button><button type="button" data-bm="rage"></button></div><div class="board-content" role="status"></div><button type="button" class="bclose"></button></section><style>.btabs{display:flex;gap:6px;justify-content:center}.btabs button{margin:0!important;padding:6px 14px!important}.btabs button.on{background:#e2cb87!important;color:#2a1c00!important;border-color:#ffe9a8!important}</style>';
+ const dialog=document.createElement('dialog');dialog.className='survival-dialog';dialog.innerHTML='<section><h2></h2><p></p><div class="btabs"><button type="button" data-bm=""></button><button type="button" data-bm="rage"></button></div><div class="board-content" role="status"></div><button type="button" class="bclose"></button></section><style>@media(max-width:560px){.lbt th:nth-child(n+4),.lbt td:nth-child(n+4){display:none}.lbt td:nth-child(2){max-width:none}}.btabs{display:flex;gap:6px;justify-content:center}.btabs button{margin:0!important;padding:6px 14px!important}.btabs button.on{background:#e2cb87!important;color:#2a1c00!important;border-color:#ffe9a8!important}</style>';
  const apply=()=>{dialog.setAttribute('aria-label',t('ui.board.title'));dialog.querySelector('h2').textContent=t('ui.board.title');dialog.querySelector('p').textContent=t('ui.board.rule');dialog.querySelector('.bclose').textContent=t('ui.board.close');dialog.querySelector('[data-bm=""]').textContent=t('ui.board.normal');dialog.querySelector('[data-bm=rage]').textContent=t('ui.board.other')};apply();onLanguageChange(apply);
  document.body.append(dialog);
  dialog.querySelector('.bclose').onclick=()=>dialog.close();let BM='';dialog.querySelectorAll('[data-bm]').forEach(b=>b.onclick=()=>{BM=b.dataset.bm;api.open()});
@@ -36,7 +38,7 @@ export function createLeaderboard(){
    const table=document.createElement('table');
    table.innerHTML='<thead><tr><th>#</th><th>'+['name','score','time','kills','lv','boss','date'].map(k=>t('ui.board.col.'+k)).join('</th><th>')+'</th></tr></thead>';
    const body=document.createElement('tbody');
-   rows.forEach((r,i)=>{const tr=document.createElement('tr');const d=new Date(r.at||0);for(const value of [i+1,r.name,r.score??scoreOf(r),formatTime(r.t),r.kills,r.lv??'-',r.bosses??'-',(d.getMonth()+1)+'/'+d.getDate()]){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}body.append(tr)});
+   table.className='lbt';rows.forEach((r,i)=>{const tr=document.createElement('tr');const d=new Date(r.at||0);for(const value of [i+1,r.name,r.score??scoreOf(r),formatTime(r.t),r.kills,r.lv??'-',r.bosses??'-',(d.getMonth()+1)+'/'+d.getDate()]){const td=document.createElement('td');td.textContent=String(value);tr.append(td)}body.append(tr)});
    table.append(body);content.append(table);
   }catch{if(current===version)content.textContent=t('ui.board.offline')}
  }};return api;

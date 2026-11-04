@@ -1,7 +1,8 @@
 // 排行榜接口（参考无名之辈英雄榜）：GET 取榜，POST 提交一局。
 // 存储：Netlify Blobs，每局一个独立 key，避免并发写入互相覆盖。
 import { getStore } from '@netlify/blobs';
-import { randomUUID } from 'node:crypto';
+import { randomUUID, createHash } from 'node:crypto';
+const H = s => createHash('sha256').update('isk-pin|'+s).digest('hex');
 
 export const config = { path: '/api/scores' };
 const SEASON = 's2';              // 换赛季只改这里（大改平衡时换，旧成绩自动不显示）
@@ -50,6 +51,9 @@ export default async function handler(req,context){
   if(![t,kills].every(Number.isFinite)||t<10||t>7200)return json({ok:false,error:'bad time'},400);
   if(kills<0||kills>t*10)return json({ok:false,error:'bad kills'},400);
   if(lv<1||lv>200||bosses<0||bosses>Math.floor(t/120)+2)return json({ok:false,error:'bad stats'},400);
+  // 名字口令：用口令上传过的名字会被占住，之后必须口令一致才能上榜
+  {const name=cleanName(body.name),pin=String(body?.pin||'').slice(0,12),nk='name-'+H(name).slice(0,32),own=await store.get(nk);
+   if(own){if(!pin||H(name+'|'+pin)!==own)return json({ok:false,error:'name taken'},403)}else if(pin)await store.set(nk,H(name+'|'+pin))}
   const ip=context?.ip||req.headers.get('x-nf-client-connection-ip')||'unknown',now=Date.now();
   if((await readAll(store)).filter(r=>r.ip===ip&&now-r.at<RATE_WINDOW*1000).length>=RATE_MAX)return json({ok:false,error:'too many'},429);
   const tags=a=>Array.isArray(a)?a.slice(0,12).map(x=>String(x).replace(/[^a-z_0-9:]/gi,'').slice(0,16)):[];   // 平衡分析用：带了哪些卡、祝福、被什么打死

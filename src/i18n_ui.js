@@ -1,5 +1,6 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.board.taken":"这个名字已被别人用口令占用，成绩没有上榜。请换个名字或输入正确口令",
  "ui.board.normal":"普通",
  "ui.board.other":"其他模式（狂暴）",
  "ui.board.ruleRage":"狂暴模式的成绩单独排名",
@@ -231,6 +232,7 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.board.taken":"This name is protected by a passcode — score not posted. Use another name or the right passcode",
  "ui.board.normal":"Normal",
  "ui.board.other":"Other (Frenzy)",
  "ui.board.ruleRage":"Frenzy mode runs are ranked separately",
@@ -462,6 +464,7 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.board.taken":"この名前は合言葉で保護されています。記録は登録されませんでした",
  "ui.board.normal":"通常",
  "ui.board.other":"その他（狂乱）",
  "ui.board.ruleRage":"狂乱モードの記録は別ランキング",

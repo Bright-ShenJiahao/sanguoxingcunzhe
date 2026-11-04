@@ -159,11 +159,11 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    }
   }
   for(const o of en){if(!(o.soulT>0))continue;if(o.expired||!o.soulBy||o.soulBy.dead){o.soulT=0;continue}if(Math.hypot(hero.x-o.x,hero.y-o.y)<14){o.soulT=0;o.expired=true;window.onStomp?.(o);continue}o.soulT-=dt;if(o.soulT<=0){o.expired=true;window.SPAWN?.('skeleton',o.x,o.y)}}   // 魂火尸体
-  for(let i=lobs.length-1;i>=0;i--){const L=lobs[i];L.t+=dt;if(L.t>=L.d){let dm=L.dm;if(L.vol){dm*=[1,.6,.35][Math.min(2,L.vol.n)];if(Math.hypot(hero.x-L.x,(hero.y-L.y)*1.25)<L.r)L.vol.n++}explode(L.x,L.y,L.r,dm,false);lobs.splice(i,1)}}
+  for(let i=lobs.length-1;i>=0;i--){const L=lobs[i];L.t+=dt;if(L.t>=L.d){let dm=L.dm;if(L.vol){dm*=[1,.6,.35][Math.min(2,L.vol.n)];if(Math.hypot(hero.x-L.x,(hero.y-L.y)*1.25)<L.r)L.vol.n++}window.CUR_E=(L.k==='fire'?'gob_mage':L.k==='rock'?'gob_thrower':(L.k||'?'))+'·投掷';explode(L.x,L.y,L.r,dm,false);lobs.splice(i,1)}}
   for(let i=booms.length-1;i>=0;i--){booms[i].t+=dt;if(booms[i].t>.4)booms.splice(i,1)}
-  for(let i=PIL.length-1;i>=0;i--){const L=PIL[i];L.t+=dt;if(!L.hit&&L.t>=L.d){L.hit=1;if(Math.hypot(hero.x-L.x,(hero.y-L.y)*1.25)<L.r)onHit(L.dm)}if(L.t>=L.d+.25)PIL.splice(i,1)}
+  for(let i=PIL.length-1;i>=0;i--){const L=PIL[i];L.t+=dt;if(!L.hit&&L.t>=L.d){L.hit=1;if(Math.hypot(hero.x-L.x,(hero.y-L.y)*1.25)<L.r){window.CUR_E='光柱·Boss';onHit(L.dm)}}if(L.t>=L.d+.25)PIL.splice(i,1)}
   for(let i=SPR_.length-1;i>=0;i--){const p=SPR_[i];if(p.st>0){p.st-=dt;const q=Math.hypot(hero.x-p.x,hero.y-(p.y+10));if(q<9&&q>0){hero.x=p.x+(hero.x-p.x)/q*9;hero.y=p.y+10+(hero.y-p.y-10)/q*9}if(p.st<=0)SPR_.splice(i,1);continue}   // 插地长矛：挡路 3 秒
-   const nx=p.x+p.dx*320*dt,ny=p.y+p.dy*320*dt;p.life-=dt;if(!ok(nx,ny+10)||p.life<=0){p.st=3;continue}p.x=nx;p.y=ny;if(!p.hit&&Math.hypot(hero.x-p.x,hero.y-10-p.y)<9){p.hit=1;onHit(p.dm)}}
+   const nx=p.x+p.dx*320*dt,ny=p.y+p.dy*320*dt;p.life-=dt;if(!ok(nx,ny+10)||p.life<=0){p.st=3;continue}p.x=nx;p.y=ny;if(!p.hit&&Math.hypot(hero.x-p.x,hero.y-10-p.y)<9){p.hit=1;window.CUR_E='gob_emperor·Boss';onHit(p.dm)}}
   for(let i=arrows.length-1;i>=0;i--){
    const p=arrows[i],oldx=p.x,oldy=p.y;p.x+=p.dx*120*dt;p.y+=p.dy*120*dt;p.life-=dt;
    const vx=p.x-oldx,vy=p.y-oldy,v2=vx*vx+vy*vy;
