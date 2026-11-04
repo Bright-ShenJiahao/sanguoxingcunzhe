@@ -1,5 +1,8 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.ci.hint":"点卡片查看效果，再点一次加入或移出卡组",
+ "ui.ci.in":"再点一次加入卡组",
+ "ui.ci.out":"再点一次移出卡组",
  "ui.rh.t":"💡 用金币让自己变强！",
  "ui.rh.b":"你有 {g} 金币。回到备战界面：「强化」可以永久提升生命、攻击等属性，「技能卡」可以买新技能。",
  "ui.rh.go":"去强化 →",
@@ -244,6 +247,9 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.ci.hint":"Tap a card to see its effect; tap again to add or remove it",
+ "ui.ci.in":"Tap again to add to deck",
+ "ui.ci.out":"Tap again to remove from deck",
  "ui.rh.t":"💡 Spend gold to get stronger!",
  "ui.rh.b":"You have {g} gold. In Preparation: \"Upgrades\" boost HP, damage and more permanently; \"Skills\" lets you buy new skill cards.",
  "ui.rh.go":"Go to Upgrades →",
@@ -488,6 +494,9 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.ci.hint":"カードをタップで効果を表示、もう一度タップでデッキに出し入れ",
+ "ui.ci.in":"もう一度タップでデッキに追加",
+ "ui.ci.out":"もう一度タップでデッキから外す",
  "ui.rh.t":"💡 金貨で強くなろう！",
  "ui.rh.b":"金貨 {g} 枚。出撃準備の「強化」で体力や攻撃力を永久アップ、「スキル」で新しいスキルを買えます。",
  "ui.rh.go":"強化へ →",

@@ -10,7 +10,8 @@ export function createAudio(){
   const rv=ac.createConvolver(),len=ac.sampleRate*1.6,b=ac.createBuffer(2,len,ac.sampleRate);for(let c=0;c<2;c++){const d=b.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.5)}
   rv.buffer=b;const wet=ac.createGain();wet.gain.value=.22;musicBus.connect(rv);rv.connect(wet);wet.connect(master);T.rv=rv}
  const T={};
- const unlock=()=>{init();if(ac.state==='suspended')ac.resume();if(!started){started=true;next=ac.currentTime+.1;tick()}};
+ document.addEventListener('visibilitychange',()=>{if(!ac)return;if(document.hidden)ac.suspend();else ac.resume()});   /* 切后台/锁屏/换标签：静音 */
+ const unlock=()=>{init();if(ac.state==='suspended'&&!document.hidden)ac.resume();if(!started){started=true;next=ac.currentTime+.1;tick()}};
  addEventListener('pointerdown',unlock);addEventListener('keydown',e=>{unlock();if(e.key==='m'||e.key==='M'){on=!on;try{localStorage.setItem('mute',on?'0':'1')}catch(_){}if(master)master.gain.setTargetAtTime(on?.9:0,ac.currentTime,.05)}});
  const hz=m=>440*Math.pow(2,(m-69)/12);
  function tone(t,m,d,{type='triangle',vol=.2,bus=musicBus,att=.01,rel=.25,det=0,lp=0}={}){const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=hz(m);o.detune.value=det;
