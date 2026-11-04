@@ -8,29 +8,29 @@ import {DEFS,CARD_DT,CARD_IC,CARD_KIND,install} from './cards2.js?v=11042550';
 const R=(a,b)=>a+Math.random()*(b-a);
 const CATS={own:{get name(){return tr('run.cat.own')},ws:[]},blade:{get name(){return tr('run.cat.blade')},ws:[]},pole:{get name(){return tr('run.cat.pole')},ws:[]},bow:{get name(){return tr('run.cat.bow')},ws:[]},throw:{get name(){return tr('run.cat.throw')},ws:[]},spell:{get name(){return tr('run.cat.spell')},ws:[]}};
 const WEAPONS={
- sword:{get name(){return tr('run.w.sword.name')},cat:'blade',img:'ui:w_sword',get desc(){return [0,1,2,3,4].map(i=>tr('run.w.sword.d'+i))}},
- hammer:{get name(){return tr('run.w.hammer.name')},cat:'blade',img:'ui:w_hammer',get desc(){return [0,1,2,3,4].map(i=>tr('run.w.hammer.d'+i))}},
- axe:{get name(){return tr('run.w.axe.name')},cat:'blade',img:'ui:w_axe',get desc(){return [0,1,2,3,4].map(i=>tr('run.w.axe.d'+i))}},
- bow:{get name(){return tr('run.w.bow.name')},cat:'bow',img:null,get desc(){return [0,1,2,3,4].map(i=>tr('run.w.bow.d'+i))}},
- xbow:{get name(){return tr('run.w.xbow.name')},cat:'bow',img:null,get desc(){return [0,1,2,3,4].map(i=>tr('run.w.xbow.d'+i))}}};
+ sword:{get name(){return tr('run.w.sword.name')},cat:'blade',img:'ui:w_sword',get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.sword.d'+i))}},
+ hammer:{get name(){return tr('run.w.hammer.name')},cat:'blade',img:'ui:w_hammer',get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.hammer.d'+i))}},
+ axe:{get name(){return tr('run.w.axe.name')},cat:'blade',img:'ui:w_axe',get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.axe.d'+i))}},
+ bow:{get name(){return tr('run.w.bow.name')},cat:'bow',img:null,get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.bow.d'+i))}},
+ xbow:{get name(){return tr('run.w.xbow.name')},cat:'bow',img:null,get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.xbow.d'+i))}}};
 const PASSIVES={
- atk:{get name(){return tr('run.p.atk.name')},get desc(){return tr('run.p.atk.desc')},max:5},arc:{get name(){return tr('run.p.arc.name')},get desc(){return tr('run.p.arc.desc')},max:5},
- hp:{get name(){return tr('run.p.hp.name')},get desc(){return tr('run.p.hp.desc')},max:5},
- spd:{get name(){return tr('run.p.spd.name')},get desc(){return tr('run.p.spd.desc')},max:5},
- cd:{get name(){return tr('run.p.cd.name')},get desc(){return tr('run.p.cd.desc')},max:5},area:{get name(){return tr('run.p.area.name')},get desc(){return tr('run.p.area.desc')},max:5},amt:{get name(){return tr('run.p.amt.name')},get desc(){return tr('run.p.amt.desc')},max:2},
- regen:{get name(){return tr('run.p.regen.name')},get desc(){return tr('run.p.regen.desc')},max:5},armor:{get name(){return tr('run.p.armor.name')},get desc(){return tr('run.p.armor.desc')},max:5},luck:{get name(){return tr('run.p.luck.name')},get desc(){return tr('run.p.luck.desc')},max:5},crit:{get name(){return tr('run.p.crit.name')},get desc(){return tr('run.p.crit.desc')},max:5},critd:{get name(){return tr('run.p.critd.name')},get desc(){return tr('run.p.critd.desc')},max:5},
- wis:{get name(){return tr('run.p.wis.name')},get desc(){return tr('run.p.wis.desc')},max:5},dur:{get name(){return tr('run.p.dur.name')},get desc(){return tr('run.p.dur.desc')},max:5},pspd:{get name(){return tr('run.p.pspd.name')},get desc(){return tr('run.p.pspd.desc')},max:5},
- vamp:{get name(){return tr('run.p.vamp.name')},get desc(){return tr('run.p.vamp.desc')},max:5},greed:{get name(){return tr('run.p.greed.name')},get desc(){return tr('run.p.greed.desc')},max:5},curse:{get name(){return tr('run.p.curse.name')},get desc(){return tr('run.p.curse.desc')},max:5},
- dodge:{get name(){return tr('run.p.dodge.name')},get desc(){return tr('run.p.dodge.desc')},max:5},tough:{get name(){return tr('run.p.tough.name')},get desc(){return tr('run.p.tough.desc')},max:3},svamp:{get name(){return tr('run.p.svamp.name')},get desc(){return tr('run.p.svamp.desc')},max:5},rev:{get name(){return tr('run.p.rev.name')},get desc(){return tr('run.p.rev.desc')},max:1},
- berserk:{get name(){return tr('run.p.berserk.name')},get desc(){return tr('run.p.berserk.desc')},max:5},exec:{get name(){return tr('run.p.exec.name')},get desc(){return tr('run.p.exec.desc')},max:5},hunt:{get name(){return tr('run.p.hunt.name')},get desc(){return tr('run.p.hunt.desc')},max:3},
- knock:{get name(){return tr('run.p.knock.name')},get desc(){return tr('run.p.knock.desc')},max:3},boom:{get name(){return tr('run.p.boom.name')},get desc(){return tr('run.p.boom.desc')},max:5},mag:{get name(){return tr('run.p.mag.name')},get desc(){return tr('run.p.mag.desc')},max:5},gamble:{get name(){return tr('run.p.gamble.name')},get desc(){return tr('run.p.gamble.desc')},max:3}};
+ atk:{get name(){return tr('run.p.atk.name')},get desc(){return tr('run.p.atk.desc')},max:6},arc:{get name(){return tr('run.p.arc.name')},get desc(){return tr('run.p.arc.desc')},max:6},
+ hp:{get name(){return tr('run.p.hp.name')},get desc(){return tr('run.p.hp.desc')},max:6},
+ spd:{get name(){return tr('run.p.spd.name')},get desc(){return tr('run.p.spd.desc')},max:6},
+ cd:{get name(){return tr('run.p.cd.name')},get desc(){return tr('run.p.cd.desc')},max:6},area:{get name(){return tr('run.p.area.name')},get desc(){return tr('run.p.area.desc')},max:6},amt:{get name(){return tr('run.p.amt.name')},get desc(){return tr('run.p.amt.desc')},max:2},
+ regen:{get name(){return tr('run.p.regen.name')},get desc(){return tr('run.p.regen.desc')},max:6},armor:{get name(){return tr('run.p.armor.name')},get desc(){return tr('run.p.armor.desc')},max:6},luck:{get name(){return tr('run.p.luck.name')},get desc(){return tr('run.p.luck.desc')},max:6},crit:{get name(){return tr('run.p.crit.name')},get desc(){return tr('run.p.crit.desc')},max:6},critd:{get name(){return tr('run.p.critd.name')},get desc(){return tr('run.p.critd.desc')},max:6},
+ wis:{get name(){return tr('run.p.wis.name')},get desc(){return tr('run.p.wis.desc')},max:6},dur:{get name(){return tr('run.p.dur.name')},get desc(){return tr('run.p.dur.desc')},max:6},pspd:{get name(){return tr('run.p.pspd.name')},get desc(){return tr('run.p.pspd.desc')},max:6},
+ vamp:{get name(){return tr('run.p.vamp.name')},get desc(){return tr('run.p.vamp.desc')},max:6},greed:{get name(){return tr('run.p.greed.name')},get desc(){return tr('run.p.greed.desc')},max:6},curse:{get name(){return tr('run.p.curse.name')},get desc(){return tr('run.p.curse.desc')},max:6},
+ dodge:{get name(){return tr('run.p.dodge.name')},get desc(){return tr('run.p.dodge.desc')},max:6},tough:{get name(){return tr('run.p.tough.name')},get desc(){return tr('run.p.tough.desc')},max:3},svamp:{get name(){return tr('run.p.svamp.name')},get desc(){return tr('run.p.svamp.desc')},max:6},rev:{get name(){return tr('run.p.rev.name')},get desc(){return tr('run.p.rev.desc')},max:1},
+ berserk:{get name(){return tr('run.p.berserk.name')},get desc(){return tr('run.p.berserk.desc')},max:6},exec:{get name(){return tr('run.p.exec.name')},get desc(){return tr('run.p.exec.desc')},max:6},hunt:{get name(){return tr('run.p.hunt.name')},get desc(){return tr('run.p.hunt.desc')},max:3},
+ knock:{get name(){return tr('run.p.knock.name')},get desc(){return tr('run.p.knock.desc')},max:3},boom:{get name(){return tr('run.p.boom.name')},get desc(){return tr('run.p.boom.desc')},max:6},mag:{get name(){return tr('run.p.mag.name')},get desc(){return tr('run.p.mag.desc')},max:6},gamble:{get name(){return tr('run.p.gamble.name')},get desc(){return tr('run.p.gamble.desc')},max:3}};
 export {WEAPONS,PASSIVES,WIC,PIC};
 export const PASS_KEYS=Object.keys(PASSIVES);
-WEAPONS.fireball={get name(){return tr('run.w.fireball.name')},cat:'spell',img:null,get desc(){return [0,1,2,3,4].map(i=>tr('run.w.fireball.d'+i))}};
-WEAPONS.chain={get name(){return tr('run.w.chain.name')},cat:'spell',img:null,get desc(){return [0,1,2,3,4].map(i=>tr('run.w.chain.d'+i))}};
-WEAPONS.frost={get name(){return tr('run.w.frost.name')},cat:'spell',img:null,get desc(){return [0,1,2,3,4].map(i=>tr('run.w.frost.d'+i))}};
-WEAPONS.missile={get name(){return tr('run.w.missile.name')},cat:'spell',img:null,get desc(){return [0,1,2,3,4].map(i=>tr('run.w.missile.d'+i))}};
-WEAPONS.thunder={get name(){return tr('run.w.thunder.name')},cat:'spell',img:null,get desc(){return [0,1,2,3,4].map(i=>tr('run.w.thunder.d'+i))}};
+WEAPONS.fireball={get name(){return tr('run.w.fireball.name')},cat:'spell',img:null,get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.fireball.d'+i))}};
+WEAPONS.chain={get name(){return tr('run.w.chain.name')},cat:'spell',img:null,get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.chain.d'+i))}};
+WEAPONS.frost={get name(){return tr('run.w.frost.name')},cat:'spell',img:null,get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.frost.d'+i))}};
+WEAPONS.missile={get name(){return tr('run.w.missile.name')},cat:'spell',img:null,get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.missile.d'+i))}};
+WEAPONS.thunder={get name(){return tr('run.w.thunder.name')},cat:'spell',img:null,get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.thunder.d'+i))}};
 Object.assign(WEAPONS,DEFS);   // 第二批 28 张技能卡（src/cards2.js）
 for(const k in WEAPONS){const c=WEAPONS[k].cat;if(CATS[c])CATS[c].ws.push(k)}
 export const POOL={w:Object.keys(WEAPONS).filter(k=>!['spell','own'].includes(WEAPONS[k].cat)),s:Object.keys(WEAPONS).filter(k=>WEAPONS[k].cat==='spell')};POOL.c=[...POOL.w,...POOL.s];
@@ -38,14 +38,14 @@ export const DECKN=10;
 export const KIND_ID={...CARD_DT,sword:'mel',hammer:'mel',axe:'rng',bow:'rng',xbow:'rng',fireball:'ele',chain:'ele',frost:'ele',thunder:'ele',missile:'ele',gb:'ele',hp:'holy'};
 export const KIND={};for(const [k,d] of Object.entries({"sword": "mel", "hammer": "mel", "axe": "rng", "bow": "rng", "xbow": "rng", "fireball": "ele", "chain": "ele", "frost": "ele", "thunder": "ele", "missile": "ele", "gb": "ele", "hp": "holy"}))Object.defineProperty(KIND,k,{enumerable:true,configurable:true,get:()=>tr('card.kind.'+d)});for(const k of Object.keys(CARD_KIND))Object.defineProperty(KIND,k,{enumerable:true,configurable:true,get:()=>CARD_KIND[k]});
 // 角色专属武器（不进公共卡池）
-WEAPONS.gb={get name(){return tr('run.w.gb.name')},cat:'own',img:'gear/gb',own:1,get desc(){return [0,1,2,3,4].map(i=>tr('run.w.gb.d'+i))}};
-WEAPONS.hp={get name(){return tr('run.w.hp.name')},cat:'own',img:'gear/hp',own:1,get desc(){return [0,1,2,3,4].map(i=>tr('run.w.hp.d'+i))}};
+WEAPONS.gb={get name(){return tr('run.w.gb.name')},cat:'own',img:'gear/gb',own:1,get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.gb.d'+i))}};
+WEAPONS.hp={get name(){return tr('run.w.hp.name')},cat:'own',img:'gear/hp',own:1,get desc(){return [0,1,2,3,4,5].map(i=>tr('run.w.hp.d'+i))}};
 const ZHID={gob_king:'哥布林大王',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士',gob_hero:'哥布林英雄',gob_emperor:'哥布林皇帝'};   // 存档内部 id，不显示
 const WV=await (async()=>{for(let n=0;n<3;n++){try{const r=await fetch('data/waves.json?v=11042550');if(r.ok)return await r.json()}catch(_){}await new Promise(z=>setTimeout(z,800*(n+1)))}const t=document.getElementById('bootx');if(t){t.textContent='加载失败，点击重试 / Failed to load — tap to retry';t.style.color='#ffb4a0';document.getElementById('boot')?.addEventListener('click',()=>location.reload())}throw new Error('waves')})();   // 波次表（每分钟一张）
 const MAXG=5,MAXP=6;   // 局内上限：通用技能卡 5 格（物理法术不限）、祝福 6（专属另算）
 const UIV=new URLSearchParams(location.search).get('ui')==='blue'?'blue':'card';
 const FRS='frames_';
-const MAXL=5,OL=[0,1,3,5,6,8];   // 5 级制：新等级 → 旧数值档位
+const MAXL=6,OL=[0,1,1,3,5,6,8];   // 6 级制：新等级 → 旧数值档位（第 2 级＝第 1 档 +18% 伤害，见 dmg）
 const WIC={sword:'ic_sword',hammer:'ic_hammer',axe:'icons_3',thunder:'ic_thunder',bow:'ic_bow',xbow:'ic_xbow',gb:'icons_0',hp:'icons_1',missile:'icons_2',axe:'icons_3',fireball:'icons_4',frost:'icons_5',chain:'icons_6',holy:'icons_7'};Object.assign(WIC,CARD_IC);
 const PIC={atk:'b_atk',arc:'p_arc',hp:'icons_10',spd:'icons_9',cd:'b_cd',area:'b_area',amt:'b_amt',regen:'b_regen',armor:'b_armor',luck:'b_luck',crit:'p_crit',critd:'p_critd',wis:'icons_12',dur:'b_dur',pspd:'b_pspd',vamp:'b_vamp',greed:'icons_11',curse:'b_curse',dodge:'p_dodge',tough:'p_tough',svamp:'p_svamp',rev:'p_rev',berserk:'p_berserk',exec:'p_exec',hunt:'p_hunt',knock:'p_knock',boom:'p_boom',mag:'p_mag',gamble:'p_gamble'};
 const isSp=k=>WEAPONS[k]?.cat==='spell',isOwn=k=>!!WEAPONS[k]?.own;
@@ -183,7 +183,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
   else if(S.t>=S.eliteT){S.eliteT=S.t+R(60,90);e.elite=true;e.armor=0;e.res='';const ek=S.t>=600?['gob_shaman','gob_drum','gob_necro']:S.t>=420?['gob_shaman','gob_drum']:['gob_shaman'];e.k=ek[Math.floor(Math.random()*ek.length)];e.hp=e.hpMax=Math.ceil((e.k==='gob_shaman'?10:12)*(1+S.t/100));e.sc=1.1;if(e.k==='gob_shaman')e.summonT=4;if(NEWKS.has(e.k)&&!S.seen[e.k]){S.seen[e.k]=1;S.banner={v:tr('run.new.'+e.k),t:3}}}
  }
  const ST=(f,t)=>{const k=S.src;return setTimeout(()=>{const o=S.src;S.src=k;f();S.src=o},t)};
- function dmg(base){base*=1.5;   // 武器伤害整体 ×1.5：开局小怪一下死（参考吸血鬼：鞭子 10 / 蝙蝠 1 血）
+ function dmg(base){base*=1.5*(S.l2?1.18:1);   // 武器伤害整体 ×1.5：开局小怪一下死（参考吸血鬼：鞭子 10 / 蝙蝠 1 血）
  const ph=PHYS.has(S.src)||DT[S.src]==='mel'||DT[S.src]==='rng',hpf=survival?survival.hp/Math.max(1,survival.max):1;return base*(1+(ph?0.1*S.p.atk+S.B.atk:0.1*S.p.arc+(S.B.arc||0)))*(1+.08*S.p.berserk*(1-hpf))}
  const AR=()=>1+.1*S.p.area+(S.B.area||0),AMT=()=>S.p.amt+(S.B.amt||0),FA=()=>hero.face>0?0:Math.PI,MA=()=>Math.atan2(hero.my||0,hero.mx||hero.face),FN=()=>{const t=nearest(260);return t?(t.x>=hero.x?0:Math.PI):FA()},AIM=(r=260)=>{const t=nearest(r);return t?Math.atan2(t.y-10-hero.y+10,t.x-hero.x):MA()},PS=()=>1+.15*S.p.pspd+(S.B.pspd||0),DUR=()=>1+.15*S.p.dur+(S.B.dur||0);
  function cluster(){let b=null,bn=-1;const v=en.filter(e=>!e.dead&&Math.abs(e.x-hero.x)<230&&Math.abs(e.y-hero.y)<160);for(let i=0;i<Math.min(24,v.length);i++){const e=v[Math.floor(Math.random()*v.length)];let n=0;for(const o of v)if((o.x-e.x)**2+(o.y-e.y)**2<40*40)n++;if(n>bn){bn=n;b=e}}return b}
@@ -342,7 +342,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
   if(S.gems?.length>220){const g=S.gems,keep=[];g.sort((a,b)=>a.x-b.x);for(const q of g){const l=keep[keep.length-1];if(l&&Math.abs(l.x-q.x)<24&&Math.abs(l.y-q.y)<24){l.v+=q.v}else keep.push(q)}S.gems=keep}
   if(S.coins.length>160){const g=S.coins,keep=[];for(const q of g){const l=keep[keep.length-1];if(l&&!q.bag&&!l.bag&&Math.abs(l.x-q.x)<30&&Math.abs(l.y-q.y)<30){l.v+=q.v}else keep.push(q)}S.coins=keep}
   S.t+=dt;S.spT=(S.spT||0)+dt;if(S.bpool){for(const q of S.bpool){q.t+=dt;if((hero.x-q.x)**2+((hero.y-q.y)*1.25)**2<q.r*q.r){q.hT=(q.hT||0)-dt;window.HSLOW=performance.now()+300;if(q.hT<=0){q.hT=.5;window.CUR_E='血池';(window.PLAYERHIT||survival?.damage)?.(4+S.t/120)}}}S.bpool=S.bpool.filter(q=>q.t<q.d)}{const mv=Math.hypot(hero.x-(S.stX??hero.x),hero.y-(S.stY??hero.y));S.stX=hero.x;S.stY=hero.y;if(mv>.3*dt*60)S.still=0;else S.still=(S.still||0)+dt;if(S.still>=6&&S.t>120&&!S.stillWarn&&!window.DBG?.noMob&&survival?.playing){S.stillWarn=1;S.banner={v:tr('run.keepMoving'),t:2}}if(S.still<6)S.stillWarn=0;if(S.still>=8&&S.t>120&&!window.DBG?.noMob&&survival?.playing){S.still=0;S.stillWarn=0;S.banner={v:tr('run.wolfCame'),t:2};window.HURT=performance.now()-80;for(let i=0;i<3+Math.min(4,Math.floor(S.t/120));i++)window.SUMMON?.('gob_wolf')}}if(S.spT>=wave().iv){S.spT=0;S.pend=Math.min((S.pend||0)+1,8)}if(!window.DBG?.noMob){events();camp(dt);tribe(dt);crates(dt)}if(S.banner&&!S.banner.snd){S.banner.snd=1;window.SFX?.[/Boss|ボス/.test(S.banner.v)?'boss':'banner']()}if(S.banner){S.banner.t-=dt;if(S.banner.t<=0)S.banner=null}
-  for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0){S.src=k;S.cd[k]=FIRE[k]?.(OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd)}}
+  for(const k in S.w){S.cd[k]=(S.cd[k]??R(.1,.4))-dt;if(S.cd[k]<=0){S.src=k;S.l2=S.w[k]===2;S.cd[k]=FIRE[k]?.(OL[S.w[k]])*(1-.06*S.p.cd)*(1-S.B.cd);S.l2=false}}
   C2.update(dt);LM.update(dt);
   if(S.comboT>0){S.comboT-=dt;if(S.comboT<=0&&!(S.ocT>0))S.combo=0}if(S.ocT>0)S.ocT-=dt;if(S.ocCd>0)S.ocCd-=dt;
   if(S.p.regen||S.B.reg){S.rg=(S.rg||0)+dt*(.15*S.p.regen+S.B.reg);if(S.rg>=1){survival?.heal?.(Math.floor(S.rg));S.rg%=1}}

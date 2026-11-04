@@ -24,7 +24,7 @@ const G=[
  ['clearF','surv','ach_crown',{zh:'用女主通关',en:'Clear as the girl',ja:'女主人公でクリア'},c=>[c.st.clearF?1:0,1],200],
  ['nohit5','surv','ach_heart',{zh:'前 5 分钟一次伤害都没受',en:'Take no damage for the first 5 min',ja:'最初の5分間ノーダメージ'},c=>[c.st.nohit5?1:0,1],150],
  ...[[10,30],[20,60],[30,100],[40,150]].map(([n,g])=>['lv'+n,'grow','ach_up',{zh:`单局升到 ${n} 级`,en:`Reach Lv ${n} in one run`,ja:`1回でLv${n}に到達`},c=>[Math.min(n,c.st.lv||0),n],g]),
- ['l5','grow','ach_book',{zh:'把一张技能升到第 5 级',en:'Raise a skill to Lv 5',ja:'スキルをLv5まで強化'},c=>[c.st.l5?1:0,1],50],
+ ['l5','grow','ach_book',{zh:'把一张技能升到第 6 级（进阶）',en:'Raise a skill to Lv 6 (Evolution)',ja:'スキルをLv6（進化）まで強化'},c=>[c.st.l5?1:0,1],50],
  ['full5','grow','ach_sword',{zh:'技能栏装满 5 张',en:'Fill all 5 skill slots',ja:'スキル枠を5つ埋める'},c=>[c.st.full5?1:0,1],50],
  ['combo100','grow','ach_fist',{zh:'掌机连击达到 100',en:'Reach a 100-hit combo with the handheld',ja:'ゲーム機で100コンボ'},c=>[Math.min(100,c.st.combo||0),100],80],
  ...[[500,40],[1000,80],[2000,150]].map(([n,g])=>['k'+n,'kill','ach_sword',{zh:`单局击杀 ${n}`,en:`Defeat ${n} in one run`,ja:`1回で${n}体撃破`},c=>[Math.min(n,c.st.kills||0),n],g]),
@@ -42,7 +42,7 @@ export function achvRunEnd(rec){
  const a=store(),st=a.st,S=window.__G?.S;
  st.lv=Math.max(st.lv||0,rec.lv||0);st.kills=Math.max(st.kills||0,rec.kills||0);st.bosses=Math.max(st.bosses||0,rec.bosses||0);
  if(rec.clear){st.clears=(st.clears||0)+1;if(rec.role==='f')st.clearF=1;else st.clearM=1}
- if(S){if(Object.values(S.w||{}).some(v=>v>=5))st.l5=1;if(S.full5)st.full5=1;st.combo=Math.max(st.combo||0,S.cmax||0)}
+ if(S){if(Object.values(S.w||{}).some(v=>v>=6))st.l5=1;if(S.full5)st.full5=1;st.combo=Math.max(st.combo||0,S.cmax||0)}
  if(rec.t>=300&&(window.FHT==null||window.FHT>=300))st.nohit5=1;
  save(a);
  const got=[];for(const x of list()){if(x.gold&&x.done&&!a.done[x.id]){a.done[x.id]=1;window.META?.spend?.(-x.gold);got.push(x.d+' +'+x.gold+'🪙')}}
