@@ -1,5 +1,6 @@
 
 import {createMenu} from './menu.js?v=11041530';
+import {t,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11041530';
 import {createSurvival} from './survival.js?v=11041530';
 import {createEnemies} from './enemies.js?v=11041530';
 import {createAudio} from './audio.js?v=11041530';
@@ -74,10 +75,13 @@ const PZ={on:false};{const st=document.createElement('style');st.textContent=`#p
 #pzm{position:fixed;inset:0;z-index:45;background:#0008;display:grid;place-items:center}#pzm[hidden],#pzb[hidden]{display:none}#pzm>div{background:#0b1530f0;border:1px solid #8fbbef;border-radius:12px;padding:22px 28px;display:grid;gap:12px;min-width:200px;text-align:center;color:#f7d987;font:900 22px "PingFang SC","Microsoft YaHei",sans-serif}
 #pzm button{font:700 16px "PingFang SC","Microsoft YaHei",sans-serif;padding:10px 18px;border-radius:8px;border:1px solid #f0dc9c;background:#1e3a72;color:#fff;cursor:pointer}`;document.head.append(st);
  PZ.btn=document.createElement('button');PZ.btn.id='pzb';PZ.btn.textContent='⏸';PZ.btn.hidden=true;document.body.append(PZ.btn);
- PZ.m=document.createElement('div');PZ.m.id='pzm';PZ.m.hidden=true;PZ.m.innerHTML='<div>暂停<button data-z="go">继续游戏</button><button data-z="shk">震屏：开</button><button data-z="home">结束本局，回主界面</button></div>';document.body.append(PZ.m);
+ PZ.m=document.createElement('div');PZ.m.id='pzm';PZ.m.hidden=true;PZ.m.innerHTML='<div><span data-i18n="title"></span><button data-z="go"></button><button data-z="shk"></button><label><span data-i18n="language"></span> <select aria-label="Language"><option value="zh">中文</option><option value="en">English</option><option value="ja">日本語</option></select></label><button data-z="home"></button></div>';document.body.append(PZ.m);
+ const languageSelect=PZ.m.querySelector('select');languageSelect.addEventListener('change',()=>setLanguage(languageSelect.value));
+ const renderPause=()=>{let off=false;try{off=!!localStorage.getItem('noShake')}catch(_){}PZ.m.querySelector('[data-i18n="title"]').textContent=t('pause.title');PZ.m.querySelector('[data-i18n="language"]').textContent=t('language.label');languageSelect.setAttribute('aria-label',t('language.label'));languageSelect.value=getLanguage();PZ.m.querySelector('[data-z="go"]').textContent=t('pause.resume');PZ.m.querySelector('[data-z="shk"]').textContent=t(off?'pause.shake.off':'pause.shake.on');PZ.m.querySelector('[data-z="home"]').textContent=t('pause.home')};
+ onLanguageChange(renderPause);renderPause();
  PZ.set=v=>{PZ.on=v;PZ.m.hidden=!v;if(v)survival?.game?.clearInput?.()};
  PZ.btn.onclick=()=>{PZ.btn.blur();PZ.set(true)};
- PZ.m.onclick=e=>{const z=e.target.dataset?.z;if(z==='go')PZ.set(false);if(z==='shk'){let off=false;try{off=!localStorage.getItem('noShake');off?localStorage.setItem('noShake','1'):localStorage.removeItem('noShake')}catch(_){}e.target.textContent='震屏：'+(off?'关':'开')}if(z==='home'){PZ.set(false);PZ.btn.hidden=true;joy=null;for(const k in keys)keys[k]=0;survival.stop();menu.show()}};
+ PZ.m.onclick=e=>{const z=e.target.dataset?.z;if(z==='go')PZ.set(false);if(z==='shk'){let off=false;try{off=!localStorage.getItem('noShake');off?localStorage.setItem('noShake','1'):localStorage.removeItem('noShake')}catch(_){}renderPause()}if(z==='home'){PZ.set(false);PZ.btn.hidden=true;joy=null;for(const k in keys)keys[k]=0;survival.stop();menu.show()}};
  addEventListener('keydown',e=>{if((e.key==='Escape'||e.key==='p'||e.key==='P')&&survival?.playing&&!run?.paused){PZ.set(!PZ.on);e.preventDefault()}})}const CO=objs.filter(o=>o.r);
 window.SETC=(x,y,v)=>{x=Math.round(x);y=Math.round(y);if(CM&&x>=0&&y>=0&&x<WW&&y<WH)CM[(y*WW+x)*4]=v};   // 运行时改碰撞（城堡城墙/城门）
 function water(x,y){x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=WW||y>=WH)return 1;return CM[(y*WW+x)*4]}

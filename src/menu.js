@@ -1,4 +1,5 @@
 import {WEAPONS,PASSIVES,POOL,PASS_KEYS,WIC,PIC,fixDeck,DECKN,KIND} from './run.js?v=11041530';
+import {t,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11041530';
 // 主界面：独立绘制演示场景；备战（角色/装备/商店）→ 选关卡 → 出发。
 document.documentElement.classList.add('menu-loading');
 const style=document.createElement('style');
@@ -93,11 +94,25 @@ export function createMenu(game){
   <div class="menu-character" hidden></div><label class="menu-name" aria-label="你的名字"><input maxlength="8" placeholder="输入你的名字" autocomplete="nickname"></label>
  </section><nav class="menu-panel" aria-label="主菜单">
   <button class="menu-start" type="button"><span>开始游戏</span><span aria-hidden="true">→</span></button>
+  <label class="menu-language"><span></span> <select aria-label="Language"><option value="zh">中文</option><option value="en">English</option><option value="ja">日本語</option></select></label>
   <div class="menu-note">WASD / 方向键移动 · 靠近敌人自动攻击<br>移动端在地图上拖动即可行走</div>
  </nav>`;
- document.body.append(root);document.body.classList.remove('loading');{const bt=document.getElementById('boot');if(bt){const go=()=>{if(performance.now()<(window.BOOT_MIN??2300)){setTimeout(go,100);return}bt.style.opacity='0';setTimeout(()=>bt.remove(),500)};go()}}document.body.classList.add('menu-open');document.title='异世界幸存者 · 无名之辈外传';
+ document.body.append(root);document.body.classList.remove('loading');{const bt=document.getElementById('boot');if(bt){const go=()=>{if(performance.now()<(window.BOOT_MIN??2300)){setTimeout(go,100);return}bt.style.opacity='0';setTimeout(()=>bt.remove(),500)};go()}}document.body.classList.add('menu-open');
  const cs=document.getElementById('cs');
  const input=root.querySelector('input'),caption=root.querySelector('.menu-character');
+ const languageSelect=root.querySelector('.menu-language select');
+ languageSelect.addEventListener('change',()=>setLanguage(languageSelect.value));
+ const localizeMenu=()=>{
+  root.querySelector('.menu-title').textContent=t('game.title');
+  root.querySelector('.menu-start span').textContent=t('menu.start');
+  root.querySelector('.menu-language span').textContent=t('language.label');
+  root.querySelector('.menu-language select').setAttribute('aria-label',t('language.label'));
+  root.querySelector('.menu-name').setAttribute('aria-label',t('menu.name'));
+  input.placeholder=t(input.classList.contains('need')?'menu.name.required':'menu.name.placeholder');
+  root.querySelector('.menu-note').replaceChildren(document.createTextNode(t('menu.instructions')),document.createElement('br'),document.createTextNode(t('menu.mobile')));
+  languageSelect.value=getLanguage();
+ };
+ onLanguageChange(localizeMenu);localizeMenu();
  try{input.value=localStorage.getItem('sanguo.playerName')||''}catch{/* 隐私模式仍可游玩。 */}
  const syncSt=()=>root.querySelector('.menu-start')?.classList.toggle('off',!input.value.trim());input.addEventListener('input',()=>{try{localStorage.setItem('sanguo.playerName',input.value)}catch{}syncSt();input.classList.remove('need')});setTimeout(syncSt,0);
  // 阻断名字输入与菜单点击进入原来的全局移动按键处理。
@@ -120,7 +135,7 @@ export function createMenu(game){
  document.body.append(prep);
  prep.addEventListener('keydown',e=>e.stopPropagation());
  // ---------- 键盘操作：方向键在按钮间移动，回车/空格确认，Esc 返回 ----------
- function navKeys(e){const box=!prep.hidden?prep:!root.hidden?root:document.getElementById('lvup')?.hidden===false?document.getElementById('lvup'):null;if(!box)return;if(/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)&&e.key!=='Escape'&&!/^Arrow(Up|Down)$/.test(e.key))return;   // 打字时 WASD、左右键留给输入框
+ function navKeys(e){if(document.activeElement?.tagName==='SELECT')return;const box=!prep.hidden?prep:!root.hidden?root:document.getElementById('lvup')?.hidden===false?document.getElementById('lvup'):null;if(!box)return;if(/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)&&e.key!=='Escape'&&!/^Arrow(Up|Down)$/.test(e.key))return;   // 打字时 WASD、左右键留给输入框
  
   const K={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0],w:[0,-1],s:[0,1],a:[-1,0],d:[1,0]}[e.key];
   if(e.key==='Escape'&&box===prep){const b=[...prep.querySelectorAll('.pp-back')].find(x=>x.offsetParent);if(b){b.click();e.preventDefault()}return}
@@ -181,7 +196,7 @@ export function createMenu(game){
  prep.querySelector('.pp-next').onclick=()=>{if(deck.c.length<Math.min(DECKN,POOL.c.length)){prep.querySelector('.pp-tabs [data-t=gear]').click();prep.querySelectorAll('.dk .warn').forEach(w=>w.textContent=`技能卡要选满 ${DECKN} 张才能出发`);return}try{localStorage.setItem('deck',JSON.stringify(deck))}catch(e){}step('stage')};
  prep.querySelector('[data-s=stage] .pp-back').onclick=()=>step('prep');
  const info=prep.querySelector('.pp-info'),ipv=info.querySelector('canvas').getContext('2d');
- root.querySelector('.menu-start').onclick=()=>{const ni=root.querySelector('.menu-name input');if(!ni.value.trim()){ni.placeholder='请先输入名字';ni.classList.remove('need');void ni.offsetWidth;ni.classList.add('need');ni.focus();return}root.hidden=true;prep.hidden=false;step('prep');prep.querySelector('.pp-next').focus()};
+ root.querySelector('.menu-start').onclick=()=>{const ni=root.querySelector('.menu-name input');if(!ni.value.trim()){ni.placeholder=t('menu.name.required');ni.classList.remove('need');void ni.offsetWidth;ni.classList.add('need');ni.focus();return}root.hidden=true;prep.hidden=false;step('prep');prep.querySelector('.pp-next').focus()};
  prep.querySelector('.pp-go').onclick=async()=>{
   if(starting)return;starting=true;prep.hidden=true;
   try{await game.ready?.()}catch{/* 加载失败也进入游戏 */}
