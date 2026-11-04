@@ -417,7 +417,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
    else{window.FREEZE=performance.now()+5000;window.SFX?.zap?.();S.banner={v:tr('run.it.watch'),t:2}}}
  // ---------- 流浪商人：3 分钟起每 4 分钟出现在远处，停留 60 秒；用本局捡到的金币买，每次最多 2 件 ----------
  const MER_IT=[['meat',30],['cross',60],['watch',60],['rev',120],['mys',80]];
- let merUI=null;
+ let merUI=null;const MERI=[0,1,2,3].map(i=>{const im=new Image();im.src='assets/characters/npc/merchant/idle'+i+'.png?v=11042550';return im});
  function merchant(dt){
   if(S.mer){S.mer.t-=dt;if(S.mer.t<=0){S.mer=null;S.banner={v:tr('run.mer.leave'),t:2};return}
    const m=S.mer;if(!m.open&&(hero.x-m.x)**2+(hero.y-m.y)**2<20*20){if(!m.near){m.near=1;openMer()}}else if((hero.x-m.x)**2+(hero.y-m.y)**2>40*40)m.near=0;return}
@@ -434,7 +434,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
   drawMer();merUI.hidden=false}
  function drawMer(){const m=S.mer;if(!m)return;const g=merGold(),left=2-m.buys,IC={meat:'assets/ui/meat.png',cross:'assets/ui/it_cross.png',watch:'assets/ui/it_watch.png',rev:'assets/ui/'+(PIC.rev||'icons_10')+'.png',mys:'assets/ui/goldbag.png'};
   const can=k=>k==='rev'?!S.merRev:k==='mys'?Object.keys(S.w).some(w=>!WEAPONS[w]?.own&&S.w[w]<MAXL-1):true;
-  merUI.innerHTML=`<div class="bx"><h3>🛒 ${tr('run.mer.name')}</h3><div class="sb">${tr('run.mer.sub',{g,n:left})}</div><div class="g">${MER_IT.map(([k,p])=>`<div class="it"><img src="${IC[k]}?v=11042550" alt=""><b>${tr('run.mer.'+k)}</b><span>${tr('run.mer.'+k+'.d')}</span><button data-mb="${k}" ${left>0&&g>=p&&can(k)?'':'disabled'}>🪙 ${p}</button></div>`).join('')}</div><button class="cl">${tr('run.mer.close')}</button></div>`;
+  merUI.innerHTML=`<div class="bx"><div style="display:flex;gap:12px;align-items:center;margin-bottom:12px"><img src="assets/characters/npc/merchant/portrait.png?v=11042550" alt="" style="width:72px;height:72px;object-fit:contain;flex:none"><div><h3>${tr('run.mer.name')}</h3><div class="sb" style="margin:0">${tr('run.mer.sub',{g,n:left})}</div></div></div><div class="g">${MER_IT.map(([k,p])=>`<div class="it"><img src="${IC[k]}?v=11042550" alt=""><b>${tr('run.mer.'+k)}</b><span>${tr('run.mer.'+k+'.d')}</span><button data-mb="${k}" ${left>0&&g>=p&&can(k)?'':'disabled'}>🪙 ${p}</button></div>`).join('')}</div><button class="cl">${tr('run.mer.close')}</button></div>`;
   merUI.querySelector('.cl').onclick=closeMer;merUI.querySelectorAll('[data-mb]').forEach(b=>b.onclick=()=>buyMer(b.dataset.mb))}
  function closeMer(){if(merUI)merUI.hidden=true;if(S.mer)S.mer.open=0;S.paused=false}
  function buyMer(k){const m=S.mer,p=(MER_IT.find(x=>x[0]===k)||[])[1];if(!m||m.buys>=2||merGold()<p||!window.META?.spend(p))return;S.rg-=p;m.buys++;window.SFX?.coin?.();
@@ -444,7 +444,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
   if(k==='cross'||k==='watch'){closeMer();useTrn(k);return}
   drawMer()}
  function drawMer_(c,cx,cy,now){const m=S.mer;if(!m)return;const x=m.x-cx,y=m.y-cy;c.save();c.globalAlpha=.3+.2*Math.sin(now/200);c.fillStyle='#ffd166';c.beginPath();c.ellipse(x,y,16,9,0,0,6.3);c.fill();c.restore();
-  if(UI.goldbag?.complete)c.drawImage(UI.goldbag,x-11,y-24+Math.sin(now/250)*1.5,22,22);c.save();c.font='bold 9px "PingFang SC",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='#000b';const t=tr('run.mer.name')+' '+Math.ceil(m.t)+'s';c.strokeText(t,x,y-28);c.fillStyle='#ffd166';c.fillText(t,x,y-28);c.restore()}
+  {const im=MERI[Math.floor(now/220)%4];if(im.complete&&im.width){const h=40,w=im.width*h/im.height;c.drawImage(im,x-w/2,y-h+4,w,h)}}c.save();c.font='bold 9px "PingFang SC",sans-serif';c.textAlign='center';c.lineWidth=3;c.strokeStyle='#000b';const t=tr('run.mer.name')+' '+Math.ceil(m.t)+'s';c.strokeText(t,x,y-40);c.fillStyle='#ffd166';c.fillText(t,x,y-40);c.restore()}
 
  function drawWorld(c,cx,cy,now){drawMer_(c,cx,cy,now);
   if(S?.exitP){const P=S.exitP,k=Math.max(.02,Math.min(1,(now-P.t)/600)),px=P.x-cx,py=P.y-cy-14;c.save();c.translate(px,py);const g=c.createRadialGradient(0,0,0,0,0,22*k+1);g.addColorStop(0,'rgba(255,255,240,.98)');g.addColorStop(.35,'rgba(255,214,120,.9)');g.addColorStop(.8,'rgba(255,150,60,.45)');g.addColorStop(1,'rgba(255,120,40,0)');c.scale(.7,1);c.fillStyle=g;c.beginPath();c.arc(0,0,22*k,0,6.3);c.fill();c.lineWidth=1.3;for(let i=0;i<3;i++){c.strokeStyle=`rgba(255,${230-i*30},${170-i*40},.85)`;c.beginPath();c.arc(0,0,(8+i*5)*k,now/280*(i%2?-1:1)+i,now/280*(i%2?-1:1)+i+4);c.stroke()}c.restore();
