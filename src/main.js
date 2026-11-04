@@ -27,7 +27,7 @@ const D={...W,...CH,gt:W.tiles.list||[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),col
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),WW=D.WW,WH=D.WH||D.WW,HD=D.HD;
 let VW=480,VH=300,SC=HD;
-function fit(){const dpr=window.LOWQ?1:Math.min(1.5,devicePixelRatio||1),k=Math.max(1,Math.min(4,Math.round(innerHeight/380),Math.min(innerWidth,innerHeight)/(innerHeight>innerWidth*1.2?355:320)));/* 短边至少看到约 320 逻辑像素 */const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;VW=W/SC;VH=H/SC;window.VIEWHW=VW/2;window.VIEWHH=VH/2}
+function fit(){const dpr=window.LOWQ?1:Math.min(1.5,devicePixelRatio||1),k=Math.max(1,Math.min(4,Math.round(innerHeight/380),Math.min(innerWidth,innerHeight)/(innerHeight>innerWidth*1.2?355:320)));/* 短边至少看到约 320 逻辑像素 */const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;document.documentElement.style.setProperty('--hk',k);SC=k*dpr;VW=W/SC;VH=H/SC;window.VIEWHW=VW/2;window.VIEWHH=VH/2}
 addEventListener('resize',()=>{if(!menu?.visible)fit()});
 const $=id=>document.getElementById(id);
 const keys={};let joy=null;

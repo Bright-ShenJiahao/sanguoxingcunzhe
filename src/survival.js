@@ -7,7 +7,7 @@ export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
  const style=document.createElement('style');style.textContent=`
  .survival-hud{position:absolute;top:2%;left:2%;width:min(310px,65%);box-sizing:border-box;padding:10px 12px;background:#102138e8;color:#f6f8ff;border:1px solid #94baff;border-radius:7px;font:clamp(11px,1.6vw,16px) system-ui;pointer-events:none}
- .survival-hud[hidden]{display:none}.survival-hud .stats{display:flex;justify-content:space-between;gap:10px;margin-bottom:5px}.survival-hud progress{width:100%;height:14px;accent-color:#66dc94}
+ .survival-hud[hidden]{display:none}@media(max-width:700px){.survival-hud{top:calc(27px*var(--hk,2) + env(safe-area-inset-top,0px));left:50%;transform:translateX(-50%);width:auto;padding:0;background:none;border:none;font:600 12px system-ui;text-shadow:0 0 3px #000,0 1px 2px #000}.survival-hud .stats{gap:14px;margin:0}}.survival-hud .stats{display:flex;justify-content:space-between;gap:10px;margin-bottom:5px}.survival-hud progress{width:100%;height:14px;accent-color:#66dc94}
  .survival-playing #kc{display:none}
  .survival-dialog{box-sizing:border-box;width:min(560px,94vw);max-height:90vh;padding:26px;border:2px solid #accfff;border-radius:12px;background:linear-gradient(145deg,#234e89,#101f3f);color:#f0f5ff;font:16px system-ui;text-align:center;overflow:auto}
  .survival-dialog::backdrop{background:#06101cd9}.survival-dialog h2{color:#f6db94;margin:0 0 18px}.survival-dialog p{color:#d6e2f6;margin:12px 0;overflow-wrap:anywhere}
