@@ -1,33 +1,33 @@
 
-import {createMenu} from './menu.js?v=11042510';
-import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11042510';
-import {createSurvival} from './survival.js?v=11042510';
-import {createEnemies} from './enemies.js?v=11042510';
-import {createAudio} from './audio.js?v=11042510';
-import {createMeta} from './meta.js?v=11042510';
+import {createMenu} from './menu.js?v=11042540';
+import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11042540';
+import {createSurvival} from './survival.js?v=11042540';
+import {createEnemies} from './enemies.js?v=11042540';
+import {createAudio} from './audio.js?v=11042540';
+import {createMeta} from './meta.js?v=11042540';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11042510';
+import {createPathing} from './pathing.js?v=11042540';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11042510';
-import {createRun} from './run.js?v=11042510';
-import {playEnding} from './ending.js?v=11042510';
-import {startTutorial} from './tutorial.js?v=11042510';
-import {initAchv} from './achv.js?v=11042510';
-import {initNB} from './nb.js?v=11042510';
-import {createDebug} from './debug.js?v=11042510';
+import {createWeather} from './weather.js?v=11042540';
+import {createRun} from './run.js?v=11042540';
+import {playEnding} from './ending.js?v=11042540';
+import {startTutorial} from './tutorial.js?v=11042540';
+import {initAchv} from './achv.js?v=11042540';
+import {initNB} from './nb.js?v=11042540';
+import {createDebug} from './debug.js?v=11042540';
 // 加载失败：自动重试 2 次，仍失败就在加载画面提示「点击重试」
 window.LOADFAIL=()=>{const t=document.getElementById('bootx');if(t&&!t.dataset.fail){t.dataset.fail=1;t.textContent=t_(lf());t.style.cursor='pointer';t.style.color='#ffb4a0';document.getElementById('boot')?.addEventListener('click',()=>location.reload())}};
 const lf=()=>({zh:'加载失败，点击重试',en:'Failed to load — tap to retry',ja:'読み込み失敗：タップで再試行'}),t_=o=>o[(()=>{try{return localStorage.getItem('lang')}catch(e){}})()]||o.zh;
 const fj=async(u,n=0)=>{try{const r=await fetch(u);if(!r.ok)throw 0;return await r.json()}catch(e){if(n<2){await new Promise(z=>setTimeout(z,800*(n+1)));return fj(u,n+1)}window.LOADFAIL();throw e}};
-const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042510'].map(u=>fj(u)));
+const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042540'].map(u=>fj(u)));
 const HN=await fj('data/heroine.json');
 const HM=await fj('data/hero_m.json');
 const D={...W,...CH,gt:W.tiles.list||[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),coll:'assets/map/coll.png?v='+W.ver,
  spr:Object.fromEntries(Object.keys(W.size).map(k=>[k,'assets/map/sprites/'+k+'.png']))};
 const cv=document.getElementById('cv'),c=cv.getContext('2d'),WW=D.WW,WH=D.WH||D.WW,HD=D.HD;
 let VW=480,VH=300,SC=HD;
-function fit(){const dpr=Math.min(1.5,devicePixelRatio||1),k=Math.max(1,Math.min(4,Math.round(innerHeight/380),Math.min(innerWidth,innerHeight)/(innerHeight>innerWidth*1.2?355:320)));/* 短边至少看到约 320 逻辑像素 */const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;VW=W/SC;VH=H/SC;window.VIEWHW=VW/2;window.VIEWHH=VH/2}
+function fit(){const dpr=window.LOWQ?1:Math.min(1.5,devicePixelRatio||1),k=Math.max(1,Math.min(4,Math.round(innerHeight/380),Math.min(innerWidth,innerHeight)/(innerHeight>innerWidth*1.2?355:320)));/* 短边至少看到约 320 逻辑像素 */const W=Math.round(innerWidth*dpr),H=Math.round(innerHeight*dpr);if(cv.width!==W||cv.height!==H){cv.width=W;cv.height=H}SC=k*dpr;VW=W/SC;VH=H/SC;window.VIEWHW=VW/2;window.VIEWHH=VH/2}
 addEventListener('resize',()=>{if(!menu?.visible)fit()});
 const $=id=>document.getElementById(id);
 const keys={};let joy=null;
@@ -46,7 +46,7 @@ const IM={};let left=0;
 let tot=0;const BAD=[];function ld(k,s,tr=0){if(!tr){left++;tot++}const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};
  i.onerror=()=>{if(tr<2){setTimeout(()=>ld(k,s,tr+1),600*(tr+1));return}BAD.push(s);console.warn('加载失败',s);if(/coll|\/map\/g/.test(s))window.LOADFAIL();const t=document.querySelector('#boot,.boot,#loading');if(t)t.setAttribute('data-err',BAD.join(' '));if(--left==0)start()};i.src=s}
 D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);for(const k of D.gt)ld(k,'assets/map/'+k+'.jpg?v='+W.ver);left++;tot++;fetch(D.coll).then(r=>{if(!r.ok)throw 0;return r.blob()}).catch(()=>fetch(D.coll+'&r=1').then(r=>r.blob())).catch(()=>{window.LOADFAIL();throw 0}).then(b=>{const i=new Image();i.onload=()=>{IM.coll=i;if(--left==0)start()};i.src=URL.createObjectURL(b)});   // 碰撞图走 blob，避免跨域污染画布（试玩网址）
-for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11042510');
+for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11042540');
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
 // 发型按需下载：选中哪一套才加载哪一套（女主 5 套×9 帧，男主 4 套×8 帧）
@@ -157,7 +157,7 @@ window.onGameClear=()=>{const S=run?.dbg?.S;if(S)S.paused=true;playEnding(CS[0]=
 function contact(x,y,w){c.fillStyle='rgba(18,40,20,.2)';c.beginPath();c.ellipse(x,y-1,w*.4,2.2,0,0,6.3);c.fill()}
 /* 防卡死：画圆半径为负数时浏览器会报错，统一夹到 0；主循环出任何错都继续下一帧，不让游戏冻住 */
 {const P=CanvasRenderingContext2D.prototype,A=P.arc,E=P.ellipse;P.arc=function(x,y,r,...a){return A.call(this,x,y,r>0?r:0,...a)};P.ellipse=function(x,y,rx,ry,...a){return E.call(this,x,y,rx>0?rx:0,ry>0?ry:0,...a)}}
-let LOOPERR=0;const loop=now=>{try{loopInner(now)}catch(e){if(LOOPERR++<5)console.error(e);requestAnimationFrame(loop)}};
+let LOOPERR=0;let FTA=16,FTL=0;const loop=now=>{if(FTL&&survival?.playing&&!PZ.on){FTA=FTA*.97+Math.min(100,now-FTL)*.03;if(!window.LOWQ&&FTA>30){window.LOWQ=1;fit();console.info('低画质模式：帧率偏低，自动降低画面分辨率')}}FTL=now;try{loopInner(now)}catch(e){if(LOOPERR++<5)console.error(e);requestAnimationFrame(loop)}};
 let flT=0;function loopInner(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimationFrame(loop);return}flT=now;   // 锁帧：游戏 60、菜单 30
 
  const dt=Math.min(.05,(now-last)/1000||0);last=now;

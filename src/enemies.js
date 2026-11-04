@@ -1,4 +1,5 @@
 // 敌人（哥布林）：动作、受击、死亡与远程弹；命中事件交给调用方。
+const WHITE=new WeakMap();
 export function createEnemies({data,images,hero,ok,water,onHit}){
  const kinds=['goblin','gob_blade','gob_archer','gob_shield'],arrows=[],lobs=[],booms=[];window.__EP={arrows,lobs,booms};   // 测试机器人读取敌方飞行物
  const FX={};for(const n of ['lob_fire','lob_rock','boom0','boom1','boom2','boom3']){const im=new Image();im.src='assets/characters/enemies/fx/'+n+'.png';FX[n]=im}
@@ -218,12 +219,13 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.state==='bash'){const k=Math.min(1,e.timer),a0=(e.bx||1)>0?-Math.PI/2:Math.PI/2;c.save();c.globalAlpha=.2+.45*k;c.fillStyle='#ff3a2a';c.beginPath();c.moveTo(e.x-cx,e.y-cy);c.ellipse(e.x-cx,e.y-cy,32*k,22*k,0,a0,a0+Math.PI);c.closePath();c.fill();c.restore()}
   const sc=(e.sc||1)*SPR;c.save();c.translate(Math.round(e.x-cx)+(e.state==='aim'&&e.timer>(e.aimT||.5)*.6?(Math.floor(now/40)%2?1:-1):0),Math.round(e.y-cy));if(e.rc>0){e.rc-=1/60;if(!e.boss&&!e.dead)c.translate(Math.round((e.rcd||0)*(e.elite?1:2.5)*e.rc/.09),0)}c.scale(e.face*sc,sc);c.globalAlpha=e.alpha??1;c.imageSmoothingEnabled=false;
   if(!e.dead){c.fillStyle='rgba(10,20,10,.32)';c.beginPath();c.ellipse(0,0,6,2.2,0,0,6.3);c.fill()}   // 脚下阴影：雨雾天也看得清
-  if(e.flash>0){e.flash-=1/60;c.filter=e.flash>.03?'brightness(0) invert(1)':'brightness(2.2)'}if(e.state==='fall'&&e.timer<.4)c.scale(1-.3*e.timer/.4,1-.3*e.timer/.4);
+  let wf=0;if(e.flash>0){e.flash-=1/60;wf=e.flash>.03?1:.55}   /* 受击闪白：用预先做好的白色剪影叠加，不用很耗性能的 filter */if(e.state==='fall'&&e.timer<.4)c.scale(1-.3*e.timer/.4,1-.3*e.timer/.4);
   if(data[e.k].ghost)c.globalAlpha*=e.phT>0?.25:.75;
   if(e.hop)c.translate(0,-e.hop/sc);
-  c.drawImage(im,-f.anchor[0],-f.anchor[1],f.size[0],f.size[1]);c.restore();
+  c.drawImage(im,-f.anchor[0],-f.anchor[1],f.size[0],f.size[1]);if(wf){const W=whiteOf(im);if(W){const ga=c.globalAlpha;c.globalAlpha=ga*wf;c.drawImage(W,-f.anchor[0],-f.anchor[1],f.size[0],f.size[1]);c.globalAlpha=ga}}c.restore();
   if((e.elite||e.boss)&&!e.dead&&e.hpMax){const w=e.boss?40:20,x=Math.round(e.x-cx-w/2),y=Math.round(e.y-cy-f.anchor[1]*sc-4);c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x,y,w,2.5);c.fillStyle=e.boss?'#ff5a4a':'#c77dff';c.fillRect(x,y,w*Math.max(0,e.hp/e.hpMax),2.5)}
  }
+ function whiteOf(im){if(!im?.width)return null;let w=WHITE.get(im);if(!w){w=document.createElement('canvas');w.width=im.width;w.height=im.height;const x=w.getContext('2d');x.drawImage(im,0,0);x.globalCompositeOperation='source-in';x.fillStyle='#fff';x.fillRect(0,0,w.width,w.height);WHITE.set(im,w)}return w}
  function drawArrows(c,cx,cy){
   for(const L of PIL){const x=L.x-cx,y=L.y-cy;c.save();if(L.t<L.d){const k=L.t/L.d;c.globalAlpha=.25+.4*k;c.strokeStyle='#ffe27a';c.lineWidth=1.5;c.beginPath();c.ellipse(x,y,L.r,L.r*.8,0,0,6.3);c.stroke();c.fillStyle='#fff3c0';c.beginPath();c.ellipse(x,y,L.r*k,L.r*.8*k,0,0,6.3);c.fill()}else{const k=1-(L.t-L.d)/.25;c.globalAlpha=k;const g=c.createLinearGradient(x-L.r,0,x+L.r,0);g.addColorStop(0,'rgba(255,240,190,0)');g.addColorStop(.5,'rgba(255,255,240,1)');g.addColorStop(1,'rgba(255,240,190,0)');c.fillStyle=g;c.fillRect(x-L.r,y-140,L.r*2,140)}c.restore()}
   for(const p of SPR_){const a=Math.atan2(p.dy,p.dx);if(p.img&&!(p.st>0)){const f=data.gob_emperor.frames.spear,im=images['en_gob_emperor_spear'];if(f&&im){c.save();c.translate(p.x-cx,p.y-cy);c.rotate(a);c.drawImage(im,-f.size[0]/2,-f.size[1]/2,f.size[0],f.size[1]);c.restore();continue}}c.save();c.translate(p.x-cx,p.y-cy+(p.st>0?6:0));c.rotate(p.st>0?a*.3-.9:a);c.fillStyle='#7a4a24';c.fillRect(-14,-1,22,2);c.fillStyle='#d8dde8';c.beginPath();c.moveTo(8,-2.5);c.lineTo(14,0);c.lineTo(8,2.5);c.fill();c.restore()}
