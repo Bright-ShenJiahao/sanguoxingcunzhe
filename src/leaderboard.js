@@ -1,4 +1,4 @@
-import {t,onLanguageChange} from './i18n.js?v=11042410';
+import {t,onLanguageChange} from './i18n.js?v=11042420';
 // 同源 Netlify Functions 接口；超时/断网均由调用方显示提示，不影响游戏。
 export const formatTime = seconds => Math.floor(seconds/60)+':'+String(Math.floor(seconds%60)).padStart(2,'0');
 async function request(options={},q=''){
@@ -13,7 +13,8 @@ async function request(options={},q=''){
  }finally{clearTimeout(timer)}
 }
 // 评分（与服务器一致）：存活每秒 2 分 + 击杀 1 分 + 等级 10 分 + 每个 Boss 200 分
-export const scoreOf=r=>(r.clear?20000:0)+Math.round((r.t||0)*2+(r.kills||0)+(r.lv||0)*10+(r.bosses||0)*200);
+import {scoreOf} from './score.js?v=11042420';
+export {scoreOf};
 export async function submitScore(record){
  {const q=new URLSearchParams(location.search);if(window.BOT||q.has('debug')||q.has('t')||q.has('cards'))return false}   // 调试/机器人/跳关的局不上榜
  let pin='';try{pin=localStorage.getItem('pin')||''}catch(_){}

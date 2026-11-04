@@ -12,8 +12,8 @@ const json = (body,status=200) => new Response(JSON.stringify(body),{
  status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}
 });
 const cleanName = raw => Array.from(String(raw??'').replace(/[\u0000-\u001f<>\\"'`]/g,'').trim()).slice(0,NAME_MAX).join('') || '无名氏';
-// 评分：存活每秒 2 分 + 击杀 1 分 + 等级 10 分 + 每个 Boss 200 分（与前端 scoreOf 一致）
-const scoreOf = r => (r.clear?20000:0) + Math.round(r.t*2 + r.kills + (r.lv||0)*10 + (r.bosses||0)*200);
+// 评分规则和前端共用 src/score.js
+import { scoreOf } from '../../src/score.js';
 const compare = (a,b) => b.score-a.score || b.t-a.t || b.kills-a.kills || a.at-b.at;
 async function readAll(store){
  const {blobs}=await store.list({prefix:'run-'});const rows=[];

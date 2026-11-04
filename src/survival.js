@@ -1,6 +1,7 @@
-import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042410';
-import {t,onLanguageChange} from './i18n.js?v=11042410';
-import {achvRunEnd,achvTitle,clearPick} from './achv.js?v=11042410';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042420';
+import {t,onLanguageChange} from './i18n.js?v=11042420';
+import {resetRunGlobals} from './runstate.js?v=11042420';
+import {achvRunEnd,achvTitle,clearPick} from './achv.js?v=11042420';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -28,7 +29,7 @@ export function createSurvival(game){
  applyText();onLanguageChange(applyText);
  function stop(){playing=false;finished=false;generation++;hud.hidden=true;document.body.classList.remove('survival-playing');if(dialog.open)dialog.close()}
  function start(){
-  stop();playing=true;window.CLEARED=0;window.FHT=null;window.FREEZE=0;window.FLASHW=0;window.HSLOW=0;window.HURT=0;maxHp=100;hp=100;game.reset();elapsed=0;cooldown=0;
+  stop();playing=true;resetRunGlobals();maxHp=100;hp=100;game.reset();elapsed=0;cooldown=0;
   name=(document.querySelector('.menu-name input').value.trim()||t('ui.defaultName')).slice(0,8);
   hud.hidden=false;document.body.classList.add('survival-playing');render();
  }

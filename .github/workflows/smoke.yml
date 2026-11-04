@@ -1,0 +1,19 @@
+name: 冒烟测试
+on:
+  push:
+    branches: [preview, main]
+  workflow_dispatch:
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - run: nohup python3 -m http.server 8765 >/dev/null 2>&1 &
+      - run: node tools/smoke.js
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: smoke-shots, path: 'smoke_*.png', if-no-files-found: ignore }

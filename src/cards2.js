@@ -1,6 +1,6 @@
 // 第二批技能卡（28 张）：定义 + 发射逻辑 + 弹道/区域/召唤物 + 绘制。设计见在线文档「卡池定稿（第三版）」。
 // run.js 合并 DEFS 进 WEAPONS，并在 createRun 里 install(ctx) 拿到 update / draw / sprites / absorb / onKill / mul。
-import {t} from './i18n.js?v=11042410';
+import {t} from './i18n.js?v=11042420';
 const T=(k,dt,cat,n)=>[k,{get name(){return t('card.'+k+'.name')},cat,img:null,dt,get desc(){return Array.from({length:n},(_,i)=>t('card.'+k+'.d'+i))}}];
 export const DEFS=Object.fromEntries([
  T('greatsword','mel','blade',5),
@@ -38,13 +38,13 @@ export const CARD_KIND={};for(const [k,v] of Object.entries(DEFS))Object.defineP
 
 const IMG={};const ld=(k,p)=>{const im=new Image();im.src=p;IMG[k]=im};
 for(const k of 'slash crack whip fistwave trap rock buck wedge orb keg jet holyorb hwall sigil bubble skull mist dcoil vortex rise'.split(' '))ld('fx_'+k,'assets/fx/skill/'+k+'.png');
-for(const k of 'golem treant wolf waterel fireel firelet hawk fairy'.split(' '))for(const f of ['idle','walk','atk'])ld(k+'_'+f,`assets/characters/summons/${k}/${f}.png`);
+for(const k of 'treant wolf waterel fireel firelet hawk fairy'.split(' '))for(const f of ['idle','walk','atk'])ld(k+'_'+f,`assets/characters/summons/${k}/${f}.png`);
 for(const f of ['walk0','walk1','walk2','walk3','strike'])ld('sk_'+f,'assets/characters/enemies/skeleton/'+f+'.png');
-for(const k of 'bone0 bone1 bone2 bone3 tornado0 tornado1 tornado2 tornado3 flame0 flame1 flame2 flame3 pf0 pf1 pf2 pi0 pi1 pi2 pl0 pl1 pl2 crack0 crack1 crack2 wave0 wave1 wave2 wave3 feet0 feet1 feet2 feet3 rock0 rock1 rock2 rock3 rockhit bmist0 bmist1 bmist2 qi0 qi1 qi2 gs0 gs1 gs2 gs3'.split(' '))ld('s2_'+k,'assets/fx/skill2/'+k+'.png?v=11042410');
+for(const k of 'bone0 bone1 bone2 bone3 tornado0 tornado1 tornado2 tornado3 flame0 flame1 flame2 flame3 pf0 pf1 pf2 pi0 pi1 pi2 pl0 pl1 pl2 crack0 crack1 crack2 wave0 wave1 wave2 wave3 feet0 feet1 feet2 feet3 rock0 rock1 rock2 rock3 rockhit bmist0 bmist1 bmist2 qi0 qi1 qi2 gs0 gs1 gs2 gs3'.split(' '))ld('s2_'+k,'assets/fx/skill2/'+k+'.png?v=11042420');
 const DB=(c,im,x,y,w,alpha=1)=>{const I=IMG[im];if(!I?.complete||!I.width)return;const h=I.height*w/I.width;c.save();c.globalAlpha*=alpha;c.drawImage(I,x-w/2,y-h,w,h);c.restore()};   // 脚底对齐
-ld('swd','assets/ui/w_sword.png?v=11042410');
+ld('swd','assets/ui/w_sword.png?v=11042420');
 for(const f of ['idle','walk','walk2','atk'])ld('wolf_'+f,'assets/characters/summons/cat/'+f+'.png');   // 布偶猫用 wolf 这个卡位
-const SH={golem:104,treant:120,wolf:64,waterel:100,fireel:108,firelet:40,hawk:60,fairy:44},DH={golem:30,treant:36,wolf:16,waterel:30,fireel:32,firelet:11,hawk:15,fairy:13};   // 召唤物：站立帧原图高 → 游戏里的高
+const SH={treant:120,wolf:64,waterel:100,fireel:108,firelet:40,hawk:60,fairy:44},DH={treant:36,wolf:16,waterel:30,fireel:32,firelet:11,hawk:15,fairy:13};   // 召唤物：站立帧原图高 → 游戏里的高
 
 export function install(X){
  const {en,hero,strike,knock,nearest,cluster,dmg,AR,AMT,DUR,ok,burn,survival,AIM,MA,FN}=X,R=(a,b)=>a+Math.random()*(b-a);
@@ -155,12 +155,12 @@ export function install(X){
    const L=lv(m.src)||1,dm=b=>dmK(m.src,b);let walk=false;
    const goto=(tx,ty,sp)=>{const dx=tx-m.x,dy=ty-m.y,d=Math.hypot(dx,dy);if(d<2)return d;const k=Math.min(d,sp*dt),nx=m.x+dx/d*k,ny=m.y+dy/d*k;if(m.fly||ok(nx,ny)){m.x=nx;m.y=ny}else{m.x+=dx/d*k*.3;m.y+=dy/d*k*.3}m.face=dx>=0?1:-1;walk=true;return d};
    const far=Math.hypot(m.x-hero.x,m.y-hero.y);if(far>320){m.x=hero.x+R(-20,20);m.y=hero.y+R(-15,15)}   // 跟丢了直接回到身边
-   if(m.k==='golem'||m.k==='skel'){const t=tgtSum(hero,150);if(t&&Math.hypot(t.x-hero.x,t.y-hero.y)<170){const d=goto(t.x-(t.x>m.x?10:-10),t.y,m.k==='golem'?42:55);if(d<16&&m.cd<=0){m.cd=m.k==='golem'?(L>=3?.8:1.1):.9;m.at=.25;
-      if(m.spear){}else{const v=m.k==='golem'?dm(2.2+.6*(L-1)):dm(1.2+.35*(L-1));for(const e of near(m.x+m.face*8,m.y,m.k==='golem'?22:14))hit(m.src,e,v,m.face,{sum:1,mel:true})}}
+   if(m.k==='skel'){const t=tgtSum(hero,150);if(t&&Math.hypot(t.x-hero.x,t.y-hero.y)<170){const d=goto(t.x-(t.x>m.x?10:-10),t.y,55);if(d<16&&m.cd<=0){m.cd=.9;m.at=.25;
+      if(m.spear){}else{const v=dm(1.2+.35*(L-1));for(const e of near(m.x+m.face*8,m.y,14))hit(m.src,e,v,m.face,{sum:1,mel:true})}}
      if(m.spear&&m.cd<=0&&t){m.cd=1.2;m.at=.25;const a=Math.atan2(t.y-m.y,t.x-m.x);c.P.push({k:'spear',src:'undead',x:m.x,y:m.y-10,dx:Math.cos(a),dy:Math.sin(a),v:220,life:.9,dm:dm(1.5+.3*L),hit:new Set(),pierce:1,sum:1,size:12})}}
     else goto(hero.x-hero.face*(18+(m.i||0)*10),hero.y+((m.i||0)?10:-6),70);
-    if(m.k==='golem'&&L>=5){m.jT=(m.jT??(3+(m.i||0)*2.5))-dt;if(m.jT<=0){m.jT=5;const [mx,my]=moveDir();m.x=hero.x+mx*45;m.y=hero.y+my*45;fx({k:'ring',x:m.x,y:m.y,r:40,d:.3,c:'200,190,170'});for(const e of near(m.x,m.y,40)){hit('golem',e,dm(3),Math.sign(e.x-m.x)||1,{sum:1});knock(e,6)}}}}
-   if(m.k==='golem'||m.k==='treant'){m.hT=(m.hT||0)-dt;if(m.hT<=0){m.hT=.5;let n=0;for(const e of en)if(alive(e)&&(e.x-m.x)**2+(e.y-m.y)**2<16*16)n+=(e.elite||e.boss)?3:1;if(n){m.hp-=n*2;if(m.hp<=0){m.broken=6;fx({k:'img',im:'fx_rock',x:m.x,y:m.y-8,a:0,w:24,d:.4})}}}}
+    }
+   if(m.k==='treant'){m.hT=(m.hT||0)-dt;if(m.hT<=0){m.hT=.5;let n=0;for(const e of en)if(alive(e)&&(e.x-m.x)**2+(e.y-m.y)**2<16*16)n+=(e.elite||e.boss)?3:1;if(n){m.hp-=n*2;if(m.hp<=0){m.broken=6;fx({k:'img',im:'fx_rock',x:m.x,y:m.y-8,a:0,w:24,d:.4})}}}}
    if(m.k==='treant'){const [mx,my]=moveDir();goto(hero.x-mx*26,hero.y-my*20,75);if(m.cd<=0){let best=null,bn=0;for(const e of en){if(!alive(e))continue;const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d>(L>=3?240:200)||d<50)continue;const k=near(e.x,e.y,40).length+d/100;if(k>bn){bn=k;best=e}}
      if(best){m.cd=L>=4?2.3:3;m.at=.35;m.face=best.x>=m.x?1:-1;const n=L>=5?3:1;for(let i=0;i<n;i++){const ox=(i-(n-1)/2)*30;c.P.push({k:'lob',src:'treant',x0:m.x,y0:m.y-20,x:best.x+ox*Math.cos(Math.atan2(best.y-m.y,best.x-m.x)+1.57),y:best.y+ox*Math.sin(Math.atan2(best.y-m.y,best.x-m.x)+1.57),t:0,d:.8,r:30*AR(),dm:dm(2.6+.7*(L-1)),img:'fx_rock',size:16,sum:1})}}}}
    if(m.k==='wolf'){const t=tgtSum(m,150);if(t&&Math.hypot(t.x-hero.x,t.y-hero.y)<190){m.wp=null;goto(t.x,t.y,L>=3?150:125)}else{if(!m.wp||m.wT<=0||Math.hypot(m.x-m.wp[0],m.y-m.wp[1])<6){m.wT=R(.8,1.8);const a=R(0,6.3),r=R(20,110);m.wp=[hero.x+Math.cos(a)*r,hero.y+Math.sin(a)*r*.8]}m.wT-=dt;goto(m.wp[0],m.wp[1],L>=3?120:95)}   // 布偶猫：在你附近乱跑，碰到就挠
@@ -247,7 +247,7 @@ export function install(X){
    if(m.k==='skel'){const k=m.rise>0?1-m.rise/.6:1;if(m.rise>0)DI(c,'fx_rise',x,y-6,22);const im=m.at>0?'sk_strike':'sk_walk'+(m.walk?Math.floor(now/120)%4:0);c.save();c.globalAlpha=k;c.translate(x,y);c.scale(-(m.face||1),1);const I=IMG[im];if(I?.complete&&I.width){c.filter='hue-rotate(160deg) saturate(1.6)';c.drawImage(I,-16,-30,32,32);c.filter='none'}c.restore();
      c.fillStyle='rgba(90,170,255,.55)';c.beginPath();c.ellipse(x,y,6,2,0,0,6.3);c.fill();return}
    if(m.broken>0){DI(c,'fx_rock',x,y-6,18,0,false,.6);return}
-   const key=m.k,f=m.at>0?'atk':m.walk?(m.k==='wolf'&&Math.floor(now/110)%2?'walk2':'walk'):'idle',I=IMG[key+'_'+f];if(!I?.complete||!I.width)return;const sc=DH[key]/SH[key]*(lv(m.src)>=4&&(m.k==='golem'||m.k==='treant')?1.15:1),h=I.height*sc,w=I.width*sc;
+   const key=m.k,f=m.at>0?'atk':m.walk?(m.k==='wolf'&&Math.floor(now/110)%2?'walk2':'walk'):'idle',I=IMG[key+'_'+f];if(!I?.complete||!I.width)return;const sc=DH[key]/SH[key]*(lv(m.src)>=4&&(m.k==='treant')?1.15:1),h=I.height*sc,w=I.width*sc;
    const bob=m.fly&&m.k!=='hawk'?Math.sin(now/180+(m.i||0))*2:0;if(m.k==='hawk'&&m.tr?.length>1){c.save();for(let i=1;i<m.tr.length;i++){const q=i/m.tr.length;c.strokeStyle=`rgba(255,255,255,${q*.5})`;c.lineWidth=q*3;c.beginPath();c.moveTo(m.tr[i-1][0]-cx,m.tr[i-1][1]-cy-h/2);c.lineTo(m.tr[i][0]-cx,m.tr[i][1]-cy-h/2);c.stroke()}c.restore()}c.save();c.translate(x,y-h/2+2+bob);if(m.face<0)c.scale(-1,1);
    const nearHero=Math.abs(m.x-hero.x)<14&&m.y>hero.y-4&&m.y<hero.y+20;if(nearHero)c.globalAlpha=.55;   // 挡住主角时半透明
    if(m.life!==undefined&&m.life<2)c.globalAlpha*=.5+.5*Math.sin(now/60);

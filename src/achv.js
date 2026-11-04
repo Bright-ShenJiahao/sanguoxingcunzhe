@@ -1,6 +1,6 @@
 // 成就收藏：卡牌解锁 + 祝福解锁 + 金币成就。进度存在本机 localStorage 'ach'。
-import {getLanguage} from './i18n.js?v=11042410';
-import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042410';
+import {getLanguage} from './i18n.js?v=11042420';
+import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042420';
 const L=o=>o[getLanguage()]||o.zh;
 const BOSS={gob_king:'哥布林大王',gob_hero:'哥布林英雄',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士',gob_emperor:'哥布林皇帝'};
 const BNAME={gob_king:{zh:'哥布林大王',en:'Goblin King',ja:'ゴブリンキング'},gob_hero:{zh:'哥布林英雄',en:'Goblin Hero',ja:'ゴブリン勇者'},gob_chief:{zh:'哥布林酋长',en:'Goblin Chief',ja:'ゴブリン族長'},gob_paladin:{zh:'哥布林圣骑士',en:'Goblin Paladin',ja:'ゴブリン聖騎士'},gob_emperor:{zh:'哥布林皇帝',en:'Goblin Emperor',ja:'ゴブリン皇帝'}};
@@ -69,8 +69,6 @@ export function initAchv(){
   const gh=e.target.closest('[data-g]');if(gh){const g=gh.dataset.g;open.has(g)?open.delete(g):open.add(g);draw();return}
   const it=e.target.closest('[data-i]');if(it){const x=o._xs.find(y=>y.id===it.dataset.i);if(x)o.querySelector('.dt').innerHTML=`${esc(x.d)}<br><b>${L(T.reward)}：</b>${esc(x.rw)}`}});
  o.addEventListener('change',e=>{if(e.target.matches('[data-h]')){hide=e.target.checked;try{localStorage.setItem('achHide',hide?'1':'0')}catch(_){}draw()}});
- const b=document.createElement('button');b.type='button';b.className='menu-board';b.dataset.achv=1;
- const lab=()=>{b.textContent='🏆 '+L(T.title)};lab();b.onclick=()=>{draw();o.hidden=false};
  window.ACHV_OPEN=()=>{draw();o.hidden=false};window.ACHV_NAME=()=>L(T.title);window.ACHV_LABEL=()=>window.META?.drawBar?.();window.META?.drawBar?.();
 }
 // 通关奖励：任选一张未解锁的技能卡或祝福免费解锁；全部解锁后改为 +1000 金币
