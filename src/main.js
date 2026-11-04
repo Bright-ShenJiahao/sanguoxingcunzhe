@@ -18,7 +18,7 @@ import {initNB} from './nb.js?v=11042430';
 import {createDebug} from './debug.js?v=11042430';
 // 加载失败：自动重试 2 次，仍失败就在加载画面提示「点击重试」
 window.LOADFAIL=()=>{const t=document.getElementById('bootx');if(t&&!t.dataset.fail){t.dataset.fail=1;t.textContent=t_(lf());t.style.cursor='pointer';t.style.color='#ffb4a0';document.getElementById('boot')?.addEventListener('click',()=>location.reload())}};
-const lf=()=>({zh:'加载失败，点击重试',en:'Failed to load — tap to retry',ja:'読み込み失敗：タップで再試行'}),t_=o=>o[(()=>{try{return localStorage.getItem('lang')}catch(e){}})()]||o.en;
+const lf=()=>({zh:'加载失败，点击重试',en:'Failed to load — tap to retry',ja:'読み込み失敗：タップで再試行'}),t_=o=>o[(()=>{try{return localStorage.getItem('lang')}catch(e){}})()]||o.zh;
 const fj=async(u,n=0)=>{try{const r=await fetch(u);if(!r.ok)throw 0;return await r.json()}catch(e){if(n<2){await new Promise(z=>setTimeout(z,800*(n+1)));return fj(u,n+1)}window.LOADFAIL();throw e}};
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042430'].map(u=>fj(u)));
 const HN=await fj('data/heroine.json');
