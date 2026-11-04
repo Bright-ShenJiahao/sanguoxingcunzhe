@@ -77,13 +77,13 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      if(stats.ranged){
       const len=Math.hypot(ax,ay)||1;
       arrows.push({k:e.k,x:e.x,y:e.y-10,dx:ax/len,dy:ay/len,life:1.6,dm:stats.damage*(e.dmgMul||1)*(e.elite?1.3:1)});
-      if(e.k==='gob_archer'&&!(e.vlT>performance.now())){const g=en.filter(o=>o!==e&&o.k==='gob_archer'&&!o.dead&&(o.x-e.x)**2+(o.y-e.y)**2<60*60);if(g.length>=2){window.onVolley?.(e);for(const o of g){o.vlT=performance.now()+2500;o.cooldown=Math.max(o.cooldown||0,1.5);arrows.push({k:o.k,x:o.x,y:o.y-10,dx:ax/len,dy:ay/len,life:1.6,dm:stats.damage*(o.dmgMul||1)})}e.vlT=performance.now()+2500}}   // 弓手齐射：同一方向一排箭
+      if(e.k==='gob_archer'&&!(e.vlT>performance.now())){const g=en.filter(o=>o!==e&&o.k==='gob_archer'&&!o.dead&&(o.x-e.x)**2+(o.y-e.y)**2<60*60);if(g.length>=2){window.onVolley?.(e);for(const o of g){o.flash=.15;o.vlT=performance.now()+2500;o.cooldown=Math.max(o.cooldown||0,1.5);arrows.push({k:o.k,x:o.x,y:o.y-10,dx:ax/len,dy:ay/len,life:1.6,dm:stats.damage*(o.dmgMul||1)})}e.vlT=performance.now()+2500}}   // 弓手齐射：同一方向一排箭
      }else if((e.elite||e.boss)&&d<=(stats.reach+5)*(e.sc||1)){onHit(BD)}   // 普通怪挥砍只是动画，伤害靠碰撞
     }
    }else if(e.state==='strike'){
     if(e.timer>=.2){e.state='recover';e.timer=0}
    }else if(e.state==='recover'){
-    if(e.timer>=.45){e.state='move';e.timer=0;e.cooldown=.55+Math.random()*.35}
+    if(e.timer>=.45){e.state='move';e.timer=0;e.cooldown=stats.ranged?1.4+Math.random()*.5:.55+Math.random()*.35}   // 弓手一轮约 2.5–3 秒
    }else{
     e.cooldown=Math.max(0,e.cooldown-dt);e.dcd=(e.dcd||0)-dt;e.bcd=(e.bcd||0)-dt;
     const reg=!e.elite&&!e.boss;
@@ -135,7 +135,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      }
     if(plain||(e.k==='gob_archer'&&(Math.abs(ax)>230||Math.abs(ay)>140))){}
     else if(e.k==='gob_hero'&&d<=stats.reach*(e.sc||1)*1.2&&e.cooldown===0){e.state='combo';e.timer=0;e.cmb=0;continue}
-    else if(d<=stats.reach*(e.sc||1)&&e.cooldown===0){e.state='windup';e.timer=0;continue}
+    else if(d<=stats.reach*(e.sc||1)&&e.cooldown===0&&(!stats.ranged||(Math.abs(ax)<(window.VIEWHW||240)-8&&Math.abs(ay)<(window.VIEWHH||150)-8))){e.state='windup';e.timer=0;if(stats.ranged)e.flash=.12;continue}   // 远程怪只在屏幕内才拉弓
     if(d>(plain?6:stats.reach*(e.sc||1)*.85)){
      e.losT=(e.losT||0)-dt;if(e.losT<=0){e.losT=.25+Math.random()*.1;e.los=true;const n=Math.ceil(d/6);for(let k=1;k<n;k++){if(water(e.x+ax*k/n,e.y+ay*k/n)===1){e.los=false;break}}}   // 中间没有河/崖就直线走
      const fd=d>28&&!e.los&&!stats.ghost&&window.PATHDIR?.(e.x,e.y);let tx=fd?fd[0]:ax/d,ty=fd?fd[1]:ay/d;
@@ -165,7 +165,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   for(let i=SPR_.length-1;i>=0;i--){const p=SPR_[i];if(p.st>0){p.st-=dt;const q=Math.hypot(hero.x-p.x,hero.y-(p.y+10));if(q<9&&q>0){hero.x=p.x+(hero.x-p.x)/q*9;hero.y=p.y+10+(hero.y-p.y-10)/q*9}if(p.st<=0)SPR_.splice(i,1);continue}   // 插地长矛：挡路 3 秒
    const nx=p.x+p.dx*320*dt,ny=p.y+p.dy*320*dt;p.life-=dt;if(!ok(nx,ny+10)||p.life<=0){p.st=3;continue}p.x=nx;p.y=ny;if(!p.hit&&Math.hypot(hero.x-p.x,hero.y-10-p.y)<9){p.hit=1;onHit(p.dm)}}
   for(let i=arrows.length-1;i>=0;i--){
-   const p=arrows[i],oldx=p.x,oldy=p.y;p.x+=p.dx*145*dt;p.y+=p.dy*145*dt;p.life-=dt;
+   const p=arrows[i],oldx=p.x,oldy=p.y;p.x+=p.dx*120*dt;p.y+=p.dy*120*dt;p.life-=dt;
    const vx=p.x-oldx,vy=p.y-oldy,v2=vx*vx+vy*vy;
    const t=v2?Math.max(0,Math.min(1,((hero.x-oldx)*vx+(hero.y-10-oldy)*vy)/v2)):0;
    if(Math.hypot(oldx+vx*t-hero.x,oldy+vy*t-(hero.y-10))<8){window.CUR_E=(p.k||'?')+'·远程';onHit(p.dm);arrows.splice(i,1)}
