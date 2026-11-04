@@ -1,40 +1,40 @@
 // 第二批技能卡（28 张）：定义 + 发射逻辑 + 弹道/区域/召唤物 + 绘制。设计见在线文档「卡池定稿（第三版）」。
 // run.js 合并 DEFS 进 WEAPONS，并在 createRun 里 install(ctx) 拿到 update / draw / sprites / absorb / onKill / mul。
-const T=(k,n,dt,cat,desc)=>[k,{name:n,cat,img:null,dt,desc}];
+import {t} from './i18n.js?v=11041530';
+const T=(k,dt,cat,n)=>[k,{get name(){return t('card.'+k+'.name')},cat,img:null,dt,get desc(){return Array.from({length:n},(_,i)=>t('card.'+k+'.d'+i))}}];
 export const DEFS=Object.fromEntries([
- T('greatsword','双手大剑','mel','blade',['往前方直线重劈，伤害高、能破盾（打盾卫、圣骑士 +50%）','伤害提升','劈得更远，间隔缩短','伤害提升','【进阶】重劈后地面延迟裂斩，再追一次伤害']),
- T('rapier','疾风突刺剑','mel','blade',['每隔几秒往移动方向刺出一道突刺剑气，穿过一排怪','伤害提升','剑气更长，间隔缩短','伤害提升','【进阶】剑气路径留下残影，稍后沿原路再刺一次']),
- T('gsword','守护飞剑','mel','blade',['2 把剑绕身旋转，碰到的怪受伤并被弹开','3 把剑','转得更快，伤害提升','4 把剑','【进阶】飞剑周期性向外飞出，再回旋归位']),
- T('whip','长鞭','mel','blade',['朝一侧横抽一条长线','伤害提升','鞭子更长，间隔缩短','两侧都抽','【进阶】鞭梢回抽，沿原路再打一次']),
- T('fist','气功波','mel','blade',['朝最近的怪双掌推出一团气功波，穿透沿途敌人，击退、减速，飞到尽头炸开','伤害提升','气功波更大，间隔缩短','减速更久','【进阶】一次推出 3 团气功波']),
- T('trap','猎夹','mel','blade',['往前方扔 3 个夹子，踩中受伤并减速','伤害提升','间隔缩短','一次扔 4 个','【进阶】夹住后崩裂，溅伤周围']),
- T('treant','落石','rng','bow',['往远处怪最多的地方抛一块巨石，砸出一圈，减速','伤害提升','砸得更远','间隔缩短','【进阶】一次砸 3 块，扇形落下']),
- T('wolf','布偶猫','mel','blade',['一只布偶猫在你附近乱跑，碰到的怪受伤（打不死）','伤害提升','跑得更快','2 只猫','【进阶】猫抓狂：碰到怪时连挠三下']),
- T('mgun','魔导枪','rng','bow',['近距离散弹，扇形打出，击退','弹丸 +1，伤害提升','间隔缩短','弹丸 +1','【进阶】被打飞的怪撞到别的怪就爆炸']),
- T('wedge','银之楔','holy','bow',['天上落下一根银木桩，钉住单个敌人（神圣伤害），精英怪、Boss 优先，对它们伤害 ×2.5','伤害提升','间隔缩短','伤害提升','【进阶】同一目标钉满 3 根后引爆，周围的怪一起受伤']),
- T('hawk','唤鹰','rng','bow',['猎鹰绕着你盘旋，看到敌人就俯冲啄击，挂猎印（你打它 +15%）','伤害提升','俯冲更频繁','2 只鹰','【进阶】猎印目标死后，猎印转给最近的怪']),
- T('orb','水晶弹珠','ele','spell',['水晶弹珠绕着你沿六芒星轨迹飞，伤害低、命中多','伤害提升','飞得更快','2 颗弹珠','【进阶】六芒星周期性向外扩大，再收回身边']),
- T('keg','火药桶','ele','spell',['往移动方向滚出火药桶，延时爆炸并点燃','伤害提升','爆炸范围变大','间隔缩短','【进阶】爆炸时往两侧再滚出两个小桶']),
- T('flamestep','烈焰足迹','ele','spell',['边走边在身后留火，点燃踩到的怪','伤害提升','火更宽','火留得更久','【进阶】火线够长后，从旧的一端依次爆燃']),
- T('pouch','元素口袋','ele','spell',['朝前方扇形吐息，火（点燃）、冰（减速）、雷（高伤）轮换','伤害提升','吐息更远','间隔缩短','【进阶】每次换元素前，先放一次强化吐息']),
- T('waterel','激流','ele','spell',['往前推出一波水浪，沿途伤害并把怪推后','伤害提升','浪更宽','间隔缩短','【进阶】连推两波，打中的怪减速']),
- T('fireel','火龙卷','ele','spell',['一股火旋风在你身边游走 4 秒，卷到的怪受伤并点燃','伤害提升','旋风更大','持续 6 秒','【进阶】两股火旋风']),
- T('holyorb','圣光球','holy','spell',['射出慢速光球，一路磨血，最后爆炸','伤害提升','光球更大','间隔缩短','【进阶】爆炸后分成两颗小光球，往两侧继续前进']),
- T('hshield','圣盾','holy','spell',['金色护盾吸收伤害，破碎时爆炸（不回血），8 秒后重生','护盾更厚','重生更快','爆炸更强','【进阶】破碎时碎片往移动方向汇成一道推进光浪']),
- T('hwall','圣壁','holy','spell',['身前立起光墙往前推进，穿过怪群造成伤害、轻推（不挡怪）','伤害提升','光墙更长','间隔缩短','【进阶】两道光墙交叉推进']),
- T('sigil','圣印','holy','spell',['在怪多处落印，1 秒后定身（普通 1 秒、精英 0.4 秒、Boss 只减速），结束时圣光爆发','伤害提升','范围变大','间隔缩短','【进阶】定身 1.5 秒，封住时受伤 +20%；再沿移动方向落两枚小圣印']),
- T('fairy','审判之光','holy','spell',['天降光柱，打附近血最多的怪','伤害提升','光柱更粗','间隔缩短','【进阶】一次落 3 道']),
- T('shadow','暗影魔矢','dark','spell',['快速骷髅魔矢，命中挂易伤（受伤 +12%）','伤害提升','间隔缩短','一次 2 支','【进阶】易伤叠 3 层；叠满的怪死后，易伤传给周围 3 只']),
- T('bmist','血雾','dark','spell',['身边淡红血雾持续群伤，雾里的怪易伤（不吸血）','伤害提升','雾更大','伤害提升','【进阶】移动时身后留下雾带']),
- T('dcoil','死亡缠绕','dark','spell',['缠绕飞出再飞回，沿途伤害，击杀时回 1 点血（每次最多 3）','伤害提升','飞得更远','一次 2 道','【进阶】回程顺路收割残血小怪']),
- T('vortex','暗黑漩涡','dark','spell',['在怪多处开漩涡，把怪吸成一团马上炸开','伤害提升','吸得更远','间隔缩短','【进阶】爆炸后把残骸往移动方向喷出，再打一轮']),
- T('undead','骨手','dark','spell',['怪脚下伸出骷髅手抓住它 2 秒，强力减速并持续伤害','伤害提升','抓得更久','同时抓 2 只','【进阶】同时抓 3 只']),
+ T('greatsword','mel','blade',5),
+ T('rapier','mel','blade',5),
+ T('gsword','mel','blade',5),
+ T('whip','mel','blade',5),
+ T('fist','mel','blade',5),
+ T('trap','mel','blade',5),
+ T('treant','rng','bow',5),
+ T('wolf','mel','blade',5),
+ T('mgun','rng','bow',5),
+ T('wedge','holy','bow',5),
+ T('hawk','rng','bow',5),
+ T('orb','ele','spell',5),
+ T('keg','ele','spell',5),
+ T('flamestep','ele','spell',5),
+ T('pouch','ele','spell',5),
+ T('waterel','ele','spell',5),
+ T('fireel','ele','spell',5),
+ T('holyorb','holy','spell',5),
+ T('hshield','holy','spell',5),
+ T('hwall','holy','spell',5),
+ T('sigil','holy','spell',5),
+ T('fairy','holy','spell',5),
+ T('shadow','dark','spell',5),
+ T('bmist','dark','spell',5),
+ T('dcoil','dark','spell',5),
+ T('vortex','dark','spell',5),
+ T('undead','dark','spell',5),
 ]);
 export const CARD_DT=Object.fromEntries(Object.entries(DEFS).map(([k,v])=>[k,v.dt]));
 export const CARD_IC=Object.fromEntries(Object.keys(DEFS).map(k=>[k,'sk_'+k]));
-const KN={mel:'物理·近战',rng:'物理·远程',ele:'法术·元素',holy:'法术·神圣',dark:'法术·黑暗'};
-const FORM={wolf:'召唤',hawk:'召唤',trap:'放置',hshield:'护盾',bmist:'光环'};
-export const CARD_KIND=Object.fromEntries(Object.entries(DEFS).map(([k,v])=>[k,KN[v.dt]+(FORM[k]?'·'+FORM[k]:'')]));
+const FORM={wolf:'summon',hawk:'summon',trap:'place',hshield:'shield',bmist:'aura'};
+export const CARD_KIND={};for(const [k,v] of Object.entries(DEFS))Object.defineProperty(CARD_KIND,k,{enumerable:true,get:()=>t('card.kind.'+v.dt)+(FORM[k]?'·'+t('card.form.'+FORM[k]):'')});
 
 const IMG={};const ld=(k,p)=>{const im=new Image();im.src=p;IMG[k]=im};
 for(const k of 'slash crack whip fistwave trap rock buck wedge orb keg jet holyorb hwall sigil bubble skull mist dcoil vortex rise'.split(' '))ld('fx_'+k,'assets/fx/skill/'+k+'.png');
