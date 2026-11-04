@@ -6,7 +6,7 @@ const BOSS={gob_king:'哥布林大王',gob_hero:'哥布林英雄',gob_chief:'哥
 const BNAME={gob_king:{zh:'哥布林大王',en:'Goblin King',ja:'ゴブリンキング'},gob_hero:{zh:'哥布林英雄',en:'Goblin Hero',ja:'ゴブリン勇者'},gob_chief:{zh:'哥布林酋长',en:'Goblin Chief',ja:'ゴブリン族長'},gob_paladin:{zh:'哥布林圣骑士',en:'Goblin Paladin',ja:'ゴブリン聖騎士'},gob_emperor:{zh:'哥布林皇帝',en:'Goblin Emperor',ja:'ゴブリン皇帝'}};
 const T={
  title:{zh:'成就',en:'Achievements',ja:'実績'},done:{zh:'已完成',en:'Completed',ja:'達成'},hide:{zh:'隐藏已完成',en:'Hide completed',ja:'達成済みを隠す'},
- close:{zh:'关闭',en:'Close',ja:'閉じる'},reward:{zh:'奖励',en:'Reward',ja:'報酬'},got:{zh:'达成成就',en:'Achievement',ja:'実績達成'},
+ close:{zh:'关闭',en:'Close',ja:'閉じる'},claim:{zh:'领取',en:'Claim',ja:'受取'},claimAll:{zh:'全部领取',en:'Claim all',ja:'すべて受取'},ready:{zh:'可领取，去成就页领取奖励',en:'ready — claim rewards in Achievements',ja:'受取可能（実績画面で受け取ろう）'},reward:{zh:'奖励',en:'Reward',ja:'報酬'},got:{zh:'达成成就',en:'Achievement',ja:'実績達成'},
  g_surv:{zh:'生存',en:'Survival',ja:'生存'},g_grow:{zh:'成长',en:'Growth',ja:'成長'},g_kill:{zh:'战斗',en:'Combat',ja:'戦闘'},g_boss:{zh:'Boss',en:'Bosses',ja:'ボス'},
  g_card:{zh:'技能卡收集',en:'Skill Cards',ja:'スキル収集'},g_bless:{zh:'祝福收集',en:'Blessings',ja:'祝福収集'},
  rCard:{zh:'解锁技能卡「{n}」',en:'Unlock skill card "{n}"',ja:'スキル「{n}」解放'},rBless:{zh:'解锁祝福「{n}」',en:'Unlock blessing "{n}"',ja:'祝福「{n}」解放'},rGold:{zh:'{n} 金币',en:'{n} gold',ja:'金貨 {n}'}};
@@ -33,7 +33,7 @@ const G=[
  ['boss4','boss','ach_trophy',{zh:'一局打倒 4 个 Boss',en:'Defeat 4 bosses in one run',ja:'1回でボスを4体倒す'},c=>[Math.min(4,c.st.bosses||0),4],150]];
 function list(){
  const U=window.UNL,u=U?.load?.()||{best:0,boss:{},runs3:0,c:[],p:[]},m=meta(),a=store(),ctx={u,m,st:a.st},out=[];
- for(const [id,g,ic,d,p,gold] of G){const [cur,goal]=p(ctx);out.push({id,g,ic:`assets/ui/${ic}.png`,d:L(d),cur,goal,done:!!a.done[id]||cur>=goal,rw:f(T.rGold,{n:gold}),gold})}
+ for(const [id,g,ic,d,p,gold] of G){const [cur,goal]=p(ctx);out.push({id,g,ic:`assets/ui/${ic}.png`,d:L(d),cur,goal,done:!!a.done[id]||cur>=goal,cl:!a.done[id]&&cur>=goal,rw:f(T.rGold,{n:gold}),gold})}
  for(const [k,,fn] of U?.CU||[]){const ok=U.okC(k),[cur,goal]=fn.p?fn.p(m,u):[ok?1:0,1];out.push({id:'c_'+k,g:'card',ic:WIC[k]?`assets/ui/${WIC[k]}.png`:'',d:U.condC(k),cur:ok?goal:cur,goal,done:ok,rw:f(T.rCard,{n:WEAPONS[k]?.name||k})})}
  (U?.PU||[]).forEach((k,i)=>{const ok=U.okP(k);out.push({id:'p_'+k,g:'bless',ic:PIC[k]?`assets/ui/${PIC[k]}.png`:'',d:U.condP(k),cur:ok?i+1:Math.min(i+1,u.runs3||0),goal:i+1,done:ok,rw:f(T.rBless,{n:PASSIVES[k]?.name||k})})});
  return out}
@@ -45,8 +45,9 @@ export function achvRunEnd(rec){
  if(S){if(Object.values(S.w||{}).some(v=>v>=6))st.l5=1;if(S.full5)st.full5=1;st.combo=Math.max(st.combo||0,S.cmax||0)}
  if(rec.t>=300&&(window.FHT==null||window.FHT>=300))st.nohit5=1;
  save(a);
- const got=[];for(const x of list()){if(x.gold&&x.done&&!a.done[x.id]){a.done[x.id]=1;window.META?.spend?.(-x.gold);got.push(x.d+' +'+x.gold+'🪙')}}
- save(a);return got}
+ a.ntf=a.ntf||{};const got=[];for(const x of list()){if(x.cl&&!a.ntf[x.id]){a.ntf[x.id]=1;got.push(x.d)}}
+ save(a);if(got.length)got.push(L(T.ready));window.META?.drawBar?.();return got}
+function claim(ids){const a=store();let g=0;for(const x of list())if(x.cl&&ids.includes(x.id)){a.done[x.id]=1;g+=x.gold}save(a);if(g){window.META?.spend?.(-g);window.SFX?.coin?.()}window.META?.drawBar?.();return g}
 export const achvTitle=()=>L(T.got);
 // 成就页
 export function initAchv(){
@@ -55,21 +56,22 @@ export function initAchv(){
 #achv .hd{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #e2cb8755;flex-wrap:wrap}#achv h2{margin:0;color:#f6db94;font-size:22px;flex:1}#achv .hd label{font-size:13px;display:flex;gap:6px;align-items:center}#achv .hd button{font:inherit;color:#fff;background:#436da66b;border:1px solid #8fbbef;border-radius:6px;padding:6px 14px;cursor:pointer}
 #achv .ls{overflow:auto;padding:6px 10px 12px;flex:1;-webkit-overflow-scrolling:touch}#achv .gh{display:flex;justify-content:space-between;align-items:center;margin:10px 4px 4px;padding:8px 12px;background:#0b1a38;border:1px solid #e2cb8788;border-radius:6px;color:#f6db94;font-weight:800;cursor:pointer;user-select:none}
 #achv .it{display:grid;grid-template-columns:22px 1fr auto 34px;gap:10px;align-items:center;padding:8px 10px;border-bottom:1px solid #ffffff14;cursor:pointer}#achv .it.ok{opacity:.72}#achv .ck{width:18px;height:18px;border:2px solid #e2cb87;border-radius:3px;display:grid;place-items:center;color:#f6db94;font-weight:900;font-size:13px}
-#achv .pg{font:600 12px ui-monospace,Menlo,monospace;color:#b9cbe6;white-space:nowrap}#achv .it img{width:30px;height:30px;image-rendering:pixelated;object-fit:contain}#achv .dt{padding:10px 16px;border-top:1px solid #e2cb8755;min-height:44px;font-size:14px;background:#0b1a38}#achv .dt b{color:#f6db94}`;
+#achv .pg{font:600 12px ui-monospace,Menlo,monospace;color:#b9cbe6;white-space:nowrap}#achv .it img{width:30px;height:30px;image-rendering:pixelated;object-fit:contain}#achv .dt{padding:10px 16px;border-top:1px solid #e2cb8755;min-height:44px;font-size:14px;background:#0b1a38}#achv .dt b{color:#f6db94}#achv .cb,#achv .hd .ca{font:700 12px system-ui;color:#2a1a00;background:linear-gradient(#ffe08a,#e2b44a);border:1px solid #fff3c0;border-radius:6px;padding:5px 9px;cursor:pointer;white-space:nowrap;animation:cbp 1.2s infinite}#achv .hd .ca{font-size:13px;padding:6px 12px}@keyframes cbp{50%{box-shadow:0 0 10px #ffd166}}#achv .rd{display:inline-block;width:9px;height:9px;border-radius:50%;background:#ff4b4b;margin-left:6px;vertical-align:1px}`;
  document.head.append(st);
  const o=document.createElement('div');o.id='achv';o.hidden=true;document.body.append(o);
  let hide=false;const open=new Set(['surv','grow','kill','boss','card','bless']);try{hide=localStorage.getItem('achHide')==='1'}catch(_){}
  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
  const draw=()=>{const xs=list(),n=xs.filter(x=>x.done).length;
-  let h=`<div class="box"><div class="hd"><h2>${L(T.title)}　${L(T.done)}：${n}/${xs.length}</h2><label><input type="checkbox" data-h ${hide?'checked':''}>${L(T.hide)}</label><button data-x>${L(T.close)}</button></div><div class="ls">`;
-  for(const g of ['surv','grow','kill','boss','card','bless']){const gs=xs.filter(x=>x.g===g);h+=`<div class="gh" data-g="${g}"><span>${open.has(g)?'▼':'▶'} ${L(T['g_'+g])}</span><span>${gs.filter(x=>x.done).length} / ${gs.length}</span></div>`;
-   if(open.has(g))for(const x of gs){if(hide&&x.done)continue;h+=`<div class="it${x.done?' ok':''}" data-i="${x.id}"><span class="ck">${x.done?'✓':''}</span><span>${esc(x.d)}</span><span class="pg">${x.goal>1?Math.min(x.cur,x.goal)+' / '+x.goal:''}</span>${x.ic?`<img src="${x.ic}" alt="">`:'<span></span>'}</div>`}}
+  const cls=xs.filter(x=>x.cl);let h=`<div class="box"><div class="hd"><h2>${L(T.title)}　${L(T.done)}：${n}/${xs.length}</h2>${cls.length?`<button class="ca" data-ca>${L(T.claimAll)} +${cls.reduce((a,x)=>a+x.gold,0)}🪙</button>`:''}<label><input type="checkbox" data-h ${hide?'checked':''}>${L(T.hide)}</label><button data-x>${L(T.close)}</button></div><div class="ls">`;
+  for(const g of ['surv','grow','kill','boss','card','bless']){const gs=xs.filter(x=>x.g===g);const nc=gs.filter(x=>x.cl).length;h+=`<div class="gh" data-g="${g}"><span>${open.has(g)?'▼':'▶'} ${L(T['g_'+g])}${nc?' <i class="rd"></i>':''}</span><span>${gs.filter(x=>x.done).length} / ${gs.length}</span></div>`;
+   if(open.has(g))for(const x of gs){if(hide&&x.done)continue;h+=`<div class="it${x.done?' ok':''}" data-i="${x.id}"><span class="ck">${x.done?'✓':''}</span><span>${esc(x.d)}</span>${x.cl?`<button class="cb" data-c="${x.id}">${L(T.claim)} +${x.gold}🪙</button>`:`<span class="pg">${x.goal>1?Math.min(x.cur,x.goal)+' / '+x.goal:''}</span>`}${x.ic?`<img src="${x.ic}" alt="">`:'<span></span>'}</div>`}}
   h+=`</div><div class="dt"></div></div>`;o.innerHTML=h;o._xs=xs};
  o.addEventListener('click',e=>{if(e.target===o||e.target.closest('[data-x]')){o.hidden=true;return}
+  const cb=e.target.closest('[data-c],[data-ca]');if(cb){claim(cb.dataset.c?[cb.dataset.c]:o._xs.filter(x=>x.cl).map(x=>x.id));draw();return}
   const gh=e.target.closest('[data-g]');if(gh){const g=gh.dataset.g;open.has(g)?open.delete(g):open.add(g);draw();return}
   const it=e.target.closest('[data-i]');if(it){const x=o._xs.find(y=>y.id===it.dataset.i);if(x)o.querySelector('.dt').innerHTML=`${esc(x.d)}<br><b>${L(T.reward)}：</b>${esc(x.rw)}`}});
  o.addEventListener('change',e=>{if(e.target.matches('[data-h]')){hide=e.target.checked;try{localStorage.setItem('achHide',hide?'1':'0')}catch(_){}draw()}});
- window.ACHV_OPEN=()=>{draw();o.hidden=false};window.ACHV_NAME=()=>L(T.title);window.ACHV_LABEL=()=>window.META?.drawBar?.();window.META?.drawBar?.();
+ window.ACHV_OPEN=()=>{draw();o.hidden=false};window.ACHV_PEND=()=>list().filter(x=>x.cl).length;window.ACHV_NAME=()=>L(T.title);window.ACHV_LABEL=()=>window.META?.drawBar?.();window.META?.drawBar?.();
 }
 // 通关奖励：任选一张未解锁的技能卡或祝福免费解锁；全部解锁后改为 +1000 金币
 export function clearPick(tr,done){

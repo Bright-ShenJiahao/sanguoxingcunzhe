@@ -36,6 +36,7 @@ export function createMeta(){
  .mpanel[hidden]{display:none}
  .mpanel .box{width:min(900px,94vw);max-height:88vh;overflow:auto;padding:22px 24px;border:3px solid #cfe2ff;border-radius:16px;background:linear-gradient(160deg,#2a5aaef5,#173a7cf5);box-shadow:0 8px 0 #0006}
  .mpanel h2{margin:0;font-size:26px;letter-spacing:2px;text-shadow:0 2px 0 #0008}.mpanel .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.mpanel .hd h2{min-width:0;flex:1}.mpanel .back{flex:none;white-space:nowrap}@media(max-width:700px){.mpanel .hd{gap:10px}.mpanel .hd h2{font-size:20px}.mpanel .hd h2 small{display:block;margin:4px 0 0!important;font-size:12px}.mpanel .back{padding:6px 14px}}
  .mpanel .hd small{font-size:15px;color:#c9d8f0;margin-left:10px}
  .mpanel .back{cursor:pointer;padding:8px 20px;border:2px solid #cfe2ff;border-radius:10px;background:#123063;color:#fff;font:inherit}
  .mpanel .note{color:#c9d8f0;margin:-4px 0 14px;font-size:13px}
@@ -68,6 +69,7 @@ export function createMeta(){
  // ---------- 顶部状态栏 ----------
  const bar=document.createElement('div');bar.id='mbar';document.body.append(bar);
  function drawBar(){bar.innerHTML=`<span class="pill" title="${tr('ui.gold')}"><img src="assets/ui/misc_0.png?v=11042550" alt="">${M.gold}</span><button class="pill" data-p="dex" title="${tr('ui.dex.title')}"><img src="assets/ui/misc_2.png?v=11042550" alt=""><span class="lb">${tr('ui.dex.short')}</span></button><button class="pill" data-p="ach" title="${window.ACHV_NAME?.()||''}">🏆<span class="lb">${window.ACHV_NAME?.()||''}</span></button><button class="pill" data-p="snd" title="${tr('ui.mute')}"><img src="assets/ui/misc_${window.SFX?.muted?9:8}.png?v=11042550" alt=""></button>`;
+  {const ab=bar.querySelector('[data-p=ach]');if(ab){ab.style.position='relative';if(window.ACHV_PEND?.()>0)ab.insertAdjacentHTML('beforeend','<i style="position:absolute;top:-3px;right:-3px;width:11px;height:11px;border-radius:50%;background:#ff4b4b;box-shadow:0 0 0 2px #10213a"></i>')}}
   bar.querySelectorAll('button').forEach(b=>b.onclick=()=>{if(b.dataset.p==='dex')openDex();else if(b.dataset.p==='ach')window.ACHV_OPEN?.();else{dispatchEvent(new KeyboardEvent('keydown',{key:'m'}));setTimeout(drawBar,50)}})}
  drawBar();onLanguageChange(()=>drawBar());
  // ---------- 面板 ----------
