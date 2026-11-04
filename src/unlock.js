@@ -2,16 +2,17 @@
 // 进度存在 localStorage 'unl'：{c:[已解锁卡],p:[已解锁祝福],best:最长存活秒,boss:{名字:次数},runs3:活过3分钟的局数}
 export const START_C=['sword','bow','axe','hammer','fireball','chain','frost','missile','holyorb','hshield'];   // 开局正好 10 张，全部自动带入
 export const START_P=['atk','hp','spd','cd','regen','armor','crit','wis','vamp','dodge','mag','area'];
-import {t as tr} from './i18n.js?v=11042010';
+import {t as tr} from './i18n.js?v=11042100';
 export const BUY_C=300,BUY_P=200;
-const K=(k,n)=>m=>(m.kills[k]||0)>=n,TOT=n=>m=>Object.values(m.kills).reduce((a,b)=>a+b,0)>=n,BEST=s=>(m,u)=>u.best>=s,BOSS=nm=>(m,u)=>(u.boss[nm]||0)>0,RUNS=n=>(m,u)=>u.runs3>=n;
+const P=(f,p)=>Object.assign(f,{p}),SUM=m=>Object.values(m.kills||{}).reduce((a,b)=>a+b,0);   // p：成就页显示进度 [当前, 目标]
+const K=(k,n)=>P(m=>(m.kills[k]||0)>=n,(m)=>[m.kills?.[k]||0,n]),TOT=n=>P(m=>SUM(m)>=n,m=>[SUM(m),n]),BEST=s=>P((m,u)=>u.best>=s,(m,u)=>[Math.min(s,Math.floor(u.best))/60|0,s/60]),BOSS=nm=>P((m,u)=>(u.boss[nm]||0)>0,(m,u)=>[(u.boss[nm]||0)>0?1:0,1]),RUNS=n=>P((m,u)=>u.runs3>=n,(m,u)=>[Math.min(n,u.runs3),n]);
 // [卡, 条件说明, 判断]
 export const CU=[
  ['flamestep',()=>tr('ui.unl.best',{m:5}),BEST(300)],['thunder',()=>tr('ui.unl.best',{m:10}),BEST(600)],['pouch',()=>tr('ui.unl.best',{m:15}),BEST(900)],['fairy',()=>tr('ui.unl.best',{m:20}),BEST(1200)],
  ['rapier',()=>tr('ui.unl.boss',{name:tr('run.name.gob_king')}),BOSS('哥布林大王')],['fist',()=>tr('ui.unl.boss',{name:tr('run.name.gob_hero')}),BOSS('哥布林英雄')],['wedge',()=>tr('ui.unl.boss',{name:tr('run.name.gob_chief')}),BOSS('哥布林酋长')],['sigil',()=>tr('ui.unl.boss',{name:tr('run.name.gob_paladin')}),BOSS('哥布林圣骑士')],['dcoil',()=>tr('ui.unl.boss',{name:tr('run.name.gob_emperor')}),BOSS('哥布林皇帝')],
  ['greatsword',()=>tr('ui.unl.total',{n:1000}),TOT(1000)],['mgun',()=>tr('ui.unl.total',{n:3000}),TOT(3000)],['fireel',()=>tr('ui.unl.total',{n:4000}),TOT(4000)],
  ['gsword',()=>tr('ui.unl.kill',{n:150,name:tr('ui.unl.w.shield')}),K('gob_shield',150)],['whip',()=>tr('ui.unl.kill',{n:300,name:tr('ui.unl.w.blade')}),K('gob_blade',300)],['hawk',()=>tr('ui.unl.kill',{n:150,name:tr('ui.unl.w.archer')}),K('gob_archer',150)],['trap',()=>tr('ui.unl.kill',{n:100,name:tr('ui.unl.w.wolf')}),K('gob_wolf',100)],
- ['treant',()=>tr('ui.unl.kill',{n:50,name:tr('run.name.gob_rock')}),K('gob_rock',50)],['keg',()=>tr('ui.unl.kill',{n:100,name:tr('ui.unl.w.bomb')}),K('gob_bomb',100)],['waterel',()=>tr('ui.unl.kill',{n:60,name:tr('ui.unl.w.mage')}),K('gob_mage',60)],['hwall',()=>tr('ui.unl.kill',{n:50,name:tr('ui.unl.w.ghost')}),K('gob_ghost',50)],
+ ['treant',()=>tr('ui.unl.kill',{n:50,name:tr('ui.enemy.gob_rock')}),K('gob_rock',50)],['keg',()=>tr('ui.unl.kill',{n:100,name:tr('ui.unl.w.bomb')}),K('gob_bomb',100)],['waterel',()=>tr('ui.unl.kill',{n:60,name:tr('ui.unl.w.mage')}),K('gob_mage',60)],['hwall',()=>tr('ui.unl.kill',{n:50,name:tr('ui.unl.w.ghost')}),K('gob_ghost',50)],
  ['vortex',()=>tr('ui.unl.kill',{n:10,name:tr('ui.unl.w.necro')}),K('gob_necro',10)],['undead',()=>tr('ui.unl.kill',{n:100,name:tr('ui.unl.w.skeleton')}),K('skeleton',100)],['bmist',()=>tr('ui.unl.kill',{n:3,name:tr('ui.unl.w.troll')}),K('gob_troll',3)],
  ['xbow',()=>tr('ui.unl.kill',{n:300,name:tr('ui.unl.w.archer')}),K('gob_archer',300)],['shadow',()=>tr('ui.unl.boss',{name:tr('run.name.gob_king')}),BOSS('哥布林大王')],
  ['wolf',()=>tr('ui.unl.runs',{n:3}),RUNS(3)],['orb',()=>tr('ui.unl.runs',{n:5}),RUNS(5)]];

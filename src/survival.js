@@ -1,5 +1,6 @@
-import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042010';
-import {t,onLanguageChange} from './i18n.js?v=11042010';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11042100';
+import {t,onLanguageChange} from './i18n.js?v=11042100';
+import {achvRunEnd,achvTitle} from './achv.js?v=11042100';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -27,7 +28,7 @@ export function createSurvival(game){
  applyText();onLanguageChange(applyText);
  function stop(){playing=false;finished=false;generation++;hud.hidden=true;document.body.classList.remove('survival-playing');if(dialog.open)dialog.close()}
  function start(){
-  stop();playing=true;window.CLEARED=0;maxHp=100;hp=100;game.reset();elapsed=0;cooldown=0;
+  stop();playing=true;window.CLEARED=0;window.FHT=null;maxHp=100;hp=100;game.reset();elapsed=0;cooldown=0;
   name=(document.querySelector('.menu-name input').value.trim()||t('ui.defaultName')).slice(0,8);
   hud.hidden=false;document.body.classList.add('survival-playing');render();
  }
@@ -39,6 +40,7 @@ function die(win){
   dialog.querySelector('.result-stats').textContent=t('ui.result.stats',{time:formatTime(rec.t),kills:rec.kills,lv:rec.lv,bosses:rec.bosses,score:scoreOf(rec)});
   {const r=window.META?.runEnd(rec.t,rec.kills);if(r&&win){window.META.spend(-r.g);r.g*=2;try{const u=JSON.parse(localStorage.getItem('unl')||'{}');u.clears=(u.clears||0)+1;localStorage.setItem('unl',JSON.stringify(u))}catch(_){}}if(r)dialog.querySelector('.result-stats').textContent+=t('ui.result.gold',{g:r.g})+(r.tk?` · 🎟️${r.tk}`:'')}
   try{const U=window.UNL;if(U){const got=U.runEnd({kills:(JSON.parse(localStorage.getItem('meta')||'{}').kills)||{}},rec.t,window.__G?.S?.bossNames||[]);if(got.length){const R=window.__G?.R,nm=g=>g.t==='c'?(R?.WEAPONS?.[g.k]?.name||g.k):(R?.PASSIVES?.[g.k]?.name||g.k);dialog.querySelector('.result-stats').textContent+=t('ui.result.unlocked',{list:got.map(g=>t(g.t==='c'?'ui.result.unlockCard':'ui.result.unlockBless',{name:nm(g)})).join(t('run.sep'))})}}}catch(_){}
+  try{const got=achvRunEnd(rec);if(got.length)dialog.querySelector('.result-stats').textContent+=' · 🏆 '+achvTitle()+'：'+got.join('、')}catch(_){}
   const upload=dialog.querySelector('.upload');upload.textContent=t('ui.result.uploading');dialog.showModal();
   // 每局仅在首次死亡时提交一次；晚到的网络响应不写入下一局界面。
   void submitScore(rec).then(ok=>{if(generation===token)upload.textContent=ok?t('ui.result.uploaded'):t('ui.board.offline')});
@@ -47,7 +49,7 @@ function die(win){
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};
  return {start,stop,get playing(){return playing&&!finished},get hp(){return hp},get max(){return maxHp},get finished(){return finished},win(){if(playing&&!finished)die(true)},get canHit(){return playing&&!finished&&cooldown<=0&&!window.DBG?.god&&!window.CLEARED},guard(s){cooldown=Math.max(cooldown,s)},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
   if(!playing||finished||cooldown>0||window.DBG?.god||window.CLEARED)return;
-  window.LASTHIT=window.CUR_E;const big=amount>=maxHp*.12;hp=Math.max(0,hp-Math.round(amount));cooldown=Math.max(game.iframe?.()??0,big?.4:.25);window.SHAKE?.(big?3:1.5);window.HURT=performance.now();render();if(hp===0)die();
+  if(window.FHT==null)window.FHT=elapsed;window.LASTHIT=window.CUR_E;const big=amount>=maxHp*.12;hp=Math.max(0,hp-Math.round(amount));cooldown=Math.max(game.iframe?.()??0,big?.4:.25);window.SHAKE?.(big?3:1.5);window.HURT=performance.now();render();if(hp===0)die();
  },update(dt){
   if(!playing||finished)return;
   elapsed+=dt;if(dt>0)cooldown=Math.max(0,cooldown-dt);
