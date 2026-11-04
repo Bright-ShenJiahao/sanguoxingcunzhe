@@ -1,5 +1,6 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.hud.slain":"击杀 {n}",
  "ui.stage.2lock":"🔒 第一关普通模式通关后解锁",
  "ui.stage.2wip":"已解锁 · 制作中，敬请期待",
  "ui.firstLock":"完成第一局后开放",
@@ -29,7 +30,7 @@ export const zh={
  "ui.clr.gold":" · 通关奖励：+1000 金币",
  "ui.unl.boss2":"打倒 2 次{name}",
  "ui.board.title":"排行榜",
- "ui.board.rule":"评分 = 存活秒数×2 + 击杀 + 等级×10 + Boss×200 · 同名只留最好一局 · 前 20 名",
+ "ui.board.rule":"评分 = 存活秒数×2 + 击杀 + 等级×10 + Boss×200 + 通关 20000 · 同名只留最好一局 · 前 20 名",
  "ui.board.close":"关闭",
  "ui.board.loading":"正在读取排行榜……",
  "ui.board.empty":"暂无成绩，来打第一局吧",
@@ -238,6 +239,7 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.hud.slain":"Kills {n}",
  "ui.stage.2lock":"🔒 Clear Stage 1 on Normal to unlock",
  "ui.stage.2wip":"Unlocked · Coming soon",
  "ui.firstLock":"Opens after your first run",
@@ -267,7 +269,7 @@ export const en={
  "ui.clr.gold":" · Clear reward: +1000 gold",
  "ui.unl.boss2":"Defeat the {name} twice",
  "ui.board.title":"Leaderboard",
- "ui.board.rule":"Score = survival seconds ×2 + kills + level ×10 + Bosses ×200 · Only the best run per name · Top 20",
+ "ui.board.rule":"Score = survival seconds ×2 + kills + level ×10 + Bosses ×200 + clear 20000 · Only the best run per name · Top 20",
  "ui.board.close":"Close",
  "ui.board.loading":"Loading leaderboard…",
  "ui.board.empty":"No scores yet. Be the first to play!",
@@ -476,6 +478,7 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.hud.slain":"撃破 {n}",
  "ui.stage.2lock":"🔒 第1ステージを通常クリアで解放",
  "ui.stage.2wip":"解放済み・制作中",
  "ui.firstLock":"初回プレイ後に解放",
@@ -505,7 +508,7 @@ export const ja={
  "ui.clr.gold":" · クリア報酬：金貨+1000",
  "ui.unl.boss2":"{name}を2回倒す",
  "ui.board.title":"ランキング",
- "ui.board.rule":"スコア = 生存秒数×2 + 撃破数 + レベル×10 + ボス×200 · 同名は最高記録のみ · 上位20名",
+ "ui.board.rule":"スコア = 生存秒数×2 + 撃破数 + レベル×10 + ボス×200 + クリア 20000 · 同名は最高記録のみ · 上位20名",
  "ui.board.close":"閉じる",
  "ui.board.loading":"ランキングを読み込み中……",
  "ui.board.empty":"まだ記録がありません。最初の1戦をどうぞ！",

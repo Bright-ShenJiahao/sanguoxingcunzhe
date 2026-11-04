@@ -42,8 +42,8 @@ body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
 (function(){var b=document.getElementById('boot');if(!b)return;
 // 加载动画：卧室里打掌机 → 掌机爆光 → 房间碎成积木掉落、露出异世界草地 → 哥布林冒出、主角跑路
 var P='assets/characters/',K=innerHeight>=900?3:2,W=innerWidth,H=innerHeight,hb=Math.round(H*.27),hx=Math.round(W*(W<700?.7:.62)),cx0=Math.round(W*.5);
-var seen=false;   // 每次都完整播放；点击画面可跳过
-var SKIP=seen?4.1:0;window.BOOT_MIN=seen?2300:6200;
+var seen=false;try{seen=!!localStorage.getItem('bootSeen');localStorage.setItem('bootSeen','1')}catch(e){}document.addEventListener('pointerdown',function(){window.BOOT_MIN=0},{once:true});   // 每次都完整播放；点击画面可跳过
+var SKIP=seen?4.1:0;window.BOOT_MIN=seen?1500:3500;
 var kinds=['goblin','gob_blade','gob_shield','gob_archer','goblin'],L=[],lane=[-26,18,-8,30,0,-30,14,24,-14,4];
 function fr(dir,pre,from,to){var a=[];for(var j=from;j<=to;j++){var im=new Image();im.src=P+dir+'/'+pre+j+'.png';a.push(im.src)}return a}
 function mk(f,bot,z,x,v,ph,fps){var el=document.createElement('img');el.className='sd';el.style.bottom=bot+'px';el.style.zIndex=z;b.appendChild(el);return {el:el,f:f,x:x,v:v,ph:ph,fps:fps,bot:bot}}
@@ -88,5 +88,5 @@ function tick(n){if(!document.getElementById('boot'))return;var t=(n-t0)/1000,dt
 <div class="sw" role="group" id="cs"><button data-c="m" aria-pressed="true">M</button><button data-c="f0" aria-pressed="false">F</button></div>
 </div>
 
-<script type="module" src="src/main.js?v=11042360"></script>
+<script type="module" src="src/main.js?v=11042400"></script>
 </body></html>

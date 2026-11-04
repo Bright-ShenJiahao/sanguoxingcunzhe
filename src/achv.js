@@ -1,6 +1,6 @@
 // 成就收藏：卡牌解锁 + 祝福解锁 + 金币成就。进度存在本机 localStorage 'ach'。
-import {getLanguage} from './i18n.js?v=11042360';
-import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042360';
+import {getLanguage} from './i18n.js?v=11042400';
+import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042400';
 const L=o=>o[getLanguage()]||o.zh;
 const BOSS={gob_king:'哥布林大王',gob_hero:'哥布林英雄',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士',gob_emperor:'哥布林皇帝'};
 const BNAME={gob_king:{zh:'哥布林大王',en:'Goblin King',ja:'ゴブリンキング'},gob_hero:{zh:'哥布林英雄',en:'Goblin Hero',ja:'ゴブリン勇者'},gob_chief:{zh:'哥布林酋长',en:'Goblin Chief',ja:'ゴブリン族長'},gob_paladin:{zh:'哥布林圣骑士',en:'Goblin Paladin',ja:'ゴブリン聖騎士'},gob_emperor:{zh:'哥布林皇帝',en:'Goblin Emperor',ja:'ゴブリン皇帝'}};
@@ -11,7 +11,7 @@ const T={
  g_card:{zh:'技能卡收集',en:'Skill Cards',ja:'スキル収集'},g_bless:{zh:'祝福收集',en:'Blessings',ja:'祝福収集'},
  rCard:{zh:'解锁技能卡「{n}」',en:'Unlock skill card "{n}"',ja:'スキル「{n}」解放'},rBless:{zh:'解锁祝福「{n}」',en:'Unlock blessing "{n}"',ja:'祝福「{n}」解放'},rGold:{zh:'{n} 金币',en:'{n} gold',ja:'金貨 {n}'}};
 const f=(o,v)=>L(o).replace(/\{(\w+)\}/g,(_,k)=>v[k]);
-function store(){let a=null;try{a=JSON.parse(localStorage.getItem('ach')||'null')}catch(_){}a=a&&typeof a==='object'?a:{};a.done=a.done||{};a.st=a.st||{};return a}
+function store(){let a=null;try{a=JSON.parse(localStorage.getItem('ach')||'null')}catch(_){}a=a&&typeof a==='object'?a:{};a.done=a.done&&typeof a.done==='object'?a.done:{};a.st=a.st&&typeof a.st==='object'?a.st:{};try{const u=JSON.parse(localStorage.getItem('unl')||'{}');if((u.clears||0)>(a.st.clears||0))a.st.clears=u.clears}catch(_){}return a}
 function save(a){try{localStorage.setItem('ach',JSON.stringify(a))}catch(_){}}
 const meta=()=>{try{return JSON.parse(localStorage.getItem('meta')||'{}')}catch(_){return {}}};
 const SUM=m=>Object.values(m.kills||{}).reduce((a,b)=>a+(+b||0),0);
@@ -77,10 +77,11 @@ export function initAchv(){
 export function clearPick(tr,done){
  const U=window.UNL;if(!U){done(null);return}
  const items=[...(U.CU||[]).map(x=>x[0]).filter(k=>!U.okC(k)&&WEAPONS[k]).map(k=>({t:'c',k,nm:WEAPONS[k].name,ic:WIC[k]})),...(U.PU||[]).filter(k=>!U.okP(k)&&PASSIVES[k]).map(k=>({t:'p',k,nm:PASSIVES[k].name,ic:PIC[k]}))];
- if(!items.length){window.META?.spend?.(-1000);done({gold:1});return}
+ if(document.getElementById('clrpick'))return;
+ if(!items.length){try{localStorage.setItem('clrPend',String(Math.max(0,(+localStorage.getItem('clrPend')||0)-1)))}catch(_){}window.META?.spend?.(-1000);done({gold:1});return}
  const o=document.createElement('div');o.id='clrpick';
  o.innerHTML=`<style>#clrpick{position:fixed;inset:0;z-index:70;background:#06101ce6;display:grid;place-items:center;padding:16px}#clrpick .b{width:min(620px,96vw);max-height:86vh;display:flex;flex-direction:column;background:linear-gradient(145deg,#234e89,#101f3f);border:2px solid #e2cb87;border-radius:12px;color:#eef3ff;font:14px "PingFang SC","Hiragino Sans",sans-serif;overflow:hidden}#clrpick h2{margin:14px 16px 2px;color:#f6db94}#clrpick p{margin:0 16px 10px;color:#c9d8f0}#clrpick .g{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;padding:0 14px 16px;overflow:auto}#clrpick button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 4px;border:1px solid #8fbbef88;border-radius:8px;background:#0c225a99;color:#fff;font:inherit;font-size:12px;cursor:pointer}#clrpick button:hover{border-color:#e2cb87}#clrpick img{width:40px;height:40px;image-rendering:pixelated;object-fit:contain}#clrpick i{font-style:normal;font-size:10px;color:#e2cb87}</style>
 <div class="b"><h2>🏆 ${tr('ui.clr.t')}</h2><p>${tr('ui.clr.b')}</p><div class="g">${items.map((x,i)=>`<button data-i="${i}">${x.ic?`<img src="assets/ui/${x.ic}.png" alt="">`:''}<span>${x.nm}</span><i>${x.t==='c'?L(T.g_card):L(T.g_bless)}</i></button>`).join('')}</div></div>`;
- document.body.append(o);
- o.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const x=items[+b.dataset.i];U.buy(x.t,x.k);o.remove();done(x)});
+ (document.querySelector('dialog[open]')||document.body).append(o);
+ o.addEventListener('click',e=>{const b=e.target.closest('[data-i]');if(!b)return;const x=items[+b.dataset.i];U.buy(x.t,x.k);try{localStorage.setItem('clrPend',String(Math.max(0,(+localStorage.getItem('clrPend')||0)-1)))}catch(_){}o.remove();done(x)});
 }

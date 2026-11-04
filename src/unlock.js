@@ -2,7 +2,7 @@
 // 进度存在 localStorage 'unl'：{c:[已解锁卡],p:[已解锁祝福],best:最长存活秒,boss:{名字:次数},runs3:活过3分钟的局数}
 export const START_C=['sword','bow','axe','hammer','fireball','chain','frost','missile','holyorb','hshield'];   // 开局正好 10 张，全部自动带入
 export const START_P=['atk','hp','spd','cd','regen','armor','crit','wis','vamp','dodge','mag','area'];
-import {t as tr} from './i18n.js?v=11042360';
+import {t as tr} from './i18n.js?v=11042400';
 export const BUY_C=300,BUY_P=200;
 const P=(f,p)=>Object.assign(f,{p}),SUM=m=>Object.values(m.kills||{}).reduce((a,b)=>a+b,0);   // p：成就页显示进度 [当前, 目标]
 const K=(k,n)=>P(m=>(m.kills[k]||0)>=n,(m)=>[m.kills?.[k]||0,n]),TOT=n=>P(m=>SUM(m)>=n,m=>[SUM(m),n]),BEST=s=>P((m,u)=>u.best>=s,(m,u)=>[Math.min(s,Math.floor(u.best))/60|0,s/60]),BOSS=nm=>P((m,u)=>(u.boss[nm]||0)>0,(m,u)=>[(u.boss[nm]||0)>0?1:0,1]),RUNS=n=>P((m,u)=>u.runs3>=n,(m,u)=>[Math.min(n,u.runs3),n]);
@@ -18,7 +18,7 @@ export const CU=[
  ['wolf',()=>tr('ui.unl.runs',{n:4}),RUNS(4)],['orb',()=>tr('ui.unl.runs',{n:5}),RUNS(5)]];
 // 祝福：每完成 1 局（存活 3 分钟以上）按顺序解锁 1 张
 export const PU=['tough','amt','dur','pspd','luck','critd','arc','knock','greed','exec','hunt','berserk','svamp','boom','rev','curse','gamble'];
-export function load(){let u=null;try{u=JSON.parse(localStorage.getItem('unl')||'null')}catch(_){}u=Object.assign({c:[],p:[],best:0,boss:{},runs3:0},u||{});if(!Array.isArray(u.c))u.c=[];if(!Array.isArray(u.p))u.p=[];if(!u.g10&&(u.best>0||u.runs3>0)){u.g10=1;for(const k of ['xbow','shadow'])if(!u.c.includes(k))u.c.push(k);save(u)}return u}   // 老玩家保留原来开局就有的连发弩、暗影魔矢
+export function load(){let u=null;try{u=JSON.parse(localStorage.getItem('unl')||'null')}catch(_){}u=Object.assign({c:[],p:[],best:0,boss:{},runs3:0},u||{});if(!Array.isArray(u.c))u.c=[];if(!u.boss||typeof u.boss!=='object')u.boss={};if(!Array.isArray(u.p))u.p=[];if(!u.g10&&(u.best>0||u.runs3>0)){u.g10=1;for(const k of ['xbow','shadow'])if(!u.c.includes(k))u.c.push(k);save(u)}return u}   // 老玩家保留原来开局就有的连发弩、暗影魔矢
 export function save(u){try{localStorage.setItem('unl',JSON.stringify(u))}catch(_){}}
 export const okC=(k,u=load())=>START_C.includes(k)||u.c.includes(k)||!CU.some(x=>x[0]===k);
 export const okP=(k,u=load())=>START_P.includes(k)||u.p.includes(k)||!PU.includes(k);
