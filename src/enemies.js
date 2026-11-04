@@ -10,7 +10,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(!bag.length){bag=[...kinds];for(let i=bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]]}}
   return bag.pop();
  }
- function make(x,y,k=nextKind()){return {k,x,y,face:1,hp:data[k].hp,state:'move',timer:0,cooldown:Math.random()*.8,ph:Math.random()*9,dead:false,sc0:data[k].sc}}
+ function make(x,y,k=nextKind()){return {k,x,y,face:1,hp:data[k].hp,state:'move',timer:0,cooldown:data[k].ranged?Math.random()*3:Math.random()*.8,ph:Math.random()*9,dead:false,sc0:data[k].sc}}
  function hit(e,dmg=1){
   if(e.dead)return false;
   if(data[e.k].ghost&&e.phT>0)dmg*=.5;
@@ -19,7 +19,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   if(e.ward)dmg*=.5;
   if(e.k==='gob_wolf'&&!e.dism&&e.hp-dmg<e.hpMax*.5&&e.hp-dmg>0){e.dism=1;window.onDismount?.(e);e.k='goblin';e.sc0=data.goblin.sc;e.sc=data.goblin.sc||1;e.fell=.6}
   e.flash=Math.max(e.flash||0,.07);e.hp-=dmg;
-  if(e.hp<=0&&data[e.k].bomb&&!e.boomed&&e.state==='fuse'){e.boomed=1;explode(e.x,e.y,40,data[e.k].damage*(e.dmgMul||1)*3,true)}
+  if(e.hp<=0&&data[e.k].bomb&&!e.boomed&&e.state==='fuse'&&e.timer>=.5){e.boomed=1;explode(e.x,e.y,40,data[e.k].damage*(e.dmgMul||1)*3,true)}
   if(e.hp<=0){e.dead=true;e.state='fall';e.timer=0;e.alpha=1}
   else if(!e.boss&&!e.elite&&e.state!=='dash'){e.state='hurt';e.timer=0;e.cooldown=.25}else e.flash=.12
   return true;
@@ -84,7 +84,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
    }else if(e.state==='strike'){
     if(e.timer>=.2){e.state='recover';e.timer=0}
    }else if(e.state==='recover'){
-    if(e.timer>=.45){e.state='move';e.timer=0;e.cooldown=stats.ranged?1.4+Math.random()*.5:.55+Math.random()*.35}   // 弓手一轮约 2.5–3 秒
+    if(e.timer>=.45){e.state='move';e.timer=0;e.cooldown=stats.ranged?1.65*(.2+Math.random()*1.6):.55+Math.random()*.35}   /* 远程冷却随机 ±80%，避免齐射 */   // 弓手一轮约 2.5–3 秒
    }else{
     e.cooldown=Math.max(0,e.cooldown-dt*speed);e.dcd=(e.dcd||0)-dt;e.bcd=(e.bcd||0)-dt;
     const reg=!e.elite&&!e.boss;
@@ -93,7 +93,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
     if(stats.heavy&&reg&&d<(e.k==='gob_rock'?60:28)&&e.bcd<=0){e.state='smash';e.timer=0;e.sr=e.k==='gob_rock'?55:35;e.st=e.k==='gob_rock'?1:1.2;e.bx=e.k==='gob_rock'?0:ax;continue}   // 岩甲地震拳：以自己为中心
     if(stats.leap&&e.bcd<=0&&d<170&&d>40){e.state='leap';e.timer=0;e.lx0=e.x;e.ly0=e.y;e.lx1=hero.x;e.ly1=hero.y;continue}
     if(stats.leap&&e.bcd<=0&&d<=40){e.state='smash';e.timer=0;e.sr=40;e.st=.7;e.bx=ax;continue}
-    if(stats.lob&&d<=stats.reach&&e.cooldown===0){e.state='cast';e.timer=0;continue}
+    if(stats.lob&&d<=stats.reach&&e.cooldown===0&&!(e.k==='gob_mage'&&en.reduce((n,o)=>n+(o.k==='gob_mage'&&!o.dead&&(o.state==='cast'||o.state==='strike')?1:0),0)>=8)){e.state='cast';e.timer=0;continue}
     if(stats.orbit&&reg){if(d<100&&(e.orT??-1)<0&&e.dcd<=0)e.orT=2+Math.random();if(e.orT>0){e.orT-=dt;if(e.orT<=0){e.orT=-1;e.state='aim';e.timer=0;e.aimT=.4;e.dx=ax/d;e.dy=ay/d;e.dsp=300;e.dlen=(d+20)/300;e.dcdN=4;e.alen=d+20;continue}}}
     if(stats.drum){e.drT=(e.drT??1)-dt;e.chT=(e.chT??6)-dt;if(e.drT<=0){e.drT=e.rollT>0?.25:2;e.drFx=.6;window.SFX?.drum?.(e.rollT>0);for(const o of near(e.x,e.y,110,en))o.buffT=2.5}   // 鼓手：每 2 秒一下鼓点，鼓舞周围
      if(e.rollT>0)e.rollT-=dt;if(e.chT<=0){e.chT=11;e.rollT=1.2;window.onDrumRoll?.(e);for(const o of near(e.x,e.y,170,en))if(!o.boss&&o!==e)o.chgT=3}}   // 战鼓冲锋：急促鼓点，周围怪一起冲 3 秒
@@ -136,7 +136,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      }
     if(plain||(e.k==='gob_archer'&&(Math.abs(ax)>230||Math.abs(ay)>140))){}
     else if(e.k==='gob_hero'&&d<=stats.reach*(e.sc||1)*1.2&&e.cooldown===0){e.state='combo';e.timer=0;e.cmb=0;continue}
-    else if(d<=stats.reach*(e.sc||1)&&e.cooldown===0&&(!stats.ranged||(Math.abs(ax)<(window.VIEWHW||240)-8&&Math.abs(ay)<(window.VIEWHH||150)-8))){e.state='windup';e.timer=0;if(stats.ranged)e.flash=.12;continue}   // 远程怪只在屏幕内才拉弓
+    else if(d<=stats.reach*(e.sc||1)&&e.cooldown===0&&!(e.k==='gob_archer'&&en.reduce((n,o)=>n+(o.k==='gob_archer'&&!o.dead&&(o.state==='windup'||o.state==='strike')?1:0),0)>=12)&&(!stats.ranged||(Math.abs(ax)<(window.VIEWHW||240)-8&&Math.abs(ay)<(window.VIEWHH||150)-8))){e.state='windup';e.timer=0;if(stats.ranged)e.flash=.12;continue}   // 远程怪只在屏幕内才拉弓
     if(d>(plain?6:stats.reach*(e.sc||1)*.85)){
      e.losT=(e.losT||0)-dt;if(e.losT<=0){e.losT=.25+Math.random()*.1;e.los=true;const n=Math.ceil(d/6);for(let k=1;k<n;k++){if(water(e.x+ax*k/n,e.y+ay*k/n)===1){e.los=false;break}}}   // 中间没有河/崖就直线走
      const fd=d>28&&!e.los&&!stats.ghost&&window.PATHDIR?.(e.x,e.y);let tx=fd?fd[0]:ax/d,ty=fd?fd[1]:ay/d;
@@ -203,7 +203,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
   else if(e.state==='aim'){const k=Math.min(1,e.timer/(e.aimT||.5)),L_=e.alen||80,N=Math.max(4,Math.round(L_/12)),hot=data[e.k].charge?'255,150,40':'255,60,40',ux=e.dx,uy=e.dy,px=-uy,py=ux;c.save();c.lineWidth=1.6;c.lineCap='round';
    for(let i=1;i<=N;i++){const t=i/(N+1),x=e.x-cx+ux*L_*t,y=e.y-cy+uy*L_*t,s=3.2,on=t<=k;c.strokeStyle=on?`rgba(${hot},.95)`:'rgba(255,255,255,.3)';if(on){c.shadowColor=`rgba(${hot},.8)`;c.shadowBlur=4}else c.shadowBlur=0;c.beginPath();c.moveTo(x-ux*s+px*s,y-uy*s+py*s);c.lineTo(x+ux*s,y+uy*s);c.lineTo(x-ux*s-px*s,y-uy*s-py*s);c.stroke()}c.restore()}   // 蓄力箭头：从脚下逐个点亮
   if(e.state==='windup'&&(e.boss||e.elite)&&!e.dead&&!data[e.k].ranged){const k=Math.min(1,e.timer/.45),R=((data[e.k].reach||30)+5)*(e.sc||1);c.save();c.globalAlpha=.15+.35*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(e.x-cx,e.y-cy,R,R*.75,0,0,6.3);c.fill();c.globalAlpha=.8;c.strokeStyle='#ff3a2a';c.lineWidth=1.5;c.beginPath();c.ellipse(e.x-cx,e.y-cy,R,R*.75,0,0,6.3);c.stroke();c.restore()}   // Boss/精英挥砍预警
-  if(e.state==='fuse'&&e.timer<.5&&!e.dead){const k=e.timer/.5,L_=150,N=10,ux=e.fx,uy=e.fy,px=-uy,py=ux;c.save();c.lineWidth=1.6;c.lineCap='round';for(let i=1;i<=N;i++){const t=i/(N+1),x=e.x-cx+ux*L_*t,y=e.y-cy+uy*L_*t,s_=3.2,on=t<=k;c.strokeStyle=on?'rgba(255,150,40,.95)':'rgba(255,255,255,.3)';c.beginPath();c.moveTo(x-ux*s_+px*s_,y-uy*s_+py*s_);c.lineTo(x+ux*s_,y+uy*s_);c.lineTo(x-ux*s_-px*s_,y-uy*s_-py*s_);c.stroke()}c.restore()}
+  if(e.state==='fuse'&&!e.dead){c.save();c.font='12px sans-serif';c.textAlign='center';c.fillText('💣',e.x-cx,e.y-cy-30-Math.abs(Math.sin(now/90))*3);c.restore()}if(e.state==='fuse'&&e.timer<.5&&!e.dead){const k=e.timer/.5,L_=150,N=10,ux=e.fx,uy=e.fy,px=-uy,py=ux;c.save();c.lineWidth=1.6;c.lineCap='round';for(let i=1;i<=N;i++){const t=i/(N+1),x=e.x-cx+ux*L_*t,y=e.y-cy+uy*L_*t,s_=3.2,on=t<=k;c.strokeStyle=on?'rgba(255,150,40,.95)':'rgba(255,255,255,.3)';c.beginPath();c.moveTo(x-ux*s_+px*s_,y-uy*s_+py*s_);c.lineTo(x+ux*s_,y+uy*s_);c.lineTo(x-ux*s_-px*s_,y-uy*s_-py*s_);c.stroke()}c.restore()}
   if(e.dazeT>0&&!e.dead){const x=e.x-cx,y=e.y-cy-30*(e.sc||1);c.save();c.fillStyle='#ffe066';for(let i=0;i<3;i++){const a=now/180+i*2.09;c.fillRect(Math.round(x+Math.cos(a)*9)-1.5,Math.round(y+Math.sin(a)*3)-1.5,3,3)}c.restore()}
   if(e.state==='combo'&&!e.dead){const H=[.45,.9,1.5],R_=[30,30,44];const i=e.cmb||0;if(i<3){const k=Math.max(0,1-(H[i]-e.timer)/.45),x=e.x-cx+e.face*10,y=e.y-cy;c.save();c.globalAlpha=.15+.4*k;c.fillStyle='#ff3a2a';c.beginPath();c.ellipse(x,y,R_[i],R_[i]*.8,0,0,6.3);c.fill();c.globalAlpha=.8;c.strokeStyle='#ff3a2a';c.lineWidth=1;c.beginPath();c.ellipse(x,y,R_[i]*k,R_[i]*.8*k,0,0,6.3);c.stroke();c.restore()}}
   if(e.swFx>0&&!e.dead){e.swFx-=1/60;const x=e.x-cx+e.face*10,y=e.y-cy-12;c.save();c.globalAlpha=e.swFx*4;c.strokeStyle='#fff';c.lineWidth=2.5;c.beginPath();c.arc(x,y,18,e.face>0?-1.2:Math.PI-1.2,e.face>0?1.2:Math.PI+1.2);c.stroke();c.restore()}

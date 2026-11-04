@@ -108,7 +108,7 @@ export function createRun({hero,en,images,hitEnemy,survival,ok,makeEnemy}){
   S.maxHp=100+S.B.hp;S.rerolls=S.B.rr;S.rev=S.B.rev;survival?.setMax?.(S.maxHp,S.B.hp);ui.hidden=true;
  }
  // ---------- 节奏 ----------
-  const want=()=>{if(S.t<(S.calm||0))return 0;const W=wave();const early=S.lv<3&&S.t<60?.4:1;   /* 开局到 3 级前（最多 60 秒）只刷 40% 的怪 */let a=0;for(const e of en)if(!e.dead)a++;return Math.min(WV.cap,Math.max(Math.round(W.min*.9*early*(1+.1*S.p.curse)*(window.NIGHT?1.3:1)*(window.MODES?.rage?1.4:1)),a+((S.pend||0)>0?1:0)))};
+  const want=()=>{if(S.t<(S.calm||0))return 0;const W=wave();const early=S.lv<3&&S.t<60?.4:1;   /* 开局到 3 级前（最多 60 秒）只刷 40% 的怪 */let a=0;for(const e of en)if(!e.dead)a++;return Math.min(S.t>=480?Math.min(180,WV.cap):WV.cap,Math.max(Math.round(W.min*.9*early*(1+.1*S.p.curse)*(window.NIGHT?1.3:1)*(window.MODES?.rage?1.4:1)),a+((S.pend||0)>0?1:0)))};
  // ---------- 波数：按时间逐步加入兵种 ----------
  const NEWKS=new Set(["goblin", "gob_blade", "gob_shield", "gob_archer", "gob_bomb", "gob_boar", "gob_rock", "gob_mage", "gob_ghost", "gob_wolf", "gob_thrower", "gob_drum", "gob_necro"]);
  const RES={gob_shield:'iron',gob_rock:'iron',gob_ghost:'spirit',gob_mage:'magic'};
@@ -176,7 +176,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
   for(let i=0;i<3;i++){const a=i/3*6.283+R(0,1),x=C.x+Math.cos(a)*(C.rx+60),y=C.y+Math.sin(a)*(C.ry+50);if(!ok(x,y))continue;const m=makeEnemy(x,y,'goblin');if(!m)continue;onSpawnBase(m);m.elite=true;m.noChest=1;m.armor=0;m.res='';m.k=ek[Math.floor(Math.random()*ek.length)];m.hp=m.hpMax=Math.ceil(15*(1+S.t/100));m.sc=1.1;if(m.k==='gob_shaman')m.summonT=4;en.push(m)}
   for(let i=0;i<16;i++){const a=i/16*6.283,x=C.x+Math.cos(a)*(C.rx+40),y=C.y+Math.sin(a)*(C.ry+35);if(ok(x,y)){const m=makeEnemy(x,y,'goblin');if(m){onSpawnBase(m);en.push(m)}}}}
  function onSpawnBase(e){const m=S.t/40;   // 一局 20 分钟：强度按 30 分钟曲线压缩
- e.hp=e.hpMax=Math.ceil(e.hp*(m<10?1+m/2:6+(m-10)*.9)*(1+.1*S.p.curse));e.dmgMul=Math.min(3,.6+m*.12);e.sc=e.sc0||1;e.res=RES[e.k]||'';e.armor=e.res==='iron'?1:0}
+ e.hp=e.hpMax=Math.ceil(e.hp*(m<10?1+m/2:6+(m-10)*.9)*(1+.1*S.p.curse)*(S.t>=480?1.2:1));e.dmgMul=Math.min(3,.6+m*.12);e.sc=e.sc0||1;e.res=RES[e.k]||'';e.armor=e.res==='iron'?1:0}
  function onSpawn(e){
   onSpawnBase(e);S.pend=Math.max(0,(S.pend||0)-1);
   const BS=[[300,'gob_king',63,1.25,'gob_king'],[600,'gob_chief',200,1.3,'gob_chief'],[900,'gob_paladin',160,1,'gob_paladin'],[1200,'gob_emperor',441,1.5,'gob_emperor']];   // 大王 5 分钟约 180 血，皇帝 20 分钟约 3750 血   // 一局 20 分钟
@@ -273,7 +273,7 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
  const C2=install({get S(){return S},en,hero,strike,knock,nearest,cluster,dmg,AR,AMT,DUR,ok,burn,survival,AIM,MA,FN,ST});Object.assign(FIRE,C2.fire);
  const LM=installLM({get S(){return S},hero,en,ok,makeEnemy,survival,onSpawnBase});
  // ---------- 升级 ----------
- function gain(v){S.xp+=v*1.11*(1+.1*S.p.curse)*(S.w.gb?1.1:1)*(1+.08*S.p.wis+S.B.wis)}
+ function gain(v){S.xp+=v*1.11*(S.t>=480?1.33:1)*(1+.1*S.p.curse)*(S.w.gb?1.1:1)*(1+.08*S.p.wis+S.B.wis)}
  function tryLevel(){
   if(S.paused||S.t-S.lastLv<3)return;
   if(S.xp<S.need)return;
