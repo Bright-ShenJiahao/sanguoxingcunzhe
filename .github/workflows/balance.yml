@@ -13,11 +13,15 @@ on:
       maxt:
         description: '一局最长多少秒（游戏时间，1300 可打完皇帝）'
         default: '1300'
+      equip:
+        description: '1＝卡组开局直接装备（旧口径，可和以前数据对比）；空＝按正常升级获得'
+        default: ''
 concurrency:
   group: balance-${{ github.ref }}
   cancel-in-progress: true
 env:
   BOT: v3
+  EQUIP: ${{ inputs.equip }}
 jobs:
   type:
     if: ${{ (inputs.mode || 'type') == 'type' || inputs.mode == 'all' }}
