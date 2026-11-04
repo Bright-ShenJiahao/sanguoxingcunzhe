@@ -244,7 +244,7 @@ export const en={
  "ui.mode.normal":"Normal",
  "ui.mode.normal.d":"Standard · Clearable",
  "ui.hud.slain":"Kills {n}",
- "ui.stage.2lock":"🔒 Clear Stage 1 on Normal to unlock",
+ "ui.stage.2lock":"🔒 Clear Stage 1 to unlock",
  "ui.stage.2wip":"Unlocked · Coming soon",
  "ui.firstLock":"Opens after your first run",
  "ui.cg.inDeck":"In deck",
