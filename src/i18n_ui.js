@@ -1,5 +1,7 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.stage.2lock":"🔒 第一关普通模式通关后解锁",
+ "ui.stage.2wip":"已解锁 · 制作中，敬请期待",
  "ui.firstLock":"完成第一局后开放",
  "ui.cg.inDeck":"卡组中",
  "ui.cg.avail":"可用（未带入）",
@@ -236,6 +238,8 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.stage.2lock":"🔒 Clear Stage 1 on Normal to unlock",
+ "ui.stage.2wip":"Unlocked · Coming soon",
  "ui.firstLock":"Opens after your first run",
  "ui.cg.inDeck":"In deck",
  "ui.cg.avail":"Available",
@@ -472,6 +476,8 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.stage.2lock":"🔒 第1ステージを通常クリアで解放",
+ "ui.stage.2wip":"解放済み・制作中",
  "ui.firstLock":"初回プレイ後に解放",
  "ui.cg.inDeck":"デッキ",
  "ui.cg.avail":"使用可能",

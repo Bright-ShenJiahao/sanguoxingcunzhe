@@ -1,7 +1,7 @@
-import {zh as zhCards,en as enCards,ja as jaCards} from './i18n_cards.js?v=11042340';
-import {zh as zhRun,en as enRun,ja as jaRun} from './i18n_run.js?v=11042340';
-import {zh as zhWorld,en as enWorld,ja as jaWorld} from './i18n_world.js?v=11042340';
-import {zh as zhUi,en as enUi,ja as jaUi} from './i18n_ui.js?v=11042340';
+import {zh as zhCards,en as enCards,ja as jaCards} from './i18n_cards.js?v=11042350';
+import {zh as zhRun,en as enRun,ja as jaRun} from './i18n_run.js?v=11042350';
+import {zh as zhWorld,en as enWorld,ja as jaWorld} from './i18n_world.js?v=11042350';
+import {zh as zhUi,en as enUi,ja as jaUi} from './i18n_ui.js?v=11042350';
 // Text keys are stable identifiers; saved game state must never depend on translations.
 const baseZh={
  'game.title':'异世界幸存者：跑！',
