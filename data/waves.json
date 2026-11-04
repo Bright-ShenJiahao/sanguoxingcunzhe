@@ -141,7 +141,7 @@
     "goblin",
     "gob_blade"
    ],
-   "min": 120,
+   "min": 90,
    "iv": 0.2,
    "ev": [
     [
@@ -176,7 +176,7 @@
     "goblin",
     "gob_bomb"
    ],
-   "min": 250,
+   "min": 140,
    "iv": 0.1,
    "ev": [
     [

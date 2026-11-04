@@ -5,14 +5,14 @@ import { randomUUID } from 'node:crypto';
 
 export const config = { path: '/api/scores' };
 const SEASON = 's2';              // 换赛季只改这里（大改平衡时换，旧成绩自动不显示）
-const ADMIN = 'ysj-qingli-2026';  // 维护口令：删单条 / 清空 / 查看内部 key
+const ADMIN = (globalThis.Netlify?.env?.get?.('ADMIN_TOKEN')) || process.env.ADMIN_TOKEN || '';  // 维护口令：放在 Netlify 环境变量 ADMIN_TOKEN，未设置则关闭管理功能
 const NAME_MAX = 8, TOP_N = 20, RATE_MAX = 3, RATE_WINDOW = 60;
 const json = (body,status=200) => new Response(JSON.stringify(body),{
  status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}
 });
 const cleanName = raw => Array.from(String(raw??'').replace(/[\u0000-\u001f<>\\"'`]/g,'').trim()).slice(0,NAME_MAX).join('') || '无名氏';
 // 评分：存活每秒 2 分 + 击杀 1 分 + 等级 10 分 + 每个 Boss 200 分（与前端 scoreOf 一致）
-const scoreOf = r => Math.round(r.t*2 + r.kills + (r.lv||0)*10 + (r.bosses||0)*200);
+const scoreOf = r => (r.clear?20000:0) + Math.round(r.t*2 + r.kills + (r.lv||0)*10 + (r.bosses||0)*200);
 const compare = (a,b) => b.score-a.score || b.t-a.t || b.kills-a.kills || a.at-b.at;
 async function readAll(store){
  const {blobs}=await store.list({prefix:'run-'});const rows=[];
@@ -31,16 +31,16 @@ export default async function handler(req,context){
   const store=getStore({name:'sanguoxingcunzhe-board',consistency:'strong'});
   if(req.method==='GET'){
    const all=await readAll(store);
-   if(new URL(req.url).searchParams.get('admin')===ADMIN)return json({ok:true,rows:all});
+   if(ADMIN&&new URL(req.url).searchParams.get('admin')===ADMIN)return json({ok:true,rows:all});
    const best=new Map();
    for(const r of all){if(r.cheat)continue;r.score=scoreOf(r);const p=best.get(r.name);if(!p||compare(r,p)<0)best.set(r.name,r)}
-   const list=[...best.values()].sort(compare).slice(0,TOP_N).map(({name,t,kills,lv,bosses,score,at})=>({name,t,kills,lv,bosses,score,at}));
+   const list=[...best.values()].sort(compare).slice(0,TOP_N).map(({name,t,kills,lv,bosses,score,at,clear})=>({name,t,kills,lv,bosses,score,at,clear:clear?1:0}));
    return json({ok:true,season:SEASON,total:best.size,list});
   }
   let body;try{body=await req.json()}catch{return json({ok:false,error:'bad json'},400)}
   // 维护：删单条 / 清空
   if(body?.op==='del'||body?.op==='purge'||body?.op==='dump'){
-   if(body.token!==ADMIN)return json({ok:false,error:'forbidden'},403);
+   if(!ADMIN||body.token!==ADMIN)return json({ok:false,error:'forbidden'},403);
    if(body.op==='dump'){const all=(await readAll(store)).map(({ip,...r})=>r);return json({ok:true,runs:all})}   // 导出全部对局（不含 IP），做平衡分析
    if(body.op==='del'){await store.delete(String(body.key));return json({ok:true,deleted:1})}
    const {blobs}=await store.list({prefix:'run-'});for(const b of blobs)await store.delete(b.key);return json({ok:true,deleted:blobs.length});
@@ -48,12 +48,13 @@ export default async function handler(req,context){
   const t=Math.round(Number(body?.t)),kills=Math.round(Number(body?.kills)),lv=Math.round(Number(body?.lv))||1,bosses=Math.round(Number(body?.bosses))||0;
   // 合理性检查：一局 20 分钟（之后无尽也给到 2 小时上限）；击杀、等级、Boss 不能超过时间允许的量
   if(![t,kills].every(Number.isFinite)||t<10||t>7200)return json({ok:false,error:'bad time'},400);
-  if(kills<0||kills>t*20)return json({ok:false,error:'bad kills'},400);
+  if(kills<0||kills>t*10)return json({ok:false,error:'bad kills'},400);
   if(lv<1||lv>200||bosses<0||bosses>Math.floor(t/120)+2)return json({ok:false,error:'bad stats'},400);
   const ip=context?.ip||req.headers.get('x-nf-client-connection-ip')||'unknown',now=Date.now();
   if((await readAll(store)).filter(r=>r.ip===ip&&now-r.at<RATE_WINDOW*1000).length>=RATE_MAX)return json({ok:false,error:'too many'},429);
   const tags=a=>Array.isArray(a)?a.slice(0,12).map(x=>String(x).replace(/[^a-z_0-9:]/gi,'').slice(0,16)):[];   // 平衡分析用：带了哪些卡、祝福、被什么打死
-  const rec={name:cleanName(body.name),t,kills,lv,bosses,at:now,season:SEASON,ip,cheat:0,by:String(body.by||'').slice(0,30),cards:tags(body.cards),bless:tags(body.bless),role:body.role==='f'?'f':'m'};
+  const clear=body?.clear&&t>=1200&&bosses>=4?1:0;
+  const rec={name:cleanName(body.name),t,kills,lv,bosses,clear,at:now,season:SEASON,ip,cheat:0,by:String(body.by||'').slice(0,30),cards:tags(body.cards),bless:tags(body.bless),role:body.role==='f'?'f':'m'};
   await store.set('run-'+randomUUID(),JSON.stringify(rec));
   return json({ok:true,score:scoreOf(rec)});
  }catch{return json({ok:false,error:'temporarily unavailable'},503)}

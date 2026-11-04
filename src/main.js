@@ -1,18 +1,18 @@
 
-import {createMenu} from './menu.js?v=11041800';
-import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11041800';
-import {createSurvival} from './survival.js?v=11041800';
-import {createEnemies} from './enemies.js?v=11041800';
-import {createAudio} from './audio.js?v=11041800';
-import {createMeta} from './meta.js?v=11041800';
+import {createMenu} from './menu.js?v=11041900';
+import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11041900';
+import {createSurvival} from './survival.js?v=11041900';
+import {createEnemies} from './enemies.js?v=11041900';
+import {createAudio} from './audio.js?v=11041900';
+import {createMeta} from './meta.js?v=11041900';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11041800';
+import {createPathing} from './pathing.js?v=11041900';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11041800';
-import {createRun} from './run.js?v=11041800';
-import {playEnding} from './ending.js?v=11041800';
-import {createDebug} from './debug.js?v=11041800';
+import {createWeather} from './weather.js?v=11041900';
+import {createRun} from './run.js?v=11041900';
+import {playEnding} from './ending.js?v=11041900';
+import {createDebug} from './debug.js?v=11041900';
 const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json'].map(u=>fetch(u).then(r=>r.json())));
 const HN=await fetch('data/heroine.json').then(r=>r.json());
 const HM=await fetch('data/hero_m.json').then(r=>r.json());
@@ -39,7 +39,7 @@ const IM={};let left=0;
 let tot=0;const BAD=[];function ld(k,s,tr=0){if(!tr){left++;tot++}const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};
  i.onerror=()=>{if(tr<2){setTimeout(()=>ld(k,s,tr+1),600*(tr+1));return}BAD.push(s);console.warn('加载失败',s);const t=document.querySelector('#boot,.boot,#loading');if(t)t.setAttribute('data-err',BAD.join(' '));if(--left==0)start()};i.src=s}
 D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);for(const k of D.gt)ld(k,'assets/map/'+k+'.jpg?v='+W.ver);left++;tot++;fetch(D.coll).then(r=>r.blob()).then(b=>{const i=new Image();i.onload=()=>{IM.coll=i;if(--left==0)start()};i.src=URL.createObjectURL(b)});   // 碰撞图走 blob，避免跨域污染画布（试玩网址）
-for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11041800');
+for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11041900');
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
 // 发型按需下载：选中哪一套才加载哪一套（女主 5 套×9 帧，男主 4 套×8 帧）
@@ -108,7 +108,7 @@ function drawHero(px,py,moving,now){
  if(survival?.playing){const mx=survival.max,hp=survival.hp,W=22,X=px-W/2,Y=py+5;window.HPLAG=Math.max(hp,(window.HPLAG??hp)-mx*.006);if(window.HPLAG>mx)window.HPLAG=mx;
   c.fillStyle='rgba(0,0,0,.6)';c.fillRect(X-1,Y-1,W+2,4);c.fillStyle='#fff';c.fillRect(X,Y,W*window.HPLAG/mx,2);c.fillStyle=hp/mx<.3?'#ff4b4b':'#e83a3a';c.fillRect(X,Y,W*hp/mx,2)}}
 const en=[];let kills=0,fx=[];
-const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{if(run?.dodge?.())return;SFX.hurt();let v=Math.max(1,(amount-(run?.armor||0))*(1-(run?.armPct||0)));v=run?.absorb?run.absorb(v):v;if(v<=0)return;if(survival&&survival.hp-v<=0&&run?.useRevive()){survival.heal(survival.max*.5);return}survival?.damage(v)}});
+const enemySystem=createEnemies({data:ED,images:IM,hero,ok,water,onHit:amount=>{if(!survival?.canHit)return;if(run?.dodge?.())return;SFX.hurt();let v=Math.max(1,(amount-(run?.armor||0))*(1-(run?.armPct||0)));v=run?.absorb?run.absorb(v):v;if(v<=0)return;if(survival&&survival.hp-v<=0&&run?.useRevive()){survival.heal(survival.max*.5);survival.guard(1.5);return}survival?.damage(v)}});
 function hitEnemy(e,now,dx,dmg=1){if(enemySystem.hit(e,dmg)){e.rc=.09;e.rcd=dx||0;fx.push({x:e.x,y:e.y,t:now,dx});const kb=(window.KB||1)-1;if(kb>0&&!e.boss&&!e.drum&&!e.dead){const ax=e.x-hero.x,ay=e.y-hero.y,d=Math.hypot(ax,ay)||1,nx=e.x+ax/d*kb*8,ny=e.y+ay/d*kb*8;if(ok(nx,ny)){e.x=nx;e.y=ny}}}}
 function spawn(){if(window.DBG?.noMob)return;let fb=null;for(let n=0;n<40;n++){const a=Math.random()*6.28,r=(n<28?(Math.hypot(VW,VH)/2+20+Math.random()*90):(140+Math.random()*160))*(run?.spawnR||1),x=hero.x+Math.cos(a)*r,y=hero.y+Math.sin(a)*r;
  if(x<30||y<30||x>WW-30||y>WH-30||!ok(x,y))continue;

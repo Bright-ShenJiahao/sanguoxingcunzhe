@@ -1,5 +1,5 @@
-import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11041800';
-import {t,onLanguageChange} from './i18n.js?v=11041800';
+import {createLeaderboard,submitScore,formatTime,scoreOf} from './leaderboard.js?v=11041900';
+import {t,onLanguageChange} from './i18n.js?v=11041900';
 
 export function createSurvival(game){
  let maxHp=100,playing=false,finished=false,hp=100,elapsed=0,cooldown=0,name='',generation=0;
@@ -45,9 +45,9 @@ function die(win){
  }
  dialog.querySelector('.retry').onclick=start;
  dialog.querySelector('.home').onclick=()=>{stop();game.clearInput();game.home()};
- return {start,stop,get playing(){return playing&&!finished},get hp(){return hp},get max(){return maxHp},get finished(){return finished},win(){if(playing&&!finished)die(true)},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
+ return {start,stop,get playing(){return playing&&!finished},get hp(){return hp},get max(){return maxHp},get finished(){return finished},win(){if(playing&&!finished)die(true)},get canHit(){return playing&&!finished&&cooldown<=0&&!window.DBG?.god&&!window.CLEARED},guard(s){cooldown=Math.max(cooldown,s)},setMax(m,add=0){maxHp=m;hp=Math.min(m,hp+add);render()},heal(v){hp=Math.min(maxHp,hp+v);render()},damage(amount){
   if(!playing||finished||cooldown>0||window.DBG?.god||window.CLEARED)return;
-  window.LASTHIT=window.CUR_E;const big=amount>=maxHp*.12;hp=Math.max(0,hp-Math.round(amount));cooldown=Math.max(game.iframe?.()??0,big?.25:.08);window.SHAKE?.(big?3:1.5);window.HURT=performance.now();render();if(hp===0)die();
+  window.LASTHIT=window.CUR_E;const big=amount>=maxHp*.12;hp=Math.max(0,hp-Math.round(amount));cooldown=Math.max(game.iframe?.()??0,big?.4:.25);window.SHAKE?.(big?3:1.5);window.HURT=performance.now();render();if(hp===0)die();
  },update(dt){
   if(!playing||finished)return;
   elapsed+=dt;if(dt>0)cooldown=Math.max(0,cooldown-dt);

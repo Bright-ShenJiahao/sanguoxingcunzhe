@@ -1,5 +1,6 @@
 // Run/blessing/level-up/boss text (src/run.js)
 export const zh={
+ "run.full5":"技能栏已满（5/5）：之后只会升级已有技能",
  "run.clear":"哥布林帝国覆灭！",
  "run.exitPortal":"回家的光门出现了",
  "run.exitHint":"↓ 走进光门",
@@ -254,6 +255,7 @@ export const zh={
  "run.dud":"哑弹",
 };
 export const en={
+ "run.full5":"Skill slots full (5/5): only upgrades from now on",
  "run.clear":"The Goblin Empire has fallen!",
  "run.exitPortal":"A portal home has appeared",
  "run.exitHint":"↓ Enter the portal",
@@ -508,6 +510,7 @@ export const en={
  "run.dud":"Dud",
 };
 export const ja={
+ "run.full5":"スキル枠が満杯（5/5）：以降は強化のみ",
  "run.clear":"ゴブリン帝国、崩壊！",
  "run.exitPortal":"帰り道の光の門が現れた",
  "run.exitHint":"↓ 光の門へ",
