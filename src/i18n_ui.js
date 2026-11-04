@@ -1,5 +1,13 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.shop.gacha":"抽卡",
+ "ui.shop.gachaD":"随机解锁 1 张未解锁的技能卡或祝福（不会重复）",
+ "ui.shop.gachaGot":"抽到了！",
+ "ui.shop.gachaBody":"解锁：{nm}",
+ "ui.shop.head":"先手卡",
+ "ui.shop.headD":"从卡组选 1 张，下一局开局直接 2 级",
+ "ui.shop.headPick":"选择下一局开局 2 级的卡",
+ "ui.shop.headOn":"已预约：{nm}（下一局生效）",
  "ui.ci.hint":"点卡片查看效果，再点一次加入或移出卡组",
  "ui.ci.in":"再点一次加入卡组",
  "ui.ci.out":"再点一次移出卡组",
@@ -247,6 +255,14 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.shop.gacha":"Gacha",
+ "ui.shop.gachaD":"Unlock 1 random locked skill card or blessing (no duplicates)",
+ "ui.shop.gachaGot":"You got it!",
+ "ui.shop.gachaBody":"Unlocked: {nm}",
+ "ui.shop.head":"Head Start",
+ "ui.shop.headD":"Pick 1 deck card; it starts next run at Lv 2",
+ "ui.shop.headPick":"Choose a card to start next run at Lv 2",
+ "ui.shop.headOn":"Reserved: {nm} (next run)",
  "ui.ci.hint":"Tap a card to see its effect; tap again to add or remove it",
  "ui.ci.in":"Tap again to add to deck",
  "ui.ci.out":"Tap again to remove from deck",
@@ -494,6 +510,14 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.shop.gacha":"ガチャ",
+ "ui.shop.gachaD":"未解放のスキルか祝福を 1 つランダム解放（重複なし）",
+ "ui.shop.gachaGot":"ゲット！",
+ "ui.shop.gachaBody":"解放：{nm}",
+ "ui.shop.head":"先手カード",
+ "ui.shop.headD":"デッキから 1 枚選び、次のランで最初から Lv2",
+ "ui.shop.headPick":"次のランで Lv2 から始めるカードを選択",
+ "ui.shop.headOn":"予約済み：{nm}（次のラン）",
  "ui.ci.hint":"カードをタップで効果を表示、もう一度タップでデッキに出し入れ",
  "ui.ci.in":"もう一度タップでデッキに追加",
  "ui.ci.out":"もう一度タップでデッキから外す",
