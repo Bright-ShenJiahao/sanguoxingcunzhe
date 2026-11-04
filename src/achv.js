@@ -1,6 +1,6 @@
 // 成就收藏：卡牌解锁 + 祝福解锁 + 金币成就。进度存在本机 localStorage 'ach'。
-import {getLanguage} from './i18n.js?v=11042100';
-import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042100';
+import {getLanguage} from './i18n.js?v=11042110';
+import {WEAPONS,PASSIVES,WIC,PIC} from './run.js?v=11042110';
 const L=o=>o[getLanguage()]||o.zh;
 const BOSS={gob_king:'哥布林大王',gob_hero:'哥布林英雄',gob_chief:'哥布林酋长',gob_paladin:'哥布林圣骑士',gob_emperor:'哥布林皇帝'};
 const BNAME={gob_king:{zh:'哥布林大王',en:'Goblin King',ja:'ゴブリンキング'},gob_hero:{zh:'哥布林英雄',en:'Goblin Hero',ja:'ゴブリンヒーロー'},gob_chief:{zh:'哥布林酋长',en:'Goblin Chief',ja:'ゴブリン族長'},gob_paladin:{zh:'哥布林圣骑士',en:'Goblin Paladin',ja:'ゴブリン聖騎士'},gob_emperor:{zh:'哥布林皇帝',en:'Goblin Emperor',ja:'ゴブリン皇帝'}};
@@ -71,6 +71,5 @@ export function initAchv(){
  o.addEventListener('change',e=>{if(e.target.matches('[data-h]')){hide=e.target.checked;try{localStorage.setItem('achHide',hide?'1':'0')}catch(_){}draw()}});
  const b=document.createElement('button');b.type='button';b.className='menu-board';b.dataset.achv=1;
  const lab=()=>{b.textContent='🏆 '+L(T.title)};lab();b.onclick=()=>{draw();o.hidden=false};
- const after=document.querySelector('.menu-board');if(after)after.after(b);else document.querySelector('.menu-start')?.after(b);
- window.ACHV_LABEL=lab;
+ window.ACHV_OPEN=()=>{draw();o.hidden=false};window.ACHV_NAME=()=>L(T.title);window.ACHV_LABEL=()=>window.META?.drawBar?.();window.META?.drawBar?.();
 }
