@@ -1,26 +1,26 @@
 
-import {createMenu} from './menu.js?v=11042430';
-import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11042430';
-import {createSurvival} from './survival.js?v=11042430';
-import {createEnemies} from './enemies.js?v=11042430';
-import {createAudio} from './audio.js?v=11042430';
-import {createMeta} from './meta.js?v=11042430';
+import {createMenu} from './menu.js?v=11042450';
+import {t,t as tr,getLanguage,setLanguage,onLanguageChange} from './i18n.js?v=11042450';
+import {createSurvival} from './survival.js?v=11042450';
+import {createEnemies} from './enemies.js?v=11042450';
+import {createAudio} from './audio.js?v=11042450';
+import {createMeta} from './meta.js?v=11042450';
 window.META=createMeta();
 const SFX=window.SFX=createAudio();
-import {createPathing} from './pathing.js?v=11042430';
+import {createPathing} from './pathing.js?v=11042450';
 let PATH=null;window.PATHDIR=(x,y)=>PATH?.dir(x,y);window.PATHDBG=()=>PATH?.dbg();window.PATHAT=(x,y)=>PATH?PATH.at(x,y):-1;
-import {createWeather} from './weather.js?v=11042430';
-import {createRun} from './run.js?v=11042430';
-import {playEnding} from './ending.js?v=11042430';
-import {startTutorial} from './tutorial.js?v=11042430';
-import {initAchv} from './achv.js?v=11042430';
-import {initNB} from './nb.js?v=11042430';
-import {createDebug} from './debug.js?v=11042430';
+import {createWeather} from './weather.js?v=11042450';
+import {createRun} from './run.js?v=11042450';
+import {playEnding} from './ending.js?v=11042450';
+import {startTutorial} from './tutorial.js?v=11042450';
+import {initAchv} from './achv.js?v=11042450';
+import {initNB} from './nb.js?v=11042450';
+import {createDebug} from './debug.js?v=11042450';
 // 加载失败：自动重试 2 次，仍失败就在加载画面提示「点击重试」
 window.LOADFAIL=()=>{const t=document.getElementById('bootx');if(t&&!t.dataset.fail){t.dataset.fail=1;t.textContent=t_(lf());t.style.cursor='pointer';t.style.color='#ffb4a0';document.getElementById('boot')?.addEventListener('click',()=>location.reload())}};
 const lf=()=>({zh:'加载失败，点击重试',en:'Failed to load — tap to retry',ja:'読み込み失敗：タップで再試行'}),t_=o=>o[(()=>{try{return localStorage.getItem('lang')}catch(e){}})()]||o.zh;
 const fj=async(u,n=0)=>{try{const r=await fetch(u);if(!r.ok)throw 0;return await r.json()}catch(e){if(n<2){await new Promise(z=>setTimeout(z,800*(n+1)));return fj(u,n+1)}window.LOADFAIL();throw e}};
-const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042430'].map(u=>fj(u)));
+const [W,CH,ED]=await Promise.all(['data/world.json','data/characters.json','data/enemies.json?v=11042450'].map(u=>fj(u)));
 const HN=await fj('data/heroine.json');
 const HM=await fj('data/hero_m.json');
 const D={...W,...CH,gt:W.tiles.list||[0,1].flatMap(y=>[0,1].map(x=>'g'+x+y)),coll:'assets/map/coll.png?v='+W.ver,
@@ -46,7 +46,7 @@ const IM={};let left=0;
 let tot=0;const BAD=[];function ld(k,s,tr=0){if(!tr){left++;tot++}const i=new Image();i.crossOrigin='anonymous';i.onload=()=>{IM[k]=i;const b=document.getElementById('bootbar');if(b)b.style.width=Math.round((tot-left+1)/tot*100)+'%';if(--left==0)start()};
  i.onerror=()=>{if(tr<2){setTimeout(()=>ld(k,s,tr+1),600*(tr+1));return}BAD.push(s);console.warn('加载失败',s);if(/coll|\/map\/g/.test(s))window.LOADFAIL();const t=document.querySelector('#boot,.boot,#loading');if(t)t.setAttribute('data-err',BAD.join(' '));if(--left==0)start()};i.src=s}
 D.hb.forEach((u,i)=>ld('hb_'+i,u));for(const k in D.wp)ld('wp_'+k,D.wp[k]);for(const k of D.gt)ld(k,'assets/map/'+k+'.jpg?v='+W.ver);left++;tot++;fetch(D.coll).then(r=>{if(!r.ok)throw 0;return r.blob()}).catch(()=>fetch(D.coll+'&r=1').then(r=>r.blob())).catch(()=>{window.LOADFAIL();throw 0}).then(b=>{const i=new Image();i.onload=()=>{IM.coll=i;if(--left==0)start()};i.src=URL.createObjectURL(b)});   // 碰撞图走 blob，避免跨域污染画布（试玩网址）
-for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11042430');
+for(const k in D.spr)ld('s_'+k,D.spr[k]);window.CAMP=D.camp;ld('camp_drum','assets/map/sprites/camp_drum.png');ld('camp_drum_x','assets/map/sprites/camp_drum_x.png');ld('camp_totem','assets/map/sprites/camp_totem.png');for(const n of ['barrel','pot','box'])ld('ui_'+n,'assets/ui/'+n+'.png?v=11042450');
 for(const k in ED)for(const name in ED[k].frames)ld('en_'+k+'_'+name,ED[k].frames[name].src);
 ld('wp_xbow','assets/characters/hero_b/weapons/xbow.png');
 // 发型按需下载：选中哪一套才加载哪一套（女主 5 套×9 帧，男主 4 套×8 帧）
@@ -62,7 +62,7 @@ let CS=(()=>{try{return localStorage.getItem('sex')==='f'?'f0':'m'}catch(e){retu
 for(let r=0;r<HM.rows.length;r++){const z=HM.rows[r].size||HM.size;SETS['m'+(r+1)]={pre:'hm'+r+'_',size:[z[0]/2,z[1]/2],grip:HM.rows[r],walk:[2,3,4,5,6,7]}};
 for(let r=0;r<HN.rows.length;r++)SETS['f'+r]={pre:'hh'+r+'_',size:(z=>[z[0]/2,z[1]/2])(HN.rows[r].size||HN.size),grip:HN.rows[r],walk:HN.rows[r].n===8?[2,3,4,5,6,7]:[2,3,4,5,6,7,8]};
 const GI={gb:new Image(),hp:new Image()};GI.gb.src='assets/weapons/gear/gb.png';GI.hp.src='assets/weapons/gear/hp_f.png';
-const MMR=900;let hairG=false,weaponAttack=null,pj=[],CM,mmc,wpm='short';const R=D.coll_r;
+const MMR=900,SEP=15;   /* 怪与怪之间至少保持约 15 像素，不挤成一团 */let hairG=false,weaponAttack=null,pj=[],CM,mmc,wpm='short';const R=D.coll_r;
 const objs=D.objs.map(([k,x,y])=>({k,x,y,a:1,w:D.size[k][0],h:D.size[k][1],r:R[k]||0}));
 const QP=new URLSearchParams(location.search);const AT=QP.get('x')?[+QP.get('x')/D.WW,+QP.get('y')/D.WH]:({n:[.8,.15],s:[.85,.85],w:[.15,.2],e:[.95,.6],sw:[.15,.85]})[QP.get('at')]||[D.spawn[0]/D.WW,D.spawn[1]/D.WH];
 const region=()=>'翠绿平原',region0=(x,y)=>{const [gw,gh]=D.rgrid||[64,64],i=D.rmap[Math.min(gh-1,Math.max(0,Math.floor(y/D.WH*gh)))*gw+Math.min(gw-1,Math.max(0,Math.floor(x/D.WW*gw)))];return D.rnames[i]};
@@ -175,8 +175,8 @@ let flT=0;function loop(now){if(now-flT<(menu?.visible?32:15.5)){requestAnimatio
  if(ok(nx,hero.y))hero.x=nx;if(ok(hero.x,ny))hero.y=ny;
  if(inSh&&moving&&Math.random()<dt*7)rip.push({x:hero.x,y:hero.y,t:now});
  enemySystem.update(en,window.FREEZE>performance.now()?0:gdt,window.MODES?.rage?1.25:1);
- {const G=new Map();for(const e of en){if(e.dead||e.drum)continue;const key=((e.x/10)|0)*4096+((e.y/10)|0);let L=G.get(key);if(!L)G.set(key,L=[]);L.push(e)}   // 空间网格：只和相邻格子里的怪比较
-  for(const [key,L] of G){const gx=Math.floor(key/4096),gy=key-gx*4096;for(let ox=0;ox<=1;ox++)for(let oy=-1;oy<=1;oy++){if(ox===0&&oy<0)continue;const M=ox===0&&oy===0?L:G.get((gx+ox)*4096+gy+oy);if(!M)continue;for(let i=0;i<L.length;i++)for(let j=M===L?i+1:0;j<M.length;j++){const a=L[i],b=M[j];const ddx=b.x-a.x,ddy=b.y-a.y;if(ddx*ddx+ddy*ddy>=100)continue;const d=Math.hypot(ddx,ddy);if(d>0&&d<10){const f=(10-d)/24;if(ok(a.x-ddx/d*f,a.y-ddy/d*f)){a.x-=ddx/d*f;a.y-=ddy/d*f}if(ok(b.x+ddx/d*f,b.y+ddy/d*f)){b.x+=ddx/d*f;b.y+=ddy/d*f}}}}}}
+ {const G=new Map();for(const e of en){if(e.dead||e.drum)continue;const key=((e.x/SEP)|0)*4096+((e.y/SEP)|0);let L=G.get(key);if(!L)G.set(key,L=[]);L.push(e)}   // 空间网格：只和相邻格子里的怪比较
+  for(const [key,L] of G){const gx=Math.floor(key/4096),gy=key-gx*4096;for(let ox=0;ox<=1;ox++)for(let oy=-1;oy<=1;oy++){if(ox===0&&oy<0)continue;const M=ox===0&&oy===0?L:G.get((gx+ox)*4096+gy+oy);if(!M)continue;for(let i=0;i<L.length;i++)for(let j=M===L?i+1:0;j<M.length;j++){const a=L[i],b=M[j];const ddx=b.x-a.x,ddy=b.y-a.y;if(ddx*ddx+ddy*ddy>=SEP*SEP)continue;const d=Math.hypot(ddx,ddy);if(d>0&&d<SEP){const f=(SEP-d)/16;if(ok(a.x-ddx/d*f,a.y-ddy/d*f)){a.x-=ddx/d*f;a.y-=ddy/d*f}if(ok(b.x+ddx/d*f,b.y+ddy/d*f)){b.x+=ddx/d*f;b.y+=ddy/d*f}}}}}}
  run.update(gdt);
  if(false){const RNG=(wpm=='bow'||wpm=='xbow'),DUR={short:380,none:380,long:430,bow:560,xbow:380,magic:380}[wpm]||380;
   if(!weaponAttack&&now>nextAtk){let best=null,bd=RNG?150:52;for(const e of en){if(e.dead)continue;const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d<bd){bd=d;best=e}}if(best){hero.face=best.x>=hero.x?1:-1;weaponAttack={t0:now,dur:DUR,hit:false,tx:best.x,ty:best.y}}}

@@ -1,5 +1,7 @@
 // UI: menu, meta, unlock, leaderboard, result
 export const zh={
+ "ui.mode.normal":"普通",
+ "ui.mode.normal.d":"标准难度 · 可通关",
  "ui.hud.slain":"击杀 {n}",
  "ui.stage.2lock":"🔒 第一关普通模式通关后解锁",
  "ui.stage.2wip":"已解锁 · 制作中，敬请期待",
@@ -11,7 +13,7 @@ export const zh={
  "ui.board.normal":"普通",
  "ui.board.other":"其他模式（狂暴）",
  "ui.board.ruleRage":"狂暴模式的成绩单独排名",
- "ui.mode.title":"难度模式",
+ "ui.mode.title":"难度",
  "ui.mode.sub":"可多选，金币奖励更多",
  "ui.mode.lock":"通关一次后开启",
  "ui.mode.rage":"狂暴",
@@ -239,6 +241,8 @@ export const zh={
  "ui.role.f.t":"特性：拾取范围 +25%",
 };
 export const en={
+ "ui.mode.normal":"Normal",
+ "ui.mode.normal.d":"Standard · Can clear",
  "ui.hud.slain":"Kills {n}",
  "ui.stage.2lock":"🔒 Clear Stage 1 on Normal to unlock",
  "ui.stage.2wip":"Unlocked · Coming soon",
@@ -250,7 +254,7 @@ export const en={
  "ui.board.normal":"Normal",
  "ui.board.other":"Other (Frenzy)",
  "ui.board.ruleRage":"Frenzy mode runs are ranked separately",
- "ui.mode.title":"Challenge Modes",
+ "ui.mode.title":"Difficulty",
  "ui.mode.sub":"Stackable; more gold",
  "ui.mode.lock":"Unlocks after your first clear",
  "ui.mode.rage":"Frenzy",
@@ -478,6 +482,8 @@ export const en={
  "ui.role.f.t":"Trait: Pickup range +25%",
 };
 export const ja={
+ "ui.mode.normal":"通常",
+ "ui.mode.normal.d":"標準・クリア可",
  "ui.hud.slain":"撃破 {n}",
  "ui.stage.2lock":"🔒 第1ステージを通常クリアで解放",
  "ui.stage.2wip":"解放済み・制作中",
@@ -489,7 +495,7 @@ export const ja={
  "ui.board.normal":"通常",
  "ui.board.other":"その他（狂乱）",
  "ui.board.ruleRage":"狂乱モードの記録は別ランキング",
- "ui.mode.title":"チャレンジモード",
+ "ui.mode.title":"難易度",
  "ui.mode.sub":"重ねがけ可・金貨アップ",
  "ui.mode.lock":"初クリアで解放",
  "ui.mode.rage":"狂乱",
