@@ -20,23 +20,49 @@ export function createAudio(){
   const g=ac.createGain();g.gain.value=vol;n.connect(g);g.connect(bus);s.start(t)}
  function kick(t,v=.5){const o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(40,t+.15);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+.25);o.connect(g);g.connect(musicBus);o.start(t);o.stop(t+.3)}
  // ---------- 曲子 ----------
- // D 多利亚：D E F G A B C；和弦进行 Dm – C – G – Dm（每小节 8 个八分音符）
- const CH=[[50,53,57],[48,52,55],[43,47,50],[50,53,57]],BASS=[38,36,31,38];
- const MEL_A=[74,72,69,67,69,72,74,77, 76,74,72,69,67,69,72,74, 71,72,74,71,67,69,71,74, 69,67,65,64,62,64,65,69];
- const MEL_B=[81,79,77,76,74,76,77,79, 79,77,76,74,72,74,76,77, 74,76,79,81,79,77,74,71, 74,72,69,67,69,72,74,74];
+ // 多首曲子按场景切换；大部分是舒缓的，只有 Boss 战激烈。每 16 小节有 4 小节去掉鼓，避免一直很吵。
+ // 和弦：每小节一个三和弦（MIDI 音高）；旋律：每小节 8 个八分音符，0 = 休止
+ const SONGS={
+  menu:{beat:.36,ch:[[50,53,57],[48,52,55],[43,47,50],[50,53,57]],bass:[38,36,31,38],drum:0,lead:'sine',lv:.09,harp:.07,
+   mel:[74,0,72,69,67,0,69,0, 72,0,74,77,76,0,0,0, 71,0,72,74,71,0,67,0, 69,0,67,65,64,0,62,0]},
+  prep:{beat:.32,ch:[[55,59,62],[52,55,59],[48,52,55],[50,54,57]],bass:[43,40,36,38],drum:0,lead:'triangle',lv:.07,harp:.06,pluck:1,
+   mel:[79,0,78,76,74,0,71,0, 76,0,74,72,71,0,0,0, 72,74,76,0,79,0,76,0, 74,0,72,0,69,0,0,0]},
+  calm:{beat:.27,ch:[[50,53,57],[46,50,53],[48,52,55],[45,49,52]],bass:[38,34,36,33],drum:1,lead:'sine',lv:.07,harp:.05,
+   mel:[69,0,72,74,72,0,69,67, 70,0,69,67,65,0,62,0, 67,0,69,72,71,0,67,0, 69,0,0,0,73,0,0,0]},
+  game:{beat:.24,ch:[[50,53,57],[48,52,55],[43,47,50],[50,53,57]],bass:[38,36,31,38],drum:2,lead:'sine',lv:.07,harp:.05,
+   mel:[74,72,69,67,69,72,74,77, 76,74,72,69,67,69,72,74, 71,72,74,71,67,69,71,74, 69,67,65,64,62,64,65,69],
+   mel2:[81,79,77,76,74,76,77,79, 79,77,76,74,72,74,76,77, 74,76,79,81,79,77,74,71, 74,72,69,67,69,72,74,74]},
+  night:{beat:.34,ch:[[45,48,52],[41,45,48],[43,47,50],[40,44,47]],bass:[33,29,31,28],drum:0,lead:'sine',lv:.065,harp:.06,
+   mel:[76,0,0,74,72,0,71,0, 69,0,0,0,72,0,0,0, 74,0,72,71,67,0,0,0, 68,0,71,0,76,0,0,0]},
+  late:{beat:.26,ch:[[45,48,52],[41,45,48],[48,52,55],[44,47,52]],bass:[33,29,36,32],drum:1,lead:'triangle',lv:.06,harp:.05,
+   mel:[76,0,77,76,74,72,71,0, 72,0,74,72,69,0,0,0, 72,0,74,76,79,0,76,0, 75,0,74,0,71,0,68,0]},
+  boss:{beat:.19,ch:[[50,53,57],[48,52,55],[43,47,50],[50,53,57]],bass:[38,36,31,38],drum:3,lead:'sine',lv:.07,harp:.05,heavy:1,
+   mel:[81,79,77,76,74,76,77,79, 79,77,76,74,72,74,76,77, 74,76,79,81,79,77,74,71, 74,72,69,67,69,72,74,74]},
+  emperor:{beat:.3,ch:[[38,45,50],[36,43,48],[34,41,46],[33,40,45]],bass:[26,24,22,21],drum:4,lead:'sawtooth',lv:.035,harp:.04,heavy:1,
+   mel:[62,0,0,65,64,0,62,0, 60,0,0,64,62,0,60,0, 58,0,62,65,70,0,69,0, 69,0,0,0,61,0,64,0]},
+  end:{beat:.4,ch:[[48,52,55],[45,48,52],[41,45,48],[43,47,50]],bass:[36,33,29,31],drum:0,lead:'sine',lv:.08,harp:.07,box:1,
+   mel:[79,0,76,0,72,0,76,0, 74,0,72,0,69,0,0,0, 72,0,69,0,65,0,69,0, 71,0,74,0,79,0,0,0]}};
+ let cur='menu';
  function bar(t,beat,bi){
-  const c=CH[bi%4],b=BASS[bi%4],menu=mode==='menu',boss=mode==='boss',e=boss?1:inten;
+  const S=SONGS[cur]||SONGS.menu,c=S.ch[bi%4],b=S.bass[bi%4],e=cur==='boss'?1:inten,quiet=S.drum&&(bi%16)>=12;   // 每 16 小节最后 4 小节不打鼓
+  const mel=(S.mel2&&(bi>>2)%2)?S.mel2:S.mel,seg=(bi%4)*8;
   for(let i=0;i<8;i++){const tt=t+i*beat;
-   tone(tt,c[i%3]+12+(i>=4?12:0),beat*.9,{type:'triangle',vol:menu?.07:.05,rel:.6});          // 竖琴分解和弦
-   if(!menu&&(i%2===0))tone(tt,b,beat*1.8,{type:'sawtooth',vol:.05+.04*e,lp:500,rel:.2});     // 低音
-   if(!menu){if(i%4===0)kick(tt,.35+.25*e);if(i%4===2)noise(tt,.12,{vol:.08+.1*e,hp:1800,bus:musicBus});if(e>.5||boss)noise(tt+beat/2,.04,{vol:.05,hp:6000,bus:musicBus})}}
-  const mel=(boss||(bi>>2)%2)?MEL_B:MEL_A,seg=(bi%4)*8;
-  if(!menu||bi%2===0)for(let i=0;i<8;i++){const m=mel[seg+i];if(i%2===1&&menu)continue;tone(t+i*beat,m,beat*(menu?1.8:.9),{type:'sine',vol:menu?.09:.07,att:.03,rel:.3,det:Math.sin(i)*6});
-   if(e>.6||boss)tone(t+i*beat,m-12,beat*.9,{type:'square',vol:.025,lp:1800})}                  // 激烈层：加一层低八度
+   if(S.harp)tone(tt,c[i%3]+12+(i>=4?12:0),beat*(S.pluck?.5:.9),{type:S.box?'sine':'triangle',vol:S.harp,rel:S.pluck?.25:.6});    // 分解和弦
+   if(S.drum&&i%2===0)tone(tt,b,beat*1.8,{type:'sawtooth',vol:.04+.03*e,lp:450,rel:.2});        // 低音
+   else if(!S.drum&&i===0)tone(tt,b,beat*7.5,{type:'triangle',vol:.05,lp:400,rel:1});             // 舒缓曲：长低音
+   if(!quiet){
+    if(S.drum===1){if(i===0)kick(tt,.18);if(i%2===1)noise(tt,.05,{vol:.03,hp:5000,bus:musicBus})}   // 轻：沙锤
+    else if(S.drum===2){if(i%4===0)kick(tt,.28+.2*e);if(i%4===2)noise(tt,.1,{vol:.06+.06*e,hp:1800,bus:musicBus})}
+    else if(S.drum===3){if(i%4===0)kick(tt,.6);if(i%4===2)noise(tt,.12,{vol:.18,hp:1800,bus:musicBus});noise(tt+beat/2,.04,{vol:.05,hp:6000,bus:musicBus})}
+    else if(S.drum===4){if(i===0||i===3)kick(tt,.7);if(i===4)noise(tt,.3,{vol:.16,lp:900,bus:musicBus})}}   // 皇帝：慢而重的战鼓
+   const m=mel[seg+i];if(m)tone(tt,m,beat*(S.drum?.9:1.7),{type:S.lead,vol:S.lv,att:.03,rel:.35,det:Math.sin(i)*6,lp:S.lead==='sawtooth'?1400:0});
+   if(m&&S.heavy)tone(tt,m-12,beat*.9,{type:'square',vol:.022,lp:1600});
+   if(m&&S.box&&i%4===0)tone(tt,m+12,beat*.4,{type:'sine',vol:.03,rel:.8})}
  }
- function tick(){if(!ac)return;const beat=mode==='menu'?.34:mode==='boss'?.19:.24;
+ function tick(){if(!ac)return;const want=MODEMAP(mode);if(want!==cur){cur=want;step=0;next=Math.max(next,ac.currentTime+.05)}const beat=(SONGS[cur]||SONGS.menu).beat;
   while(next<ac.currentTime+.6){if(on)bar(next,beat,step);next+=beat*8;step++}
   setTimeout(tick,200)}
+ const MODEMAP=m=>SONGS[m]?m:'game';
  // ---------- 音效 ----------
  let last={};const ok=(k,gap)=>{const n=performance.now();if(n-(last[k]||0)<gap)return false;last[k]=n;return true};
  const S={
