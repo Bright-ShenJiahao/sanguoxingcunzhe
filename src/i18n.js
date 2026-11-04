@@ -1,5 +1,9 @@
+import {zh as zhCards,en as enCards,ja as jaCards} from './i18n_cards.js?v=11041530';
+import {zh as zhRun,en as enRun,ja as jaRun} from './i18n_run.js?v=11041530';
+import {zh as zhWorld,en as enWorld,ja as jaWorld} from './i18n_world.js?v=11041530';
+import {zh as zhUi,en as enUi,ja as jaUi} from './i18n_ui.js?v=11041530';
 // Text keys are stable identifiers; saved game state must never depend on translations.
-export const zh={
+const baseZh={
  'game.title':'异世界幸存者：跑！',
  'language.label':'语言',
  'language.zh':'中文',
@@ -20,7 +24,7 @@ export const zh={
  'combat.revive':'复活！',
  'combat.shieldBreak':'圣盾破碎！',
 };
-export const en={
+const baseEn={
  'game.title':'Isekai Survivors: RUN!',
  'language.label':'Language',
  'language.zh':'中文',
@@ -41,7 +45,7 @@ export const en={
  'combat.revive':'Revived!',
  'combat.shieldBreak':'Holy Shield broken!',
 };
-export const ja={
+const baseJa={
  'game.title':'異世界サバイバーズ：逃げろ！',
  'language.label':'言語',
  'language.zh':'中文',
@@ -63,6 +67,9 @@ export const ja={
  'combat.shieldBreak':'聖盾破壊！',
 };
 
+export const zh={...baseZh,...zhCards,...zhRun,...zhWorld,...zhUi};
+export const en={...baseEn,...enCards,...enRun,...enWorld,...enUi};
+export const ja={...baseJa,...jaCards,...jaRun,...jaWorld,...jaUi};
 const tables={zh,en,ja};
 const supported=language=>Object.hasOwn(tables,language);
 function initialLanguage(){
