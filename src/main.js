@@ -214,7 +214,7 @@ let flT=0;function loopInner(now){if(now-flT<(menu?.visible?32:15.5)){requestAni
   const fl=/^(st\d|wlily)/.test(o.k);   // 踏脚石、睡莲贴地画，永远在人物下面
   items.push({y:fl?-1e9:o.y,f:()=>{c.imageSmoothingEnabled=true;c.globalAlpha=o.a;c.drawImage(IM['s_'+o.k],sx-o.w/2,fl?sy-o.h/2:sy-o.h,o.w,o.h);c.globalAlpha=1}})}
  for(const p of pj){const sx=p.x-cx,sy=p.y-cy;items.push({y:p.y+1,f:()=>{c.strokeStyle='#eadfc2';c.lineWidth=1;c.beginPath();c.moveTo(sx-p.dx*7,sy-9-p.dy*7);c.lineTo(sx,sy-9);c.stroke();c.fillStyle='#9aa0a6';c.fillRect(sx-.7,sy-9.7,1.6,1.4);c.fillStyle='rgba(18,40,20,.25)';c.fillRect(sx-1,sy-1,2,1)}})}
- for(const e of en){const sx=e.x-cx,sy=e.y-cy;if(sx<-60||sx>VW+60||sy<-30||sy>VH+60)continue;items.push({y:e.y,f:()=>{if(!e.dead&&!e.tower&&(e.alpha??1)>.3)contact(sx,sy,16);enemySystem.draw(e,c,cx,cy,now)}})}
+ for(const e of en){const sx=e.x-cx,sy=e.y-cy;if(sx<-60||sx>VW+60||sy<-30||sy>VH+60)continue;items.push({y:e.y,f:()=>{if(!e.dead&&!e.tower&&(e.alpha??1)>.3)contact(sx,sy,16);if(e.cart&&window.XDRAW)window.XDRAW(e,c,cx,cy,now);else enemySystem.draw(e,c,cx,cy,now)}})}
  items.push({y:hero.y+1,f:()=>enemySystem.drawArrows(c,cx,cy)});
  items.push({y:hero.y,f:()=>{c.imageSmoothingEnabled=false;drawHero(px,py,moving,now);if(inSh){c.fillStyle='rgba(200,228,232,.6)';c.fillRect(px-7,py-4,14,4)}}});
  run?.ground?.(c,cx,cy,now);run?.sprites?.(items,cx,cy,c,now);
