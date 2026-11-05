@@ -26,8 +26,8 @@ body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
 #boot .bg{position:absolute;inset:0;background:url(assets/ui/boot_grass2.jpg) repeat-x 0 0/auto 100%}
 #boot::before{content:"";position:absolute;inset:0;z-index:2000;pointer-events:none;background:linear-gradient(180deg,#07101b99,#07101b44 45%,#07101bbb)}
 #boot .sd{position:absolute;left:0;image-rendering:pixelated;transform-origin:50% 100%;will-change:transform}
-#boot .tx{position:absolute;left:0;right:0;bottom:9vh;z-index:2100;text-align:center;color:#c9d8e8;font-size:15px;letter-spacing:.35em}
-#boot .bar{position:absolute;left:50%;bottom:5vh;z-index:2100;width:min(320px,60vw);height:4px;margin-left:calc(min(320px,60vw)/-2);background:#ffffff22;border-radius:2px;overflow:hidden}
+#boot .tx{position:absolute;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:2100;text-align:center;color:#c9d8e8;font-size:11px;letter-spacing:.3em;opacity:.85}#btitle{position:absolute;left:0;right:0;bottom:calc(46px + env(safe-area-inset-bottom,0px));z-index:2100;text-align:center;pointer-events:none;font-family:'Noto Serif CJK SC','Songti SC','Hiragino Mincho ProN',serif;white-space:nowrap}#btitle b{font-size:clamp(28px,6vw,64px);font-weight:900;color:#f6d77e;letter-spacing:.06em;-webkit-text-stroke:2px #3a2208;paint-order:stroke fill;text-shadow:0 4px 0 #6b3d0e,0 8px 18px #000c}#btitle em{display:inline-block;margin-left:.25em;font-style:normal;font-size:clamp(22px,4.2vw,46px);font-weight:900;color:#ff8a3a;-webkit-text-stroke:2px #3a1404;paint-order:stroke fill;text-shadow:0 3px 0 #7a2a08,0 6px 14px #000c;transform:rotate(-5deg)}
+#boot .bar{position:absolute;left:50%;bottom:calc(30px + env(safe-area-inset-bottom,0px));z-index:2100;width:min(320px,60vw);height:4px;margin-left:calc(min(320px,60vw)/-2);background:#ffffff22;border-radius:2px;overflow:hidden}
 #boot .bar i{display:block;height:100%;width:4%;background:#f0d58a;transition:width .25s}
 #bx{position:absolute;z-index:2200;display:flex;gap:14px;align-items:center;box-sizing:border-box;width:min(440px,90vw);padding:14px 18px 14px 14px;background:#101a3a;border:4px solid #f4f4f4;box-shadow:0 0 0 4px #101a3a,0 0 0 7px #8aa6e0,0 8px 24px #000a;color:#fff;font:700 17px/1.65 "PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;letter-spacing:.08em;opacity:0;transition:opacity .2s}
 #bx.on{opacity:1}
@@ -37,7 +37,7 @@ body.loading{background:#07101b}body.loading .wrap{visibility:hidden}
 #bx::after{content:"";position:absolute;left:var(--tail,50%);bottom:-17px;margin-left:-9px;border:9px solid transparent;border-top:9px solid #f4f4f4;border-bottom:0}
 @keyframes bk{50%{opacity:0}}
 </style></head><body class="loading">
-<div id="boot"><div id="bbg"></div><div id="bx"><canvas id="bxa" width="37" height="33"></canvas><p id="bxt"></p><i>▼</i></div><div class="tx" id="bootx"></div><div class="bar"><i id="bootbar"></i></div></div>
+<div id="boot"><div id="bbg"></div><div id="bx"><canvas id="bxa" width="37" height="33"></canvas><p id="bxt"></p><i>▼</i></div><div id="btitle"><b></b><em></em></div><div class="tx" id="bootx"></div><div class="bar"><i id="bootbar"></i></div></div>
 <script>
 (function(){var b=document.getElementById('boot');if(!b)return;
 // 加载动画：卧室里打掌机 → 掌机爆光 → 房间碎成积木掉落、露出异世界草地 → 哥布林冒出、主角跑路
@@ -65,7 +65,7 @@ function scene(sc){cx.fillStyle='#4a6a3a';cx.fillRect(0,0,W,H);
 var BS=Math.round(28*K/2),blocks=[],px=cx0,py=H-hb-14*K;
 for(var y=0;y<H;y+=BS)for(var x=0;x<W;x+=BS){var d=Math.hypot(x+BS/2-px,y+BS/2-py)/Math.hypot(W,H);blocks.push({x:x,y:y,d:d*.85+Math.random()*.08,r:(Math.random()-.5)*4,vx:(x+BS/2-px)/W*120})}
 var q=document.createElement('div');q.textContent='？';q.style.cssText='position:absolute;z-index:2300;font:900 '+(18*K)+'px sans-serif;color:#fff;text-shadow:0 3px #000;opacity:0;transition:opacity .2s;left:'+(cx0-6*K)+'px;bottom:'+(hb+46*K)+'px';b.appendChild(q);
-var tp=document.getElementById('bx'),tt=document.getElementById('bxt'),LG=(function(){try{var s=localStorage.getItem('lang');if(s==='zh'||s==='en'||s==='ja')return s}catch(e){}return 'zh'})(),BT={zh:['再打一局就睡……','我刚才不是在家里打游戏吗！？','加载中…'],en:['One more round and then I\'ll sleep…','Wait, wasn\'t I just playing games at home?!','Loading…'],ja:['もう一回だけやったら寝る……','さっきまで家でゲームしてたはずじゃ！？','読み込み中…']}[LG],T1=BT[0],T2=BT[1],tx0=(document.getElementById('bootx').textContent=BT[2]),t0=performance.now()-SKIP*1000,shown='';
+var tp=document.getElementById('bx'),tt=document.getElementById('bxt'),LG=(function(){try{var s=localStorage.getItem('lang');if(s==='zh'||s==='en'||s==='ja')return s}catch(e){}return 'zh'})(),BT={zh:['再打一局就睡……','我刚才不是在家里打游戏吗！？','加载中…'],en:['One more round and then I\'ll sleep…','Wait, wasn\'t I just playing games at home?!','Loading…'],ja:['もう一回だけやったら寝る……','さっきまで家でゲームしてたはずじゃ！？','読み込み中…']}[LG],T1=BT[0],T2=BT[1],tx0=(document.getElementById('bootx').textContent=BT[2]),_tt=(function(){var t={zh:['异世界幸存者','跑！'],en:['Isekai Survivors','RUN!'],ja:['異世界サバイバーズ','逃げろ！']}[LG],e=document.getElementById('btitle');if(e){e.firstChild.textContent=t[0];e.lastChild.textContent=t[1]}})(),t0=performance.now()-SKIP*1000,shown='';
 var av=new Image();av.onload=function(){var c=document.getElementById('bxa').getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(av,0,0,33,31,2,2,33,31)};av.src=P+'hero_b/w0.png';
 var bw=Math.min(440,W*.9);function place(x){var bl=Math.max(12,Math.min(x-bw/2,W-bw-12));tp.style.left=bl+'px';tp.style.bottom=(hb+50*K+26)+'px';tp.style.setProperty('--tail',(x-bl)+'px')}
 function say(s,t){if(shown!==s){shown=s;tt.textContent=''}tp.className='on';tt.textContent=s.slice(0,Math.min(s.length,Math.floor(t/.075)))}
