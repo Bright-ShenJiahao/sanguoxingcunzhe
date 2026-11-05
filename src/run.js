@@ -212,23 +212,26 @@ if(e.brkT>0){e.brkT-=dt;if(e.brkT<=0)e.bshield=1}}if(e.boss||e.elite){L.push(e);
  function knock(e,k){if(e.drum)return;if(e.boss)k*=.15;if(e.armor)k*=.2;const dx=e.x-hero.x,dy=e.y-hero.y,l=Math.hypot(dx,dy)||1,nx=e.x+dx/l*k,ny=e.y+dy/l*k;if(ok(nx,ny)){e.x=nx;e.y=ny}}
  // ---------- 武器 ----------
  const FIRE={
-  sword(L){const a=FN(),n=L>=7?3:L>=3?2:1,rg=(L>=8?56:L>=4?48:40),dm=1.3*dmg(1+.35*(L-1)+(L>=6?.6:0)+(L>=8?1:0));if(nearest(rg+10))window.SFX?.slash();
+  sword(L){const a=AIM(260),n=L>=7?3:L>=3?2:1,dm=1.3*dmg(1+.35*(L-1)+(L>=6?.6:0)+(L>=8?1:0));window.SFX?.slash();   // 月牙剑气：飞向最近敌人约 160 像素，穿透
+   for(let i=0;i<n;i++)ST(()=>{if(!S||S.paused)return;const aa=a+(i===1?Math.PI:i===2?.35:0);C2.shoot({k:'cres',src:'sword',x:hero.x,y:hero.y-4,dx:Math.cos(aa),dy:Math.sin(aa),v:260,life:.62*AR(),dm,w:(L>=8?46:L>=4?40:34)*AR(),kb:4,hit:new Set(),nohit:1,col:'235,245,255'})},i*110);
+   return L>=5?.65:.85},
+  _swordOld(L){const a=FN(),n=L>=7?3:L>=3?2:1,rg=(L>=8?56:L>=4?48:40),dm=1.3*dmg(1+.35*(L-1)+(L>=6?.6:0)+(L>=8?1:0));if(nearest(rg+10))window.SFX?.slash();
    for(let i=0;i<n;i++)ST(()=>{if(!S||S.paused)return;const aa=i===1?a+Math.PI:a;hitArc(aa,rg,.9,dm);S.fx.push({k:'arc',a:aa+(i%2?-.3:.3),r:rg*AR(),w:1.8,t:0,d:.18,c:'255,255,255',img:'sword',flip:i%2})},i*110);
    return L>=5?.65:.85},
   dao(L){const ang=FA(),half=L>=6?1.57:L>=3?1.25:1.05,dm=dmg(1.6+.45*(L-1)+(L>=5?.6:0));if(nearest(60))window.SFX?.slash();
    hitArc(ang,46,half,dm);S.fx.push({k:'arc',a:ang,r:46*AR(),w:half*2,t:0,d:.22,c:'255,236,200',img:'dao'});
    if(L>=8){hitArc(ang+Math.PI,46,half,dm);S.fx.push({k:'arc',a:ang+Math.PI,r:46*AR(),w:half*2,t:0,d:.22,c:'255,236,200',img:'dao'})}
    return L>=7?.85:L>=4?1.0:1.2},
-  hammer(L){const n=L>=6?2:1,r=(L>=7?48:L>=3?40:34)*AR(),dm=1.56*dmg(3.8+1*(L-1)+(L>=8?2:0)),sd=FN()===0?1:-1;
-   for(let i=0;i<n;i++){const d=60+i*45;const hx=hero.x+sd*d,hy=hero.y+R(-10,10);S.shots.push({k:'hammer',x:hx,y:hy,t:0,d:.35,r,dm});if(L>=8)S.shots.push({k:'hammer',x:hx,y:hy,t:-.35,d:.35,r:r*1.3,dm:dm*.6,ghost:1})}
+  hammer(L){const n=L>=6?2:1,r=(L>=7?64:L>=3?54:46)*AR(),dm=1.56*dmg(3.8+1*(L-1)+(L>=8?2:0)),sd=FN()===0?1:-1;
+   const tg=cluster(),dd=tg?Math.hypot(tg.x-hero.x,tg.y-hero.y):0;for(let i=0;i<n;i++){const d=60+i*45;let hx=hero.x+sd*d,hy=hero.y+R(-10,10);if(tg&&dd<220){hx=tg.x+(i?R(-40,40):0);hy=tg.y+(i?R(-25,25):0)}/* 天降巨锤：砸在 220 像素内怪最密处 */S.shots.push({k:'hammer',x:hx,y:hy,t:0,d:.35,r,dm});if(L>=8)S.shots.push({k:'hammer',x:hx,y:hy,t:-.35,d:.35,r:r*1.3,dm:dm*.6,ghost:1})}
    return L>=4?1.6:2},
   axe(L){const n=(L>=6?2:1)+AMT(),dm=1.3*dmg(1.7+.35*(L-1)+(L>=3?.5:0)),sd=FN()===0?1:-1,cr=.2+(L>=2?.1:0)+(L>=6?.1:0),cm=L>=8?3:L>=4?2.5:2;
    for(let i=0;i<n;i++)S.shots.push({k:'axe',x:hero.x,y:hero.y-12,vx:sd*(55+i*30)*(L>=7?1.3:1),vy:-190,life:1.6,dm,cr,cm,hit:new Set()});
    return L>=5?.9:1.2},
-  bow(L){const n=(L>=8?4:L>=5?3:L>=2?2:1)+AMT(),dm=dmg(1.3+(L>=3?.5:0)+(L>=6?.7:0)),pierce=L>=8?99:(L>=4?1:0)+(L>=7?2:0),b=AIM(300);
-   for(let i=0;i<n;i++){const a=b+(i-(n-1)/2)*.12;S.shots.push({k:'arrow',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:240,life:1,dm,pierce,hit:new Set()})}
+  bow(L){const n=(L>=8?4:L>=5?3:L>=2?2:1)+AMT(),dm=dmg(1.3+(L>=3?.5:0)+(L>=6?.7:0)),pierce=L>=8?99:2+(L>=4?2:0)+(L>=7?3:0),b=AIM(380);   // 长弓：远距离穿透狙击
+   for(let i=0;i<n;i++){const a=b+(i-(n-1)/2)*.12;S.shots.push({k:'arrow',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:360,life:1.05,dm,pierce,hit:new Set()})}
    return L>=8?.7:.95},
-  xbow(L){const n=(L>=8?9:L>=6?7:L>=3?5:3)+AMT(),dm=dmg(.9+(L>=2?.3:0)+(L>=5?.4:0)+(L>=8?.5:0)),pierce=L>=7?1:0,t=nearest(240);if(!t)return .3;
+  xbow(L){const n=(L>=8?9:L>=6?7:L>=3?5:3)+AMT(),dm=dmg(.9+(L>=2?.3:0)+(L>=5?.4:0)+(L>=8?.5:0)),pierce=L>=7?1:0;let t=null,bh=0;for(const e of en){if(e.dead||e.drum||e.crate)continue;if((e.x-hero.x)**2+(e.y-hero.y)**2>260*260)continue;const h=(e.boss?1e6:e.elite?1e4:0)+e.hp;if(h>bh){bh=h;t=e}}if(!t)return .3;   // 连发弩：优先锁定血最多的精英/Boss
    for(let i=0;i<n;i++)ST(()=>{if(!S||S.paused)return;const tx=t.dead?null:t,a=tx?Math.atan2(tx.y-10-(hero.y-10),tx.x-hero.x)+R(-.04,.04):AIM(240);S.shots.push({k:'bolt',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:300,life:.8,dm,pierce,hit:new Set()})},i*70);
    return L>=4?1.15:1.5},
   spear(L){const a=MA(),len=(L>=7?95:L>=3?80:65)*AR(),dm=dmg(1.6+.4*(L-1)+(L>=8?1.5:0)),n=L>=8?3:L>=5?2:1;if(nearest(len))window.SFX?.slash();

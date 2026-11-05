@@ -62,14 +62,17 @@ export function install(X){
  const moveDir=()=>{const l=Math.hypot(hero.mx||0,hero.my||0);return l>.1?[hero.mx/l,hero.my/l]:[hero.face||1,0]};
  const tgtSum=(from,r)=>{let b=null,bd=r*r;for(const e of en){if(!alive(e))continue;const d=d2(e,from)*(e.markT>0?.3:1);if(d<bd){bd=d;b=e}}return b};   // 召唤物：优先猎印目标
  const fire={
-  greatsword(L){const l=LV(L),a=Math.cos(AIM(200))>=0?0:Math.PI,len=(l>=3?100:85)*AR(),v=1.45*dmg(3.4+1*(l-1)+(l>=4?1:0));window.SFX?.slash();
+  greatsword(L){const l=LV(L),a=Math.cos(AIM(260))>=0?0:Math.PI,len=(l>=3?230:200)*AR(),v=1.45*dmg(3.4+1*(l-1)+(l>=4?1:0));window.SFX?.slash();
    const bonus=e=>(e.k==='gob_shield'||e.k==='gob_paladin'||e.armor)?1.5:1;
    for(const e of en){if(!alive(e))continue;const c=Math.cos(a),s_=Math.sin(a),dx=e.x-hero.x,dy=e.y-6-hero.y,al=dx*c+dy*s_,sd=Math.abs(-dx*s_+dy*c);if(al>-4&&al<len&&sd<12+3*(e.sc||1)){hit('greatsword',e,v*bonus(e),Math.sign(c)||1,{mel:true});knock(e,6)}}
    fx({k:'gsw',x:hero.x,y:hero.y,f:Math.cos(a)>=0?1:-1,s:len*.9/453,d:.42});
    X.ST(()=>{fx({k:'seq',ims:['s2_crack0','s2_crack1','s2_crack2'],x:hero.x+Math.cos(a)*len/2,y:hero.y+Math.sin(a)*len/2,a,w:len*1.05,d:.55});for(let i=0;i<3;i++)fx({k:'dust',x:hero.x+Math.cos(a)*len*(.3+i*.25),y:hero.y+Math.sin(a)*len*(.3+i*.25),r:14,d:.45});window.SFX?.boom()},90);
    if(l>=5){const x=hero.x,y=hero.y;X.ST(()=>{lineHit('greatsword',x,y,a,len,12,v*.6);fx({k:'seq',ims:['s2_crack0','s2_crack1','s2_crack2'],x:x+Math.cos(a)*len/2,y:y+Math.sin(a)*len/2,a,w:len*1.05,d:.5})},400)}
    return l>=3?2.3:3},
-  rapier(L){const l=LV(L),[mx,my]=moveDir(),len=(l>=3?95:78)*AR(),v=.6*dmg(1.8+.5*(l-1)+(l>=4?.6:0)),x0=hero.x,y0=hero.y,a=Math.atan2(my,mx);   // 人不动，往移动方向刺出剑气
+  rapier(L){const l=LV(L),[mx,my]=moveDir(),v=.6*dmg(1.8+.5*(l-1)+(l>=4?.6:0)),a=Math.atan2(my,mx),n=l>=4?3:l>=2?2:1;window.SFX?.slash();   // 往移动方向甩出高速飞刃（约 260 像素，穿透）
+   const fly=(m)=>{for(let i=0;i<n;i++){const b=a+(i-(n-1)/2)*.22;st().P.push({k:'cres',src:'rapier',x:hero.x,y:hero.y-4,dx:Math.cos(b),dy:Math.sin(b),v:420,life:.62*AR(),dm:v*m,w:16*AR(),hit:new Set(),nohit:1,col:'170,230,255'})}};fly(.9);if(l>=5)X.ST(()=>fly(.6),300);
+   return l>=3?.7:.9},
+  _rapierOld(L){const l=LV(L),[mx,my]=moveDir(),len=(l>=3?95:78)*AR(),v=.6*dmg(1.8+.5*(l-1)+(l>=4?.6:0)),x0=hero.x,y0=hero.y,a=Math.atan2(my,mx);
    [0,-.13,.13].forEach((o,i)=>X.ST(()=>{const b=a+o;lineHit('rapier',x0,y0+6,b,len,8,v*.42);window.SFX?.slash();fx({k:'thrust',x0,y0,x1:x0+Math.cos(b)*len,y1:y0+Math.sin(b)*len,d:.22,c:'200,240,255'})},i*80));
    if(l>=5)X.ST(()=>{lineHit('rapier',x0,y0+6,a,len,10,v*.7);fx({k:'thrust',x0,y0,x1:x0+mx*len,y1:y0+my*len,d:.3,c:'200,240,255'})},500);
    return l>=3?.7:.9},
@@ -85,19 +88,19 @@ export function install(X){
    for(let i=0;i<Math.min(n,c.length);i++){const t=c[i];st().Z.push({k:'pillar',x:t.x,y:t.y,t:-.45,d:.35,r,v,src:'fairy'})}return l>=4?1.8:2.5},
   undead(L){const l=LV(L),n=l>=5?3:l>=4?2:1,v=dmg(.7+.2*(l-1)),d=l>=3?2.8:2;const c=en.filter(e=>alive(e)&&!e.boss&&!(e.boneT>0)&&Math.hypot(e.x-hero.x,e.y-hero.y)<200).sort((a,b)=>d2(a,hero)-d2(b,hero));if(!c.length)return .5;
    for(let i=0;i<Math.min(n,c.length);i++){const e=c[i];e.boneT=d;st().Z.push({k:'bone',e,x:e.x,y:e.y,t:0,d,v,tick:0,src:'undead'})}return l>=4?2.2:3},
-  whip(L){const l=LV(L),side=FN()===0?1:-1,len=(l>=3?130:110)*AR(),v=dmg(1.6+.45*(l-1)),sides=l>=4?[side,-side]:[side];window.SFX?.slash();
-   for(const sd of sides){const a=sd>0?0:Math.PI;lineHit('whip',hero.x,hero.y,a,len,9,v);fx({k:'whip',x:hero.x,y:hero.y,sd,len,d:.3,c:'255,255,255'});
-    if(l>=5)X.ST(()=>{lineHit('whip',hero.x,hero.y,a,len,9,v*.7);fx({k:'whip',x:hero.x,y:hero.y+4,sd,len,d:.25,c:'255,220,160',back:1})},220)}
+  whip(L){const l=LV(L),side=(X.S.wpS=-(X.S.wpS||-1)),len=(l>=3?170:150)*AR(),v=dmg(1.6+.45*(l-1)),sides=l>=4?[side,-side]:[side];window.SFX?.slash();
+   for(const sd of sides){const a=sd>0?0:Math.PI;lineHit('whip',hero.x,hero.y,a,len,22,v);fx({k:'whip',x:hero.x,y:hero.y,sd,len,d:.3,c:'255,255,255'});
+    if(l>=5)X.ST(()=>{lineHit('whip',hero.x,hero.y,a,len,22,v*.7);fx({k:'whip',x:hero.x,y:hero.y+4,sd,len,d:.25,c:'255,220,160',back:1})},220)}
    return l>=3?.95:1.25},
-  fist(L){const l=LV(L),a=AIM(140),r=(l>=3?13:10)*AR(),v=dmg(1.5+.36*(l-1)),sl=(l>=4?2:1.3)*DUR();window.SFX?.wave();
-   for(const o of (l>=5?[0,-.35,.35]:[0]))st().P.push({k:'qi',src:'fist',x:hero.x+Math.cos(a+o)*10,y:hero.y-10+Math.sin(a+o)*10,dx:Math.cos(a+o),dy:Math.sin(a+o),v:165,life:.6,dm:v,r,sl,hit:new Set(),nohit:1,tr:[]});
+  fist(L){const l=LV(L),a=AIM(220),r=(l>=3?13:10)*AR(),v=dmg(1.5+.36*(l-1)),sl=(l>=4?2:1.3)*DUR();window.SFX?.wave();
+   for(const o of (l>=5?[0,-.35,.35]:[0]))st().P.push({k:'qi',src:'fist',x:hero.x+Math.cos(a+o)*10,y:hero.y-10+Math.sin(a+o)*10,dx:Math.cos(a+o),dy:Math.sin(a+o),v:165,life:1.3,dm:v,r,r0:r,sl,hit:new Set(),nohit:1,tr:[]});
    return l>=3?1.5:2},
   trap(L){const l=LV(L),n=l>=4?4:3,[mx,my]=moveDir(),v=dmg(2.6+.75*(l-1));
-   for(let i=0;i<n;i++){const d=35+i*18,sp=(i-(n-1)/2)*.35,a=Math.atan2(my,mx)+sp;st().Z.push({k:'trap',x:hero.x+Math.cos(a)*d,y:hero.y+Math.sin(a)*d,t:0,d:10,v,l5:l>=5,src:'trap'})}
+   const tg=en.filter(e=>alive(e)&&!e.drum&&(e.x-hero.x)**2+(e.y-hero.y)**2<180*180).sort(()=>Math.random()-.5);for(let i=0;i<n;i++){const t=tg[i];let x,y;if(t){x=t.x;y=t.y}else{const d=60+i*30,a=Math.atan2(my,mx)+(i-(n-1)/2)*.6;x=hero.x+Math.cos(a)*d;y=hero.y+Math.sin(a)*d}if(!ok(x,y)){x=hero.x;y=hero.y}st().Z.push({k:'trap',x,y,t:0,d:10,v,l5:l>=5,src:'trap'});fx({k:'dust',x,y,r:8,d:.3})}   // 投掷：甩到 180 像素内敌人脚下
    const tr=st().Z.filter(z=>z.k==='trap');if(tr.length>12)tr.slice(0,tr.length-12).forEach(z=>z.t=z.d);
    return l>=3?2:2.8},
-  mgun(L){const l=LV(L),n=5+(l>=2?1:0)+(l>=4?1:0)+AMT(),a=AIM(150),v=dmg(.75+.2*(l-1));
-   for(let i=0;i<n;i++)X.ST(()=>{const b=a+(n>1?(i/(n-1)-.5)*1.1:0),mx=hero.x+Math.cos(a)*14,my=hero.y-10+Math.sin(a)*14;window.SFX?.shoot();st().P.push({k:'buck',src:'mgun',x:mx,y:my,dx:Math.cos(b),dy:Math.sin(b),v:330,life:.5,dm:v,hit:new Set(),kb:6,l5:l>=5,size:7});fx({k:'flash',x:mx,y:my+10,r:6,d:.06,c:'255,230,140'})},i*55);
+  mgun(L){const l=LV(L),n=5+(l>=2?1:0)+(l>=4?1:0)+AMT(),a=AIM(220),v=dmg(.75+.2*(l-1));
+   for(let i=0;i<n;i++)X.ST(()=>{const b=a+(n>1?(i/(n-1)-.5)*1.1:0),mx=hero.x+Math.cos(a)*14,my=hero.y-10+Math.sin(a)*14;window.SFX?.shoot();st().P.push({k:'buck',src:'mgun',x:mx,y:my,dx:Math.cos(b),dy:Math.sin(b),v:330,life:.67,dm:v,hit:new Set(),kb:10,l5:l>=5,size:7});fx({k:'flash',x:mx,y:my+10,r:6,d:.06,c:'255,230,140'})},i*55);
    return l>=3?1.2:1.6},
   wedge(L){const l=LV(L),v=dmg(2.2+.6*(l-1)+(l>=4?.6:0));let t=null,bd=320*320;for(const e of en)if(alive(e)&&(e.elite||e.boss)&&d2(e,hero)<bd){bd=d2(e,hero);t=e}t=t||nearest(260);if(!t)return .4;
    st().Z.push({k:'stake',e:t,x:t.x,y:t.y,t:-.3,d:.4,v,l5:l>=5,src:'wedge'});
@@ -129,7 +132,7 @@ export function install(X){
  function update(dt){const s=X.S;if(!s)return;const c=st();
   for(const e of en){if(e.markT>0)e.markT-=dt;if(e.vulnT>0){e.vulnT-=dt;if(e.vulnT<=0)e.vuln=0}if(e.sealT>0)e.sealT-=dt;if(e.stunImm>0)e.stunImm-=dt;if(e.boneT>0)e.boneT-=dt}
   // 守护飞剑
-  const g=lv('gsword');if(g){c.gA=(c.gA||0)+dt*(g>=3?4.2:3.2);c.gT=(c.gT||0)+dt;const n=g>=4?4:g>=2?3:2,out=g>=5&&(c.gT%4)<1?Math.sin((c.gT%4)*Math.PI):0,r=(34+out*60)*AR(),v=dmK('gsword',1+.3*(g-1));c.gs=[];
+  const g=lv('gsword');if(g){c.gA=(c.gA||0)+dt*(g>=3?4.2:3.2);c.gT=(c.gT||0)+dt;const n=g>=4?4:g>=2?3:2,out=g>=5&&(c.gT%4)<1?Math.sin((c.gT%4)*Math.PI):0,r=(50+out*60)*AR(),v=dmK('gsword',1+.3*(g-1));c.gs=[];
    for(let i=0;i<n;i++){const a=c.gA+i*6.283/n,x=hero.x+Math.cos(a)*r,y=hero.y-8+Math.sin(a)*r*.8;c.gs.push({x,y,a});for(const e of en){if(!alive(e))continue;if((e.x-x)**2+(e.y-10-y)**2<(9*(e.sc||1))**2&&!(e.gsT>0)){e.gsT=.45;hit('gsword',e,v,Math.sign(e.x-hero.x)||1,{mel:true});knock(e,7)}}}
    for(const e of en)if(e.gsT>0)e.gsT-=dt}else c.gs=null;
   // 水晶弹珠：六芒星轨迹
@@ -192,10 +195,11 @@ export function install(X){
    if(p.k==='keg'){if(p.age>=p.life){p.dead=1;kegBoom(p);continue}p.dT=(p.dT||0)-dt;if(p.dT<=0){p.dT=.09;fx({k:'dust',x:p.x-p.dx*6,y:p.y+2,r:5,d:.35})}}
    if(p.k==='holyorb'){p.tick-=dt;if(p.tick<=0){p.tick=.3;for(const e of near(p.x,p.y+10,p.r))hit('holyorb',e,p.dm*.45)}if(p.age>=p.life){p.dead=1;fx({k:'boom2',x:p.x,y:p.y,r:p.r*2,d:.35});for(const e of near(p.x,p.y+10,p.r*2))hit('holyorb',e,p.dm*2.2);
      if(p.l5&&!p.small)for(const s_ of [-1,1]){const a=Math.atan2(p.dy,p.dx)+s_*1;c.P.push({...p,dx:Math.cos(a),dy:Math.sin(a),age:0,life:1.5,small:1,r:p.r*.7,size:p.size*.7,dead:0})}}}
-   if(p.k==='qi'){p.tr.push([p.x,p.y]);if(p.tr.length>6)p.tr.shift();for(const e of near(p.x,p.y+10,p.r+4)){if(p.hit.has(e))continue;p.hit.add(e);hit('fist',e,p.dm,Math.sign(p.dx)||1,{mel:true});e.slowT=Math.max(e.slowT||0,e.boss?p.sl*.3:p.sl);if(!e.boss)knock(e,8);fx({k:'flash',x:e.x,y:e.y-8,r:8,d:.12,c:'255,240,190'})}
+   if(p.k==='qi'){p.r=p.r0*(1+p.age/p.life);p.tr.push([p.x,p.y]);if(p.tr.length>6)p.tr.shift();for(const e of near(p.x,p.y+10,p.r+4)){if(p.hit.has(e))continue;p.hit.add(e);hit('fist',e,p.dm,Math.sign(p.dx)||1,{mel:true});e.slowT=Math.max(e.slowT||0,e.boss?p.sl*.3:p.sl);if(!e.boss)knock(e,8);fx({k:'flash',x:e.x,y:e.y-8,r:8,d:.12,c:'255,240,190'})}
     if(p.age>=p.life){p.dead=1;fx({k:'ring',x:p.x,y:p.y+10,r:p.r*2.4,d:.3,c:'255,220,140'});fx({k:'flash',x:p.x,y:p.y+10,r:p.r*1.6,d:.18,c:'255,245,210'});for(const e of near(p.x,p.y+10,p.r*2.4))if(!p.hit.has(e))hit('fist',e,p.dm*.5,Math.sign(p.dx)||1);continue}}
    if(p.k==='dcoil'){(p.tr=p.tr||[]).push([p.x,p.y]);if(p.tr.length>6)p.tr.shift()}
    if(p.k==='wave'){const c_=p.dx,s_=p.dy;for(const e of en){if(!alive(e))continue;const dx=e.x-p.x,dy=e.y-p.y,al=dx*c_+dy*s_,sd=Math.abs(-dx*s_+dy*c_);if(Math.abs(al)<9&&sd<p.len/2){if(!p.hit.has(e)){p.hit.add(e);hit('waterel',e,p.dm,Math.sign(c_)||1);if(p.slow)e.slowT=Math.max(e.slowT||0,e.boss?.5:1.5)}if(!e.boss){const k=(e.elite?.3:1)*p.v*dt,nx=e.x+c_*k,ny=e.y+s_*k;if(ok(nx,ny)){e.x=nx;e.y=ny}}}}}
+   if(p.k==='cres'){const c_=p.dx,s_=p.dy;for(const e of en){if(!alive(e)||p.hit.has(e))continue;const dx=e.x-p.x,dy=e.y-6-p.y,al=dx*c_+dy*s_,sd=Math.abs(-dx*s_+dy*c_);if(Math.abs(al)<10+3*(e.sc||1)&&sd<p.w/2+3*(e.sc||1)){p.hit.add(e);hit(p.src,e,p.dm,Math.sign(c_)||1,{mel:true});if(p.kb&&!e.boss)knock(e,p.kb)}}}
    if(p.k==='hwall'){const c_=p.dx,s_=p.dy;for(const e of en){if(!alive(e)||p.hit.has(e))continue;const dx=e.x-p.x,dy=e.y-p.y,al=dx*c_+dy*s_,sd=Math.abs(-dx*s_+dy*c_);if(Math.abs(al)<8&&sd<p.len/2){p.hit.add(e);hit('hwall',e,p.dm,Math.sign(c_)||1);if(!e.boss&&!e.elite){const nx=e.x+c_*6,ny=e.y+s_*6;if(ok(nx,ny)){e.x=nx;e.y=ny}}}}}
    p.x+=p.dx*p.v*dt;p.y+=p.dy*p.v*dt;if(p.k!=='dcoil'&&p.k!=='keg'&&p.age>=p.life){p.dead=1;continue}
    if(p.nohit)continue;
@@ -264,6 +268,7 @@ export function install(X){
    if(p.k==='buck'){c.save();c.translate(x,y);c.rotate(a);c.fillStyle='rgba(255,200,90,.35)';c.fillRect(-12,-1.5,12,3);c.fillStyle='#fff1b8';c.fillRect(-6,-.8,8,1.6);c.restore();continue}
    if(p.k==='qi'){const I=IMG['s2_qi'+Math.min(2,Math.floor(p.age/p.life*3))];if(I?.complete&&I.width){const w=p.r*4.5,h=I.height*w/I.width;c.save();c.translate(x,y);c.rotate(a);c.drawImage(I,-w*.82,-h/2,w,h);c.restore()}continue}
    if(p.k==='buck'||p.k==='light'||p.k==='shard'||p.k==='spear'){c.save();c.translate(x,y);c.rotate(a);c.fillStyle=p.k==='buck'?'#bfe6ff':p.k==='light'?'#fff3b0':p.k==='shard'?'#b98cff':'#e8dcc0';c.fillRect(-(p.size||5)/2,-1,p.size||5,2);c.restore();continue}
+   if(p.k==='cres'){const fd=Math.min(1,(p.life-p.age)*4,p.age*10),w=p.w/2;c.save();c.translate(x,y-8);c.rotate(a);c.globalAlpha=fd*.35;c.fillStyle=`rgb(${p.col||'220,240,255'})`;c.beginPath();c.ellipse(-4,0,9,w,0,-1.57,1.57);c.ellipse(-10,0,5,w*.85,0,1.57,-1.57,true);c.fill();c.globalAlpha=fd;c.strokeStyle=`rgb(${p.col||'220,240,255'})`;c.lineWidth=2.5;c.beginPath();c.ellipse(-4,0,9,w,0,-1.4,1.4);c.stroke();c.strokeStyle='#fff';c.lineWidth=1;c.beginPath();c.ellipse(-4,0,9,w*.9,0,-1.2,1.2);c.stroke();c.restore();continue}
    if(p.k==='wave'){const fd=Math.min(1,(p.life-p.age)*3,p.age*6),I=IMG['s2_wave'+(Math.floor(now/120)%4)];if(I?.complete&&I.width){const w=p.len*1.1,h=I.height*w/I.width;c.save();c.globalAlpha=fd;c.translate(x,y+4);if(p.dx<0)c.scale(-1,1);c.drawImage(I,-w/2,-h,w,h);c.restore()}continue}
    if(p.k==='hwall'){c.save();c.translate(x,y-8);c.rotate(Math.atan2(p.dy,p.dx));const L2=p.len/2,fl=.75+.25*Math.sin(now/60),g=c.createLinearGradient(-7,0,7,0);g.addColorStop(0,'rgba(255,255,255,0)');g.addColorStop(.5,`rgba(255,255,255,${.85*fl})`);g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(-7,-L2,14,p.len);c.fillStyle=`rgba(255,250,225,${.95*fl})`;c.fillRect(-1.2,-L2,2.4,p.len);c.restore();continue}
    if(p.k==='keg'){c.fillStyle='rgba(18,40,20,.25)';c.beginPath();c.ellipse(x,y+2,p.size*.4,2,0,0,6.3);c.fill();c.save();c.translate(x,y-p.size/2+2);c.rotate(p.age*p.v/(p.size/2)*(p.dx>=0?1:-1));DI(c,'fx_keg',0,0,p.size);c.restore();continue}
@@ -307,5 +312,5 @@ export function install(X){
   if(e.markT>0&&lv('hawk')>=5){const o=nearest(150,e);if(o&&o!==e)o.markT=6}}
  // 伤害乘区：猎印、易伤、圣印封印
  function mul(e){const s=X.S;let m=1;if(e.markT>0)m*=1.15;if(e.vulnT>0)m*=1+.12*(e.vuln||1);if(e.sealT>0)m*=1.2;return m}
- return {fire,update,draw,ground,sprites,absorb,onKill,mul};
+ return {fire,update,draw,ground,sprites,absorb,onKill,mul,shoot:p=>st().P.push(p)};
 }
