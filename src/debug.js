@@ -13,7 +13,7 @@ export function createDebug(g){
  const WK=['auto','clear','lightrain','heavyrain','lightsnow','heavysnow','blizzard','fog','overcast'];
  el.innerHTML=`<h4>🔧 开发者（点标题收起）</h4>
  <b>召唤（出现在身边）</b><div class="r">${[['gob_hero','哥布林英雄'],['gob_troll','血咒巨魔'],['gob_king','哥布林大王'],['gob_chief','哥布林酋长'],['gob_paladin','哥布林圣骑士'],['gob_giant','巨型哥布林'],['gob_shaman','萨满精英']].map(([k,n])=>`<button data-sum="${k}">${n}</button>`).join('')}</div>
- <b>主角</b><div class="r"><button data-a="god">无敌</button><button data-a="nomob">没有怪物</button><button data-a="heal">回满血</button><button data-a="lv">升一级</button><button data-a="max">全武器满级</button><button data-a="job6">两张卡 6 级</button><button data-a="altar">祭坛出现</button><button data-a="unlall">全部解锁</button></div>
+ <b>主角</b><div class="r"><button data-a="god">无敌</button><button data-a="nomob">没有怪物</button><button data-a="heal">回满血</button><button data-a="lv">升一级</button><button data-a="max">全武器满级</button><button data-a="job6">两张卡 6 级</button><button data-a="altar">祭坛出现</button><button data-a="arc">秘法</button><button data-a="xev">随机事件</button><button data-a="unlall">全部解锁</button></div>
  <b>木头人（只有你和木头人）</b><div class="r"><button data-a="dummy">木头人模式</button><button data-a="dclear">清空技能</button></div>
  <div class="r cards" style="max-height:180px;overflow:auto"></div><div class="dps" style="font-size:11px;color:#ffe9a8"></div>
  <b>时间（跳过）</b><div class="r"><button data-a="t60">+1 分</button><button data-a="t300">+5 分</button><button data-a="boss">到 Boss 前</button><button data-a="kill">清屏</button></div>
@@ -27,7 +27,7 @@ export function createDebug(g){
  el.onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.sum){window.SUMMON?.(b.dataset.sum);return}const R=g.run.dbg,a=b.dataset.a;
   if(a==='god'){D.god=!D.god;b.classList.toggle('on',D.god)}
   else if(a==='nomob'){D.noMob=!D.noMob;b.classList.toggle('on',D.noMob);if(D.noMob)for(const e of g.en)e.dead=e.expired=true}
-  else if(a==='heal')g.survival.heal(9999);else if(a==='job6')g.run.dbg.job6();else if(a==='altar')g.run.dbg.altar();
+  else if(a==='heal')g.survival.heal(9999);else if(a==='job6')g.run.dbg.job6();else if(a==='altar')g.run.dbg.altar();else if(a==='arc')g.run.dbg.arc();else if(a==='xev')g.run.dbg.xev();
   else if(a==='dummy'){D.dummy=!D.dummy;b.classList.toggle('on',D.dummy);D.noMob=D.dummy;el.querySelector('[data-a=nomob]').classList.toggle('on',D.noMob);for(const e of g.en)e.dead=e.expired=true;if(D.dummy)mkDummy();cardList()}
   else if(a==='dclear'){const S=R.S;if(S)for(const k of Object.keys(S.w))delete S.w[k];cardList()}
   else if(a==='unlall'){window.UNL?.unlockAll();b.textContent='已全部解锁'}
