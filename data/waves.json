@@ -104,8 +104,8 @@
       "main": [
         "goblin"
       ],
-      "min": 20,
-      "iv": 0.8,
+      "min": 45,
+      "iv": 0.5,
       "ev": [
         [
           "wall",
@@ -122,8 +122,8 @@
         "gob_bomb",
         "goblin"
       ],
-      "min": 60,
-      "iv": 0.4,
+      "min": 70,
+      "iv": 0.3,
       "ev": [
         [
           "kids",

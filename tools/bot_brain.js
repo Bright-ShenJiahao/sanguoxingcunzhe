@@ -31,7 +31,7 @@ function danger(ux,uy,sp){const g=G(),h=g.hero,E=EP();let d=0,proj=0;
  return {d,proj}}
 function density(ux,uy){const g=G(),h=g.hero;let s=0;for(const e of g.en){if(e.dead||e.crate)continue;const rx=e.x-h.x,ry=e.y-h.y,dd=Math.hypot(rx,ry);if(dd>360||dd<1)continue;const c=(rx*ux+ry*uy)/dd;if(c>.3)s+=(c-.3)*(e.boss?4:e.elite?2.5:1)*(1-dd/400)}return s}
 function pickTarget(){const g=G(),h=g.hero,S=g.S,hpf=(g.hp||1)/(g.maxHp||100);let best=null,bs=0;
- const cand=[...(S.gems||[]).map(o=>[o,1]),...(S.meats||[]).map(o=>[o,hpf<.5?6:hpf<.8?1.5:.2]),...(S.chests||[]).map(o=>[o,4]),...(S.mags||[]).map(o=>[o,3])];
+ const cand=[...(S.gems||[]).map(o=>[o,S.lv<8?2.5:1]),...(S.meats||[]).map(o=>[o,hpf<.5?6:hpf<.8?1.5:.2]),...(S.chests||[]).map(o=>[o,4]),...(S.mags||[]).map(o=>[o,3])];
  let bossNear=false;for(const e of g.en)if(!e.dead&&(e.boss)&&Math.hypot(e.x-h.x,e.y-h.y)<120)bossNear=true;
  for(const [o,w] of cand){const dd=Math.hypot(o.x-h.x,o.y-h.y);if(dd>240)continue;if(bossNear&&w<3)continue;const nn=near(o.x,o.y,40);const sc=w/(dd+25)/(1+nn*.5);if(sc>bs){bs=sc;best=o}}return best}
 window.BOTTICK=function(dt){const g=G();if(!g||!g.S)return;const h=g.hero;T+=dt;hold-=dt;emerg-=dt;LOG.dec++;
