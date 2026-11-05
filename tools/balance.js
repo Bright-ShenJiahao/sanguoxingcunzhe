@@ -40,7 +40,7 @@ async function one(b,cards){const p=await b.newPage({viewport:{width:480,height:
  await p.evaluate(()=>document.querySelector('.cfm')?.remove());await p.evaluate(()=>document.querySelector('.pp-next').click());await p.waitForTimeout(300);await p.evaluate(()=>{document.querySelector('.cfm')?.remove();document.querySelector('.pp-go').click()});await p.waitForFunction(()=>window.__G?.S,null,{timeout:30000})
  await p.evaluate(BOTV!=='v1'?BRAIN2:BRAIN);if(BOTV==='still')await p.evaluate(()=>{window.BOTTICK=()=>{window.BOTDIR=[0,0]}});const w0=Date.now();
  let status='timeout',lastT=-1,lastMove=Date.now();
- while(true){await p.waitForTimeout(2000);const st=await p.evaluate(()=>({dead:!!document.querySelector('.survival-dialog')?.open,clear:!!window.__G?.S?.clear,t:window.__G?.S?.t||0}));
+ while(true){await p.waitForTimeout(2000);await p.evaluate(()=>{const b=document.querySelector('#arcui:not([hidden]) button.it');if(b)b.click()});const st=await p.evaluate(()=>({dead:!!document.querySelector('.survival-dialog')?.open,clear:!!window.__G?.S?.clear,t:window.__G?.S?.t||0}));
   if(st.clear){status='clear';await p.waitForTimeout(1500);break}if(st.dead){status='death';break}if(st.t>=MAXT){status='cap';break}
   if(st.t!==lastT){lastT=st.t;lastMove=Date.now()}else if(Date.now()-lastMove>90e3){status='stuck';break}
   if(Date.now()-w0>40*60e3)break}
