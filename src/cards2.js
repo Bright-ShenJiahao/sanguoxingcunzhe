@@ -88,10 +88,10 @@ export function install(X){
    for(let i=0;i<Math.min(n,c.length);i++){const t=c[i];st().Z.push({k:'pillar',x:t.x,y:t.y,t:-.45,d:.35,r,v,src:'fairy'})}return l>=4?1.8:2.5},
   undead(L){const l=LV(L),n=l>=5?3:l>=4?2:1,v=dmg(.7+.2*(l-1)),d=l>=3?2.8:2;const c=en.filter(e=>alive(e)&&!e.boss&&!(e.boneT>0)&&Math.hypot(e.x-hero.x,e.y-hero.y)<200).sort((a,b)=>d2(a,hero)-d2(b,hero));if(!c.length)return .5;
    for(let i=0;i<Math.min(n,c.length);i++){const e=c[i];e.boneT=d;st().Z.push({k:'bone',e,x:e.x,y:e.y,t:0,d,v,tick:0,src:'undead'})}return l>=4?2.2:3},
-  whip(L){const l=LV(L),side=(X.S.wpS=-(X.S.wpS||-1)),len=(l>=3?170:150)*AR(),v=dmg(1.6+.45*(l-1)),sides=l>=4?[side,-side]:[side];window.SFX?.slash();
+  whip(L){const l=LV(L),side=(X.S.wpS=-(X.S.wpS||-1)),len=(l>=3?170:150)*AR(),v=dmg((1.6+.45*(l-1))*(l>=5?1.6:1.35)),sides=l>=4?[side,-side]:[side];window.SFX?.crack();
    for(const sd of sides){const a=sd>0?0:Math.PI;lineHit('whip',hero.x,hero.y,a,len,22,v);fx({k:'whip',x:hero.x,y:hero.y,sd,len,d:.3,c:'255,255,255'});
-    if(l>=5)X.ST(()=>{lineHit('whip',hero.x,hero.y,a,len,22,v*.7);fx({k:'whip',x:hero.x,y:hero.y+4,sd,len,d:.25,c:'255,220,160',back:1})},220)}
-   return l>=3?.95:1.25},
+}
+   return l>=3?1.3:1.7},
   fist(L){const l=LV(L),a=AIM(220),r=(l>=3?13:10)*AR(),v=dmg(1.5+.36*(l-1)),sl=(l>=4?2:1.3)*DUR();window.SFX?.wave();
    for(const o of (l>=5?[0,-.35,.35]:[0]))st().P.push({k:'qi',src:'fist',x:hero.x+Math.cos(a+o)*10,y:hero.y-10+Math.sin(a+o)*10,dx:Math.cos(a+o),dy:Math.sin(a+o),v:165,life:1.3,dm:v,r,r0:r,sl,hit:new Set(),nohit:1,tr:[]});
    return l>=3?1.5:2},
@@ -293,8 +293,8 @@ export function install(X){
      c.fillStyle='rgba(255,255,255,.92)';c.beginPath();for(let i=0;i<=n;i++){const [px,py]=P(i/N);c.lineTo(px,py)}for(let i=n;i>=0;i--){const [px,py]=P(i/N),w=9*Math.sin(Math.PI*i/N);c.lineTo(px-w*f.f,py)}c.closePath();c.fill()}
    else if(f.k==='bigsw'){const I=IMG.swd,p=Math.min(1,k/.3);if(I?.complete&&I.width){c.globalAlpha=k<.5?1:1-(k-.5)*2;c.translate(f.x-cx,f.y-cy);c.rotate(f.a-1.1+2*p);c.drawImage(I,0,-f.r*.18,f.r,f.r*.36)}}
    else if(f.k==='thrust'){const x0=f.x0-cx,y0=f.y0-cy-8,x1=f.x1-cx,y1=f.y1-cy-8,a=Math.atan2(y1-y0,x1-x0),L=Math.hypot(x1-x0,y1-y0)*Math.min(1,k/.25+.3);c.translate(x0,y0);c.rotate(a);c.fillStyle=`rgba(${f.c},.35)`;c.beginPath();c.moveTo(0,-5);c.lineTo(L,0);c.lineTo(0,5);c.fill();c.fillStyle='rgba(255,255,255,.95)';c.beginPath();c.moveTo(4,-1.6);c.lineTo(L+4,0);c.lineTo(4,1.6);c.fill()}
-   else if(f.k==='whip'){const p=Math.min(1,k/.35),x=f.x-cx,y=f.y-cy-8,ex=x+f.sd*f.len,ey=y+1,qx=x+f.sd*f.len*.5,qy=y-7,N=20,n=Math.ceil(N*p);c.globalAlpha=k<.35?1:1-(k-.35)/.65;
-     const P=t=>{const u=f.back?1-t:t;return[(1-u)*(1-u)*x+2*(1-u)*u*qx+u*u*ex,(1-u)*(1-u)*y+2*(1-u)*u*qy+u*u*ey]};for(let i=1;i<=n;i++){const [ax,ay]=P((i-1)/N),[bx,by]=P(i/N),t=i/N;c.strokeStyle=`rgba(${f.c},${.4+.6*t})`;c.lineWidth=f.back?1+4*t:5-4*t;c.lineCap='round';c.beginPath();c.moveTo(ax,ay);c.lineTo(bx,by);c.stroke()}}
+   else if(f.k==='whip'){const p=Math.min(1,k/.35),x=f.x-cx,y=f.y-cy-8,ex=x+f.sd*f.len,ey=y+1,qx=x+f.sd*f.len*.45,qy=y-f.len*.38,N=24,n=Math.ceil(N*p);c.globalAlpha=k<.35?1:1-(k-.35)/.65;
+     const P=t=>{const u=f.back?1-t:t;return[(1-u)*(1-u)*x+2*(1-u)*u*qx+u*u*ex,(1-u)*(1-u)*y+2*(1-u)*u*qy+u*u*ey]};for(let i=1;i<=n;i++){const [ax,ay]=P((i-1)/N),[bx,by]=P(i/N),t=i/N;c.strokeStyle=`rgba(${f.c},${.4+.6*t})`;c.lineWidth=2.5-1.5*t;c.lineCap='round';c.beginPath();c.moveTo(ax,ay);c.lineTo(bx,by);c.stroke()}if(p>=1&&k<.5){const s=4+8*(k-.35)/.15;c.strokeStyle='rgba(255,240,180,.95)';c.lineWidth=1;c.beginPath();for(let j=0;j<4;j++){const g=j*Math.PI/4;c.moveTo(ex-Math.cos(g)*s,ey-Math.sin(g)*s);c.lineTo(ex+Math.cos(g)*s,ey+Math.sin(g)*s)}c.stroke()}}
    else if(f.k==='dust'){c.globalAlpha=(1-k)*.5;c.fillStyle='rgb(190,175,140)';for(let i=0;i<3;i++){c.beginPath();c.arc(f.x-cx+(i-1)*f.r*.4,f.y-cy-k*f.r*.5,f.r*(.3+.5*k),0,6.3);c.fill()}}
    else if(f.k==='flash'){c.globalAlpha=1-k;const g=c.createRadialGradient(f.x-cx,f.y-cy,0,f.x-cx,f.y-cy,f.r);g.addColorStop(0,`rgba(${f.c},1)`);g.addColorStop(1,`rgba(${f.c},0)`);c.fillStyle=g;c.beginPath();c.arc(f.x-cx,f.y-cy,f.r*(.7+.3*k),0,6.3);c.fill()}
    else if(f.k==='seq'){const im=f.ims[Math.min(f.ims.length-1,Math.floor(k*f.ims.length))];c.globalAlpha=(f.al||1)*(k<.7?1:(1-k)/.3);const fl=Math.cos(f.a)<0;c.translate(f.x-cx,f.y-cy);c.rotate(fl?f.a-Math.PI:f.a);DI(c,f.wh?tinted(im,'saturate(0) brightness(1.7)'):im,0,-2,f.w,0,fl)}

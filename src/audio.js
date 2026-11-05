@@ -68,6 +68,7 @@ export function createAudio(){
  let last={};const ok=(k,gap)=>{const n=performance.now();if(n-(last[k]||0)<gap)return false;last[k]=n;return true};
  const S={
   shoot(){if(!ac||!ok('sh',70))return;const t=ac.currentTime;tone(t,88,.04,{type:'square',vol:.06,bus:sfxBus,rel:.03});tone(t+.03,95,.03,{type:'square',vol:.04,bus:sfxBus,rel:.03})},
+  crack(){if(!ac||!ok('wc',300))return;noise(ac.currentTime+.09,.035,{vol:.09,hp:1800})},
   slash(){if(!ac||!ok('sl',80))return;noise(ac.currentTime,.12,{vol:.12,hp:2500})},
   wave(){if(!ac||!ok('wv',150))return;const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(70,t+.3);g.gain.setValueAtTime(.18,t);g.gain.exponentialRampToValueAtTime(.001,t+.35);o.connect(g);g.connect(sfxBus);o.start(t);o.stop(t+.4)},
   boom(){if(!ac||!ok('bm',90))return;noise(ac.currentTime,.35,{vol:.25,lp:700})},
