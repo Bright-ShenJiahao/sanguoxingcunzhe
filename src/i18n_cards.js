@@ -1,7 +1,7 @@
 // Card names/descriptions (src/cards2.js)
 export const zh={
  "card.greatsword.name":"双手大剑",
- "card.greatsword.d0":"往前方重劈，地面裂开一道长长的裂痕，伤害高、能破盾（打盾卫、圣骑士 +50%）",
+ "card.greatsword.d0":"自动朝怪最多的方向重劈，地面裂开一道长长的裂痕，伤害高、能破盾（打盾卫、圣骑士 +50%）",
  "card.greatsword.d1":"伤害提升",
  "card.greatsword.d2":"劈得更远，间隔缩短",
  "card.greatsword.d3":"伤害提升",
@@ -201,7 +201,7 @@ export const zh={
 };
 export const en={
  "card.greatsword.name":"Greatsword",
- "card.greatsword.d0":"Heavy slash that splits the ground in a long fissure ahead. High damage, breaks shields (+50% vs Shield Guards and Paladins)",
+ "card.greatsword.d0":"Auto-cleaves toward the densest crowd, heavy slash that splits the ground in a long fissure ahead. High damage, breaks shields (+50% vs Shield Guards and Paladins)",
  "card.greatsword.d1":"Damage up",
  "card.greatsword.d2":"Reaches farther, shorter cooldown",
  "card.greatsword.d3":"Damage up",
@@ -401,7 +401,7 @@ export const en={
 };
 export const ja={
  "card.greatsword.name":"大剣",
- "card.greatsword.d0":"前方へ重い一撃、地面に長い亀裂が走る。高威力でシールド破壊（盾兵・聖騎士に+50%）",
+ "card.greatsword.d0":"敵が最も多い方向へ自動で重い一撃、地面に長い亀裂が走る。高威力でシールド破壊（盾兵・聖騎士に+50%）",
  "card.greatsword.d1":"ダメージ上昇",
  "card.greatsword.d2":"射程延長、クールダウン短縮",
  "card.greatsword.d3":"ダメージ上昇",

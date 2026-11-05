@@ -62,10 +62,10 @@ export function install(X){
  const moveDir=()=>{const l=Math.hypot(hero.mx||0,hero.my||0);return l>.1?[hero.mx/l,hero.my/l]:[hero.face||1,0]};
  const tgtSum=(from,r)=>{let b=null,bd=r*r;for(const e of en){if(!alive(e))continue;const d=d2(e,from)*(e.markT>0?.3:1);if(d<bd){bd=d;b=e}}return b};   // 召唤物：优先猎印目标
  const fire={
-  greatsword(L){const l=LV(L),a=Math.cos(AIM(260))>=0?0:Math.PI,len=(l>=3?230:200)*AR(),v=1.45*dmg(3.4+1*(l-1)+(l>=4?1:0));window.SFX?.slash();
+  greatsword(L){const l=LV(L),len=(l>=3?115:100)*AR();let a=Math.cos(AIM(260))>=0?0:Math.PI,bn=0;for(let i=0;i<16;i++){const b=i*Math.PI/8,c=Math.cos(b),s_=Math.sin(b);let n=0;for(const e of en){if(!alive(e))continue;const dx=e.x-hero.x,dy=e.y-6-hero.y,al=dx*c+dy*s_;if(al>0&&al<len&&Math.abs(-dx*s_+dy*c)<18)n++}if(n>bn){bn=n;a=b}}if(!bn&&!nearest(len+40))return .4;const v=1.35*1.45*dmg(3.4+1*(l-1)+(l>=4?1:0));window.SFX?.slash();
    const bonus=e=>(e.k==='gob_shield'||e.k==='gob_paladin'||e.armor)?1.5:1;
    for(const e of en){if(!alive(e))continue;const c=Math.cos(a),s_=Math.sin(a),dx=e.x-hero.x,dy=e.y-6-hero.y,al=dx*c+dy*s_,sd=Math.abs(-dx*s_+dy*c);if(al>-4&&al<len&&sd<12+3*(e.sc||1)){hit('greatsword',e,v*bonus(e),Math.sign(c)||1,{mel:true});knock(e,6)}}
-   fx({k:'gsw',x:hero.x,y:hero.y,f:Math.cos(a)>=0?1:-1,s:len*.9/453,d:.42});
+   fx({k:'gsw',x:hero.x,y:hero.y,f:Math.cos(a)>=0?1:-1,a,s:len*.9/453,d:.42});
    X.ST(()=>{fx({k:'seq',ims:['s2_crack0','s2_crack1','s2_crack2'],x:hero.x+Math.cos(a)*len/2,y:hero.y+Math.sin(a)*len/2,a,w:len*1.05,d:.55});for(let i=0;i<3;i++)fx({k:'dust',x:hero.x+Math.cos(a)*len*(.3+i*.25),y:hero.y+Math.sin(a)*len*(.3+i*.25),r:14,d:.45});window.SFX?.boom()},90);
    if(l>=5){const x=hero.x,y=hero.y;X.ST(()=>{lineHit('greatsword',x,y,a,len,12,v*.6);fx({k:'seq',ims:['s2_crack0','s2_crack1','s2_crack2'],x:x+Math.cos(a)*len/2,y:y+Math.sin(a)*len/2,a,w:len*1.05,d:.5})},400)}
    return l>=3?2.3:3},
@@ -288,7 +288,7 @@ export function install(X){
    else if(f.k==='streak'){c.strokeStyle=`rgba(${f.c},.9)`;c.lineWidth=3*(1-k)+1;c.beginPath();c.moveTo(f.x0-cx,f.y0-cy-8);c.lineTo(f.x1-cx,f.y1-cy-8);c.stroke()}
    else if(f.k==='arc'){const p=Math.min(1,k/.3);c.globalAlpha=k<.3?1:1-(k-.3)/.7;c.translate(f.x-cx,f.y-cy);c.scale(1,.8);const a0=f.a-f.sw,a1=a0+2*f.sw*p,N=18;c.fillStyle=`rgba(${f.c},.9)`;c.beginPath();
      for(let i=0;i<=N;i++){const b=a0+(a1-a0)*i/N;c.lineTo(Math.cos(b)*f.r,Math.sin(b)*f.r)}for(let i=N;i>=0;i--){const t=i/N,b=a0+(a1-a0)*t,rr=f.r-f.w*Math.pow(t,1.5);c.lineTo(Math.cos(b)*rr,Math.sin(b)*rr)}c.closePath();c.fill()}
-   else if(f.k==='gsw'){const I=IMG['s2_gs'+Math.min(3,Math.floor(k*4))];if(I?.complete&&I.width){c.globalAlpha=k<.75?1:(1-k)*4;const w=I.width*f.s,h=I.height*f.s;c.translate(f.x-cx,f.y-cy+4);c.scale(f.f,1);c.drawImage(I,-8,-h,w,h)}}
+   else if(f.k==='gsw'){const I=IMG['s2_gs'+Math.min(3,Math.floor(k*4))];if(I?.complete&&I.width){c.globalAlpha=k<.75?1:(1-k)*4;const w=I.width*f.s,h=I.height*f.s;c.translate(f.x-cx,f.y-cy+4);c.scale(f.f,1);if(f.a!==undefined)c.rotate(f.f>0?f.a:Math.PI-f.a);c.drawImage(I,-8,-h,w,h)}}
    else if(f.k==='chop'){const p=Math.min(1,k/.3),x=f.x-cx,y=f.y-cy,N=16,n=Math.ceil(N*p);c.globalAlpha=k<.4?1:1-(k-.4)/.6;const P=t=>{const u=1-t;return[u*u*(x-8*f.f)+2*u*t*(x+22*f.f)+t*t*x,u*u*(y-62)+2*u*t*(y-34)+t*t*y]};
      c.fillStyle='rgba(255,255,255,.92)';c.beginPath();for(let i=0;i<=n;i++){const [px,py]=P(i/N);c.lineTo(px,py)}for(let i=n;i>=0;i--){const [px,py]=P(i/N),w=9*Math.sin(Math.PI*i/N);c.lineTo(px-w*f.f,py)}c.closePath();c.fill()}
    else if(f.k==='bigsw'){const I=IMG.swd,p=Math.min(1,k/.3);if(I?.complete&&I.width){c.globalAlpha=k<.5?1:1-(k-.5)*2;c.translate(f.x-cx,f.y-cy);c.rotate(f.a-1.1+2*p);c.drawImage(I,0,-f.r*.18,f.r,f.r*.36)}}
