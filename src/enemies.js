@@ -146,7 +146,7 @@ export function createEnemies({data,images,hero,ok,water,onHit}){
      const k_=Math.min(1,dt*7);e.vx=(e.vx??tx)+(tx-(e.vx??tx))*k_;e.vy=(e.vy??ty)+(ty-(e.vy??ty))*k_;   // 转向限速：方向逐渐转过去
      const vl=Math.hypot(e.vx,e.vy)||1,ux=e.vx/vl,uy=e.vy/vl;
      if(e.slowT>0)e.slowT-=dt;if(e.buffT>0)e.buffT-=dt;if(e.chgT>0)e.chgT-=dt;if(e.wwT>0){e.wwT-=dt;e.wwc=(e.wwc||0)-dt;if(d<34&&e.wwc<=0){e.wwc=.3;onHit(BD*.5)}}if(stats.ghost){e.phC=(e.phC??6)-dt;if(e.phC<=0){e.phC=6;e.phT=1.5}if(e.phT>0)e.phT-=dt}
-     const oldx=e.x,oldy=e.y,dist=(e.buffT>0?1.3:1)*(e.chgT>0?1.8:1)*(e.wwT>0?(e.wwS||1.3):1)*((e.slowT>0&&!stats.heavy)?.5:1)*(e.boss?.8:1)*(e.spdMul||1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
+     const oldx=e.x,oldy=e.y,dist=(e.buffT>0?1.3:1)*(e.chgT>0?1.8:1)*(e.wwT>0?(e.wwS||1.3):1)*((e.slowT>0&&!stats.heavy)?(e.boss?.8:e.elite?.6:.5):1)*(e.boss?.8:1)*(e.spdMul||1)*stats.speed*(water(e.x,e.y)===2?.6:1)*dt*speed,mx=ux*dist,my=uy*dist;
      if(stats.ghost){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y+my)){e.x+=mx;e.y+=my}else if(ok(e.x+mx,e.y)){e.x+=mx}else if(ok(e.x,e.y+my)){e.y+=my}
      else if(ok(e.x-my*1.6,e.y+mx*1.6)){e.x-=my*1.6;e.y+=mx*1.6}
      e.moving=e.x!==oldx||e.y!==oldy;

@@ -1,5 +1,13 @@
 // Run/blessing/level-up/boss text (src/run.js)
 export const zh={
+ "run.job.pknight":"像素骑士",
+ "run.job.pknight.d":"物理 +15%，光弹 +30%；每跑一段，下一次物理命中附带像素爆炸",
+ "run.job.pmage":"像素法师",
+ "run.job.pmage.d":"法术 +15%；光弹每命中 20 次放一次全屏像素爆炸（20 秒冷却）",
+ "run.job.mswd":"旋律剑姬",
+ "run.job.mswd.d":"物理 +15%，摇滚曲时再 +25%；声波击退 ×2",
+ "run.job.hsong":"天籁圣女",
+ "run.job.hsong.d":"法术 +15%；切歌间隔 10→7 秒，每次切歌震开周围敌人并回复 3 生命",
  "run.p.pen.name":"破甲",
  "run.p.pen.desc":"物理攻击有抗性的敌人时，每级抵消 10% 的抗性",
  "run.p.mpen.name":"贯魔",
@@ -330,6 +338,14 @@ export const zh={
  "run.dud":"哑弹",
 };
 export const en={
+ "run.job.pknight":"Pixel Knight",
+ "run.job.pknight.d":"Physical +15%, pixel bolts +30%; after running, next physical hit adds a pixel burst",
+ "run.job.pmage":"Pixel Mage",
+ "run.job.pmage.d":"Spells +15%; every 20 pixel-bolt hits unleash a screen-wide pixel blast (20s cooldown)",
+ "run.job.mswd":"Melody Swordmaiden",
+ "run.job.mswd.d":"Physical +15%, +25% more during Rock; sound-wave knockback ×2",
+ "run.job.hsong":"Heavenly Songstress",
+ "run.job.hsong.d":"Spells +15%; track switch every 7s instead of 10, each switch pushes enemies away and heals 3",
  "run.p.pen.name":"Armor Break",
  "run.p.pen.desc":"Physical hits ignore 10% of enemy resistance per level",
  "run.p.mpen.name":"Spell Pierce",
@@ -660,6 +676,14 @@ export const en={
  "run.dud":"Dud",
 };
 export const ja={
+ "run.job.pknight":"ピクセルナイト",
+ "run.job.pknight.d":"物理 +15%、光弾 +30%。走ると次の物理ヒットにピクセル爆発",
+ "run.job.pmage":"ピクセルメイジ",
+ "run.job.pmage.d":"魔法 +15%。光弾20ヒットごとに全画面ピクセル爆発（20秒CD）",
+ "run.job.mswd":"旋律の剣姫",
+ "run.job.mswd.d":"物理 +15%、ロック中さらに +25%。音波ノックバック ×2",
+ "run.job.hsong":"天籟の聖女",
+ "run.job.hsong.d":"魔法 +15%。曲の切替が10→7秒、切替時に周囲を弾きHP3回復",
  "run.p.pen.name":"破甲",
  "run.p.pen.desc":"物理攻撃で敵の耐性をレベルごとに10%無視",
  "run.p.mpen.name":"貫魔",

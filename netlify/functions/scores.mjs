@@ -59,7 +59,7 @@ export default async function handler(req,context){
   const tags=a=>Array.isArray(a)?a.slice(0,12).map(x=>String(x).replace(/[^a-z_0-9:]/gi,'').slice(0,16)):[];   // 平衡分析用：带了哪些卡、祝福、被什么打死
   const mode=String(body?.mode||'').split(',').filter(x=>['rage','fast','endless'].includes(x)).join(',');
   const clear=body?.clear&&body?.emp&&t>=1200&&bosses>=4&&!/fast|endless/.test(mode)?1:0;   // 急速、无尽不算通关
-  const rec={name:cleanName(body.name),t,kills,lv,bosses,clear,mode,at:now,season:SEASON,ip,cheat:0,by:String(body.by||'').slice(0,30),cards:tags(body.cards),bless:tags(body.bless),role:body.role==='f'?'f':'m'};
+  const rec={name:cleanName(body.name),t,kills,lv,bosses,clear,mode,at:now,season:SEASON,ip,cheat:0,by:String(body.by||'').slice(0,30),cards:tags(body.cards),bless:tags(body.bless),role:body.role==='f'?'f':'m',job:String(body.job||'').replace(/[^a-z]/g,'').slice(0,12)};
   await store.set('run-'+randomUUID(),JSON.stringify(rec));
   return json({ok:true,score:scoreOf(rec)});
  }catch{return json({ok:false,error:'temporarily unavailable'},503)}

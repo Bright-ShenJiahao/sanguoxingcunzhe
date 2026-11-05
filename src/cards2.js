@@ -81,7 +81,7 @@ export function install(X){
   treant(L){const l=LV(L);let best=null,bn=0;for(const e of en){if(!alive(e))continue;const d=Math.hypot(e.x-hero.x,e.y-hero.y);if(d>(l>=3?250:210)||d<40)continue;const k=near(e.x,e.y,40).length+d/100;if(k>bn){bn=k;best=e}}if(!best)return .5;
    const n=l>=5?3:1,a=Math.atan2(best.y-hero.y,best.x-hero.x);for(let i=0;i<n;i++){const ox=(i-(n-1)/2)*32;st().P.push({k:'lob',src:'treant',x0:hero.x,y0:hero.y-20,x:best.x+ox*Math.cos(a+1.57),y:best.y+ox*Math.sin(a+1.57),t:0,d:.8,r:32*AR(),dm:dmg(3+.8*(l-1)),img:'fx_rock',size:16})}
    return l>=4?2.2:3},
-  waterel(L){const l=LV(L),[mx,my]=moveDir(),len=(l>=3?80:62)*AR(),v=dmg(2.6+.75*(l-1));const mk=()=>st().P.push({k:'wave',src:'waterel',x:hero.x+mx*14,y:hero.y+my*14,dx:mx,dy:my,v:110,life:1.4,dm:v,len,hit:new Set(),nohit:1,slow:l>=5});
+  waterel(L){const l=LV(L),[mx,my]=moveDir(),len=(l>=3?110:90)*AR(),v=dmg(2.6+.75*(l-1));const mk=()=>st().P.push({k:'wave',src:'waterel',x:hero.x+mx*14,y:hero.y+my*14,dx:mx,dy:my,v:110,life:1.4,dm:v,len,hit:new Set(),nohit:1,slow:l>=5});
    mk();if(l>=5)X.ST(mk,450);return l>=4?2.4:3.2},
   fireel(L){const l=LV(L),n=l>=5?2:1,d=l>=4?6:4;for(let i=0;i<n;i++)st().Z.push({k:'tornado',x:hero.x+R(-30,30),y:hero.y+R(-20,20),t:0,d,r:(l>=3?26:20)*AR(),v:dmg(1.05+.32*(l-1)),tick:0,a:R(0,6.3),src:'fireel'});return d+(l>=4?2:3)},
   fairy(L){const l=LV(L),n=l>=5?3:1,v=dmg(4+1.2*(l-1)),r=(l>=3?22:16)*AR();const c=en.filter(e=>alive(e)&&Math.hypot(e.x-hero.x,e.y-hero.y)<230).sort((a,b)=>b.hp-a.hp);if(!c.length)return .5;
@@ -107,13 +107,13 @@ export function install(X){
    return l>=3?1:1.4},
   keg(L){const l=LV(L),[mx,my]=moveDir();st().P.push({k:'keg',src:'keg',x:hero.x+mx*10,y:hero.y+my*10,dx:mx,dy:my,v:85,life:1.3,dm:dmg(3.8+1*(l-1)),r:(l>=3?48:38)*AR(),hit:new Set(),img:'fx_keg',size:16,roll:1,l5:l>=5,nohit:1});
    return l>=4?2.2:3},
-  pouch(L){const l=LV(L),s=X.S;s.pI=((s.pI||0)+1)%9;const el=Math.floor(s.pI/3),a=AIM(130),r=(l>=3?60:50)*AR(),v=dmg(1.6+.45*(l-1))*(el===2?1.3:1),col=['255,140,60','150,220,255','255,240,120'][el];
+  pouch(L){const l=LV(L),s=X.S;s.pI=((s.pI||0)+1)%9;const el=Math.floor(s.pI/3),a=AIM(200),r=(l>=3?120:100)*AR(),v=dmg(1.6+.45*(l-1))*(el===2?1.3:1),col=['255,140,60','150,220,255','255,240,120'][el];
    const go=(m,rr)=>{for(const e of near(hero.x,hero.y,rr)){let d=Math.atan2((e.y-hero.y)*1.15,e.x-hero.x)-a;d=Math.atan2(Math.sin(d),Math.cos(d));if(Math.abs(d)<=.5){hit('pouch',e,v*m);if(el===0)burn(e,v*.3);if(el===1)e.slowT=Math.max(e.slowT||0,(e.boss?.6:1.8)*DUR())}}fx({k:'seq',ims:['p'+'fil'[el]+'0','p'+'fil'[el]+'1','p'+'fil'[el]+'2'].map(q=>'s2_'+q),x:hero.x+Math.cos(a)*rr*.55,y:hero.y-6+Math.sin(a)*rr*.55,a,w:rr*.85,d:.5,al:.75,wh:el===2})};
    if(l>=5&&s.pI%3===2)go(2,r*1.3);else go(1,r);
    return l>=4?1:1.3},
   holyorb(L){const l=LV(L),a=AIM(220),v=dmg(1+.3*(l-1));st().P.push({k:'holyorb',src:'holyorb',x:hero.x,y:hero.y-10,dx:Math.cos(a),dy:Math.sin(a),v:48,life:3,dm:v,tick:0,r:(l>=3?24:18)*AR(),hit:new Set(),img:'fx_holyorb',size:l>=3?26:20,nohit:1,l5:l>=5});
    return l>=4?1.8:2.5},
-  hwall(L){const l=LV(L),[mx,my]=moveDir(),len=(l>=3?75:58)*AR(),v=dmg(2+.6*(l-1));const mk=(dx,dy,x,y)=>st().P.push({k:'hwall',src:'hwall',x,y,dx,dy,v:85,life:2,dm:v,len,hit:new Set(),nohit:1});
+  hwall(L){const l=LV(L),[mx,my]=moveDir(),len=(l>=3?110:90)*AR(),v=dmg(2+.6*(l-1));const mk=(dx,dy,x,y)=>st().P.push({k:'hwall',src:'hwall',x,y,dx,dy,v:85,life:2,dm:v,len,hit:new Set(),nohit:1});
    mk(mx,my,hero.x+mx*16,hero.y+my*16);if(l>=5)mk(-my,mx,hero.x+my*45,hero.y-mx*45);
    return l>=4?2.8:3.6},
   sigil(L){const l=LV(L),t=cluster();if(!t)return .5;st().Z.push({k:'sigil',x:t.x,y:t.y,t:0,d:1+(l>=5?1.5:1),r:(l>=3?48:38)*AR(),v:dmg(2.5+.7*(l-1)),l,src:'sigil'});
